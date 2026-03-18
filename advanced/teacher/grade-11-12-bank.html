@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Bank - Class 11/12</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/pro-animations.css">
+    <style>
+        .app-container {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .header-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .search-bar {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #fff;
+            margin-bottom: 16px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-bar:focus {
+            border-color: #FFD700;
+        }
+
+        .subject-group {
+            margin-bottom: 24px;
+        }
+
+        .subject-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFD700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chapter-card {
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .chapter-card:hover {
+            background: rgba(255, 215, 0, 0.05);
+            border-color: rgba(255, 215, 0, 0.2);
+        }
+
+        .chap-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chap-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .chap-topics {
+            font-size: 11px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .q-count-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .q-count-badge.low {
+            background: rgba(255, 87, 34, 0.2);
+            color: #ff5722;
+        }
+
+        .q-count-badge.good {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        /* Filter Chips */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .chip {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            font-size: 11px;
+            color: #ccc;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .chip.active {
+            background: #FFD700;
+            color: #000;
+            font-weight: 700;
+        }
+    </style>
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+    </div>
+    <div class="app-container">
+        <div class="header-section">
+            <h1 style="color: #fff; font-size: 24px; font-weight: 800; margin: 0;">Question Bank</h1>
+            <button onclick="window.location.href='grade-11-12-add-question.html'"
+                style="background: #FFD700; color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px;">+
+                Add New</button>
+        </div>
+
+        <input type="text" class="search-bar" placeholder="Search chapter or topic...">
+
+        <div class="filter-row">
+            <div class="chip active">All Subjects</div>
+            <div class="chip">Physics</div>
+            <div class="chip">Chemistry</div>
+            <div class="chip">Mathematics</div>
+            <div class="chip">Biology</div>
+        </div>
+
+        <!-- Physics Section -->
+        <div class="subject-group">
+            <div class="subject-title">
+                <span>Physics</span>
+                <span class="count-summ">1,240 Qs</span>
+            </div>
+
+            <!-- List Item -->
+            <div class="chapter-card">
+                <div class="chap-info">
+                    <span class="chap-name">Electrostatics</span>
+                    <span class="chap-topics">Electric Charges • Fields • Potential</span>
+                </div>
+                <div class="q-count-badge good">342</div>
+            </div>
+
+            <div class="chapter-card">
+                <div class="chap-info">
+                    <span class="chap-name">Current Electricity</span>
+                    <span class="chap-topics">Ohm's Law • Circuits • Kirchhoff</span>
+                </div>
+                <div class="q-count-badge good">215</div>
+            </div>
+
+            <div class="chapter-card">
+                <div class="chap-info">
+                    <span class="chap-name">Magnetism</span>
+                    <span class="chap-topics">Moving Charges • Magnetism</span>
+                </div>
+                <div class="q-count-badge low">45</div>
+            </div>
+        </div>
+
+        <!-- Chemistry Section -->
+        <div class="subject-group">
+            <div class="subject-title">
+                <span>Chemistry</span>
+                <span class="count-summ">890 Qs</span>
+            </div>
+
+            <div class="chapter-card">
+                <div class="chap-info">
+                    <span class="chap-name">Solutions</span>
+                    <span class="chap-topics">Concentration • Colligative Properties</span>
+                </div>
+                <div class="q-count-badge good">150</div>
+            </div>
+
+            <div class="chapter-card">
+                <div class="chap-info">
+                    <span class="chap-name">Electrochemistry</span>
+                    <span class="chap-topics">Nernst Eq • Cells</span>
+                </div>
+                <div class="q-count-badge low">32</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-bottom">
+        <a href="grade-11-12-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="grade-11-12-bank.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 10h16v10H4zM4 6h16v2H4z" />
+            </svg>
+            <span>Bank</span>
+        </a>
+        <a href="grade-11-12-take-test.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+            </svg>
+            <span>Take Test</span>
+        </a>
+        <a href="grade-11-12-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+    <script src='../../assets/js/beeprepare-security.js'></script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to all interactive elements
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card, .role-card, .dash-card, .paper-card, .stream-card");
+            if(tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch(e) {}
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container, .dash-card, .role-card, .paper-card, .stream-card");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

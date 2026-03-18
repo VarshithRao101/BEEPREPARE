@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Banks - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .app-container {
+            padding-bottom: 90px;
+        }
+
+        /* Updated My Banks Styles (Dark Mode) */
+        body {
+            background: #050505;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            color: #fff;
+        }
+
+        .app-container {
+            padding-bottom: 100px;
+            padding-top: 40px;
+        }
+
+        .discover-hero {
+            background: linear-gradient(135deg, rgba(15, 15, 15, 0.9), rgba(5, 5, 5, 0.95)) !important;
+            border-radius: 28px !important;
+            padding: 40px 32px !important;
+            text-align: center !important;
+            border: 1px solid rgba(255, 215, 0, 0.15) !important;
+            margin-bottom: 40px !important;
+            position: relative !important;
+            overflow: visible !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(255, 215, 0, 0.05) !important;
+            display: block !important;
+            min-height: 250px !important;
+            height: auto !important;
+        }
+
+        .discover-hero::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .discover-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(77, 166, 255, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .discover-title {
+            font-size: 32px !important;
+            font-weight: 800 !important;
+            color: #fff !important;
+            margin-bottom: 8px !important;
+            position: relative !important;
+            z-index: 2 !important;
+            letter-spacing: -0.5px !important;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+            display: block !important;
+        }
+
+        .discover-sub {
+            color: #aaa !important;
+            font-size: 14px !important;
+            margin-bottom: 32px !important;
+            position: relative !important;
+            z-index: 2 !important;
+            font-weight: 500 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .discover-search {
+            position: relative !important;
+            max-width: 440px !important;
+            margin: 0 auto !important;
+            z-index: 2 !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .discover-box {
+            display: flex !important;
+            align-items: center !important;
+            background: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(12px) !important;
+            padding: 6px 6px 6px 20px !important;
+            border-radius: 50px !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .discover-box:focus-within {
+            background: rgba(20, 20, 20, 0.8) !important;
+            border-color: #FFD700 !important;
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .discover-icon {
+            color: #888 !important;
+            margin-right: 12px !important;
+            transition: 0.3s !important;
+            display: flex !important;
+        }
+
+        .discover-box:focus-within .discover-icon {
+            color: #FFD700 !important;
+        }
+
+        .discover-input {
+            flex: 1 !important;
+            background: transparent !important;
+            border: none !important;
+            color: #fff !important;
+            font-size: 15px !important;
+            font-family: 'Inter', sans-serif !important;
+            outline: none !important;
+            width: 100% !important;
+            padding: 12px 0 !important;
+        }
+
+        .discover-input::placeholder {
+            color: #666 !important;
+            font-weight: 500 !important;
+        }
+
+        .discover-btn {
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 50% !important;
+            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+            color: #000 !important;
+            border: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            transition: 0.3s !important;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3) !important;
+            flex-shrink: 0 !important;
+            padding: 0 !important;
+            margin-left: 8px !important;
+        }
+
+        .discover-btn:hover {
+            transform: scale(1.05) rotate(5deg) !important;
+            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5) !important;
+        }
+
+        .banks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 0 8px;
+        }
+
+        .bank-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 180px;
+        }
+
+        .bank-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .bank-icon-lg {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .bank-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .bank-meta {
+            font-size: 12px;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .bank-bg-icon {
+            position: absolute;
+            right: -20px;
+            bottom: -20px;
+            font-size: 140px;
+            opacity: 0.03;
+            transform: rotate(-15deg);
+            pointer-events: none;
+            filter: grayscale(100%);
+            transition: 0.3s;
+        }
+
+        .bank-card:hover .bank-bg-icon {
+            opacity: 0.06;
+            transform: rotate(0deg) scale(1.1);
+        }
+
+        .bank-status {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #4CAF50;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* CUSTOM MODAL - REPLACES INLINE EXPANSION */
+        /* Updated Modal Overlay */
+        .custom-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .custom-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .custom-modal {
+            background: #141414;
+            width: 90%;
+            max-width: 420px;
+            border-radius: 32px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8);
+            transform: scale(0.95) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .custom-modal-overlay.active .custom-modal {
+            transform: scale(1);
+        }
+
+        .modal-icon-header {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary);
+            margin: 0 auto 16px auto;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+        }
+
+        @keyframes pulse-gold {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 215, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+            }
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            display: block;
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .action-btn-lg {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .action-btn-lg:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            cursor: pointer;
+            padding: 8px;
+            color: rgba(255, 255, 255, 0.5);
+            transition: 0.2s;
+        }
+
+        .close-modal:hover {
+            color: #fff;
+        }
+
+        /* OTP Styles Inside Modal */
+        .otp-input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 24px 0;
+        }
+
+        .otp-digit {
+            width: 50px;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 24px;
+            text-align: center;
+            font-weight: bold;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .otp-digit:focus {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+
+        <!-- Header -->
+        <div class="top-header"
+            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 32px;">
+            <div class="header-title text-gold-glow"
+                style="color: var(--primary); font-weight: 800; font-size: 20px; letter-spacing: 1px;">QUESTION BANKS
+            </div>
+            <div class="profile-icon" onclick="window.location.href='student-profile.html'"
+                style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; right: 0; cursor: pointer;">
+                ST</div>
+        </div>
+
+        <!-- SEARCH SECTION -->
+        <!-- SEARCH SECTION -->
+        <!-- SEARCH SECTION -->
+        <div class="discover-hero">
+            <h2 class="discover-title">Unlock Knowledge</h2>
+            <p class="discover-sub">Enter a Teacher ID to instantly access premium question banks and study materials.
+            </p>
+
+            <div class="discover-search">
+                <div class="discover-box">
+                    <svg class="discover-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="bank-id-input" class="discover-input" placeholder="e.g. TRNT-MATH-10"
+                        autocomplete="off">
+                    <button class="discover-btn" onclick="findBank()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVE BANKS SECTION -->
+        <div class="section-divider">
+            <span class="section-label">Your Active Banks</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="banks-grid" id="my-banks-list">
+            <!-- Bank 1 -->
+            <div class="bank-card" onclick="window.location.href='student-notes.html'">
+                <div class="bank-bg-icon">⚛️</div>
+                <div class="bank-icon-lg" style="color: #4da6ff; background: rgba(77,166,255,0.1);">
+                    <img src="../../assets/images/subjects/physics.svg" alt="" style="width: 40px; height: 40px;">
+                </div>
+                <div>
+                    <div class="bank-title">Physics</div>
+                    <div class="bank-meta">Class 10 • Mrs. Verma</div>
+                </div>
+                <div class="bank-status">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #4CAF50;"></div>
+                    Active
+                </div>
+            </div>
+
+            <!-- Bank 2 -->
+            <div class="bank-card" onclick="window.location.href='student-notes.html'">
+                <div class="bank-bg-icon"></div>
+                <div class="bank-icon-lg" style="color: #ff4d4d; background: rgba(255,77,77,0.1);">
+                    <img src="../../assets/images/subjects/chemistry.svg" alt="" style="width: 40px; height: 40px;">
+                </div>
+                <div>
+                    <div class="bank-title">Chemistry</div>
+                    <div class="bank-meta">Class 10 • Mr. Rao</div>
+                </div>
+                <div class="bank-status">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #4CAF50;"></div>
+                    Active
+                </div>
+            </div>
+
+            <!-- Bank 3 -->
+            <div class="bank-card" onclick="window.location.href='student-notes.html'">
+                <div class="bank-bg-icon"></div>
+                <div class="bank-icon-lg" style="color: #FFD700; background: rgba(255,215,0,0.1);">
+                    <img src="../../assets/images/subjects/mathematics.svg" alt="" style="width: 40px; height: 40px;">
+                </div>
+                <div>
+                    <div class="bank-title">Maths</div>
+                    <div class="bank-meta">Class 10 • Mr. Sharma</div>
+                </div>
+                <div class="bank-status">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #4CAF50;"></div>
+                    Active
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM HTML MODAL -->
+    <div class="custom-modal-overlay" id="bankModal">
+        <div class="custom-modal">
+            <div class="close-modal" onclick="closeModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </div>
+
+            <!-- STAGE 1: DETAILS -->
+            <div id="modal-stage-1">
+                <div class="modal-icon-header"><img src="../../assets/images/subjects/mathematics.svg" alt="Math"
+                        style="width: 60%; height: 60%; object-fit: contain;"></div>
+                <div class="modal-title">Mathematics - Class 10</div>
+                <div class="modal-subtitle">By Mr. Sharma • T-101</div>
+
+                <div class="modal-stats">
+                    <div class="stat-box">
+                        <span class="stat-val">120+</span>
+                        <span class="stat-lbl">Questions</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val">2d ago</span>
+                        <span class="stat-lbl">Updated</span>
+                    </div>
+                </div>
+
+                <div
+                    style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; font-size: 12px; color: #ccc; margin-bottom: 24px; text-align: center;">
+                    This bank contains comprehensive questions for Class 10 Mathematics, including Algebra, Geometry,
+                    and Statistics.
+                </div>
+
+                <button class="action-btn-lg" onclick="goToOTP()">
+                    REQUEST ACCESS
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="student-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="student-generate.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            <span>Test</span>
+        </a>
+        <a href="student-bank.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            <span>Banks</span>
+        </a>
+        <a href="student-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        // Check for pending state on load - Open modal directly
+
+
+        function findBank() {
+            const id = document.getElementById('bank-id-input').value;
+            if (id.length > 2) {
+                openModal();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Invalid ID', text: 'Enter a valid ID (min 3 chars)', background: '#1a1a1a', color: '#fff' });
+            }
+        }
+
+        function openModal() {
+            const modal = document.getElementById('bankModal');
+            document.getElementById('modal-stage-1').style.display = 'block';
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('bankModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+
+        function goToOTP() {
+            // Fake server request
+            Swal.fire({
+                title: 'Sending Request...',
+                timer: 1000,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading() },
+                background: '#1a1a1a', color: '#fff'
+            }).then(() => {
+                // Success State with Animation!
+                const btn = document.querySelector('#modal-stage-1 .action-btn-lg');
+                btn.innerHTML = 'REQUESTED <span style="font-size: 20px;">✓</span>';
+                btn.style.background = '#4CAF50';
+                btn.style.color = '#fff';
+                btn.disabled = true;
+
+                // Show celebration/pulse effect on the modal
+                document.querySelector('.custom-modal').style.boxShadow = '0 0 50px rgba(76, 175, 80, 0.5)';
+
+                setTimeout(() => {
+                    localStorage.setItem('pendingBankOTP', 'true');
+                    closeModal();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Request Sent!',
+                        text: 'Go to your Profile to enter the OTP once you receive it from your teacher.',
+                        background: '#1a1a1a',
+                        color: '#fff',
+                        confirmButtonText: 'Go to Profile',
+                        showCancelButton: true,
+                        cancelButtonText: 'Stay Here'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'student-profile.html';
+                        }
+                    });
+                }, 800);
+            });
+        }
+
+
+
+
+        // Close modal on outside click
+        document.getElementById('bankModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('bankModal')) closeModal();
+        });
+    </script>
+
+    <!-- EXTREME UI SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt
+            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
+                max: 8,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.15,
+                scale: 1.02
+            });
+
+            // Apply Staggered HUD Load-in
+            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
+            elements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

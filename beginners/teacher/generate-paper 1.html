@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configure Paper - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Modern Reset & Base */
+        .app-container {
+            padding-bottom: 90px;
+        }
+
+        /* Section Dividers */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0 16px 0;
+        }
+
+        .divider-line {
+            height: 2px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Context Grid Styles */
+        .context-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .context-card {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .context-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .glass-select-clean {
+            background: transparent;
+            border: none;
+            color: var(--adv-text);
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right center;
+            background-size: 16px;
+            padding-right: 24px;
+        }
+
+        .glass-select-clean option {
+            background: #111;
+        }
+
+        /* Total Marks Badge */
+        .total-badge {
+            background: linear-gradient(135deg, var(--primary), #FFA500);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: classic-pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes classic-pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+            }
+
+            50% {
+                transform: scale(1.03);
+                box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
+            }
+        }
+
+        /* Chapter List Styles */
+        .chapters-box {
+            background: rgba(20, 20, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .chapter-row {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .chapter-row:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .chapter-row.selected {
+            border-color: var(--adv-yellow);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        /* Blueprint Row Styles */
+        .bp-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .counter-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .cnt-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--adv-yellow);
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+
+        .cnt-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Action Button */
+        .primary-action-btn {
+            background: var(--primary);
+            color: var(--adv-dark);
+            width: 100%;
+            padding: 18px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            margin-top: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .primary-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .primary-action-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Visual Checkbox */
+        .chk-visual {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .chapter-row.selected .chk-visual {
+            background: var(--primary);
+            border-color: var(--adv-yellow);
+            color: var(--adv-dark);
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+
+        <!-- Header -->
+        <div class="top-header"
+            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
+            <div class="header-title text-gold-glow"
+                style="color: var(--adv-yellow); font-weight: 700; font-size: 18px; letter-spacing: 1px;">BEEPREPARE</div>
+            <div class="profile-icon"
+                style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; right: 0;">
+                T</div>
+        </div>
+
+        <!-- Subheader -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 20px; font-weight: 700; color: var(--adv-text); margin-bottom: 4px;">Configure Paper</div>
+            <p style="color: var(--text-muted); font-size: 13px;">Set your requirements to generate a paper</p>
+        </div>
+
+        <!-- Section 1: Context & Summary -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <div class="context-grid" style="margin: 0; display: block;">
+                <div class="context-card" style="flex-direction: row; gap: 16px; height: 100%;">
+                    <div style="flex: 1; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 16px;">
+                        <div class="context-label">CLASS</div>
+                        <select class="glass-select-clean">
+                            <option>Class 10</option>
+                            <option>Class 9</option>
+                            <option>Class 8</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="context-label">SUBJECT</div>
+                        <select class="glass-select-clean">
+                            <option>Mathematical Sci</option>
+                            <option>Physics</option>
+                            <option>Chemistry</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-badge">
+                <div style="font-size: 36px; font-weight: 800; line-height: 1; color: var(--adv-dark);" id="total-marks">0</div>
+                <div
+                    style="font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.6); text-transform: uppercase; margin-top: 4px;">
+                    Marks</div>
+            </div>
+        </div>
+
+        <!-- Section 2: Chapters -->
+        <div class="section-divider">
+            <span class="section-label">1. Select Chapters</span>
+            <div class="divider-line"></div>
+            <button onclick="toggleAll()"
+                style="background:none; border:none; color: var(--adv-yellow); font-size: 12px; font-weight: 600; cursor: pointer;">Select
+                All</button>
+        </div>
+
+        <div class="chapters-box">
+            <!-- Chapter 1 -->
+            <div class="chapter-row selected" onclick="toggleRow(this)">
+                <div class="chk-visual">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Real Numbers</div>
+                </div>
+                <div
+                    style="font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
+                    3 Qs</div>
+            </div>
+            <!-- Chapter 2 -->
+            <div class="chapter-row" onclick="toggleRow(this)">
+                <div class="chk-visual"></div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Polynomials</div>
+                </div>
+                <div
+                    style="font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
+                    5 Qs</div>
+            </div>
+            <!-- Chapter 3 -->
+            <div class="chapter-row" onclick="toggleRow(this)">
+                <div class="chk-visual"></div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Pair of Linear Eqs</div>
+                </div>
+                <div
+                    style="font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
+                    8 Qs</div>
+            </div>
+        </div>
+
+        <!-- Section 3: Blueprint -->
+        <div class="section-divider">
+            <span class="section-label">2. Blueprint</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+            <!-- MCQ -->
+            <div class="bp-row">
+                <div>
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">MCQ <span
+                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(1m)</span>
+                    </div>
+                </div>
+                <div class="counter-control">
+                    <button class="cnt-btn" onclick="update('mcq', -1)">−</button>
+                    <span id="cnt-mcq" style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
+                    <button class="cnt-btn" onclick="update('mcq', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- VSA -->
+            <div class="bp-row">
+                <div>
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">V. Short <span
+                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(1m)</span>
+                    </div>
+                </div>
+                <div class="counter-control">
+                    <button class="cnt-btn" onclick="update('vshort', -1)">−</button>
+                    <span id="cnt-vshort"
+                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
+                    <button class="cnt-btn" onclick="update('vshort', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- Short -->
+            <div class="bp-row">
+                <div>
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Short <span
+                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(2m)</span>
+                    </div>
+                </div>
+                <div class="counter-control">
+                    <button class="cnt-btn" onclick="update('short', -1)">−</button>
+                    <span id="cnt-short"
+                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
+                    <button class="cnt-btn" onclick="update('short', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- Long -->
+            <div class="bp-row">
+                <div>
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Long <span
+                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(4m)</span>
+                    </div>
+                </div>
+                <div class="counter-control">
+                    <button class="cnt-btn" onclick="update('long', -1)">−</button>
+                    <span id="cnt-long" style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
+                    <button class="cnt-btn" onclick="update('long', 1)">+</button>
+                </div>
+            </div>
+
+            <!-- Essay -->
+            <div class="bp-row">
+                <div>
+                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Essay <span
+                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(6m)</span>
+                    </div>
+                </div>
+                <div class="counter-control">
+                    <button class="cnt-btn" onclick="update('essay', -1)">−</button>
+                    <span id="cnt-essay"
+                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
+                    <button class="cnt-btn" onclick="update('essay', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Button -->
+
+        <!-- Section 3: Layout Preference -->
+        <div class="section-divider">
+            <span class="section-label">3. Layout Preference</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="chapters-box" style="margin-bottom: 24px;">
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; padding: 0 4px;">
+                Map question types to paper sections.
+            </div>
+
+            <!-- Section A -->
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-weight: 700; color: var(--adv-yellow); font-size: 14px;">SECTION A</div>
+                <div style="position: relative; width: 180px;">
+                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="mcq" selected>MCQ / Objective</option>
+                        <option value="vsa">Very Short Answer</option>
+                        <option value="sa">Short Answer</option>
+                        <option value="la">Long Answer</option>
+                        <option value="essay">Essay / Descriptive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Section B -->
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION B</div>
+                <div style="position: relative; width: 180px;">
+                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="mcq">MCQ / Objective</option>
+                        <option value="vsa" selected>Very Short Answer</option>
+                        <option value="sa">Short Answer</option>
+                        <option value="la">Long Answer</option>
+                        <option value="essay">Essay / Descriptive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Section C -->
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION C</div>
+                <div style="position: relative; width: 180px;">
+                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="mcq">MCQ / Objective</option>
+                        <option value="vsa">Very Short Answer</option>
+                        <option value="sa" selected>Short Answer</option>
+                        <option value="la">Long Answer</option>
+                        <option value="essay">Essay / Descriptive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Section D -->
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION D</div>
+                <div style="position: relative; width: 180px;">
+                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="mcq">MCQ / Objective</option>
+                        <option value="vsa">Very Short Answer</option>
+                        <option value="sa">Short Answer</option>
+                        <option value="la" selected>Long Answer</option>
+                        <option value="essay">Essay / Descriptive</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Section E -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px;">
+                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION E</div>
+                <div style="position: relative; width: 180px;">
+                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="mcq">MCQ / Objective</option>
+                        <option value="vsa">Very Short Answer</option>
+                        <option value="sa">Short Answer</option>
+                        <option value="la">Long Answer</option>
+                        <option value="essay" selected>Essay / Descriptive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <button class="primary-action-btn" onclick="window.location.href='edit-paper.html'">
+            <span>GENERATE PAPER</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </button>
+
+        <!-- Bottom spacing for nav -->
+        <div style="height: 20px;"></div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="teacher-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="question-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
+            </svg>
+            <span>Bank</span>
+        </a>
+        <a href="generate-paper.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span>Generate</span>
+        </a>
+        <a href="teacher-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        // Logic for Total Marks Calculation
+        const counts = { mcq: 0, vshort: 0, short: 0, long: 0, essay: 0 };
+        const marks = { mcq: 1, vshort: 1, short: 2, long: 4, essay: 6 };
+
+        function update(type, diff) {
+            counts[type] = Math.max(0, counts[type] + diff);
+            document.getElementById('cnt-' + type).innerText = counts[type];
+            calcTotal();
+        }
+
+        function calcTotal() {
+            let t = 0;
+            for (let k in counts) t += counts[k] * marks[k];
+            document.getElementById('total-marks').innerText = t;
+        }
+
+        // Logic for Visual Selection
+        function toggleRow(el) {
+            el.classList.toggle('selected');
+            // In a real app, update underlying checkbox logic here
+            // Update SVG visibility
+            const visual = el.querySelector('.chk-visual');
+            if (el.classList.contains('selected')) {
+                visual.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            } else {
+                visual.innerHTML = '';
+            }
+        }
+
+        function toggleAll() {
+            const rows = document.querySelectorAll('.chapter-row');
+            // Check if all are selected to decide toggle direction
+            const allSelected = Array.from(rows).every(r => r.classList.contains('selected'));
+
+            rows.forEach(r => {
+                if (allSelected) {
+                    r.classList.remove('selected');
+                    r.querySelector('.chk-visual').innerHTML = '';
+                } else {
+                    r.classList.add('selected');
+                    r.querySelector('.chk-visual').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                }
+            });
+        }
+    </script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to Teacher Cards
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            if(tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch(e) {}
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

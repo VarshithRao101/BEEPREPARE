@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEEPREPARE - Central Hub</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/premium-student-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #030303;
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Moving Cyber Grid */
+        .cyber-grid {
+            position: absolute;
+            inset: -50%;
+            background-image:
+                linear-gradient(rgba(255, 215, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 215, 0, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);
+            }
+
+            100% {
+                transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px);
+            }
+        }
+
+        .auth-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+        }
+
+        .glass-auth-card {
+            background: linear-gradient(145deg, rgba(20, 20, 20, 0.8), rgba(10, 10, 10, 0.95));
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), inset 0 2px 20px rgba(255, 215, 0, 0.05);
+            text-align: center;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Neon Corner Accents */
+        .glass-auth-card::before,
+        .glass-auth-card::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            filter: blur(40px);
+            z-index: -1;
+        }
+
+        .glass-auth-card::before {
+            top: -20px;
+            right: -20px;
+            background: rgba(255, 215, 0, 0.3);
+        }
+
+        .glass-auth-card::after {
+            bottom: -20px;
+            left: -20px;
+            background: rgba(255, 140, 0, 0.2);
+        }
+
+        .logo-hexa {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02));
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            transform: rotate(45deg);
+            animation: pulseLogo 3s infinite alternate;
+        }
+
+        .logo-hexa svg {
+            transform: rotate(-45deg);
+        }
+
+        @keyframes pulseLogo {
+            to {
+                box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+                border-color: #FFD700;
+                transform: rotate(45deg) scale(1.05);
+            }
+        }
+
+        .auth-title {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fff, #FFD700, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shineText 4s linear infinite;
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+        }
+
+        @keyframes shineText {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .auth-subtitle {
+            color: #888;
+            font-size: 15px;
+            margin-bottom: 40px;
+        }
+
+        .google-auth-btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .google-auth-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s ease;
+        }
+
+        .google-auth-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .google-auth-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .terms-text {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 30px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cyber-grid"></div>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2" style="background: rgba(255, 140, 0, 0.3);"></div>
+    </div>
+
+    <div class="auth-container">
+        <div class="glass-auth-card hud-element">
+            <div class="logo-hexa">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+            </div>
+
+            <h1 class="auth-title">BEEPREPARE</h1>
+            <div class="auth-subtitle">Initialize your learning ecosystem</div>
+
+            <button class="google-auth-btn" onclick="window.location.href='activation.html'">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="24">
+                <span>Authenticate with Google</span>
+            </button>
+
+            <div class="terms-text">
+                END-TO-END ENCRYPTED SYSTEM.<br>
+                By proceeding, you verify compliance with local directives.
+            </div>
+        </div>
+    </div>
+
+    <!-- EXTREME UI SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            VanillaTilt.init(document.querySelector(".glass-auth-card"), {
+                max: 10,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.2,
+                scale: 1.05
+            });
+
+            // Slide up animation
+            const el = document.querySelector('.glass-auth-card');
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(40px)';
+            setTimeout(() => {
+                el.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

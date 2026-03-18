@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Requests - Teacher Dashboard</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .app-container {
+            padding-bottom: 90px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Request Card */
+        .request-card {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.8), rgba(20, 20, 20, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* New Request Indicator */
+        .new-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--primary);
+            color: var(--adv-dark);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .student-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4da6ff, #0066cc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--adv-text);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .req-details {
+            flex: 1;
+        }
+
+        .student-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--adv-text);
+            margin-bottom: 4px;
+        }
+
+        .req-bank {
+            font-size: 13px;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Actions Row */
+        .action-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-approve {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-approve:hover {
+            background: rgba(76, 175, 80, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-reject {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .btn-reject:hover {
+            background: rgba(244, 67, 54, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Code Reveal Animation */
+        .code-display {
+            background: #000;
+            border: 1px dashed var(--primary);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .unique-code {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--adv-yellow);
+            letter-spacing: 4px;
+            margin: 8px 0;
+            font-family: monospace;
+        }
+
+        .code-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .copy-btn {
+            background: transparent;
+            color: var(--adv-text);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+
+        <!-- Header -->
+        <div class="top-header"
+            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
+            <div style="position: absolute; left: 0; cursor: pointer; padding: 8px;" onclick="window.history.back()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+            <div class="header-title text-gold-glow"
+                style="color: var(--adv-yellow); font-weight: 700; font-size: 18px; letter-spacing: 1px;">ACCESS REQUESTS
+            </div>
+        </div>
+
+        <!-- Filter/Tabs (Optional Visual) -->
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;">
+            <div
+                style="background: var(--primary); color: var(--adv-dark); padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                Pending (2)</div>
+            <div
+                style="background: rgba(255,255,255,0.1); color: #aaa; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                History</div>
+        </div>
+
+        <!-- Requests List -->
+        <div id="requests-list">
+            <!-- Request 1 -->
+            <div class="request-card" id="req-1">
+                <div class="new-badge">New Request</div>
+                <div class="student-info">
+                    <div class="student-avatar">VR</div>
+                    <div class="req-details">
+                        <div class="student-name">Varshith Rao</div>
+                        <div class="req-bank">
+                            <span style="color: #4da6ff;"></span> Asking for <strong>Physics - Class 10</strong>
+                        </div>
+                        <div style="font-size: 11px; color: #666; margin-top: 4px;">Requested 2 mins ago</div>
+                    </div>
+                </div>
+
+                <div class="action-row" id="actions-1">
+                    <button class="btn-action btn-reject" onclick="rejectRequest('req-1')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        Reject
+                    </button>
+                    <button class="btn-action btn-approve" onclick="approveRequest('req-1')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Approve
+                    </button>
+                </div>
+
+                <!-- Hidden Code Display -->
+                <div class="code-display" id="code-1">
+                    <div class="code-label">Access Code Generated for Varshith</div>
+                    <div class="unique-code" id="otp-1"></div>
+                    <button class="copy-btn" onclick="copyCode('otp-1')">Copy Code</button>
+                    <div style="font-size: 10px; color: #666; margin-top: 8px;">Share this code with the student
+                        manually.</div>
+                </div>
+            </div>
+
+            <!-- Request 2 -->
+            <div class="request-card" id="req-2">
+                <div class="student-info">
+                    <div class="student-avatar" style="background: linear-gradient(135deg, #ff4d4d, #cc0000);">AK</div>
+                    <div class="req-details">
+                        <div class="student-name">Amit Kumar</div>
+                        <div class="req-bank">
+                            <span style="color: #FFD700;"></span> Asking for <strong>Mathematics - Class 10</strong>
+                        </div>
+                        <div style="font-size: 11px; color: #666; margin-top: 4px;">Requested 1 hour ago</div>
+                    </div>
+                </div>
+
+                <div class="action-row" id="actions-2">
+                    <button class="btn-action btn-reject" onclick="rejectRequest('req-2')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                        Reject
+                    </button>
+                    <button class="btn-action btn-approve" onclick="approveRequest('req-2')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        Approve
+                    </button>
+                </div>
+
+                <div class="code-display" id="code-2">
+                    <div class="code-label">Access Code Generated for Amit</div>
+                    <div class="unique-code" id="otp-2"></div>
+                    <button class="copy-btn" onclick="copyCode('otp-2')">Copy Code</button>
+                    <div style="font-size: 10px; color: #666; margin-top: 8px;">Share this code with the student
+                        manually.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state" id="empty-msg">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5"
+                style="margin-bottom: 16px;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div>No Pending Requests</div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="teacher-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="question-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
+            </svg>
+            <span>Bank</span>
+        </a>
+        <a href="generate-paper.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span>Generate</span>
+        </a>
+        <a href="teacher-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        function approveRequest(id) {
+            const codeId = id.replace('req', 'code');
+            const actionId = id.replace('req', 'actions');
+            const otpId = id.replace('req', 'otp');
+
+            // Generate 4-digit code
+            const code = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById(otpId).innerText = code;
+
+            // UI Updates
+            document.getElementById(actionId).style.display = 'none';
+            document.getElementById(codeId).style.display = 'block';
+
+            // Optional: Remove badge
+            const badge = document.querySelector(`#${id} .new-badge`);
+            if (badge) badge.style.display = 'none';
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Approved!',
+                text: 'Access Code generated successfully.',
+                timer: 1500,
+                showConfirmButton: false,
+                background: '#1a1a1a', color: '#fff'
+            });
+        }
+
+        function rejectRequest(id) {
+            Swal.fire({
+                title: 'Reject Request?',
+                text: "You can't undo this action.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, reject it!',
+                background: '#1a1a1a', color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const el = document.getElementById(id);
+                    el.style.transform = 'translateX(100px)';
+                    el.style.opacity = '0';
+                    setTimeout(() => {
+                        el.style.display = 'none';
+                        checkEmpty();
+                    }, 300);
+                }
+            })
+        }
+
+        function copyCode(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const original = btn.innerText;
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = original, 2000);
+            });
+        }
+
+        function checkEmpty() {
+            const cards = document.querySelectorAll('.request-card');
+            let visible = 0;
+            cards.forEach(c => {
+                if (c.style.display !== 'none') visible++;
+            });
+            if (visible === 0) {
+                document.getElementById('empty-msg').style.display = 'flex';
+                document.getElementById('requests-list').style.display = 'none';
+            }
+        }
+    </script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to Teacher Cards
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            if(tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch(e) {}
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

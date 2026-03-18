@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test in Progress - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Premium Test Styles */
+        body {
+            background: #050505;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            color: #fff;
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(20, 20, 20, 0.85);
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .subject-badge {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timer-badge {
+            background: rgba(255, 68, 68, 0.1);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            font-variant-numeric: tabular-nums;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.1);
+        }
+
+        .question-container {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            min-height: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .q-number {
+            font-size: 13px;
+            color: #888;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .q-number::before {
+            content: '';
+            width: 20px;
+            height: 2px;
+            background: #FFD700;
+            display: block;
+        }
+
+        .q-text {
+            font-size: 20px;
+            line-height: 1.6;
+            color: #fff;
+            margin-bottom: 32px;
+            font-weight: 500;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* Dark border */
+            border-radius: 16px;
+            padding: 18px 24px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .option-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-item.selected {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+
+        .option-circle {
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .option-item.selected .option-circle {
+            border-color: #FFD700;
+            background: #FFD700;
+        }
+
+        .option-item.selected .option-circle::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+        }
+
+        .test-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 20px;
+            height: fit-content;
+        }
+
+        .p-item {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            /* Dark item */
+            font-size: 14px;
+            font-weight: 700;
+            color: #888;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .p-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .p-item.active {
+            border: 2px solid #FFD700;
+            color: #fff;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .p-item.answered {
+            background: #4CAF50;
+            color: #000;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-finish {
+            background: linear-gradient(135deg, #FF4444, #CC0000);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            font-size: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 68, 68, 0.3);
+            transition: 0.2s;
+        }
+
+        .btn-finish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 68, 68, 0.5);
+        }
+
+        .btn-nav-primary {
+            background: #fff;
+            color: #000;
+            padding: 14px 32px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-nav-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-nav-outline {
+            background: transparent;
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-nav-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #fff;
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+    </div>
+
+    <div class="test-header">
+        <div class="subject-badge">Maths • Class 10</div>
+        <div class="timer-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span id="time-display">02:59:59</span>
+        </div>
+        <button class="btn-finish" onclick="submitTest()">
+            Finish Test
+        </button>
+    </div>
+
+    <div class="app-container" style="padding-top: 24px; max-width: 1200px; padding-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 300px; gap: 24px;">
+
+            <!-- Left: Question Area -->
+            <div>
+                <div class="question-container">
+                    <div class="q-number">Question <span id="q-idx">1</span> of 20</div>
+                    <div class="q-text" id="q-content">
+                        If α and β are the zeroes of the quadratic polynomial f(x) = x² - x - 4, find the value of 1/α +
+                        1/β - αβ.
+                    </div>
+
+                    <div class="options-list" id="opt-list">
+                        <!-- Options injected by JS -->
+                    </div>
+                </div>
+
+                <div class="test-footer">
+                    <button class="btn-nav-outline" style="width: 140px;" onclick="prevQ()">Previous</button>
+                    <button class="btn-nav-primary" style="width: 140px;" onclick="nextQ()">Next Question</button>
+                </div>
+            </div>
+
+            <!-- Right: Palette -->
+            <div>
+                <div class="palette-grid" id="palette">
+                    <!-- 1-20 Circle Grid injected by JS -->
+                </div>
+
+                <div style="margin-top: 24px; font-size: 12px; color: #888; line-height: 1.6;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--success);"></div>
+                        Answered
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.1);">
+                        </div> Not Answered
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--primary);">
+                        </div> Current
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../../assets/js/beeprepare-security.js"></script>
+    <script>
+        // Mock Data
+        const questions = [
+            { id: 1, text: "If α and β are the zeroes of x² - x - 4, find 1/α + 1/β - αβ.", options: ["15/4", "-15/4", "4", "15"] },
+            { id: 2, text: "The HCF of 96 and 404 is:", options: ["4", "2", "8", "6"] },
+            { id: 3, text: "Which of the following is irrational?", options: ["√4", "3 + √9", "√7", "√81"] },
+            { id: 4, text: "The sum of the first n natural numbers is given by:", options: ["n(n+1)/2", "n²", "n(n-1)/2", "n(n+1)"] },
+            { id: 5, text: "Zeroes of p(x) = x² - 2x - 8 are:", options: ["2, -4", "4, -2", "-2, -2", "4, 4"] },
+            // Add more placeholders if needed
+        ];
+
+        // Fill up to 20
+        for (let i = 6; i <= 20; i++) {
+            questions.push({ id: i, text: `Sample Question ${i}: What is the value of X?`, options: ["Option A", "Option B", "Option C", "Option D"] });
+        }
+
+        let currentIdx = 0;
+        const answers = {};
+
+        function renderQ() {
+            const q = questions[currentIdx];
+            document.getElementById('q-idx').innerText = currentIdx + 1;
+            document.getElementById('q-content').innerText = q.text;
+
+            const optContainer = document.getElementById('opt-list');
+            optContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const isSelected = answers[currentIdx] === idx;
+                const div = document.createElement('div');
+                div.className = `option-item ${isSelected ? 'selected' : ''}`;
+                div.onclick = () => selectOpt(idx);
+                div.innerHTML = `
+                    <div class="option-circle"></div>
+                    <div style="font-size: 16px; color: ${isSelected ? '#fff' : '#ccc'}; font-weight: ${isSelected ? '600' : '400'}; flex: 1;">${opt}</div>
+                `;
+                optContainer.appendChild(div);
+            });
+
+            updatePalette();
+        }
+
+        function selectOpt(optIdx) {
+            answers[currentIdx] = optIdx;
+            renderQ(); // Re-render to show selection
+        }
+
+        function nextQ() {
+            if (currentIdx < questions.length - 1) {
+                currentIdx++;
+                renderQ();
+            }
+        }
+
+        function prevQ() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                renderQ();
+            }
+        }
+
+        function updatePalette() {
+            const pal = document.getElementById('palette');
+            pal.innerHTML = '';
+            questions.forEach((q, idx) => {
+                const isCurrent = idx === currentIdx;
+                const isAns = answers[idx] !== undefined;
+                const div = document.createElement('div');
+                div.className = `p-item ${isCurrent ? 'active' : ''} ${isAns ? 'answered' : ''}`;
+                div.innerText = idx + 1;
+                div.onclick = () => {
+                    currentIdx = idx;
+                    renderQ();
+                };
+                pal.appendChild(div);
+            });
+        }
+
+        function submitTest() {
+            if (confirm("Are you sure you want to submit the test?")) {
+                // Save results randomly for demo
+                const score = Object.keys(answers).length * 4; // Mock score
+                localStorage.setItem('last_test_score', score);
+                window.location.href = 'student-result.html';
+            }
+        }
+
+        // Timer
+        let time = 3 * 60 * 60; // 3 hours
+        setInterval(() => {
+            time--;
+            const h = Math.floor(time / 3600);
+            const m = Math.floor((time % 3600) / 60);
+            const s = time % 60;
+            document.getElementById('time-display').innerText =
+                `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }, 1000);
+
+        // Init
+        renderQ();
+    </script>
+
+    <!-- EXTREME UI SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt
+            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
+                max: 8,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.15,
+                scale: 1.02
+            });
+
+            // Apply Staggered HUD Load-in
+            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
+            elements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

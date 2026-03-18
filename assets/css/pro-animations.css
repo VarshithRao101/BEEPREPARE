@@ -1,0 +1,255 @@
+/* PRO ANIMATIONS SUITE - BEEPREPARE */
+
+/* 1. Global Entrance Animation - Staggered */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-entrance>* {
+    opacity: 0;
+    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Stagger Delays for up to 10 items */
+.animate-entrance>*:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.animate-entrance>*:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.animate-entrance>*:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.animate-entrance>*:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.animate-entrance>*:nth-child(5) {
+    animation-delay: 0.25s;
+}
+
+.animate-entrance>*:nth-child(6) {
+    animation-delay: 0.3s;
+}
+
+.animate-entrance>*:nth-child(7) {
+    animation-delay: 0.35s;
+}
+
+.animate-entrance>*:nth-child(8) {
+    animation-delay: 0.4s;
+}
+
+.animate-entrance>*:nth-child(9) {
+    animation-delay: 0.45s;
+}
+
+.animate-entrance>*:nth-child(10) {
+    animation-delay: 0.5s;
+}
+
+/* 2. Pro Hover Lift (3D) */
+.hover-lift-pro {
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        box-shadow 0.4s ease,
+        border-color 0.3s ease,
+        background 0.3s ease;
+    will-change: transform, box-shadow;
+}
+
+.hover-lift-pro:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+    z-index: 10;
+}
+
+/* 3. Glass Shimmer Effect */
+.glass-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(120deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.05) 40%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 60%,
+            transparent 100%);
+    transform: skewX(-25deg);
+    transition: 0.7s;
+    pointer-events: none;
+}
+
+.glass-shimmer:hover::after {
+    left: 100%;
+    transition: 0.7s ease-in-out;
+}
+
+/* 4. Pulse Glow for CTAs */
+.pulse-glow {
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+    }
+}
+
+.pulse-glow:hover {
+    animation: none;
+}
+
+/* 5. Smooth Text Gradient Reveal */
+.text-gradient-reveal {
+    background: linear-gradient(to right, #fff, #bbb, #fff);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: textShine 4s linear infinite;
+}
+
+@keyframes textShine {
+    to {
+        background-position: 200% center;
+    }
+}
+
+/* 6. Magnetic Button Click (Active State ) */
+.click-shrink:active {
+    transform: scale(0.95);
+    transition: 0.1s;
+}
+
+/* 7. Floating Particles (CSS only) */
+.floating-orb {
+    animation: floatOrb 6s ease-in-out infinite;
+}
+
+@keyframes floatOrb {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+/* --- PREMIUM SUBJECT ICONS SYSTEM --- */
+.subject-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.subject-icon-box svg {
+    width: 26px;
+    height: 26px;
+    stroke-width: 2;
+    stroke: currentColor;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    z-index: 2;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.subject-icon-box::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, transparent 50%);
+    z-index: 1;
+}
+
+/* --- UNIFIED GOLD THEME ICONS --- */
+/* Force Gold Theme for ALL Subjects */
+.bg-physics,
+.bg-chemistry,
+.bg-maths,
+.bg-biology,
+.bg-english,
+.bg-telugu,
+.bg-hindi,
+.bg-social,
+.bg-science,
+.bg-evs,
+.bg-computer,
+.bg-history,
+.bg-geography {
+    --glow-color: #FFD700;
+    /* Pure Gold */
+    border-color: rgba(255, 215, 0, 0.3);
+    color: #FFD700;
+    /* Gold Icon */
+    background: linear-gradient(145deg, rgba(35, 30, 10, 0.9), rgba(15, 10, 5, 0.95));
+    /* Warm Dark Base */
+}
+
+/* Hover Animations - Intense Gold */
+.subject-card:hover .subject-icon-box,
+.select-card:hover .subject-icon-box {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+    border-color: #FFD700;
+    color: #fff;
+    /* White icon on hover */
+    background: linear-gradient(145deg, rgba(255, 215, 0, 0.15), rgba(20, 20, 20, 0.95));
+}
+
+.subject-icon-box.sm {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    margin-bottom: 0;
+    margin-right: 8px;
+}
+
+.subject-icon-box.sm svg {
+    width: 14px;
+    height: 14px;}

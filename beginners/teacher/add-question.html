@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Question - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container" style="max-width: 800px; margin: 0 auto; height: 100vh; overflow-y: auto;">
+
+        <!-- Cool Top Header with Back Button and Context -->
+        <div
+            style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button onclick="window.history.back()"
+                    style="background: rgba(255,255,255,0.1); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <div>
+                    <div
+                        style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">
+                        Adding Question To</div>
+                    <div style="font-size: 16px; font-weight: 600; color: var(--adv-text);">
+                        Class 10 <span style="color: var(--adv-yellow); margin: 0 4px;">&rsaquo;</span>
+                        Maths <span style="color: var(--adv-yellow); margin: 0 4px;">&rsaquo;</span>
+                        <span style="border-bottom: 1px dashed var(--text-muted);">Real Numbers</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <!-- Type Selector -->
+                <div style="position: relative;">
+                    <select id="inp-type" onchange="toggleOptions()"
+                        style="appearance: none; background: #2C2C2C; border: 1px solid #3D3D3D; border-radius: 8px; padding: 10px 36px 10px 16px; color: white; font-weight: 700; font-size: 14px; outline: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); min-width: 120px;">
+                        <option value="MCQ">MCQ</option>
+                        <option value="V. Short" selected>V. Short</option>
+                        <option value="Short">Short</option>
+                        <option value="Long">Long</option>
+                        <option value="Essay">Essay</option>
+                    </select>
+                    <!-- Chevron Icon -->
+                    <div
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Marks Input -->
+                <!-- Marks Dropdown -->
+                <div style="position: relative;">
+                    <select id="inp-marks"
+                        style="appearance: none; background: #2C2C2C; border: 1px solid #3D3D3D; border-radius: 8px; padding: 10px 36px 10px 16px; color: #FFD700; font-weight: 800; font-size: 14px; outline: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); min-width: 110px;">
+                        <option value="1" style="background: #2C2C2C;" selected>1 Mark</option>
+                        <option value="2" style="background: #2C2C2C;">2 Marks</option>
+                        <option value="3" style="background: #2C2C2C;">3 Marks</option>
+                        <option value="4" style="background: #2C2C2C;">4 Marks</option>
+                        <option value="5" style="background: #2C2C2C;">5 Marks</option>
+                        <option value="6" style="background: #2C2C2C;">6 Marks</option>
+                        <option value="7" style="background: #2C2C2C;">7 Marks</option>
+                        <option value="8" style="background: #2C2C2C;">8 Marks</option>
+                        <option value="9" style="background: #2C2C2C;">9 Marks</option>
+                        <option value="10" style="background: #2C2C2C;">10 Marks</option>
+                    </select>
+                    <!-- Chevron Icon -->
+                    <div
+                        style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- Hidden inputs to maintain compatibility with save logic -->
+        <input type="hidden" id="inp-class" value="Class 10">
+        <input type="hidden" id="inp-subject" value="Maths">
+        <input type="hidden" id="inp-chapter" value="Real Numbers">
+
+        <!-- Main Question Area -->
+        <div style="flex: 1;">
+            <textarea id="inp-question" class="main-textarea" placeholder="Type your question here..."
+                autofocus></textarea>
+        </div>
+
+        <!-- MCQ Options Section (Hidden by default) -->
+        <div id="mcq-section" style="display: none; margin-top: 24px; animation: slideUp 0.3s ease-out;">
+            <label style="color: var(--text-muted); font-size: 12px; margin-bottom: 12px; display: block;">ANSWER
+                OPTIONS</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="option-input-wrapper">
+                    <span class="opt-label">A</span>
+                    <input type="text" id="opt-a" class="opt-input" placeholder="Option A">
+                </div>
+                <div class="option-input-wrapper">
+                    <span class="opt-label">B</span>
+                    <input type="text" id="opt-b" class="opt-input" placeholder="Option B">
+                </div>
+                <div class="option-input-wrapper">
+                    <span class="opt-label">C</span>
+                    <input type="text" id="opt-c" class="opt-input" placeholder="Option C">
+                </div>
+                <div class="option-input-wrapper">
+                    <span class="opt-label">D</span>
+                    <input type="text" id="opt-d" class="opt-input" placeholder="Option D">
+                </div>
+            </div>
+            <div class="option-input-wrapper" style="margin-top: 12px;">
+                <span class="opt-label" style="background: var(--success); color: var(--adv-text);">Correct</span>
+                <select id="correct-opt" class="opt-input custom-dropdown" style="background: #2C2C2C; color: white;">
+                    <option value="a" style="background: #2C2C2C; color: white;">Option A</option>
+                    <option value="b" style="background: #2C2C2C; color: white;">Option B</option>
+                    <option value="c" style="background: #2C2C2C; color: white;">Option C</option>
+                    <option value="d" style="background: #2C2C2C; color: white;">Option D</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Bottom Action -->
+        <div style="margin-top: auto; padding-top: 24px;">
+            <button class="btn btn-primary" onclick="saveQuestion()"
+                style="width: 100%; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);">
+                Save Question
+            </button>
+        </div>
+
+    </div>
+
+    <style>
+        .glass-select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--adv-text);
+            padding: 8px 16px;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .glass-select option {
+            background: #111;
+        }
+
+        .main-textarea {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            /* Very subtle */
+            border-radius: 16px;
+            padding: 24px;
+            color: var(--adv-text);
+            font-size: 20px;
+            /* Large professional type */
+            font-family: 'Times New Roman', serif;
+            /* Feels like paper */
+            resize: none;
+            outline: none;
+            transition: 0.3s;
+            line-height: 1.6;
+        }
+
+        .main-textarea:focus {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+            font-family: var(--font-main);
+            /* Placeholder in Sans-Serif */
+            font-size: 16px;
+        }
+
+        .option-input-wrapper {
+            background: #363636;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            transition: 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-input-wrapper:focus-within {
+            border: 1px solid var(--primary);
+            background: #404040;
+        }
+
+        .opt-label {
+            background: #4d4d4d;
+            color: #aaa;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .opt-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--adv-text);
+            padding: 0 12px;
+            height: 44px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Re-using success overlay styles */
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .success-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .svg-checkmark {
+            width: 100px;
+            height: 100px;
+            display: block;
+            stroke-width: 4;
+            stroke: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .success-overlay.active .svg-checkmark {
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        /* (Simplified animations for brevity, full set in previous file is good but trying to keep it clean) */
+        @keyframes scale {
+
+            0%,
+            100% {
+                transform: none;
+            }
+
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0px 0px 0px 30px transparent;
+            }
+        }
+    </style>
+
+    <div id="successOverlay" class="success-overlay">
+        <svg class="svg-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="currentColor"
+                stroke-dasharray="166" stroke-dashoffset="166"
+                style="animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards" />
+            <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" stroke="currentColor"
+                stroke-dasharray="48" stroke-dashoffset="48"
+                style="animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards" />
+        </svg>
+        <h2 style="color: var(--adv-yellow); font-size: 24px; font-weight: 700; margin-top: 10px;">Saved!</h2>
+    </div>
+    <style>
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+
+
+    <script>
+        // Init: Check type on load
+        window.onload = function () {
+            toggleOptions();
+        }
+
+        function toggleOptions() {
+            const type = document.getElementById('inp-type').value;
+            const mcqSection = document.getElementById('mcq-section');
+            if (type === 'MCQ') {
+                mcqSection.style.display = 'block';
+            } else {
+                mcqSection.style.display = 'none';
+            }
+        }
+
+        function saveQuestion() {
+            const text = document.getElementById('inp-question').value;
+            if (!text.trim()) {
+                if (window.ActivityManager) window.ActivityManager.showToast('Validation Error', 'Please enter question text.', 'error');
+                else alert('Please enter a question text');
+                return;
+            }
+
+            const type = document.getElementById('inp-type').value;
+            const options = {};
+            // If MCQ, gather options
+            if (type === 'MCQ') {
+                options.a = document.getElementById('opt-a').value;
+                options.b = document.getElementById('opt-b').value;
+                options.c = document.getElementById('opt-c').value;
+                options.d = document.getElementById('opt-d').value;
+                options.correct = document.getElementById('correct-opt').value;
+            }
+
+            const newQ = {
+                id: Date.now(),
+                class: document.getElementById('inp-class').value,
+                subject: document.getElementById('inp-subject').value,
+                chapter: document.getElementById('inp-chapter').value,
+                marks: document.getElementById('inp-marks').value,
+                text: text,
+                type: type,
+                options: options, // Store the options object
+                date: new Date().toLocaleDateString()
+            };
+
+            // Save to LocalStorage
+            let questions = JSON.parse(localStorage.getItem('bee_questions') || '[]');
+            questions.push(newQ);
+            localStorage.setItem('bee_questions', JSON.stringify(questions));
+
+            // Use ActivityManager for advanced logging
+            if (window.ActivityManager) {
+                const desc = `Added a ${newQ.type} question to ${newQ.class} ${newQ.subject}`;
+                window.ActivityManager.log('Added Question', desc, 'success');
+            }
+
+            // Show Success
+            document.getElementById('successOverlay').classList.add('active');
+            setTimeout(() => {
+                window.location.href = 'question-bank.html';
+            }, 1500);
+        }
+    </script>
+    <!-- Notifications Script -->
+    <script src="../../assets/js/notifications.js"></script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to Teacher Cards
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            if (tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch (e) { }
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

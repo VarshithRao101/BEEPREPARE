@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity History - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            margin-top: 24px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 32px;
+            padding-left: 24px;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInItem 0.4s forwards;
+        }
+
+        @keyframes fadeInItem {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .timeline-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            position: absolute;
+            left: 0;
+            top: 4px;
+            z-index: 2;
+        }
+
+        .timeline-dot.info {
+            background: #2196F3;
+            box-shadow: 0 0 10px #2196F3;
+        }
+
+        .timeline-dot.success {
+            background: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+
+        .timeline-dot.warning {
+            background: #FFC107;
+            box-shadow: 0 0 10px #FFC107;
+        }
+
+        .timeline-dot.error {
+            background: #ff4d4d;
+            box-shadow: 0 0 10px #ff4d4d;
+        }
+
+        .timeline-content {
+            background: rgba(30, 30, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .t-title {
+            font-weight: 700;
+            color: var(--adv-text);
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .t-desc {
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .t-time {
+            margin-top: 12px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+
+        .clear-btn {
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">
+            <div style="cursor: pointer; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 50%;"
+                onclick="window.history.back()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+            <div style="font-weight: 800; font-size: 20px; letter-spacing: 1px; color: var(--adv-text);">ACTIVITY HISTORY</div>
+            <div style="width: 40px;"></div> <!-- Spacer -->
+        </div>
+
+        <div id="activity-container">
+            <!-- Timeline will be injected here -->
+        </div>
+
+        <div style="text-align: center;">
+            <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+        </div>
+    </div>
+
+    <script src="../../assets/js/notifications.js"></script>
+    <script>
+        function renderHistory() {
+            const container = document.getElementById('activity-container');
+            const log = ActivityManager.getLog();
+
+            if (log.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 40px; margin-bottom: 16px;"></div>
+                        <div>No recent activity found.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="timeline">';
+            log.forEach((item, index) => {
+                const typeClass = item.type || 'info';
+                // Format relative time if possible, or simple date
+                const date = new Date(item.timestamp).toLocaleString();
+
+                html += `
+                    <div class="timeline-item" style="animation-delay: ${index * 0.05}s">
+                        <div class="timeline-dot ${typeClass}"></div>
+                        <div class="timeline-content">
+                            <div class="t-title">${item.action}</div>
+                            <div class="t-desc">${item.description}</div>
+                            <div class="t-time">${date}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all activity history?')) {
+                ActivityManager.clear();
+                renderHistory();
+            }
+        }
+
+        // On Load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistory();
+            ActivityManager.markAsRead(); // Logic: visiting history marks them as seen? Maybe.
+        });
+    </script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to Teacher Cards
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            if(tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch(e) {}
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

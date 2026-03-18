@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources - Class 11/12</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .res-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .res-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .res-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .res-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .res-meta {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            color: #FFD700;
+            border-bottom: 2px solid #FFD700;
+        }
+    </style>
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body style="background: #0a0a0a;">
+    <div class="app-container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+            <button onclick="window.history.back()"
+                style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer;">←</button>
+            <h2 style="margin: 0; color: #fff;">Study Resources</h2>
+            <select id="sub-filter" onchange="loadResources()"
+                style="background: #222; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 4px; margin-left: auto;">
+                <option value="">All Subjects</option>
+                <option value="Physics">Physics</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Maths">Mathematics</option>
+            </select>
+        </div>
+
+        <div class="tab-bar">
+            <div class="tab active" onclick="switchTab('Note')">Short Notes</div>
+            <div class="tab" onclick="switchTab('Formula')">Formulas</div>
+            <div class="tab" onclick="switchTab('Cheatsheet')">Cheatsheets</div>
+        </div>
+
+        <div id="loading" style="text-align: center; color: #aaa; padding: 40px;">Loading...</div>
+        <div class="res-list" id="res-container" style="display: none;">
+            <!-- Items -->
+        </div>
+
+    </div>
+
+    <!-- Viewer Modal -->
+    <div id="view-modal"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+        <div
+            style="background: #111; border: 1px solid #333; border-radius: 20px; width: 100%; max-width: 600px; height: 80%; display: flex; flex-direction: column;">
+            <div
+                style="padding: 16px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="view-title" style="margin: 0; color: #FFD700;">Title</h3>
+                <button onclick="document.getElementById('view-modal').style.display='none'"
+                    style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+            </div>
+            <div id="view-content" style="padding: 24px; overflow-y: auto; color: #ddd; line-height: 1.6; flex: 1;">
+                Content...
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/grade-11-12-logic.js"></script>
+    <script>
+        let currentTab = 'Note';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadResources();
+        });
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => {
+                if (t.innerText.includes(tab) || (tab === 'Note' && t.innerText.includes('Short'))) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+            loadResources();
+        }
+
+        function loadResources() {
+            const subject = document.getElementById('sub-filter').value;
+            const container = document.getElementById('res-container');
+            const loader = document.getElementById('loading');
+
+            loader.style.display = 'block';
+            container.style.display = 'none';
+
+            // Simulate network delay
+            setTimeout(() => {
+                const resources = Grade1112System.getResources(currentTab, subject || null);
+
+                // Mock if empty
+                if (resources.length === 0) {
+                    resources.push({
+                        title: `Sample ${currentTab} 1`,
+                        subject: 'Physics',
+                        content: { text: "Here is a sample note about kinematics..." },
+                        author: 'System'
+                    });
+                    resources.push({
+                        title: `Sample ${currentTab} 2`,
+                        subject: 'Chemistry',
+                        content: { text: "Periodic table trends..." },
+                        author: 'System'
+                    });
+                }
+
+                container.innerHTML = '';
+                resources.forEach(res => {
+                    const div = document.createElement('div');
+                    div.className = 'res-item';
+                    div.onclick = () => openResource(res);
+                    div.innerHTML = `
+                        <div class="res-title">${res.title}</div>
+                        <div class="res-meta">${res.subject} • By ${res.author}</div>
+                    `;
+                    container.appendChild(div);
+                });
+
+                loader.style.display = 'none';
+                container.style.display = 'grid';
+            }, 300);
+        }
+
+        function openResource(res) {
+            document.getElementById('view-title').innerText = res.title;
+            document.getElementById('view-content').innerText = res.content.text || "No content available.";
+            document.getElementById('view-modal').style.display = 'flex';
+        }
+    </script>
+    <script src='../../assets/js/beeprepare-security.js'></script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to all interactive elements
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card, .role-card, .dash-card, .paper-card, .stream-card");
+            if(tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch(e) {}
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container, .dash-card, .role-card, .paper-card, .stream-card");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

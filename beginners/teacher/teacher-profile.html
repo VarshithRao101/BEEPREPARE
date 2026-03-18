@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Profile - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Modern Reset & Base */
+        .app-container {
+            padding-bottom: 90px;
+        }
+
+        /* Section Dividers */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 32px 0 16px 0;
+        }
+
+        .divider-line {
+            height: 2px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Immersive Profile Card */
+        /* Robust Profile Card */
+        .profile-card {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .profile-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Avatar Text (Initials) */
+        .avatar-text {
+            font-size: 36px;
+            font-weight: 800;
+            color: #000;
+            line-height: 1;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Subject Tags Row */
+        .tags-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .subject-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #f0f0f0;
+            font-weight: 600;
+        }
+
+        .subject-pill:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+        }
+
+        /* Stats Row */
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            width: 100%;
+            gap: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Subject Tags */
+        .tags-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 16px 0 24px 0;
+            width: 100%;
+            position: relative;
+            z-index: 5;
+        }
+
+        .subject-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .subject-pill:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Menu Items */
+        .settings-menu {
+            display: grid;
+            gap: 12px;
+        }
+
+        .menu-item {
+            background: rgba(30, 30, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover {
+            background: rgba(40, 40, 40, 0.6);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .menu-item.no-hover:hover {
+            transform: none;
+            background: rgba(30, 30, 30, 0.4);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-icon {
+            color: var(--primary);
+            opacity: 0.8;
+            display: flex;
+        }
+
+        .menu-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #eeeeee;
+        }
+
+        .menu-arrow {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 18px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            background-color: #000;
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 77, 77, 0.3);
+            color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.05);
+            font-weight: 700;
+            font-size: 14px;
+            margin-top: 32px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 77, 77, 0.15);
+            border-color: #ff4d4d;
+        }
+
+        /* --- Logout Modal & Animation --- */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .logout-modal {
+            background: linear-gradient(145deg, #1a1a1a, #111);
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            padding: 32px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 340px;
+            text-align: center;
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-active .logout-modal {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 77, 77, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: #ff4d4d;
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.1);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-logout {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            background: #ff4d4d;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            /* Use standard pointer, we'll handle nav in JS */
+            box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
+            transition: 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 77, 77, 0.4);
+        }
+
+
+        /* Cinematic Exit Overlay */
+        .exit-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 3000;
+            display: none;
+            /* hidden by default */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .exit-logo {
+            width: 80px;
+            height: 80px;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: pulseLogo 1.5s ease-in-out infinite;
+        }
+
+        .exit-text {
+            margin-top: 20px;
+            font-size: 14px;
+            letter-spacing: 3px;
+            color: var(--primary);
+            text-transform: uppercase;
+            opacity: 0;
+        }
+
+        @keyframes pulseLogo {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.9);
+                opacity: 0.7;
+            }
+        }
+
+        /* Triggered Classes for Animation */
+        .start-exit .exit-overlay {
+            display: flex;
+            animation: fadeInOverlay 0.5s forwards;
+        }
+
+        .start-exit .exit-logo,
+        .start-exit .exit-text {
+            animation: fadeInUp 0.8s 0.2s forwards;
+        }
+
+        @keyframes fadeInOverlay {
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-2"></div>
+    </div>
+    <!-- Container -->
+    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+        <!-- Header -->
+        <div class="top-header"
+            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
+            <div style="position: absolute; left: 0; cursor: pointer; padding: 8px;" onclick="window.history.back()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </div>
+            <div class="header-title"
+                style="color: var(--primary); font-weight: 700; font-size: 18px; letter-spacing: 1px;">PROFILE
+            </div>
+            <div style="position: absolute; right: 0; cursor: pointer; padding: 8px;"
+                onclick="window.location.href='activity-history.html'">
+                <div style="position: relative;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <div id="notif-badge"
+                        style="position: absolute; top: -2px; right: -2px; background: #ff4d4d; color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: none; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #141414;">
+                        0</div>
+                </div>
+            </div>
+        </div>
+        <!-- Profile Card -->
+        <!-- Redesigned Profile Card -->
+        <!-- Redesigned Profile Card -->
+        <div class="profile-card">
+            <div class="profile-avatar"><span class="avatar-text">VR</span></div>
+            <div class="profile-name">Varshith Rao</div>
+            <div class="tags-row">
+                <div class="subject-pill"><img src="../../assets/images/subjects/physics.svg" alt="Physics"
+                        style="width: 20px; height: 20px; object-fit: contain;"> Physics </div>
+                <div class="subject-pill"><img src="../../assets/images/subjects/chemistry.svg" alt="Chemistry"
+                        style="width: 20px; height: 20px; object-fit: contain;"> Chemistry </div>
+                <div class="subject-pill"><span></span>Class 10 </div>
+            </div>
+            <div class="profile-stats">
+                <div class="stat-box">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Classes</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Papers</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">850</div>
+                    <div class="stat-label">Questions</div>
+                </div>
+            </div>
+        </div>
+        <!-- Core Actions -->
+        <div class="section-divider"><span class="section-label">Account</span>
+            <div class="divider-line"></div>
+        </div>
+        <div class="settings-menu">
+            <div class="menu-item" onclick="openEditProfile()">
+                <div class="menu-left">
+                    <div class="menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7">
+                            </path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
+                            </path>
+                        </svg></div>
+                    <div class="menu-text">Edit Details & Classes</div>
+                </div>
+                <div class="menu-arrow">→</div>
+            </div>
+
+            <!-- Featured Bank Option -->
+            <div class="menu-item featured-item" onclick="window.location.href='my-banks.html'"
+                style="flex-direction: column; align-items: flex-start; gap: 12px; background: linear-gradient(145deg, rgba(40, 40, 40, 0.7), rgba(30, 30, 30, 0.9)); border: 1px solid var(--primary); box-shadow: 0 4px 20px rgba(255, 215, 0, 0.1);">
+                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <div class="menu-left">
+                        <div class="menu-icon" style="color: var(--primary);"><svg width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                <line x1="8" y1="21" x2="16" y2="21" />
+                                <line x1="12" y1="17" x2="12" y2="21" />
+                            </svg></div>
+                        <div class="menu-text" style="font-size: 16px; color: #fff;">My
+                            Banks</div>
+                    </div>
+                    <div class="menu-arrow" style="color: var(--primary);">→</div>
+                </div>
+                <!-- Feature Pills -->
+                <div style="display: flex; gap: 8px; width: 100%;">
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #ccc; border: 1px solid rgba(255,255,255,0.05);">
+                        Class</div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #ccc; border: 1px solid rgba(255,255,255,0.05);">
+                        Subject</div>
+                    <div
+                        style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #ccc; border: 1px solid rgba(255,255,255,0.05);">
+                        Chapter</div>
+                </div>
+            </div>
+            <div class="menu-item" onclick="window.location.href='teacher-notes.html'">
+                <div class="menu-left">
+                    <div class="menu-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="menu-text">My Notes Library</div>
+                </div>
+                <div class="menu-arrow">→</div>
+            </div>
+
+            <div class="menu-item" onclick="window.location.href='activity-history.html'">
+                <div class="menu-left">
+                    <div class="menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+                        </svg></div>
+                    <div class="menu-text">Activity History</div>
+                </div>
+                <div class="menu-arrow">→</div>
+            </div>
+
+            <!-- Access Requests Option -->
+            <div class="menu-item" onclick="window.location.href='teacher-requests.html'">
+                <div class="menu-left">
+                    <div class="menu-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="8.5" cy="7" r="4"></circle>
+                            <line x1="20" y1="8" x2="20" y2="14"></line>
+                            <line x1="23" y1="11" x2="17" y2="11"></line>
+                        </svg>
+                    </div>
+                    <div class="menu-text">Access Requests</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div
+                        style="background: var(--primary); color: #000; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
+                        2</div>
+                    <div class="menu-arrow">→</div>
+                </div>
+            </div>
+        </div>
+        <!-- Preferences -->
+        <div class="section-divider"><span class="section-label">Preferences</span>
+            <div class="divider-line"></div>
+        </div>
+        <div class="settings-menu">
+
+            <div class="menu-item no-hover" style="cursor: default;">
+                <div class="menu-left">
+                    <div class="menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg></div>
+                    <div class="menu-text">Notifications</div>
+                </div><label class="toggle-switch"><input type="checkbox" id="notif-toggle"
+                        onchange="ActivityManager.toggle(this.checked)"><span class="slider"></span></label>
+            </div>
+            <button class="logout-btn" onclick="openLogoutModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Log Out
+            </button>
+
+        </div>
+    </div> <!-- Close App Container -->
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal-backdrop" id="logoutModal">
+        <div class="logout-modal">
+            <div class="modal-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </div>
+            <h3 class="modal-title">Sign Out?</h3>
+            <p class="modal-desc">Are you sure you want to log out of your account?</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
+                <button class="btn-logout" onclick="confirmLogout()">Yes, Sign
+                    Out</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cinematic Exit Overlay -->
+    <div class="exit-overlay" id="exitOverlay">
+        <div class="exit-logo">
+            <svg viewBox="0 0 24 24" fill="#FFD700" stroke="none">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+        </div>
+        <div class="exit-text">BEEPREPARE</div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="teacher-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="question-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
+            </svg>
+            <span>Bank</span>
+        </a>
+        <a href="generate-paper.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span>Generate</span>
+        </a>
+        <a href="teacher-profile.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        const modal = document.getElementById('logoutModal');
+        const body = document.body;
+
+        function openLogoutModal() {
+            modal.style.display = 'flex';
+            // Slight delay to allow display flex to apply before opacity transition
+            setTimeout(() => {
+                modal.classList.add('modal-active');
+            }, 10);
+        }
+
+        function closeLogoutModal() {
+            modal.classList.remove('modal-active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeLogoutModal();
+        });
+
+        function confirmLogout() {
+            // 1. Close Modal
+            closeLogoutModal();
+
+            // 2. Start Cinematic Exit
+            body.classList.add('start-exit');
+
+            // 3. Redirect after animation
+            setTimeout(() => {
+                window.location.href = '../../index.html';
+            }, 2000); // 2s duration
+        }
+    </script>
+    <!-- Edit Profile Modal (Premium UI) -->
+    <!-- Edit Profile Modal (Redesigned) -->
+    <div class="modal-backdrop" id="editProfileModal" style="z-index: 2500;">
+        <div class="edit-modal-content">
+            <!-- Header -->
+            <div class="edit-header">
+                <div class="edit-title">Edit Preferences</div>
+                <button class="close-icon-btn" onclick="closeEditProfile()">×</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="modal-tabs">
+                <div class="tab-btn active" onclick="switchTab('subjects')" id="tab-btn-subjects">Subjects & Classes
+                </div>
+                <div class="tab-btn" onclick="switchTab('chapters')" id="tab-btn-chapters">Chapters</div>
+            </div>
+
+            <!-- Tab Content: Subjects -->
+            <div id="tab-content-subjects" class="tab-content active">
+                <div class="scrollable-area">
+                    <!-- Subjects -->
+                    <div class="section-group">
+                        <h4 class="sec-label">Subjects <span
+                                style="font-weight: 400; color: #666; font-size: 11px; margin-left: 8px;">(First one is
+                                free)</span></h4>
+                        <div class="options-grid" id="subjects-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Classes -->
+                    <div class="section-group">
+                        <h4 class="sec-label">Classes</h4>
+                        <div class="options-grid" id="classes-grid">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Chapters -->
+            <div id="tab-content-chapters" class="tab-content">
+                <div class="chapter-manager-ui">
+                    <div class="cm-context">
+                        <span style="color: #888; font-size: 12px; font-weight: 600;">EDITING:</span>
+                        <select id="chapter-context-select" class="clean-select" onchange="loadChapters()">
+                            <!-- Dynamically populated -->
+                        </select>
+                    </div>
+
+                    <div class="add-chapter-row">
+                        <input type="text" id="new-chapter-name" placeholder="New Chapter Name...">
+                        <button class="add-btn" onclick="addChapter()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="3">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="chapter-list-container" id="chapter-list"></div>
+
+                    <div class="chapter-limit-bar">
+                        <div class="limit-text"><span>Usage</span><span id="limit-count">0/30</span></div>
+                        <div class="limit-track">
+                            <div class="limit-fill" id="limit-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <button class="save-profile-btn" onclick="saveAndClose()">Save Selection</button>
+            </div>
+        </div>
+
+        <!-- Unlock Overlay -->
+        <div id="unlock-overlay" class="unlock-overlay">
+            <div class="unlock-box">
+                <div style="font-size: 40px; margin-bottom: 10px;"></div>
+                <h3 style="color: #fff; margin-bottom: 8px;">Unlock Premium</h3>
+                <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">Enter your access key to add more
+                    subjects.</p>
+                <input type="text" id="unlock-key" placeholder="ENTER KEY">
+                <div class="unlock-btns">
+                    <button onclick="closeUnlock()">Cancel</button>
+                    <button class="primary" onclick="verifyUnlock()">Unlock</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <style>
+        /* Edit Modal Styles Redesigned */
+        .edit-modal-content {
+            background: #141414;
+            width: 95%;
+            max-width: 800px;
+            height: 90vh;
+            max-height: 700px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .edit-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .edit-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .close-icon-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .close-icon-btn:hover {
+            color: #fff;
+        }
+
+        /* Tabs */
+        .modal-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 16px;
+            color: #888;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: 0.2s;
+        }
+
+        .tab-btn.active {
+            color: #ffc107;
+            border-bottom-color: #ffc107;
+            background: rgba(255, 193, 7, 0.05);
+        }
+
+        /* Content */
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scrollable-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .section-group {
+            margin-bottom: 32px;
+        }
+
+        .sec-label {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .option-card {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .option-card:hover {
+            border-color: #555;
+            background: #252525;
+        }
+
+        .option-card.active {
+            border-color: #ffc107;
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        .opt-name {
+            color: #eee;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .opt-check {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #555;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-card.active .opt-check {
+            border-color: #ffc107;
+            background: #ffc107;
+        }
+
+        .opt-check::after {
+            content: '✓';
+            color: #000;
+            font-weight: 900;
+            font-size: 12px;
+            display: none;
+        }
+
+        .option-card.active .opt-check::after {
+            display: block;
+        }
+
+        /* Footer */
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #141414;
+        }
+
+        .save-profile-btn {
+            background: #ffc107;
+            color: #000;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+
+        .save-profile-btn:hover {
+            background: #ffca28;
+        }
+
+        .close-text-btn {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+        }
+
+        /* Unlock Overlay */
+        .unlock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .unlock-box {
+            background: #1e1e1e;
+            padding: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(255, 193, 7, 0.1);
+        }
+
+        #unlock-key {
+            background: #111;
+            border: 1px solid #333;
+            padding: 12px;
+            width: 100%;
+            color: #ffc107;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .unlock-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .unlock-btns button {
+            padding: 8px 16px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .unlock-btns button.primary {
+            background: #ffc107;
+            color: #000;
+            font-weight: 700;
+        }
+
+        /* Chapter Manager Styles Reuse/Adapt */
+        .chapter-manager-ui {
+            padding: 24px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cm-context {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #333;
+        }
+
+        .clean-select {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .add-chapter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        #new-chapter-name {
+            flex: 1;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .add-btn {
+            background: #333;
+            border: 1px solid #444;
+            width: 42px;
+            border-radius: 8px;
+            color: #ffc107;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chapter-list-container {
+            flex: 1;
+            overflow-y: auto;
+            background: #111;
+            border-radius: 8px;
+            border: 1px solid #222;
+            padding: 8px;
+            margin-bottom: 16px;
+        }
+
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #222;
+            align-items: center;
+        }
+
+        .chap-name {
+            color: #ddd;
+            font-size: 13px;
+        }
+
+        .del-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+        }
+
+        .del-btn:hover {
+            color: #ff4d4d;
+        }
+
+        .chapter-limit-bar {
+            background: #222;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .limit-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .limit-track {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .limit-fill {
+            height: 100%;
+            background: #ffc107;
+            width: 0%;
+            transition: 0.3s;
+        }
+    </style>
+
+    <script>
+        const SUBJECTS = ['Physics', 'Chemistry', 'Mathematics', 'Biology', 'English', 'Telugu', 'Hindi', 'Social', 'Science', 'EVS', 'Computer', 'History', 'Geography'];
+        const CLASSES = ['6', '7', '8', '9', '10', '11', '12'];
+
+        // Initial State
+        // Use window.profileState if needed, or define local
+        let appState = {
+            isPremium: false,
+            selectedSubjects: ['Physics'], // One free by default
+            selectedClasses: ['10'],       // Default class
+            chapters: {
+                '10-Physics': ['Light', 'Electricity', 'Human Eye'],
+                '10-Maths': ['Real Numbers', 'Polynomials'],
+                '10-Chemistry': ['Chemical Reactions', 'Acids Bases Salts']
+            }
+        };
+
+        const editModal = document.getElementById('editProfileModal');
+
+        function openEditProfile() {
+            editModal.classList.add('modal-active');
+            renderSubjects();
+            renderClasses();
+        }
+
+        function closeEditProfile() {
+            editModal.classList.remove('modal-active');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            document.getElementById('tab-btn-' + tab).classList.add('active');
+            document.getElementById('tab-content-' + tab).classList.add('active');
+
+            if (tab === 'chapters') {
+                renderChapterContext();
+            }
+        }
+
+        // --- Renderers ---
+        function renderSubjects() {
+            const grid = document.getElementById('subjects-grid');
+            grid.innerHTML = '';
+
+            SUBJECTS.forEach(sub => {
+                const isActive = appState.selectedSubjects.includes(sub);
+                const icon = window.BeeIcons ? window.BeeIcons.get(sub) : '';
+                const el = document.createElement('div');
+                el.className = 'option-card ' + (isActive ? 'active' : '');
+                el.onclick = () => toggleSubject(sub);
+                el.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:20px; height:20px;">${icon}</div>
+                        <span class="opt-name">${sub}</span>
+                    </div>
+                    <div class="opt-check"></div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        function renderClasses() {
+            const grid = document.getElementById('classes-grid');
+            grid.innerHTML = '';
+
+            CLASSES.forEach(cls => {
+                const isActive = appState.selectedClasses.includes(cls);
+                const el = document.createElement('div');
+                el.className = 'option-card ' + (isActive ? 'active' : '');
+                el.onclick = () => toggleClass(cls);
+                el.innerHTML = `
+                    <span class="opt-name">Class ${cls}</span>
+                    <div class="opt-check"></div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        // --- Toggles ---
+        function toggleSubject(sub) {
+            if (appState.selectedSubjects.includes(sub)) {
+                appState.selectedSubjects = appState.selectedSubjects.filter(s => s !== sub);
+            } else {
+                if (appState.selectedSubjects.length >= 1 && !appState.isPremium) {
+                    document.getElementById('unlock-overlay').style.display = 'flex';
+                    return;
+                }
+                appState.selectedSubjects.push(sub);
+            }
+            renderSubjects();
+        }
+
+        function toggleClass(cls) {
+            if (appState.selectedClasses.includes(cls)) {
+                appState.selectedClasses = appState.selectedClasses.filter(c => c !== cls);
+            } else {
+                appState.selectedClasses.push(cls);
+            }
+            renderClasses();
+        }
+
+        // --- Unlock Logic ---
+        function closeUnlock() {
+            document.getElementById('unlock-overlay').style.display = 'none';
+        }
+
+        function verifyUnlock() {
+            const key = document.getElementById('unlock-key').value.trim();
+            if (key === 'TRNT2025' || key === 'BEEPRO') {
+                appState.isPremium = true;
+                if (window.ActivityManager) window.ActivityManager.log('Premium Unlocked', 'Teacher unlocked premium access.', 'success');
+                if (window.ActivityManager) window.ActivityManager.showToast('Premium Unlocked!', 'You can now select unlimited subjects.', 'success');
+                else alert('Premium Unlocked! You can now select unlimited subjects.');
+                closeUnlock();
+                renderSubjects();
+            } else {
+                if (window.ActivityManager) window.ActivityManager.showToast('Invalid Key', 'Please verify your access key.', 'error');
+                else alert('Invalid Key');
+            }
+        }
+
+        // --- Chapter Logic ---
+        function renderChapterContext() {
+            const select = document.getElementById('chapter-context-select');
+            select.innerHTML = '';
+
+            if (appState.selectedClasses.length === 0 || appState.selectedSubjects.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = 'Select Class/Subject first';
+                select.add(opt);
+                loadChapters();
+                return;
+            }
+
+            appState.selectedClasses.forEach(cls => {
+                appState.selectedSubjects.forEach(sub => {
+                    const key = cls + '-' + sub;
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.text = 'Class ' + cls + ' ' + sub;
+                    select.add(opt);
+                });
+            });
+
+            loadChapters();
+        }
+
+        function loadChapters() {
+            const select = document.getElementById('chapter-context-select');
+            if (!select.value || select.value === 'Select Class/Subject first') {
+                document.getElementById('chapter-list').innerHTML = '';
+                return;
+            }
+
+            const key = select.value;
+            if (!appState.chapters[key]) appState.chapters[key] = [];
+            const list = appState.chapters[key];
+
+            const container = document.getElementById('chapter-list');
+            container.innerHTML = '';
+
+            list.forEach((chap, idx) => {
+                const item = document.createElement('div');
+                item.className = 'chapter-item';
+                item.innerHTML = '<span class="chap-name">' + chap + '</span><button class="del-btn" onclick="removeChapter(\'' + key + '\', ' + idx + ')">×</button>';
+                container.appendChild(item);
+            });
+
+            const count = list.length;
+            document.getElementById('limit-count').innerText = count + '/30';
+            document.getElementById('limit-fill').style.width = ((count / 30) * 100) + '%';
+        }
+
+        function addChapter() {
+            const name = document.getElementById('new-chapter-name').value.trim();
+            if (!name) return;
+
+            const key = document.getElementById('chapter-context-select').value;
+            if (!key || key === 'Select Class/Subject first') return;
+
+            if (!appState.chapters[key]) appState.chapters[key] = [];
+
+            if (appState.chapters[key].length >= 30) {
+                if (window.ActivityManager) window.ActivityManager.showToast('Limit Reached', 'Maximum 30 chapters allowed.', 'warning');
+                else alert('Limit reached.');
+                return;
+            }
+
+            appState.chapters[key].push(name);
+            if (window.ActivityManager) window.ActivityManager.log('Added Chapter', 'Added ' + name + ' to ' + key, 'success');
+
+            document.getElementById('new-chapter-name').value = '';
+            loadChapters();
+        }
+
+        function removeChapter(key, idx) {
+            if (confirm('Delete chapter?')) {
+                const removed = appState.chapters[key].splice(idx, 1);
+                if (window.ActivityManager) window.ActivityManager.log('Removed Chapter', 'Removed ' + removed + ' from ' + key, 'warning');
+                loadChapters();
+            }
+        }
+
+        function saveAndClose() {
+            closeEditProfile();
+            if (window.ActivityManager) window.ActivityManager.log('Profile Updated', 'Updated teaching preferences.', 'info');
+        }
+    </script>
+    <script src="../../assets/js/icons.js"></script>
+    <script src="../../assets/js/notifications.js"></script>
+    <script>
+        // Init Notification Toggle State
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('notif-toggle');
+            if (toggle && window.ActivityManager) {
+                toggle.checked = window.ActivityManager.isEnabled();
+            }
+        });
+    </script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to Teacher Cards
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            if (tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch (e) { }
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

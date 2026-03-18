@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Test - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Pre-load banks simulation
+        const myBanks = [
+            { id: 'bank_math_10', name: 'Mathematics', teacher: 'Mr. Sharma', class: 'Class 10', icon: '' },
+            { id: 'bank_sci_10', name: 'Physics', teacher: 'Mrs. Verma', class: 'Class 10', icon: '' }
+        ];
+    </script>
+    <style>
+        /* Updated Generator        /* Premium Dark Generate */
+        body {
+            background: #050505;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            color: #fff;
+        }
+
+        .app-container {
+            padding-bottom: 100px;
+            padding-top: 40px;
+        }
+
+        .gen-header {
+            margin-bottom: 32px;
+            padding: 0 12px;
+        }
+
+        .gen-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            /* White title */
+            margin-bottom: 4px;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gen-desc {
+            font-size: 14px;
+            color: #888;
+            /* Gray desc */
+            margin-bottom: 32px;
+        }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 32px 0 20px 0;
+            padding: 0 8px;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            /* Dark theme divider */
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #666;
+            /* Dark gray label */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: #050505;
+            /* Black bg */
+            padding-right: 12px;
+            white-space: nowrap;
+        }
+
+        /* Bank Grid */
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+            padding: 0 8px;
+        }
+
+        .bank-option-card {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1/1.1;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .bank-option-card:hover {
+            background: rgba(40, 40, 40, 0.8);
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .bank-option-card.selected {
+            background: rgba(255, 215, 0, 0.1);
+            border-color: #FFD700;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
+        }
+
+        .bank-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            /* Dark icon bg */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            font-size: 24px;
+        }
+
+        .bank-option-card.selected .bank-icon {
+            background: #FFD700;
+            color: #000;
+        }
+
+        .bank-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            /* White title */
+            text-align: center;
+        }
+
+        .bank-teacher {
+            font-size: 10px;
+            color: #888;
+            /* Gray text */
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        .check-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #FFD700;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            opacity: 0;
+            transform: scale(0);
+            transition: 0.2s;
+        }
+
+        .bank-option-card.selected .check-badge {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Chapters Box */
+        .chapters-box {
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* Dark border */
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .chapter-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            /* Dark row */
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .chapter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .chapter-row:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .chapter-row.selected {
+            background: rgba(255, 215, 0, 0.1);
+            /* Gold tint */
+            border-color: rgba(255, 215, 0, 0.3);
+            /* box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); */
+        }
+
+        .chk-visual {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: 0.2s;
+        }
+
+        .chapter-row.selected .chk-visual {
+            background: #FFD700;
+            color: #000;
+        }
+
+        .bp-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(30, 30, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .counter-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cnt-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .cnt-btn:hover {
+            background: #FFD700;
+            color: #000;
+        }
+
+        .total-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            color: #000;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+            margin: 24px 0;
+            animation: pulse-gold 2s infinite;
+        }
+
+        @keyframes pulse-gold {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .primary-action-btn {
+            background: #1a1a1a;
+            color: #fff;
+            width: 100%;
+            padding: 20px;
+            border-radius: 16px;
+            font-weight: 800;
+            font-size: 16px;
+            border: none;
+            margin-top: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+            transition: 0.2s;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .primary-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .hidden-section {
+            display: none;
+        }
+
+        .visible-section {
+            display: block;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <!-- Container -->
+    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+
+        <!-- Header -->
+        <div class="gen-header">
+            <div class="gen-title">Generate Test</div>
+            <div class="gen-desc">Customize your practice paper in seconds.</div>
+        </div>
+
+        <!-- STAGE 1: Select Bank (Grid Icon View) -->
+        <div class="section-divider">
+            <span class="section-label">1. Select Question Bank</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="bank-grid">
+            <!-- Bank Card 1 -->
+            <div class="bank-option-card" onclick="selectBank(this, 'bank_math_10')">
+                <div class="check-badge">✓</div>
+                <div class="bank-icon"><img src="../../assets/images/subjects/mathematics.svg" alt="Math"
+                        style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="bank-name">Mathematics</div>
+                <div class="bank-teacher">Mr. Sharma • Class 10</div>
+            </div>
+
+            <!-- Bank Card 2 -->
+            <div class="bank-option-card" onclick="selectBank(this, 'bank_sci_10')">
+                <div class="check-badge">✓</div>
+                <div class="bank-icon"><img src="../../assets/images/subjects/physics.svg" alt="Physics"
+                        style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="bank-name">Physics</div>
+                <div class="bank-teacher">Mrs. Verma • Class 10</div>
+            </div>
+
+            <!-- Bank Card 3 -->
+            <div class="bank-option-card" onclick="selectBank(this, 'bank_chem_10')">
+                <div class="check-badge">✓</div>
+                <div class="bank-icon"><img src="../../assets/images/subjects/chemistry.svg" alt="Chemistry"
+                        style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="bank-name">Chemistry</div>
+                <div class="bank-teacher">Mr. Rao • Class 10</div>
+            </div>
+
+            <!-- Bank Card 4 -->
+            <div class="bank-option-card" onclick="selectBank(this, 'bank_bio_10')">
+                <div class="check-badge">✓</div>
+                <div class="bank-icon"><img src="../../assets/images/subjects/biology.svg" alt="Biology"
+                        style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="bank-name">Biology</div>
+                <div class="bank-teacher">Ms. Sitha • Class 10</div>
+            </div>
+
+            <!-- Bank Card 5 -->
+            <div class="bank-option-card" onclick="selectBank(this, 'bank_eng_10')">
+                <div class="check-badge">✓</div>
+                <div class="bank-icon"><img src="../../assets/images/subjects/english.svg" alt="English"
+                        style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="bank-name">English</div>
+                <div class="bank-teacher">Mrs. Jacobs • Class 10</div>
+            </div>
+
+            <!-- Bank Card 6 -->
+            <div class="bank-option-card" onclick="selectBank(this, 'bank_soc_10')">
+                <div class="check-badge">✓</div>
+                <div class="bank-icon"><img src="../../assets/images/subjects/social.svg" alt="Social"
+                        style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="bank-name">Social Studies</div>
+                <div class="bank-teacher">Mr. Gupta • Class 10</div>
+            </div>
+
+            <!-- Bank Card 7 -->
+            <div class="bank-option-card" onclick="selectBank(this, 'bank_cs_10')">
+                <div class="check-badge">✓</div>
+                <div class="bank-icon"><img src="../../assets/images/subjects/computer.svg" alt="Computer"
+                        style="width: 100%; height: 100%; object-fit: contain;"></div>
+                <div class="bank-name">Computer Sc.</div>
+                <div class="bank-teacher">Lab Admin • Class 10</div>
+            </div>
+        </div>
+
+        <button id="btn-next-step" class="primary-action-btn" onclick="showConfigStage()"
+            style="margin-top: 12px; opacity: 0.5; pointer-events: none;">
+            Start Configuration
+        </button>
+
+        <!-- STAGE 2: Test Configuration (Hidden Initially) -->
+        <div id="config-stage" class="hidden-section">
+
+            <div style="height: 30px;"></div> <!-- Spacer -->
+
+            <!-- Section: Chapters -->
+            <div class="section-divider">
+                <span class="section-label">2. Select Chapters</span>
+                <div class="divider-line"></div>
+                <button onclick="toggleAll()"
+                    style="background:none; border:none; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer;">Select
+                    All</button>
+            </div>
+
+            <div class="chapters-box">
+                <!-- Chapter 1 -->
+                <div class="chapter-row selected" onclick="toggleRow(this)">
+                    <div class="chk-visual"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="4">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg></div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Real Numbers</div>
+                    </div>
+                    <div
+                        style="font-size: 11px; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px;">
+                        3 Qs</div>
+                </div>
+                <!-- Chapter 2 -->
+                <div class="chapter-row" onclick="toggleRow(this)">
+                    <div class="chk-visual"></div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Polynomials</div>
+                    </div>
+                    <div
+                        style="font-size: 11px; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px;">
+                        5 Qs</div>
+                </div>
+                <!-- Chapter 3 -->
+                <div class="chapter-row" onclick="toggleRow(this)">
+                    <div class="chk-visual"></div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Pair of Linear Eqs</div>
+                    </div>
+                    <div
+                        style="font-size: 11px; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px;">
+                        8 Qs</div>
+                </div>
+            </div>
+
+            <!-- Section: Blueprint -->
+            <div class="section-divider">
+                <span class="section-label">3. Configure Questions</span>
+                <div class="divider-line"></div>
+            </div>
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px;">
+                <!-- MCQ -->
+                <div class="bp-row">
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">MCQ <span
+                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(1m)</span>
+                        </div>
+                    </div>
+                    <div class="counter-control">
+                        <button class="cnt-btn" onclick="update('mcq', -1)">−</button>
+                        <span id="cnt-mcq"
+                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
+                        <button class="cnt-btn" onclick="update('mcq', 1)">+</button>
+                    </div>
+                </div>
+                <!-- VSA -->
+                <div class="bp-row">
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">V. Short <span
+                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(1m)</span>
+                        </div>
+                    </div>
+                    <div class="counter-control">
+                        <button class="cnt-btn" onclick="update('vshort', -1)">−</button>
+                        <span id="cnt-vshort"
+                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
+                        <button class="cnt-btn" onclick="update('vshort', 1)">+</button>
+                    </div>
+                </div>
+                <!-- Short -->
+                <div class="bp-row">
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Short <span
+                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(2m)</span>
+                        </div>
+                    </div>
+                    <div class="counter-control">
+                        <button class="cnt-btn" onclick="update('short', -1)">−</button>
+                        <span id="cnt-short"
+                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
+                        <button class="cnt-btn" onclick="update('short', 1)">+</button>
+                    </div>
+                </div>
+                <!-- Long -->
+                <div class="bp-row">
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Long <span
+                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(4m)</span>
+                        </div>
+                    </div>
+                    <div class="counter-control">
+                        <button class="cnt-btn" onclick="update('long', -1)">−</button>
+                        <span id="cnt-long"
+                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
+                        <button class="cnt-btn" onclick="update('long', 1)">+</button>
+                    </div>
+                </div>
+                <!-- Essay -->
+                <div class="bp-row">
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Essay <span
+                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(6m)</span>
+                        </div>
+                    </div>
+                    <div class="counter-control">
+                        <button class="cnt-btn" onclick="update('essay', -1)">−</button>
+                        <span id="cnt-essay"
+                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
+                        <button class="cnt-btn" onclick="update('essay', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-badge">
+                <div style="font-size: 14px; font-weight: 700; color: #000; text-transform: uppercase;">Total Marks
+                </div>
+                <div style="font-size: 32px; font-weight: 800; line-height: 1; color: #000;" id="total-marks">0</div>
+            </div>
+
+            <button class="primary-action-btn" onclick="generateTest()">
+                <span>GENERATE PAPER</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+
+            <div style="height: 20px;"></div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="student-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="student-generate.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            <span>Test</span>
+        </a>
+        <a href="student-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            <span>Banks</span>
+        </a>
+        <a href="student-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        const counts = { mcq: 0, vshort: 0, short: 0, long: 0, essay: 0 };
+        const marks = { mcq: 1, vshort: 1, short: 2, long: 4, essay: 6 };
+        let selectedBankId = null;
+
+        function selectBank(el, id) {
+            // Remove previous selection
+            document.querySelectorAll('.bank-option-card').forEach(c => c.classList.remove('selected'));
+            // Add new selection
+            el.classList.add('selected');
+            selectedBankId = id;
+
+            // Enable Next
+            const btn = document.getElementById('btn-next-step');
+            btn.style.opacity = '1';
+            btn.style.pointerEvents = 'auto';
+        }
+
+        function showConfigStage() {
+            // Hide the next button
+            const btn = document.getElementById('btn-next-step');
+            btn.style.display = 'none';
+            // Show the config
+            const stage = document.getElementById('config-stage');
+            stage.classList.remove('hidden-section');
+            stage.classList.add('visible-section');
+
+            // Scroll to config
+            setTimeout(() => {
+                stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function update(type, diff) {
+            counts[type] = Math.max(0, counts[type] + diff);
+            document.getElementById('cnt-' + type).innerText = counts[type];
+            calcTotal();
+        }
+
+        function calcTotal() {
+            let t = 0;
+            for (let k in counts) t += counts[k] * marks[k];
+            document.getElementById('total-marks').innerText = t;
+        }
+
+        function toggleRow(el) {
+            el.classList.toggle('selected');
+            const visual = el.querySelector('.chk-visual');
+            if (el.classList.contains('selected')) {
+                visual.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            } else {
+                visual.innerHTML = '';
+            }
+        }
+
+        function toggleAll() {
+            const rows = document.querySelectorAll('.chapter-row');
+            const allSelected = Array.from(rows).every(r => r.classList.contains('selected'));
+            rows.forEach(r => {
+                if (allSelected) {
+                    r.classList.remove('selected');
+                    r.querySelector('.chk-visual').innerHTML = '';
+                    r.querySelector('.chk-visual').style.background = 'rgba(0,0,0,0.05)';
+                    r.querySelector('.chk-visual').style.color = 'transparent';
+                } else {
+                    r.classList.add('selected');
+                    r.querySelector('.chk-visual').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                    r.querySelector('.chk-visual').style.background = '#FFD700';
+                    r.querySelector('.chk-visual').style.color = '#000';
+                }
+            });
+        }
+
+        function generateTest() {
+            if (counts.mcq + counts.vshort + counts.short + counts.long + counts.essay === 0) {
+                Swal.fire({
+                    icon: 'warning', title: 'Empty Test', text: 'Please add at least one question type.',
+                    background: '#141414', color: '#fff'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Generating Paper...',
+                html: 'Our AI is assembling your custom practice test from the bank.<br><br><b>Analyzing topics...</b>',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    const content = Swal.getHtmlContainer().querySelector('b');
+                    setTimeout(() => content.textContent = 'Selecting optimal questions...', 1000);
+                    setTimeout(() => content.textContent = 'Formatting PDF...', 2000);
+                },
+                background: '#141414', color: '#fff',
+                timer: 3000
+            }).then(() => {
+                window.location.href = 'student-paper-view.html';
+            });
+        }
+    </script>
+
+    <!-- EXTREME UI SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt
+            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
+                max: 8,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.15,
+                scale: 1.02
+            });
+
+            // Apply Staggered HUD Load-in
+            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
+            elements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

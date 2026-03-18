@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Modern Reset & Base */
+        .app-container {
+            padding-bottom: 90px;
+        }
+
+        /* Section Dividers */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 32px 0 16px 0;
+        }
+
+        .divider-line {
+            height: 2px;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Subject Cards */
+        .subject-card {
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.6), rgba(20, 20, 20, 0.8));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-4px);
+            background: rgba(40, 40, 40, 0.8);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .subject-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 24px;
+            transition: 0.2s;
+        }
+
+        .subject-card:hover .subject-icon-wrapper {
+            transform: scale(1.1);
+        }
+
+        /* Class Cards */
+        .class-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .class-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--adv-yellow);
+            transform: translateY(-2px);
+        }
+
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            padding-left: 12px;
+            margin-top: 10px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 8px;
+            bottom: 20px;
+            width: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 28px;
+            padding-left: 28px;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            position: absolute;
+            left: 1px;
+            top: 5px;
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .timeline-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--adv-text);
+            margin-bottom: 4px;
+        }
+
+        .timeline-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .timeline-date {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+
+        <!-- Header -->
+        <div class="top-header"
+            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
+            <div class="header-title text-gold-glow"
+                style="color: var(--adv-yellow); font-weight: 700; font-size: 18px; letter-spacing: 1px;">BEEPREPARE
+            </div>
+            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 16px;">
+                <div style="position: relative; cursor: pointer;"
+                    onclick="window.location.href='activity-history.html'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                    <div id="notif-badge"
+                        style="position: absolute; top: -2px; right: -2px; background: #ff4d4d; color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: none; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #141414;">
+                        0</div>
+                </div>
+                <div class="profile-icon"
+                    style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"
+                    onclick="window.location.href='teacher-profile.html'">
+                    T</div>
+            </div>
+        </div>
+
+        <!-- Subheader -->
+        <div style="text-align: center; margin-bottom: 40px;">
+            <div style="font-size: 24px; font-weight: 700; color: var(--adv-text); margin-bottom: 6px;">Welcome Back,
+                Teacher</div>
+            <p style="color: var(--text-muted); font-size: 14px;">Here is an overview of your activity</p>
+        </div>
+
+        <!-- Subjects Section -->
+        <div class="section-divider">
+            <span class="section-label">Your Subjects</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="dashboard-grid"
+            style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 0;">
+            <div class="subject-card">
+                <div class="subject-icon-wrapper" style="color: #4da6ff; border-color: rgba(77, 166, 255, 0.3);">
+                    <img src="../../assets/images/subjects/physics.svg" alt="Physics"
+                        style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Physics</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">4 Chapters</div>
+            </div>
+
+            <div class="subject-card">
+                <div class="subject-icon-wrapper" style="color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3);">
+                    <img src="../../assets/images/subjects/chemistry.svg" alt="Chemistry"
+                        style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Chemistry</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">6 Chapters</div>
+            </div>
+
+            <div class="subject-card">
+                <div class="subject-icon-wrapper" style="color: #ffd700; border-color: rgba(255, 215, 0, 0.3);">
+                    <img src="../../assets/images/subjects/mathematics.svg" alt="Mathematics"
+                        style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Mathematics</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">8 Chapters</div>
+            </div>
+
+            <div class="subject-card">
+                <div class="subject-icon-wrapper" style="color: #4caf50; border-color: rgba(76, 175, 80, 0.3);">
+                    <img src="../../assets/images/subjects/biology.svg" alt="Biology"
+                        style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Biology</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">5 Chapters</div>
+            </div>
+        </div>
+
+        <!-- Classes Section -->
+        <div class="section-divider">
+            <span class="section-label">Your Classes</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 0; gap: 12px;">
+            <div class="class-card">
+                <div style="font-weight: 700; font-size: 18px; color: var(--adv-text);">8</div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Class</div>
+            </div>
+            <div class="class-card">
+                <div style="font-weight: 700; font-size: 18px; color: var(--adv-text);">9</div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Class</div>
+            </div>
+            <div class="class-card">
+                <div style="font-weight: 700; font-size: 18px; color: var(--adv-text);">10</div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Class</div>
+            </div>
+        </div>
+
+        <!-- Activity Section -->
+        <div class="section-divider">
+            <span class="section-label">Recent Activity</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="timeline" id="home-activity-list">
+            <!-- Dynamic Activity List -->
+        </div>
+
+        <style>
+            /* Timeline CSS */
+            .timeline {
+                position: relative;
+                padding-left: 16px;
+                margin-top: 20px;
+            }
+
+            .timeline::before {
+                content: '';
+                position: absolute;
+                left: 6px;
+                top: 0;
+                bottom: 0;
+                width: 2px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 2px;
+            }
+
+            .timeline-item {
+                position: relative;
+                margin-bottom: 24px;
+                padding-left: 24px;
+            }
+
+            .timeline-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: var(--primary);
+                position: absolute;
+                left: 1px;
+                top: 5px;
+                z-index: 2;
+                border: 2px solid #141414;
+                /* contrast border */
+            }
+
+            .timeline-title {
+                color: var(--adv-text);
+                font-size: 14px;
+                font-weight: 600;
+                line-height: 1.4;
+            }
+
+            .timeline-date {
+                font-size: 10px;
+                color: rgba(255, 255, 255, 0.4);
+                margin-top: 4px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .timeline-dot.info {
+                background: #2196F3;
+                box-shadow: 0 0 10px rgba(33, 150, 243, 0.4);
+            }
+
+            .timeline-dot.success {
+                background: #4CAF50;
+                box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+            }
+
+            .timeline-dot.warning {
+                background: #FFC107;
+                box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+            }
+
+            .timeline-dot.error {
+                background: #ff4d4d;
+                box-shadow: 0 0 10px rgba(255, 77, 77, 0.4);
+            }
+        </style>
+
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="teacher-home.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span>Home</span>
+        </a>
+        <a href="question-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
+            </svg>
+            <span>Bank</span>
+        </a>
+        <a href="generate-paper.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            <span>Generate</span>
+        </a>
+        <a href="teacher-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+    <!-- Notifications Script -->
+    <script src="../../assets/js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('home-activity-list');
+
+            // Check ActivityManager
+            if (window.ActivityManager) {
+                const log = ActivityManager.getLog().slice(0, 3);
+
+                // Fallback if empty to show UI
+                if (log.length === 0) {
+                    log.push({
+                        action: 'Welcome to BeePrepare',
+                        description: 'Your recent activities will appear here.',
+                        type: 'info',
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                let html = '';
+                log.forEach((item, index) => {
+                    const delay = index * 0.1;
+                    const date = new Date(item.timestamp).toLocaleDateString();
+
+                    html += `
+                        <div class="timeline-item" style="opacity: 0; animation: fadeIn 0.5s ${delay}s forwards;">
+                            <div class="timeline-dot ${item.type || 'info'}"></div>
+                            <div class="timeline-title">${item.action}</div>
+                            <div class="timeline-desc" style="color: #aaa; font-size: 13px; line-height: 1.4; margin-top: 2px;">${item.description}</div>
+                            <div class="timeline-date">${date}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+
+                const style = document.createElement('style');
+                style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`;
+                document.head.appendChild(style);
+            }
+        });
+    </script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to Teacher Cards
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            if (tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch (e) { }
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

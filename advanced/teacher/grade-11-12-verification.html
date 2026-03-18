@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Queue - Class 11/12</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        .queue-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .type-badge {
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .bg-flash {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .bg-note {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9C27B0;
+        }
+
+        .bg-q {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+        }
+
+        .approve-btn {
+            background: #4CAF50;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body style="background: #0a0a0a;">
+    <div class="app-container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+            <button onclick="window.location.href='grade-11-12-home.html'"
+                style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer;">←</button>
+            <h2 style="margin: 0; color: #fff;">Verification Queue</h2>
+        </div>
+
+        <div id="queue-list">
+            <div style="text-align: center; color: #aaa;">Loading...</div>
+        </div>
+
+    </div>
+
+    <!-- Universal Preview Modal -->
+    <div id="preview-modal"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div
+            style="background: #111; border: 1px solid #333; border-radius: 20px; padding: 32px; width: 90%; max-width: 500px;">
+
+            <div style="margin-bottom: 16px; display: flex; justify-content: space-between;">
+                <span id="prev-type" class="type-badge">TYPE</span>
+                <span id="prev-sub" style="color: #aaa; font-size: 12px;">SUB</span>
+            </div>
+
+            <h3 id="prev-title" style="color: #fff; margin-bottom: 24px;">Title</h3>
+
+            <div id="prev-content"
+                style="background: rgba(255,255,255,0.05); padding: 16px; border-radius: 8px; margin-bottom: 24px; color: #ddd; font-size: 14px; max-height: 200px; overflow-y: auto;">
+                Content...
+            </div>
+
+            <!-- Only for Question Types -->
+            <div id="diff-selector" style="margin-bottom: 24px; display: none;">
+                <label style="display: block; color: #aaa; font-size: 12px; margin-bottom: 8px;">SET DIFFICULTY</label>
+                <select id="rev-difficulty"
+                    style="width: 100%; padding: 12px; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; outline: none;">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button onclick="closePreview()"
+                    style="flex: 1; padding: 12px; background: transparent; border: 1px solid #555; color: #aaa; border-radius: 8px; cursor: pointer;">Cancel</button>
+                <button onclick="approveCurrent()"
+                    style="flex: 2; padding: 12px; background: #4CAF50; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Approve
+                    (+10 Coins)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../assets/js/grade-11-12-logic.js"></script>
+    <script>
+        let currentItem = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadQueue();
+        });
+
+        function loadQueue() {
+            const list = document.getElementById('queue-list');
+            list.innerHTML = '';
+
+            // Get Questions
+            const qs = Grade1112System.getData('beeprepare_1112_pending') || [];
+            // Get Resources
+            const rs = Grade1112System.getData('beeprepare_1112_res_pending') || [];
+
+            const allItems = [...qs.map(q => ({ ...q, _type: 'Question' })), ...rs.map(r => ({ ...r, _type: r.type }))];
+
+            if (allItems.length === 0) {
+                list.innerHTML = `<div style="text-align: center; color: #aaa; padding: 40px;">No pending items.</div>`;
+                return;
+            }
+
+            allItems.forEach(item => {
+                let badgeClass = 'bg-q';
+                if (item._type.includes('Flash')) badgeClass = 'bg-flash';
+                if (item._type.includes('Note')) badgeClass = 'bg-note';
+
+                const div = document.createElement('div');
+                div.className = 'queue-item';
+                div.innerHTML = `
+                    <div>
+                        <span class="type-badge ${badgeClass}">${item._type}</span>
+                        <span style="font-size: 12px; color: #aaa; margin-left: 8px;">${item.subject}</span>
+                        <div style="color: #fff; font-weight: 600; margin-top: 8px;">
+                            ${item.text ? item.text.substring(0, 40) + '...' : (item.title || 'Untitled')}
+                        </div>
+                    </div>
+                    <button class="approve-btn" onclick='openPreview(${JSON.stringify(item)})'>Review</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function openPreview(item) {
+            currentItem = item;
+            const modal = document.getElementById('preview-modal');
+
+            document.getElementById('prev-type').innerText = item._type;
+            document.getElementById('prev-sub').innerText = item.subject;
+
+            if (item._type === 'Question') {
+                document.getElementById('prev-title').innerText = item.text;
+                let html = '<ul style="padding-left: 20px;">';
+                item.options.forEach((opt, idx) => {
+                    const isCorrect = idx === item.correctIndex;
+                    html += `<li style="${isCorrect ? 'color: #4CAF50; font-weight: bold;' : ''}">${opt} ${isCorrect ? '(Correct)' : ''}</li>`;
+                });
+                html += '</ul>';
+                document.getElementById('prev-content').innerHTML = html;
+                document.getElementById('diff-selector').style.display = 'block';
+            } else if (item._type === 'Flashcard') {
+                document.getElementById('prev-title').innerText = "Flashcard Content";
+                document.getElementById('prev-content').innerHTML = `
+                    <div style="color: #aaa; font-size: 10px; text-transform: uppercase;">Front</div>
+                    <div style="margin-bottom: 12px;">${item.content.front}</div>
+                    <div style="color: #aaa; font-size: 10px; text-transform: uppercase;">Back</div>
+                    <div>${item.content.back}</div>
+                `;
+                document.getElementById('diff-selector').style.display = 'none';
+            } else {
+                document.getElementById('prev-title').innerText = item.title;
+                document.getElementById('prev-content').innerText = item.content.text || item.content;
+                document.getElementById('diff-selector').style.display = 'none';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closePreview() {
+            document.getElementById('preview-modal').style.display = 'none';
+            currentItem = null;
+        }
+
+        function approveCurrent() {
+            if (!currentItem) return;
+
+            if (currentItem._type === 'Question') {
+                const diff = document.getElementById('rev-difficulty').value;
+                Grade1112System.approveQuestion(currentItem.id, 'Me (Teacher)', diff);
+            } else {
+                Grade1112System.approveResource(currentItem.id, 'Me (Teacher)');
+            }
+
+            closePreview();
+            loadQueue();
+        }
+    </script>
+    <script src='../../assets/js/beeprepare-security.js'></script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to all interactive elements
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card, .role-card, .dash-card, .paper-card, .stream-card");
+            if(tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch(e) {}
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container, .dash-card, .role-card, .paper-card, .stream-card");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

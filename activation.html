@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activate License - BEEPREPARE</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/premium-student-ui.css">
+    <style>
+        body {
+            background: #030303;
+            overflow-x: hidden;
+        }
+
+        /* Moving Scanner Background */
+        .scanner-beam {
+            position: absolute;
+            width: 100vw;
+            height: 10px;
+            background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.4), transparent);
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.6);
+            animation: scan 6s linear infinite;
+            z-index: 0;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        @keyframes scan {
+            0% {
+                top: -10%;
+            }
+
+            100% {
+                top: 110%;
+            }
+        }
+
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .extreme-card {
+            max-width: 540px;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(15, 15, 15, 0.85), rgba(5, 5, 5, 0.95));
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 30px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9), inset 0 2px 25px rgba(255, 215, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .extreme-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 30px;
+            padding: 2px;
+            background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.6), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .auth-header {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px 30px 0 0;
+        }
+
+        .auth-body {
+            padding: 40px;
+        }
+
+        /* Key Input Fields */
+        .key-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .prefix-box {
+            width: 80px;
+            height: 60px;
+            background: rgba(255, 215, 0, 0.05);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: 900;
+            letter-spacing: 2px;
+            font-size: 20px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.1);
+        }
+
+        .key-segment {
+            text-align: center;
+            height: 60px;
+            width: 80px;
+            border-radius: 12px;
+            font-size: 20px;
+            letter-spacing: 4px;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.5) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #fff !important;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .key-segment:focus {
+            border-color: #00E676 !important;
+            box-shadow: 0 0 20px rgba(0, 230, 118, 0.3), inset 0 0 10px rgba(0, 230, 118, 0.1) !important;
+            transform: scale(1.05);
+        }
+
+        /* Animations */
+        @keyframes fly {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(3deg);
+            }
+        }
+
+        .bee-flying {
+            animation: fly 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .btn-activate {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            width: 100%;
+            border: none;
+            padding: 16px;
+            border-radius: 16px;
+            color: #000;
+            font-weight: 800;
+            font-size: 16px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-activate:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .server-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="scanner-beam"></div>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="auth-container">
+        <!-- Main Card -->
+        <div class="extreme-card hud-element" id="authBox">
+            <div class="auth-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div
+                            style="color: var(--primary); font-size: 10px; font-weight: 800; letter-spacing: 2px; margin-bottom: 6px;">
+                            SYSTEM INITIALIZATION</div>
+                        <h1
+                            style="font-size: 26px; font-weight: 900; margin: 0; background: linear-gradient(90deg, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                            License Entry</h1>
+                    </div>
+                    <div style="text-align: right;">
+                        <div
+                            style="font-size: 32px; font-weight: 900; color: #FFD700; line-height: 1; text-shadow: 0 0 20px rgba(255,215,0,0.5);">
+                            01</div>
+                        <div style="font-size: 10px; color: #888; letter-spacing: 2px;">STEP 1/3</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-body">
+                <!-- Mascot -->
+                <div
+                    style="text-align: center; height: 160px; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <div
+                        style="position: absolute; width: 120px; height: 120px; background: #FFD700; opacity: 0.15; filter: blur(50px); border-radius: 50%;">
+                    </div>
+                    <img id="bee-mascot" src="assets/custom-bee.png" alt="Bee Mascot" class="bee-flying"
+                        style="width: 180px; height: auto; transition: filter 0.4s; filter: drop-shadow(0 25px 40px rgba(0,0,0,0.7)); position: relative; z-index: 2;">
+                </div>
+
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <p
+                        style="color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.6; max-width: 80%; margin: 0 auto;">
+                        Authenticate this terminal using your secure 12-character alphanumeric cluster.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
+                        <span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #888;">KEY
+                            CIPHER</span>
+                        <div class="server-status">
+                            <span
+                                style="width: 8px; height: 8px; background: #00E676; border-radius: 50%; box-shadow: 0 0 10px #00E676; animation: blink 2s infinite;"></span>
+                            <span
+                                style="font-size: 10px; color: #00E676; font-family: monospace; font-weight: 800;">UPLINK
+                                SECURE</span>
+                        </div>
+                    </div>
+
+                    <div class="key-input-container">
+                        <div class="prefix-box">BEE</div>
+                        <span style="color: #666; font-size: 30px; font-weight: 100;">/</span>
+                        <input type="text" class="key-segment" maxlength="4" placeholder="••••">
+                        <input type="text" class="key-segment" maxlength="4" placeholder="••••">
+                        <input type="text" class="key-segment" maxlength="4" placeholder="••••">
+                    </div>
+                </div>
+
+                <button id="btn-activate" class="btn-activate" onclick="validateKey()">
+                    Authenticate Terminal
+                </button>
+
+                <button
+                    style="width:100%; margin-top: 20px; background: none; border: none; color: #666; font-size: 12px; cursor: pointer; transition: 0.3s;"
+                    onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'"
+                    onclick="window.location.href='index.html'">
+                    Abort and Return
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        const inputs = document.querySelectorAll('input.key-segment');
+        const beeMascot = document.getElementById('bee-mascot');
+        const btn = document.getElementById('btn-activate');
+        const authBox = document.getElementById('authBox');
+
+        // Initial Load In
+        setTimeout(() => {
+            authBox.style.opacity = '1';
+            authBox.style.transform = 'translateY(0)';
+        }, 100);
+
+        VanillaTilt.init(authBox, {
+            max: 5,
+            speed: 400,
+            glare: true,
+            "max-glare": 0.1,
+            scale: 1.02
+        });
+
+        inputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (e.target.value.length === 4 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+                resetBee();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                    inputs[index - 1].focus();
+                }
+            });
+        });
+
+        function resetBee() {
+            beeMascot.style.transform = '';
+            beeMascot.style.filter = 'drop-shadow(0 25px 40px rgba(0,0,0,0.7))';
+            beeMascot.classList.add('bee-flying');
+        }
+
+        function validateKey() {
+            let allFilled = true;
+            inputs.forEach(inp => { if (inp.value.length < 4) allFilled = false; });
+
+            if (!allFilled) {
+                angryBee();
+                return;
+            }
+
+            btn.innerText = 'Decrypting...';
+            btn.disabled = true;
+            btn.style.opacity = '0.9';
+            btn.style.background = '#888';
+
+            setTimeout(() => {
+                successBee();
+                setTimeout(() => window.location.href = 'stream-select.html', 1500);
+            }, 1200);
+        }
+
+        function angryBee() {
+            beeMascot.classList.remove('bee-flying');
+            beeMascot.style.filter = 'sepia(1) hue-rotate(-50deg) saturate(6) contrast(1.5) drop-shadow(0 0 40px rgba(255,0,0,0.8))';
+
+            // Extreme Shake
+            authBox.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-15px)' },
+                { transform: 'translateX(15px)' },
+                { transform: 'translateX(-15px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 400, iterations: 1 });
+        }
+
+        function successBee() {
+            beeMascot.classList.remove('bee-flying');
+            beeMascot.style.filter = 'hue-rotate(90deg) saturate(3) brightness(1.5) drop-shadow(0 0 50px rgba(0,255,0,0.8))';
+
+            beeMascot.animate([
+                { transform: 'scale(1) translateY(0)' },
+                { transform: 'scale(1.3) translateY(-60px)' },
+                { transform: 'scale(1) translateY(0)' }
+            ], { duration: 700, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
+
+            btn.innerHTML = '<span style="letter-spacing:4px;">INITIALIZING</span>';
+            btn.style.background = 'linear-gradient(135deg, #00E676, #00a152)';
+            btn.style.color = '#fff';
+            btn.style.boxShadow = '0 0 40px rgba(0,230,118,0.8)';
+
+            document.querySelector('.scanner-beam').style.background = 'linear-gradient(90deg, transparent, #FFD700, transparent)';
+        }
+    </script>
+</body>
+
+</html>

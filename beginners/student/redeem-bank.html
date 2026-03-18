@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem Bank - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        /* Updated Redeem Styles (Dark Mode) */
+        body {
+            background: #050505;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #fff;
+        }
+
+        .auth-card {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* Dark border */
+            border-radius: 32px;
+            padding: 48px 32px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .premium-header {
+            margin-bottom: 32px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            /* Dark input */
+            border-radius: 16px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            transition: 0.2s;
+            box-sizing: border-box;
+        }
+
+        .input-field:focus {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .warning-box {
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            color: #FFD700;
+            font-size: 12px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            text-align: left;
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: #000;
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-text {
+            background: transparent;
+            color: #888;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 8px;
+        }
+
+        .btn-text:hover {
+            color: #fff;
+        }
+    </style>
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="auth-card">
+        <div class="premium-header">
+            <div class="logo-text">Unlock Bank</div>
+            <div class="subtitle">Enter the access code provided by your teacher</div>
+        </div>
+
+        <div class="input-group">
+            <input type="text" class="input-field" placeholder="XXXX-XXXX" maxlength="9"
+                style="text-align: center; letter-spacing: 2px; text-transform: uppercase;">
+        </div>
+
+        <div class="warning-box">
+            Please check the subject details before redeeming. This code can only be used once.
+        </div>
+
+        <button class="btn-adv"
+            onclick="alert('Bank Unlocked Successfully!'); window.location.href='student-home.html'">
+            Redeem Code
+        </button>
+
+        <button class="btn-text" onclick="window.history.back()">
+            Cancel
+        </button>
+    </div>
+
+    <!-- EXTREME UI SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt
+            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
+                max: 8,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.15,
+                scale: 1.02
+            });
+
+            // Apply Staggered HUD Load-in
+            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
+            elements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>

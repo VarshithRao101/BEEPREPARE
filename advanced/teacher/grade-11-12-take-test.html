@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Take Test (Teacher Mode) - Class 11/12</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/pro-animations.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .app-container {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .config-card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 32px;
+            margin-top: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #ccc;
+            font-weight: 600;
+        }
+
+        .form-select {
+            width: 100%;
+            background: #000;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .form-select:focus {
+            border-color: #FFD700;
+        }
+
+        .start-btn {
+            background: #FFD700;
+            color: #000;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Test UI (Hidden initially) */
+        #test-interface {
+            display: none;
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .timer-badge {
+            font-family: monospace;
+            font-size: 18px;
+            color: #FFD700;
+            font-weight: 700;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .q-text {
+            font-size: 18px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            color: #eee;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #ccc;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .option-btn.selected {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            color: #FFD700;
+        }
+
+        .option-btn.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .tools-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .tool-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .download-btn {
+            background: #FF5722;
+            color: #fff;
+        }
+    </style>
+    <!-- PREMIUM ANIMATION STYLES -->
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <!-- Configuration Screen -->
+    <div class="app-container" id="config-screen">
+        <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px;">Take Test</h1>
+        <p style="color: #888; margin-bottom: 24px;">Configure test parameters. As a teacher, you can simulate detailed
+            student scenarios.</p>
+
+        <div class="config-card">
+            <label class="form-label">Subject</label>
+            <select class="form-select" id="conf-sub">
+                <option>Physics</option>
+                <option>Chemistry</option>
+                <option>Mathematics</option>
+            </select>
+
+            <label class="form-label">Difficulty Level</label>
+            <select class="form-select" id="conf-diff">
+                <option>Standard (Board Level)</option>
+                <option>Advanced (JEE/NEET Level)</option>
+                <option>Olympiad (Critical Thinking)</option>
+            </select>
+
+            <label class="form-label">Question Count</label>
+            <select class="form-select" id="conf-count">
+                <option value="10">10 Questions</option>
+                <option value="20">20 Questions</option>
+                <option value="30">30 Questions</option>
+            </select>
+
+            <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px;">
+                <input type="checkbox" id="conf-pdf" style="width: 20px; height: 20px;">
+                <label for="conf-pdf" style="color: #fff; cursor: pointer;">Auto-generate PDF on
+                    start</label>
+            </div>
+
+            <button class="start-btn" onclick="startTest()">Start Simulation</button>
+        </div>
+    </div>
+
+    <!-- Test Interface -->
+    <div class="app-container" id="test-interface">
+        <div class="test-header">
+            <div>
+                <span class="role-badge"
+                    style="background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 10px;">PREVIEW
+                    MODE</span>
+            </div>
+            <div class="timer-badge" id="timer">00:00:00</div>
+            <button class="tool-btn"
+                style="background: rgba(244, 67, 54, 0.2); color: #f44336; border: 1px solid rgba(244, 67, 54, 0.4);"
+                onclick="endTest()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                Exit
+            </button>
+        </div>
+
+        <div class="tools-bar">
+            <button class="tool-btn download-btn" onclick="downloadPaper()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download PDF
+            </button>
+            <button class="tool-btn" id="reveal-btn" onclick="toggleReveal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Show Answers
+            </button>
+        </div>
+
+        <div class="question-card">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                <span style="color: #FFD700; font-weight: 700;">Question <span id="q-idx">1</span></span>
+                <span style="color: #888; font-size: 12px;">Rank: <span id="q-diff">Medium</span></span>
+            </div>
+            <div class="q-text" id="q-content">
+                Loading question content...
+            </div>
+            <div id="options-container">
+                <!-- Options injected here -->
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+            <button class="tool-btn" onclick="prevQ()">Previous</button>
+            <button class="tool-btn" style="background: #FFD700; color: #000; font-weight: 700;"
+                onclick="nextQ()">Next</button>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-bottom">
+        <a href="grade-11-12-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+            </svg>
+            <span>Dashboard</span>
+        </a>
+        <a href="grade-11-12-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 10h16v10H4zM4 6h16v2H4z" />
+            </svg>
+            <span>Bank</span>
+        </a>
+        <a href="grade-11-12-take-test.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+            </svg>
+            <span>Take Test</span>
+        </a>
+        <a href="grade-11-12-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        let currentQIndex = 0;
+        let mockQuestions = [];
+        let timerDetails = { h: 0, m: 0, s: 0 };
+        let timerInterval;
+
+        function startTest() {
+            // Validate Logic?
+            const sub = document.getElementById('conf-sub').value;
+            const count = parseInt(document.getElementById('conf-count').value);
+            const autoPdf = document.getElementById('conf-pdf').checked;
+
+            // Generate Mock Data
+            mockQuestions = Array.from({ length: count }, (_, i) => ({
+                id: i + 1,
+                text: `Sample ${sub} Question ${i + 1}: What is the primary principle of X?`,
+                options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                correct: 1 // B
+            }));
+
+            // UI Switch
+            document.getElementById('config-screen').style.display = 'none';
+            document.getElementById('test-interface').style.display = 'block';
+
+            // Start Timer
+            timerInterval = setInterval(() => {
+                timerDetails.s++;
+                if (timerDetails.s >= 60) { timerDetails.s = 0; timerDetails.m++; }
+                if (timerDetails.m >= 60) { timerDetails.m = 0; timerDetails.h++; }
+                document.getElementById('timer').innerText =
+                    `${timerDetails.h.toString().padStart(2, '0')}:${timerDetails.m.toString().padStart(2, '0')}:${timerDetails.s.toString().padStart(2, '0')}`;
+            }, 1000);
+
+            loadQuestion(0);
+
+            if (autoPdf) {
+                // Simulate slightly delayed download
+                setTimeout(() => downloadPaper(), 1000);
+            }
+        }
+
+        function loadQuestion(idx) {
+            if (idx < 0 || idx >= mockQuestions.length) return;
+            currentQIndex = idx;
+            const q = mockQuestions[idx];
+
+            document.getElementById('q-idx').innerText = idx + 1;
+            document.getElementById('q-content').innerText = q.text;
+
+            const optsDiv = document.getElementById('options-container');
+            optsDiv.innerHTML = '';
+
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.dataset.idx = i;
+                btn.onclick = () => selectOption(btn, i);
+                optsDiv.appendChild(btn);
+            });
+
+            // If reveal mode is on, highlight answer
+            if (revealMode) highlightAnswer();
+        }
+
+        function selectOption(el, optIdx) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function nextQ() {
+            loadQuestion(currentQIndex + 1);
+        }
+
+        function prevQ() {
+            loadQuestion(currentQIndex - 1);
+        }
+
+        function endTest() {
+            clearInterval(timerInterval);
+            if (confirm('Exit simulation?')) {
+                location.reload();
+            }
+        }
+
+        // --- Teacher Specific Tools ---
+        let revealMode = false;
+        function toggleReveal() {
+            revealMode = !revealMode;
+            const btn = document.getElementById('reveal-btn');
+            btn.style.background = revealMode ? 'rgba(76, 175, 80, 0.3)' : '';
+            btn.innerHTML = revealMode ?
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg> Hide Answers' :
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Show Answers';
+
+            if (revealMode) highlightAnswer();
+            else {
+                // Reset styles except selected
+                document.querySelectorAll('.option-btn').forEach(b => {
+                    if (!b.classList.contains('selected')) {
+                        b.classList.remove('correct');
+                        b.style.border = '';
+                    }
+                });
+            }
+        }
+
+        function highlightAnswer() {
+            const q = mockQuestions[currentQIndex];
+            const correctIdx = q.correct;
+            const correctBtn = document.querySelector(`.option-btn[data-idx="${correctIdx}"]`);
+            if (correctBtn) correctBtn.classList.add('correct');
+        }
+
+        async function downloadPaper() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(20);
+            doc.text(`Test Paper: ${document.getElementById('conf-sub').value}`, 10, 10);
+            doc.setFontSize(12);
+            doc.text(`Generated by Teacher Preview`, 10, 20);
+
+            let y = 30;
+            mockQuestions.forEach(q => {
+                if (y > 270) { doc.addPage(); y = 10; } // Basic pagination
+                doc.text(`${q.id}. ${q.text}`, 10, y);
+                y += 10;
+                q.options.forEach((opt, i) => {
+                    doc.text(`   (${String.fromCharCode(65 + i)}) ${opt}`, 15, y);
+                    y += 7;
+                });
+                y += 10;
+            });
+
+            doc.save('test-paper.pdf');
+        }
+    </script>
+    <script src='../../assets/js/beeprepare-security.js'></script>
+
+    <!-- EXTREME UI SCRIPTS (Animations Only) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply 3D Tilt to all interactive elements
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card, .role-card, .dash-card, .paper-card, .stream-card");
+            if(tiltElements.length > 0) {
+                try {
+                    VanillaTilt.init(tiltElements, {
+                        max: 8,
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.15,
+                        scale: 1.02
+                    });
+                } catch(e) {}
+            }
+
+            // Apply Staggered HUD Load-in
+            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container, .dash-card, .role-card, .paper-card, .stream-card");
+            hudElements.forEach((el, index) => {
+                el.classList.add('hud-element');
+                el.style.animationDelay = `${index * 0.08}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>
