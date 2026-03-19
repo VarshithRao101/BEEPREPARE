@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -241,13 +241,14 @@
         <div class="glow-orb orb-3"></div>
     </div>
 
-    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+    <div class="app-container">
 
         <!-- Header -->
         <div class="top-header"
             style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
             <div class="header-title text-gold-glow"
-                style="color: var(--adv-yellow); font-weight: 700; font-size: 18px; letter-spacing: 1px;">BEEPREPARE</div>
+                style="color: var(--adv-yellow); font-weight: 700; font-size: 18px; letter-spacing: 1px;">BEEPREPARE
+            </div>
             <div class="profile-icon"
                 style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; right: 0;">
                 T</div>
@@ -255,7 +256,8 @@
 
         <!-- Subheader -->
         <div style="text-align: center; margin-bottom: 30px;">
-            <div style="font-size: 20px; font-weight: 700; color: var(--adv-text); margin-bottom: 4px;">Configure Paper</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--adv-text); margin-bottom: 4px;">Configure Paper
+            </div>
             <p style="color: var(--text-muted); font-size: 13px;">Set your requirements to generate a paper</p>
         </div>
 
@@ -283,7 +285,8 @@
             </div>
 
             <div class="total-badge">
-                <div style="font-size: 36px; font-weight: 800; line-height: 1; color: var(--adv-dark);" id="total-marks">0</div>
+                <div style="font-size: 36px; font-weight: 800; line-height: 1; color: var(--adv-dark);"
+                    id="total-marks">0</div>
                 <div
                     style="font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.6); text-transform: uppercase; margin-top: 4px;">
                     Marks</div>
@@ -352,7 +355,8 @@
                 </div>
                 <div class="counter-control">
                     <button class="cnt-btn" onclick="update('mcq', -1)">−</button>
-                    <span id="cnt-mcq" style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
+                    <span id="cnt-mcq"
+                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
                     <button class="cnt-btn" onclick="update('mcq', 1)">+</button>
                 </div>
             </div>
@@ -396,7 +400,8 @@
                 </div>
                 <div class="counter-control">
                     <button class="cnt-btn" onclick="update('long', -1)">−</button>
-                    <span id="cnt-long" style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
+                    <span id="cnt-long"
+                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
                     <button class="cnt-btn" onclick="update('long', 1)">+</button>
                 </div>
             </div>
@@ -436,6 +441,7 @@
                 <div style="font-weight: 700; color: var(--adv-yellow); font-size: 14px;">SECTION A</div>
                 <div style="position: relative; width: 180px;">
                     <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="none">None</option>
                         <option value="mcq" selected>MCQ / Objective</option>
                         <option value="vsa">Very Short Answer</option>
                         <option value="sa">Short Answer</option>
@@ -451,6 +457,7 @@
                 <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION B</div>
                 <div style="position: relative; width: 180px;">
                     <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="none">None</option>
                         <option value="mcq">MCQ / Objective</option>
                         <option value="vsa" selected>Very Short Answer</option>
                         <option value="sa">Short Answer</option>
@@ -466,6 +473,7 @@
                 <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION C</div>
                 <div style="position: relative; width: 180px;">
                     <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="none">None</option>
                         <option value="mcq">MCQ / Objective</option>
                         <option value="vsa">Very Short Answer</option>
                         <option value="sa" selected>Short Answer</option>
@@ -481,6 +489,7 @@
                 <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION D</div>
                 <div style="position: relative; width: 180px;">
                     <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="none">None</option>
                         <option value="mcq">MCQ / Objective</option>
                         <option value="vsa">Very Short Answer</option>
                         <option value="sa">Short Answer</option>
@@ -495,6 +504,7 @@
                 <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION E</div>
                 <div style="position: relative; width: 180px;">
                     <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
+                        <option value="none">None</option>
                         <option value="mcq">MCQ / Objective</option>
                         <option value="vsa">Very Short Answer</option>
                         <option value="sa">Short Answer</option>
@@ -602,7 +612,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Apply 3D Tilt to Teacher Cards
             const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if(tiltElements.length > 0) {
+            if (tiltElements.length > 0) {
                 try {
                     VanillaTilt.init(tiltElements, {
                         max: 8,
@@ -611,7 +621,7 @@
                         "max-glare": 0.15,
                         scale: 1.02
                     });
-                } catch(e) {}
+                } catch (e) { }
             }
 
             // Apply Staggered HUD Load-in

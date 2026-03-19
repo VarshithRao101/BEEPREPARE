@@ -206,6 +206,32 @@
             color: #fff;
             background: rgba(255, 255, 255, 0.05);
         }
+
+        .meta-sub-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+        }
+        .meta-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+        }
+        .meta-info h4 { margin: 0; font-size: 14px; color: #fff; }
+        .meta-info p { margin: 0; font-size: 11px; color: #888; }
     </style>
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
@@ -226,14 +252,21 @@
             </svg>
         </div>
         <h2>Unlock Question Bank</h2>
-        <p>Enter the 4-digit access code provided by <strong>Mr. Sharma</strong> for <strong>Mathematics - Class
-                10</strong></p>
+        <p style="margin-bottom: 24px;">Enter the 4-digit access code to unlock.</p>
+
+        <div class="meta-sub-card">
+            <div class="meta-avatar">MS</div>
+            <div class="meta-info">
+                <h4>Mathematics - Class 10</h4>
+                <p>Teacher: Mr. Sharma</p>
+            </div>
+        </div>
 
         <div class="otp-container">
-            <input type="text" class="otp-box" maxlength="1" oninput="step(this, 'o2')">
-            <input type="text" class="otp-box" id="o2" maxlength="1" oninput="step(this, 'o3')">
-            <input type="text" class="otp-box" id="o3" maxlength="1" oninput="step(this, 'o4')">
-            <input type="text" class="otp-box" id="o4" maxlength="1">
+            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 0)" onkeydown="handleKey(event, 0)">
+            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 1)" onkeydown="handleKey(event, 1)">
+            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 2)" onkeydown="handleKey(event, 2)">
+            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 3)" onkeydown="handleKey(event, 3)">
         </div>
 
         <button class="unlock-btn" onclick="verify()">Verify & Unlock</button>
@@ -242,9 +275,18 @@
     </div>
 
     <script>
-        function step(current, next) {
-            if (current.value.length >= 1) {
-                document.getElementById(next).focus();
+        const inputs = document.querySelectorAll('.digit-input');
+
+        function handleInput(input, index) {
+            if (input.value.length > 1) input.value = input.value.slice(0, 1);
+            if (input.value.length === 1 && index < 3) {
+                inputs[index + 1].focus();
+            }
+        }
+
+        function handleKey(e, index) {
+            if (e.key === 'Backspace' && !inputs[index].value && index > 0) {
+                inputs[index - 1].focus();
             }
         }
 
@@ -281,7 +323,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Apply 3D Tilt
-            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
+            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .d-profile-card, .adv-card"), {
                 max: 8,
                 speed: 400,
                 glare: true,

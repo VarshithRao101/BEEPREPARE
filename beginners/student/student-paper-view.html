@@ -246,14 +246,56 @@
             border-color: #fff;
             background: rgba(255, 255, 255, 0.1);
         }
+
+        /* Generation Loader */
+        .gen-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #050505;
+            z-index: 9000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .gen-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+        .loader-ring {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 215, 0, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            margin-bottom: 24px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .gen-text {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #fff;
+            text-transform: uppercase;
+            animation: pulse-text 1.5s infinite;
+        }
+        @keyframes pulse-text { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-
-    <!-- Top Nav (Minimal) -->
+    
+    <!-- Generator Loader -->
+    <div id="loader" class="gen-loader">
+        <div class="loader-ring"></div>
+        <div class="gen-text">Generating Your Practice Paper...</div>
+    </div>
     <div
         style="position: fixed; top: 0; left: 0; width: 100%; height: 70px; z-index: 50; display: flex; align-items: center; padding: 0 24px; pointer-events: none;">
         <div style="pointer-events: auto; cursor: pointer; background: rgba(20,20,20,0.8); backdrop-filter: blur(8px); padding: 10px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.2);"
@@ -439,6 +481,12 @@
         let currentZoom = 1;
         const paper = document.getElementById('paper');
         const modal = document.getElementById('layoutModal');
+
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+            }, 1800);
+        };
 
         function adjustZoom(delta) {
             currentZoom += delta;

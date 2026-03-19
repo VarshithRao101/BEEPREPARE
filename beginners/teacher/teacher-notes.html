@@ -250,6 +250,62 @@
             background: rgba(255, 215, 0, 0.1);
         }
 
+        /* --- PRO NOTES ENHANCEMENTS --- */
+        .note-badge {
+            font-size: 8px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+        .badge-important { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); }
+        .badge-revision { background: rgba(77, 166, 255, 0.1); color: #4da6ff; border: 1px solid rgba(77, 166, 255, 0.2); }
+
+        .doc-actions-grid {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .action-icon-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 8px;
+            color: #ccc;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-icon-btn:hover {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .action-icon-btn.btn-danger:hover {
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            border-color: #ff4d4d;
+        }
+        
+        /* Glassy Upload Area */
+        .upload-area.saas-drop {
+            background: rgba(255, 215, 0, 0.03);
+            border: 2px dashed rgba(255, 215, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-area.saas-drop::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
         .edit-btn {
             background: rgba(255, 215, 0, 0.1);
             color: var(--primary);
@@ -517,7 +573,7 @@
                         </div>
                     </div>
 
-                    <div class="upload-area" onclick="openUploadModal('ch1-complete')">
+                    <div class="upload-area saas-drop" onclick="openUploadModal('ch1-complete')">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
                             stroke-width="2">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -828,20 +884,31 @@
 
             let docEl = document.createElement('div');
             docEl.className = 'document-item';
+            docEl.style.flexDirection = 'column';
+            docEl.style.alignItems = 'stretch';
             docEl.innerHTML = `
-                <svg class="doc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <text x="${isImg ? '6' : '10'}" y="18" fill="currentColor" stroke="none" font-size="5" font-weight="bold">${isImg ? 'IMG' : 'PDF'}</text>
-                </svg>
-                <div class="doc-info">
-                    <div class="doc-name">${fileName}</div>
-                    <div class="doc-meta"><span>${fileSize}</span> • <span>Just now</span></div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <svg class="doc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <div class="doc-info">
+                        <div class="doc-name">${fileName} 
+                            <span class="note-badge badge-revision">NEW</span>
+                        </div>
+                        <div class="doc-meta"><span>${fileSize}</span> • <span>Revision</span></div>
+                    </div>
                 </div>
-                <div class="doc-actions">
-                    <button class="edit-btn" onclick="openEditor('${fileId}')">Edit / Annotate</button>
-                    <button class="act-btn" onclick="this.parentElement.parentElement.remove()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6L18 20a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <div class="doc-actions-grid">
+                    <button class="action-icon-btn" onclick="openEditor('${fileId}')" title="Preview / Annotate">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span style="margin-left: 6px; font-size: 11px;">Preview</span>
+                    </button>
+                    <button class="action-icon-btn" onclick="window.ActivityManager.showToast('Success', 'File downloading...', 'success')" title="Download">
+                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    </button>
+                    <button class="action-icon-btn btn-danger" onclick="this.closest('.document-item').remove()" title="Delete">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6L18 20a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </div>
             `;
@@ -1070,7 +1137,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Apply 3D Tilt to Teacher Cards
             const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if(tiltElements.length > 0) {
+            if (tiltElements.length > 0) {
                 try {
                     VanillaTilt.init(tiltElements, {
                         max: 8,
@@ -1079,7 +1146,7 @@
                         "max-glare": 0.15,
                         scale: 1.02
                     });
-                } catch(e) {}
+                } catch (e) { }
             }
 
             // Apply Staggered HUD Load-in

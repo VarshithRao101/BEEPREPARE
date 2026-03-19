@@ -246,11 +246,19 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #4CAF50;
+            font-size: 10px;
+            font-weight: 800;
             letter-spacing: 0.5px;
             text-transform: uppercase;
+        }
+        .status-active { color: #4CAF50; }
+        .status-pending { color: #FFA500; }
+
+        .status-pill {
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 9px;
         }
 
         /* CUSTOM MODAL - REPLACES INLINE EXPANSION */
@@ -436,7 +444,7 @@
         <div class="glow-orb orb-3"></div>
     </div>
 
-    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+    <div class="app-container">
 
         <!-- Header -->
         <div class="top-header"
@@ -485,50 +493,52 @@
 
         <div class="banks-grid" id="my-banks-list">
             <!-- Bank 1 -->
-            <div class="bank-card" onclick="window.location.href='student-notes.html'">
+            <div class="bank-card hud-element" onclick="window.location.href='student-notes.html'">
                 <div class="bank-bg-icon">⚛️</div>
                 <div class="bank-icon-lg" style="color: #4da6ff; background: rgba(77,166,255,0.1);">
                     <img src="../../assets/images/subjects/physics.svg" alt="" style="width: 40px; height: 40px;">
                 </div>
                 <div>
                     <div class="bank-title">Physics</div>
-                    <div class="bank-meta">Class 10 • Mrs. Verma</div>
+                    <div class="bank-meta">Class 10 • <span style="color: #ccc;">Mrs. Verma</span></div>
                 </div>
-                <div class="bank-status">
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #4CAF50;"></div>
-                    Active
+                <div class="bank-status status-active">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor;"></div>
+                    <span>Active</span>
+                    <span class="status-pill">120 Qs</span>
                 </div>
             </div>
 
             <!-- Bank 2 -->
-            <div class="bank-card" onclick="window.location.href='student-notes.html'">
-                <div class="bank-bg-icon"></div>
+            <div class="bank-card hud-element" onclick="window.ActivityManager.showToast('Pending', 'Wait for teacher approval', 'info')">
+                <div class="bank-bg-icon">🧪</div>
                 <div class="bank-icon-lg" style="color: #ff4d4d; background: rgba(255,77,77,0.1);">
                     <img src="../../assets/images/subjects/chemistry.svg" alt="" style="width: 40px; height: 40px;">
                 </div>
                 <div>
                     <div class="bank-title">Chemistry</div>
-                    <div class="bank-meta">Class 10 • Mr. Rao</div>
+                    <div class="bank-meta">Class 10 • <span style="color: #ccc;">Mr. Rao</span></div>
                 </div>
-                <div class="bank-status">
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #4CAF50;"></div>
-                    Active
+                <div class="bank-status status-pending">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor;"></div>
+                    <span>Pending Approval</span>
                 </div>
             </div>
 
             <!-- Bank 3 -->
-            <div class="bank-card" onclick="window.location.href='student-notes.html'">
-                <div class="bank-bg-icon"></div>
+            <div class="bank-card hud-element" onclick="window.location.href='student-notes.html'">
+                <div class="bank-bg-icon">📐</div>
                 <div class="bank-icon-lg" style="color: #FFD700; background: rgba(255,215,0,0.1);">
                     <img src="../../assets/images/subjects/mathematics.svg" alt="" style="width: 40px; height: 40px;">
                 </div>
                 <div>
                     <div class="bank-title">Maths</div>
-                    <div class="bank-meta">Class 10 • Mr. Sharma</div>
+                    <div class="bank-meta">Class 10 • <span style="color: #ccc;">Mr. Sharma</span></div>
                 </div>
-                <div class="bank-status">
-                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #4CAF50;"></div>
-                    Active
+                <div class="bank-status status-active">
+                    <div style="width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor;"></div>
+                    <span>Active</span>
+                    <span class="status-pill">85 Qs</span>
                 </div>
             </div>
         </div>

@@ -489,7 +489,7 @@
         <div class="glow-orb orb-2"></div>
     </div>
     <!-- Container -->
-    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+    <div class="app-container">
         <!-- Header -->
         <div class="top-header"
             style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
@@ -521,6 +521,7 @@
         <!-- Redesigned Profile Card -->
         <!-- Redesigned Profile Card -->
         <div class="profile-card">
+            <div style="position: absolute; top: 16px; right: 16px; background: linear-gradient(90deg, #FFD700, #FFA500); color: #000; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);">PRO PLAN (COMING SOON)</div>
             <div class="profile-avatar"><span class="avatar-text">VR</span></div>
             <div class="profile-name">Varshith Rao</div>
             <div class="tags-row">
@@ -639,6 +640,22 @@
                     <div class="menu-arrow">→</div>
                 </div>
             </div>
+
+            <!-- Manage Subjects (Monetization Section 1) -->
+            <div class="menu-item featured-item hud-element" onclick="showPaywall()" style="border: 1px solid rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.05);">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: var(--primary);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="menu-text">Manage Subjects Limit</div>
+                        <div style="font-size: 11px; color: var(--primary); font-weight: 700; margin-top: 2px;">2 / 2 USED (Free Tier)</div>
+                    </div>
+                </div>
+                <div style="background: var(--primary); color: #000; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800;">UPGRADE</div>
+            </div>
         </div>
         <!-- Preferences -->
         <div class="section-divider"><span class="section-label">Preferences</span>
@@ -657,6 +674,8 @@
                 </div><label class="toggle-switch"><input type="checkbox" id="notif-toggle"
                         onchange="ActivityManager.toggle(this.checked)"><span class="slider"></span></label>
             </div>
+
+
             <button class="logout-btn" onclick="openLogoutModal()">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -845,17 +864,24 @@
             </div>
         </div>
 
-        <!-- Unlock Overlay -->
-        <div id="unlock-overlay" class="unlock-overlay">
-            <div class="unlock-box">
-                <div style="font-size: 40px; margin-bottom: 10px;"></div>
-                <h3 style="color: #fff; margin-bottom: 8px;">Unlock Premium</h3>
-                <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">Enter your access key to add more
-                    subjects.</p>
-                <input type="text" id="unlock-key" placeholder="ENTER KEY">
-                <div class="unlock-btns">
-                    <button onclick="closeUnlock()">Cancel</button>
-                    <button class="primary" onclick="verifyUnlock()">Unlock</button>
+        <!-- Upgrade Modal (Redesigned Section 1) -->
+        <div id="unlock-overlay" class="modal-backdrop" style="display: none; align-items: center; justify-content: center; z-index: 3000;">
+            <div class="logout-modal" style="border-color: var(--primary); max-width: 360px;">
+                <div class="modal-icon" style="background: rgba(255, 215, 0, 0.1); color: var(--primary);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                    </svg>
+                </div>
+                <h3 class="modal-title">Unlock More Subjects</h3>
+                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 20px;">
+                    <p style="font-size: 11px; color: #888; margin-bottom: 4px; text-transform: uppercase;">Current Plan: Free (1 Subject)</p>
+                    <p style="font-size: 14px; color: #fff; font-weight: 700;">Upgrade Fee: <span style="color: var(--primary);">₹100</span> per subject</p>
+                </div>
+                <p class="modal-desc">Enter your Redeem Code or Access Key to expand your teaching capacity.</p>
+                <input type="text" id="unlock-key" placeholder="REDEEM CODE" style="background: #000; border: 1px solid #333; color: var(--primary); padding: 14px; border-radius: 12px; width: 100%; text-align: center; margin-bottom: 24px; font-weight: 800; letter-spacing: 2px; outline: none;">
+                <div class="modal-actions" style="margin-top: 0;">
+                    <button class="btn-cancel" onclick="closeUnlock()">Cancel</button>
+                    <button class="btn-logout" style="background: var(--primary); color: #000; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);" onclick="verifyUnlock()">Redeem</button>
                 </div>
             </div>
         </div>
@@ -1335,13 +1361,20 @@
             document.getElementById('unlock-overlay').style.display = 'none';
         }
 
+        function showPaywall() {
+            document.getElementById('unlock-overlay').style.display = 'flex';
+        }
+
         function verifyUnlock() {
             const key = document.getElementById('unlock-key').value.trim();
             if (key === 'TRNT2025' || key === 'BEEPRO') {
                 appState.isPremium = true;
-                if (window.ActivityManager) window.ActivityManager.log('Premium Unlocked', 'Teacher unlocked premium access.', 'success');
-                if (window.ActivityManager) window.ActivityManager.showToast('Premium Unlocked!', 'You can now select unlimited subjects.', 'success');
-                else alert('Premium Unlocked! You can now select unlimited subjects.');
+                if (window.ActivityManager) {
+                    window.ActivityManager.log('Premium Unlocked', 'Teacher unlocked premium access.', 'success');
+                    window.ActivityManager.showToast('Premium Unlocked!', 'You can now select unlimited subjects.', 'success');
+                } else {
+                    alert('Premium Unlocked! You can now select unlimited subjects.');
+                }
                 closeUnlock();
                 renderSubjects();
             } else {
@@ -1349,6 +1382,14 @@
                 else alert('Invalid Key');
             }
         }
+
+        // Handle URL Upgrade Param
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('upgrade')) {
+                setTimeout(showPaywall, 500);
+            }
+        });
 
         // --- Chapter Logic ---
         function renderChapterContext() {
@@ -1453,8 +1494,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to Teacher Cards
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+            // Apply 3D Tilt to Teacher Cards (Profile Card removed as per request)
+            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .stat-box, .file-item");
             if (tiltElements.length > 0) {
                 try {
                     VanillaTilt.init(tiltElements, {

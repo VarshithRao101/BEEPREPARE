@@ -163,6 +163,54 @@
             color: #fff;
         }
 
+        /* --- PRO STUDENT ENHANCEMENTS --- */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 0 8px;
+        }
+        .stat-mini-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+        }
+        .stat-mini-val { font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+        .stat-mini-lbl { font-size: 9px; color: #666; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .action-card.primary-action {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+            border-color: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+        }
+        .action-card.primary-action:hover {
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            border-color: var(--primary);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            box-shadow: 0 0 8px var(--primary);
+        }
+        .subj-progress-text {
+            font-size: 9px;
+            color: #666;
+            margin-top: 4px;
+            font-weight: 700;
+        }
+
         /* Subject Cards Redesign */
         .subject-grid {
             display: grid;
@@ -317,7 +365,7 @@
         <div class="glow-orb orb-3"></div>
     </div>
 
-    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+    <div class="app-container">
 
         <!-- Header -->
         <div class="top-header"
@@ -339,9 +387,25 @@
         </div>
 
         <!-- Welcome -->
-        <div style="margin-bottom: 32px;">
+        <div style="margin-bottom: 28px; padding: 0 12px;">
             <div class="welcome-title text-gold-glow">Hello, Student!</div>
-            <div style="color: #bbb; font-size: 14px;">Ready to practice today?</div>
+            <div style="color: #666; font-size: 14px; font-weight: 500;">Ready to practice today?</div>
+        </div>
+
+        <!-- Progress Stats -->
+        <div class="stat-grid hud-element">
+            <div class="stat-mini-card">
+                <div class="stat-mini-val">12</div>
+                <div class="stat-mini-lbl">Tests Taken</div>
+            </div>
+            <div class="stat-mini-card">
+                <div class="stat-mini-val">84%</div>
+                <div class="stat-mini-lbl">Avg Score</div>
+            </div>
+            <div class="stat-mini-card">
+                <div class="stat-mini-val">4</div>
+                <div class="stat-mini-lbl">Active Banks</div>
+            </div>
         </div>
 
         <!-- Quick Actions -->
@@ -351,30 +415,30 @@
         </div>
 
         <div class="dashboard-grid">
-            <div class="action-card" onclick="window.location.href='student-generate.html'">
+            <div class="action-card primary-action hud-element" onclick="window.location.href='student-generate.html'">
                 <div class="arrow-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
+                        stroke="var(--primary)" stroke-width="2.5">
                         <line x1="7" y1="17" x2="17" y2="7"></line>
                         <polyline points="7 7 17 7 17 17"></polyline>
                     </svg></div>
-                <div class="action-icon" style="background: rgba(255,215,0,0.1); color: #FFD700;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                <div class="action-icon" style="background: rgba(255,215,0,0.2); color: #FFD700; box-shadow: 0 0 15px rgba(255,215,0,0.2);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
                     </svg>
                 </div>
                 <div>
-                    <div class="action-title">Start Practice</div>
-                    <div class="action-desc">Create a new test instantly</div>
+                    <div class="action-title" style="color: var(--primary);">Start Practice</div>
+                    <div class="action-desc" style="color: rgba(255,215,0,0.6);">Generate a test instantly</div>
                 </div>
             </div>
 
-            <div class="action-card" onclick="window.location.href='student-bank.html'">
+            <div class="action-card hud-element" onclick="window.location.href='student-bank.html'">
                 <div class="arrow-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2">
                         <line x1="7" y1="17" x2="17" y2="7"></line>
                         <polyline points="7 7 17 7 17 17"></polyline>
                     </svg></div>
-                <div class="action-icon" style="background: rgba(77,166,255,0.1); color: #4da6ff;">
+                <div class="action-icon" style="background: rgba(255,255,255,0.05); color: #888;">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -394,25 +458,29 @@
         </div>
 
         <div class="subject-grid">
-            <div class="subject-mini-card">
+            <div class="subject-mini-card hud-element">
                 <div class="sub-icon" id="icon-physics" style="color: #4da6ff;"></div>
-                <div class="sub-name">Physics</div>
+                <div class="subj-name">Physics</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 45%;"></div></div>
+                <div class="subj-progress-text">45%</div>
             </div>
-            <div class="subject-mini-card">
+            <div class="subject-mini-card hud-element">
                 <div class="sub-icon" id="icon-chemistry" style="color: #ff4d4d;"></div>
-                <div class="sub-name">Chemistry</div>
+                <div class="subj-name">Chemistry</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 72%;"></div></div>
+                <div class="subj-progress-text">72%</div>
             </div>
-            <div class="subject-mini-card">
+            <div class="subject-mini-card hud-element">
                 <div class="sub-icon" id="icon-math" style="color: #ffd700;"></div>
-                <div class="sub-name">Maths</div>
+                <div class="subj-name">Maths</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 90%;"></div></div>
+                <div class="subj-progress-text">90%</div>
             </div>
-            <div class="subject-mini-card">
+            <div class="subject-mini-card hud-element">
                 <div class="sub-icon" id="icon-biology" style="color: #4caf50;"></div>
-                <div class="sub-name">Biology</div>
-            </div>
-            <div class="subject-mini-card">
-                <div class="sub-icon" id="icon-english" style="color: #9c27b0;"></div>
-                <div class="sub-name">English</div>
+                <div class="subj-name">Biology</div>
+                <div class="progress-track"><div class="progress-fill" style="width: 20%;"></div></div>
+                <div class="subj-progress-text">20%</div>
             </div>
         </div>
 

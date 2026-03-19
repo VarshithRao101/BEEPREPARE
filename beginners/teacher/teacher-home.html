@@ -155,6 +155,126 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        /* --- PRO UI ENHANCEMENTS --- */
+        
+        /* 1. Progress Bar (Monetization) */
+        .limit-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin: 16px auto;
+            max-width: 400px;
+        }
+        .limit-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        .progress-bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #FFA500);
+            border-radius: 3px;
+            width: 75%; /* Simulating 3/4 subjects used */
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* 2. Insights Grid */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .insight-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .insight-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .insight-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--adv-text);
+        }
+        .fake-chart {
+            height: 30px;
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            margin-top: 4px;
+        }
+        .chart-bar {
+            flex: 1;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 2px 2px 0 0;
+            transition: 0.3s;
+        }
+        .chart-bar.active { background: var(--primary); }
+
+        /* 3. Skeleton Loader */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 4px;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* 4. Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid var(--primary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+            animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            pointer-events: auto;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
     </style>
     <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
     <!-- PREMIUM ANIMATION STYLES -->
@@ -167,7 +287,7 @@
         <div class="glow-orb orb-3"></div>
     </div>
 
-    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
+    <div class="app-container">
 
         <!-- Header -->
         <div class="top-header"
@@ -195,10 +315,24 @@
         </div>
 
         <!-- Subheader -->
-        <div style="text-align: center; margin-bottom: 40px;">
+        <div style="text-align: center; margin-bottom: 24px;">
             <div style="font-size: 24px; font-weight: 700; color: var(--adv-text); margin-bottom: 6px;">Welcome Back,
                 Teacher</div>
             <p style="color: var(--text-muted); font-size: 14px;">Here is an overview of your activity</p>
+        </div>
+
+        <!-- Section 1: Monetization Limit Bar -->
+        <div class="limit-container hud-element">
+            <div class="limit-header">
+                <span>Subjects Used</span>
+                <span style="color: var(--primary);">2 / 2 (Free Plan)</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" style="width: 100%;"></div>
+            </div>
+            <p style="font-size: 10px; color: #ffbc00; margin-top: 8px; font-weight: 600; text-align: center; cursor: pointer;" onclick="showUpgradeModal()">
+                ⚡ UPGRADE TO UNLOCK MORE SUBJECTS
+            </p>
         </div>
 
         <!-- Subjects Section -->
@@ -264,6 +398,37 @@
             <div class="class-card">
                 <div style="font-weight: 700; font-size: 18px; color: var(--adv-text);">10</div>
                 <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Class</div>
+            </div>
+        </div>
+
+        <!-- Insights Section (New Section 5) -->
+        <div class="section-divider">
+            <span class="section-label">Performance Insights</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="insights-grid">
+            <div class="insight-card hud-element">
+                <span class="insight-label">Most Used Chapter</span>
+                <div class="insight-value">Light & Reflection</div>
+                <div class="fake-chart">
+                    <div class="chart-bar" style="height: 40%;"></div>
+                    <div class="chart-bar" style="height: 60%;"></div>
+                    <div class="chart-bar active" style="height: 100%;"></div>
+                    <div class="chart-bar" style="height: 70%;"></div>
+                    <div class="chart-bar" style="height: 50%;"></div>
+                </div>
+            </div>
+            <div class="insight-card hud-element">
+                <span class="insight-label">Recent Test Activity</span>
+                <div class="insight-value">85% Avg Score</div>
+                <div class="fake-chart">
+                    <div class="chart-bar" style="height: 80%;"></div>
+                    <div class="chart-bar active" style="height: 90%;"></div>
+                    <div class="chart-bar" style="height: 75%;"></div>
+                    <div class="chart-bar" style="height: 85%;"></div>
+                    <div class="chart-bar" style="height: 60%;"></div>
+                </div>
             </div>
         </div>
 
@@ -451,7 +616,32 @@
                 el.style.animationDelay = `${index * 0.08}s`;
             });
         });
+
+        // Pro Features Logic
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showUpgradeModal() {
+            // Simplified for Dashboard: redirects to profile upgrade section
+            window.location.href = 'teacher-profile.html?upgrade=true';
+        }
     </script>
+    <div class="toast-container" id="toast-container"></div>
 </body>
 
 </html>

@@ -4,295 +4,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activate License - BEEPREPARE</title>
+    <title>Terminal Activation - BEEPREPARE</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="./assets/css/premium-student-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-gold: #FFD700;
+            --accent-gold: #FFA500;
+            --deep-bg: #050505;
+            --card-glass: rgba(15, 15, 15, 0.8);
+            --border-gold: rgba(255, 215, 0, 0.3);
+        }
+
         body {
-            background: #030303;
+            background-color: var(--bg-dark) !important;
+            color: var(--text-main) !important;
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0 !important;
+            padding: 0 !important;
             overflow-x: hidden;
-        }
-
-        /* Moving Scanner Background */
-        .scanner-beam {
-            position: absolute;
-            width: 100vw;
-            height: 10px;
-            background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.4), transparent);
-            box-shadow: 0 0 20px rgba(0, 230, 118, 0.6);
-            animation: scan 6s linear infinite;
-            z-index: 0;
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        @keyframes scan {
-            0% {
-                top: -10%;
-            }
-
-            100% {
-                top: 110%;
-            }
-        }
-
-        .auth-container {
+            overflow-y: auto;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 40px;
+            width: 100vw !important;
+            max-width: none !important;
+        }
+
+        /* Scanner Beam */
+        .scanner-beam {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+            box-shadow: 0 0 20px var(--primary-gold);
+            z-index: 100;
+            opacity: 0.5;
+            pointer-events: none;
+            animation: scanVertical 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes scanVertical {
+            0% { top: -5%; }
+            100% { top: 105%; }
+        }
+
+        /* Activation Container */
+        .activation-card {
+            width: 90%;
+            max-width: 440px;
+            padding: 30px;
+            background: var(--card-glass);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border-gold);
+            border-radius: 24px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 215, 0, 0.05);
             position: relative;
             z-index: 10;
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+            text-align: center;
         }
 
-        .extreme-card {
-            max-width: 540px;
-            width: 100%;
-            background: linear-gradient(145deg, rgba(15, 15, 15, 0.85), rgba(5, 5, 5, 0.95));
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            border-radius: 30px;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9), inset 0 2px 25px rgba(255, 215, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-            transform-style: preserve-3d;
-            perspective: 1000px;
-        }
-
-        .extreme-card::after {
+        .activation-card::before {
             content: '';
             position: absolute;
-            inset: 0;
-            border-radius: 30px;
-            padding: 2px;
-            background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.6), transparent);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
+            top: -1px; left: -1px; right: -1px; bottom: -1px;
+            background: linear-gradient(135deg, transparent, var(--border-gold), transparent);
+            border-radius: 32px;
+            z-index: -1;
         }
 
-        .auth-header {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 30px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 30px 30px 0 0;
-        }
-
-        .auth-body {
-            padding: 40px;
-        }
-
-        /* Key Input Fields */
-        .key-input-container {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            align-items: center;
-            margin: 30px 0;
-        }
-
-        .prefix-box {
-            width: 80px;
-            height: 60px;
-            background: rgba(255, 215, 0, 0.05);
-            border: 2px solid var(--primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-weight: 900;
-            letter-spacing: 2px;
-            font-size: 20px;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.1);
-        }
-
-        .key-segment {
+        /* Header Section */
+        .card-header {
             text-align: center;
-            height: 60px;
-            width: 80px;
-            border-radius: 12px;
-            font-size: 20px;
-            letter-spacing: 4px;
-            font-weight: 700;
-            background: rgba(0, 0, 0, 0.5) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #fff !important;
-            transition: 0.3s;
-            text-transform: uppercase;
+            margin-bottom: 30px;
         }
 
-        .key-segment:focus {
-            border-color: #00E676 !important;
-            box-shadow: 0 0 20px rgba(0, 230, 118, 0.3), inset 0 0 10px rgba(0, 230, 118, 0.1) !important;
-            transform: scale(1.05);
-        }
-
-        /* Animations */
-        @keyframes fly {
-
-            0%,
-            100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(3deg);
-            }
-        }
-
-        .bee-flying {
-            animation: fly 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        .btn-activate {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            width: 100%;
-            border: none;
-            padding: 16px;
-            border-radius: 16px;
-            color: #000;
-            font-weight: 800;
-            font-size: 16px;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
-            transition: 0.3s;
-            text-transform: uppercase;
-        }
-
-        .btn-activate:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .server-status {
+        .status-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(0, 230, 118, 0.1);
-            border: 1px solid rgba(0, 230, 118, 0.3);
-            padding: 6px 12px;
+            padding: 6px 14px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--border-gold);
             border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--primary-gold);
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary-gold);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.5); }
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(to bottom, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
+        }
+
+        p.desc {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            margin-top: 8px;
+            line-height: 1.5;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Bee Mascot Wrapper */
+        .mascot-wrapper {
+            position: relative;
+            height: 100px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mascot-glow {
+            position: absolute;
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, var(--primary-gold) 0%, transparent 70%);
+            opacity: 0.15;
+            filter: blur(20px);
+            animation: floatGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes floatGlow {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.2) translateY(-10px); }
+        }
+
+        .bee-flying {
+            width: 110px;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.5));
+            animation: beeMove 3s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @keyframes beeMove {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        /* Inputs Section */
+        .cipher-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            display: block;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 35px;
+        }
+
+        .prefix {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--primary-gold);
+            background: rgba(255, 215, 0, 0.1);
+            width: 55px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid var(--border-gold);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .spacer {
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 20px;
+            font-weight: 300;
+        }
+
+        .key-segment {
+            width: 55px;
+            height: 48px;
+            background: rgba(0, 0, 0, 0.5) !important;
+            border: 1px solid var(--border-gold) !important;
+            border-radius: 10px !important;
+            color: #fff !important;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .key-segment:focus {
+            border-color: var(--primary-gold) !important;
+            background: rgba(255, 215, 0, 0.05) !important;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2) !important;
+            transform: translateY(-2px);
+        }
+
+        /* Button Section */
+        .action-button {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
+            border: none;
+            border-radius: 16px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.4);
+        }
+
+        .action-button:active {
+            transform: translateY(-2px);
+        }
+
+        .action-button:disabled {
+            filter: grayscale(1);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .action-button .shimmer {
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg);
+            animation: shimmerEffect 3s infinite;
+        }
+
+        @keyframes shimmerEffect {
+            to { left: 200%; }
+        }
+
+        .abort-link {
+            display: inline-block;
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+
+        .abort-link:hover {
+            color: var(--primary-gold);
+            letter-spacing: 4px;
+        }
+
+        /* Success/Error States */
+        .card-error {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+            border-color: rgba(255, 68, 68, 0.5) !important;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translateX(-1px); }
+            20%, 80% { transform: translateX(2px); }
+            30%, 50%, 70% { transform: translateX(-4px); }
+            40%, 60% { transform: translateX(4px); }
+        }
+
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--deep-bg);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.8s ease;
+        }
+
+        .success-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .loading-ring {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 215, 0, 0.1);
+            border-top-color: var(--primary-gold);
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-text {
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: var(--primary-gold);
+            text-transform: uppercase;
         }
     </style>
+
 </head>
 
 <body>
     <div class="scanner-beam"></div>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-        <div class="glow-orb orb-3"></div>
+    <div class="background-animation"></div>
+
+    <div class="activation-card hud-element" id="activationBox">
+        <div class="card-header">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                System Uplink: Active
+            </div>
+            <h1>Terminal Activation</h1>
+            <p class="desc">Enter your 12-character license cluster to synchronize this node with the central hive.</p>
+        </div>
+
+        <div class="mascot-wrapper">
+            <div class="mascot-glow"></div>
+            <img id="bee-mascot" src="assets/custom-bee.png" alt="BEE Mascot" class="bee-flying">
+        </div>
+
+        <div class="activation-body">
+            <span class="cipher-label">Key Cipher Encryption</span>
+            <div class="input-group">
+                <div class="prefix">BEE</div>
+                <span class="spacer">/</span>
+                <input type="text" class="key-segment" maxlength="4" placeholder="••••" autocomplete="off">
+                <span class="spacer">/</span>
+                <input type="text" class="key-segment" maxlength="4" placeholder="••••" autocomplete="off">
+                <span class="spacer">/</span>
+                <input type="text" class="key-segment" maxlength="4" placeholder="••••" autocomplete="off">
+            </div>
+
+            <button id="activateBtn" class="action-button" onclick="handleActivation()">
+                <div class="shimmer"></div>
+                <span>Authenticate Terminal</span>
+            </button>
+
+            <a href="index.html" class="abort-link">Terminate Uplink</a>
+        </div>
     </div>
 
-    <div class="auth-container">
-        <!-- Main Card -->
-        <div class="extreme-card hud-element" id="authBox">
-            <div class="auth-header">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div
-                            style="color: var(--primary); font-size: 10px; font-weight: 800; letter-spacing: 2px; margin-bottom: 6px;">
-                            SYSTEM INITIALIZATION</div>
-                        <h1
-                            style="font-size: 26px; font-weight: 900; margin: 0; background: linear-gradient(90deg, #fff, #bbb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                            License Entry</h1>
-                    </div>
-                    <div style="text-align: right;">
-                        <div
-                            style="font-size: 32px; font-weight: 900; color: #FFD700; line-height: 1; text-shadow: 0 0 20px rgba(255,215,0,0.5);">
-                            01</div>
-                        <div style="font-size: 10px; color: #888; letter-spacing: 2px;">STEP 1/3</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="auth-body">
-                <!-- Mascot -->
-                <div
-                    style="text-align: center; height: 160px; display: flex; align-items: center; justify-content: center; position: relative;">
-                    <div
-                        style="position: absolute; width: 120px; height: 120px; background: #FFD700; opacity: 0.15; filter: blur(50px); border-radius: 50%;">
-                    </div>
-                    <img id="bee-mascot" src="assets/custom-bee.png" alt="Bee Mascot" class="bee-flying"
-                        style="width: 180px; height: auto; transition: filter 0.4s; filter: drop-shadow(0 25px 40px rgba(0,0,0,0.7)); position: relative; z-index: 2;">
-                </div>
-
-                <div style="text-align: center; margin-bottom: 30px;">
-                    <p
-                        style="color: rgba(255,255,255,0.6); font-size: 14px; line-height: 1.6; max-width: 80%; margin: 0 auto;">
-                        Authenticate this terminal using your secure 12-character alphanumeric cluster.
-                    </p>
-                </div>
-
-                <div style="margin-bottom: 30px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 10px;">
-                        <span style="font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #888;">KEY
-                            CIPHER</span>
-                        <div class="server-status">
-                            <span
-                                style="width: 8px; height: 8px; background: #00E676; border-radius: 50%; box-shadow: 0 0 10px #00E676; animation: blink 2s infinite;"></span>
-                            <span
-                                style="font-size: 10px; color: #00E676; font-family: monospace; font-weight: 800;">UPLINK
-                                SECURE</span>
-                        </div>
-                    </div>
-
-                    <div class="key-input-container">
-                        <div class="prefix-box">BEE</div>
-                        <span style="color: #666; font-size: 30px; font-weight: 100;">/</span>
-                        <input type="text" class="key-segment" maxlength="4" placeholder="••••">
-                        <input type="text" class="key-segment" maxlength="4" placeholder="••••">
-                        <input type="text" class="key-segment" maxlength="4" placeholder="••••">
-                    </div>
-                </div>
-
-                <button id="btn-activate" class="btn-activate" onclick="validateKey()">
-                    Authenticate Terminal
-                </button>
-
-                <button
-                    style="width:100%; margin-top: 20px; background: none; border: none; color: #666; font-size: 12px; cursor: pointer; transition: 0.3s;"
-                    onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'"
-                    onclick="window.location.href='index.html'">
-                    Abort and Return
-                </button>
-            </div>
-        </div>
+    <div class="success-overlay" id="successOverlay">
+        <div class="loading-ring"></div>
+        <div class="success-text" id="statusHeader">Synchronizing...</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script>
-        const inputs = document.querySelectorAll('input.key-segment');
-        const beeMascot = document.getElementById('bee-mascot');
-        const btn = document.getElementById('btn-activate');
-        const authBox = document.getElementById('authBox');
+        const inputs = document.querySelectorAll('.key-segment');
+        const card = document.getElementById('activationBox');
+        const mascot = document.getElementById('bee-mascot');
+        const btn = document.getElementById('activateBtn');
+        const overlay = document.getElementById('successOverlay');
+        const statusHeader = document.getElementById('statusHeader');
 
-        // Initial Load In
-        setTimeout(() => {
-            authBox.style.opacity = '1';
-            authBox.style.transform = 'translateY(0)';
-        }, 100);
-
-        VanillaTilt.init(authBox, {
-            max: 5,
-            speed: 400,
-            glare: true,
-            "max-glare": 0.1,
-            scale: 1.02
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', () => {
+            VanillaTilt.init(card, {
+                max: 5,
+                speed: 400,
+                glare: true,
+                "max-glare": 0.1,
+            });
         });
 
+        // Input Management
         inputs.forEach((input, index) => {
             input.addEventListener('input', (e) => {
                 e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
                 if (e.target.value.length === 4 && index < inputs.length - 1) {
                     inputs[index + 1].focus();
                 }
-                resetBee();
+                resetVisuals();
             });
 
             input.addEventListener('keydown', (e) => {
@@ -302,62 +435,47 @@
             });
         });
 
-        function resetBee() {
-            beeMascot.style.transform = '';
-            beeMascot.style.filter = 'drop-shadow(0 25px 40px rgba(0,0,0,0.7))';
-            beeMascot.classList.add('bee-flying');
+        function resetVisuals() {
+            card.classList.remove('card-error');
+            mascot.style.filter = '';
         }
 
-        function validateKey() {
-            let allFilled = true;
-            inputs.forEach(inp => { if (inp.value.length < 4) allFilled = false; });
+        function handleActivation() {
+            let isValid = true;
+            inputs.forEach(inp => { if(inp.value.length < 4) isValid = false; });
 
-            if (!allFilled) {
-                angryBee();
+            if(!isValid) {
+                triggerError();
                 return;
             }
 
-            btn.innerText = 'Decrypting...';
+            executeActivation();
+        }
+
+        function triggerError() {
+            card.classList.add('card-error');
+            mascot.style.filter = 'sepia(1) hue-rotate(-50deg) saturate(10) drop-shadow(0 0 20px #f00)';
+            
+            // Haptic Feedback (Vibration)
+            if (window.navigator.vibrate) {
+                window.navigator.vibrate(200);
+            }
+        }
+
+        function executeActivation() {
             btn.disabled = true;
-            btn.style.opacity = '0.9';
-            btn.style.background = '#888';
-
+            btn.querySelector('span').innerText = 'Decrypting...';
+            
             setTimeout(() => {
-                successBee();
-                setTimeout(() => window.location.href = 'stream-select.html', 1500);
-            }, 1200);
-        }
-
-        function angryBee() {
-            beeMascot.classList.remove('bee-flying');
-            beeMascot.style.filter = 'sepia(1) hue-rotate(-50deg) saturate(6) contrast(1.5) drop-shadow(0 0 40px rgba(255,0,0,0.8))';
-
-            // Extreme Shake
-            authBox.animate([
-                { transform: 'translateX(0)' },
-                { transform: 'translateX(-15px)' },
-                { transform: 'translateX(15px)' },
-                { transform: 'translateX(-15px)' },
-                { transform: 'translateX(0)' }
-            ], { duration: 400, iterations: 1 });
-        }
-
-        function successBee() {
-            beeMascot.classList.remove('bee-flying');
-            beeMascot.style.filter = 'hue-rotate(90deg) saturate(3) brightness(1.5) drop-shadow(0 0 50px rgba(0,255,0,0.8))';
-
-            beeMascot.animate([
-                { transform: 'scale(1) translateY(0)' },
-                { transform: 'scale(1.3) translateY(-60px)' },
-                { transform: 'scale(1) translateY(0)' }
-            ], { duration: 700, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
-
-            btn.innerHTML = '<span style="letter-spacing:4px;">INITIALIZING</span>';
-            btn.style.background = 'linear-gradient(135deg, #00E676, #00a152)';
-            btn.style.color = '#fff';
-            btn.style.boxShadow = '0 0 40px rgba(0,230,118,0.8)';
-
-            document.querySelector('.scanner-beam').style.background = 'linear-gradient(90deg, transparent, #FFD700, transparent)';
+                overlay.classList.add('active');
+                
+                setTimeout(() => {
+                    statusHeader.innerText = 'Neural Link Established';
+                    setTimeout(() => {
+                        window.location.href = 'beginners/role-select.html';
+                    }, 1000);
+                }, 1500);
+            }, 800);
         }
     </script>
 </body>
