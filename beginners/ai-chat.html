@@ -4,371 +4,729 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEE AI Assistant - ChatGPT Edition</title>
+    <title>BEEPREPARE AI - Your Intelligent Assistant</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="../assets/css/premium-student-ui.css">
     <style>
+        :root {
+            --sidebar-width: 280px;
+            --glass-bg: rgba(25, 25, 25, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --chat-user-bg: rgba(255, 255, 255, 0.05);
+            --chat-ai-bg: rgba(255, 215, 0, 0.04);
+        }
+
         body {
             background-color: transparent !important;
             overflow: hidden;
             display: flex;
-            flex-direction: column;
             height: 100vh;
+            color: #fff;
         }
 
-        .main-chat-wrapper {
-            flex: 1;
+        /* --- LAYOUT STRUCTURE --- */
+        .app-layout {
             display: flex;
-            flex-direction: column;
+            width: 100%;
             height: 100%;
             position: relative;
         }
 
-        /* ChatGPT Style Window */
-        .chat-window {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 16px 140px;
+        /* --- SIDEBAR (CHAT HISTORY) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
-            gap: 24px;
-            scroll-behavior: smooth;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
-        /* Message Structure */
-        .message-row {
+        .sidebar-header {
+            padding: 24px 16px;
+        }
+
+        .new-chat-btn {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .search-chats {
+            margin-top: 16px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px 12px 10px 35px;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .history-item {
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .history-item.active {
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+        }
+
+        .history-title {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .history-preview {
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* --- MAIN CHAT AREA --- */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+            position: relative;
+            height: 100%;
+        }
+
+        /* --- TOP BAR --- */
+        .chat-header {
+            padding: 16px 24px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-info h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .header-info p {
+            font-size: 11px;
+            color: #888;
+            margin: 2px 0 0 0;
+        }
+
+        .header-actions {
             display: flex;
             gap: 12px;
-            width: 100%;
-            animation: fadeIn 0.3s ease;
+            align-items: center;
         }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .icon-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            opacity: 0.6;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 6px;
+        }
 
-        .ai-avatar, .user-avatar-initials {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+        .icon-btn:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        /* --- MESSAGES AREA --- */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 20% 120px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .empty-state h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+
+        .suggestion-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .suggestion-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: left;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 215, 0, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            animation: slideUp 0.3s ease-out;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
             font-weight: 800;
+            font-size: 14px;
         }
 
-        .ai-avatar {
+        .message.ai .message-avatar {
             background: var(--primary);
             color: #000;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
 
-        .user-avatar-initials {
+        .message.user .message-avatar {
             background: #444;
             color: #fff;
         }
 
-        .message-content {
-            flex: 1;
-            color: #ececf1;
+        .bubble {
+            padding: 16px 20px;
+            border-radius: 20px;
             font-size: 15px;
             line-height: 1.6;
+            max-width: 85%;
+            position: relative;
         }
 
-        /* Structured Response Boxes */
-        .solution-section {
-            background: rgba(255, 255, 255, 0.05);
+        .message.ai .bubble {
+            background: rgba(40, 40, 40, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-top-left-radius: 4px;
+        }
+
+        .message.user .bubble {
+            background: rgba(255, 215, 0, 0.95);
+            color: #000;
+            font-weight: 600;
+            border-top-right-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Code/Answer Blocks */
+        .answer-block {
+            background: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
-            padding: 16px;
             margin-top: 12px;
+            overflow: hidden;
         }
 
-        .solution-title {
-            color: var(--primary);
+        .answer-header {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 11px;
             font-weight: 800;
-            font-size: 12px;
+            color: #aaa;
             text-transform: uppercase;
-            margin-bottom: 8px;
             display: flex;
-            align-items: center;
-            gap: 6px;
+            justify-content: space-between;
         }
 
-        .diagram-box {
-            background: #1a1a1a;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 12px 0;
-            text-align: center;
-            border: 1px dashed rgba(255, 215, 0, 0.3);
+        .answer-content {
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
         }
 
-        .mnemonic-box {
-            background: rgba(255, 215, 0, 0.08);
-            border-left: 4px solid var(--primary);
-            padding: 12px;
-            border-radius: 0 8px 8px 0;
-            margin-top: 12px;
-            font-style: italic;
-            color: #fff;
-        }
-
-        /* Upload Preview */
-        .upload-preview {
-            max-width: 200px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border: 2px solid var(--primary);
-        }
-
-        /* ChatGPT Input Area */
-        .input-wrapper {
-            position: fixed;
+        /* --- INPUT AREA --- */
+        .input-container {
+            position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 20px;
-            background: linear-gradient(to top, #050505 50%, transparent 100%);
-            z-index: 1000;
+            padding: 30px 20% 40px;
+            background: linear-gradient(to top, #000 40%, transparent);
+            z-index: 100;
         }
 
-        .input-bar {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            background: rgba(30, 30, 30, 0.8);
+        .input-box-wrapper {
+            background: rgba(30, 30, 30, 0.85);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 8px 12px;
             display: flex;
             align-items: flex-end;
-            padding: 10px 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        .chat-textarea {
+        .textarea-ai {
             flex: 1;
             background: transparent;
             border: none;
             color: #fff;
-            padding: 8px 12px;
-            outline: none;
+            padding: 10px 4px;
             font-size: 15px;
+            outline: none;
             resize: none;
             max-height: 200px;
             font-family: inherit;
         }
 
-        .input-actions {
+        .input-btns {
             display: flex;
             gap: 8px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
-        .action-icon-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            border: none;
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.05);
+            border: none;
             color: #aaa;
             cursor: pointer;
-            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: 0.2s;
         }
 
-        .action-icon-btn:hover {
+        .action-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
         }
 
-        .send-pill-btn {
+        .send-btn-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             background: var(--primary);
             color: #000;
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
             border: none;
-            font-weight: 800;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: 0.3s;
         }
 
-        .send-pill-btn:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
+        .send-btn-circle:hover {
+            transform: scale(1.1) rotate(-10deg);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
         }
 
-        /* Top Bar */
-        .chat-top-bar {
-            padding: 16px 20px;
+        /* Quick Action Toolbar */
+        .quick-toolbar {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
         }
+
+        .tool-btn-sm {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #ccc;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .tool-btn-sm:hover {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* --- MOBILE RESPONSIVENESS --- */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .messages-container {
+                padding: 40px 16px 140px;
+            }
+            .input-container {
+                padding: 20px 16px 30px;
+            }
+            .suggestion-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Typing Indicator */
+        .typing {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1s infinite alternate;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { to { transform: translateY(-4px); opacity: 0.3; } }
     </style>
 </head>
 
 <body>
+    <!-- Background Animation -->
     <div class="background-animation">
         <div class="glow-orb orb-1"></div>
         <div class="glow-orb orb-2"></div>
     </div>
 
-    <div class="main-chat-wrapper">
-        <!-- Top Nav -->
-        <div class="chat-top-bar">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <button onclick="window.history.back()" style="background: none; border: none; color: #fff; cursor: pointer; padding: 5px;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
+    <div class="app-layout">
+        <!-- Sidebar Shell -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="new-chat-btn" onclick="startNewChat()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
+                    New Chat
                 </button>
-                <div style="font-weight: 800; color: var(--primary); font-size: 16px; letter-spacing: 1px;">BEE AI 4.0</div>
-            </div>
-            <div style="font-size: 11px; font-weight: 700; color: #666; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">TURBO MODE</div>
-        </div>
-
-        <!-- Chat History -->
-        <div class="chat-window" id="chat-window">
-            <!-- AI Welcome Message -->
-            <div class="message-row">
-                <div class="ai-avatar">B</div>
-                <div class="message-content">
-                    Hello! I'm BEE AI. You can ask me questions, upload images of your homework, or ask for diagrammatic solutions. How can I help you excel today?
+                <div class="search-chats">
+                    <div style="position: absolute; left: 12px; top: 11px; color: #666;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                    <input type="text" class="search-input" placeholder="Search conversations...">
                 </div>
             </div>
-        </div>
+            
+            <div class="history-list">
+                <div class="history-item active">
+                    <div class="history-title">Physics Quiz Assistance</div>
+                    <div class="history-preview">Sure, I can explain Electromagnetism...</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-title">Math Formula Memory</div>
+                    <div class="history-preview">Try this mnemonic for Calculus...</div>
+                </div>
+                <!-- More items added dynamically -->
+            </div>
+        </aside>
 
-        <!-- Input Area -->
-        <div class="input-wrapper">
-            <div class="input-bar">
-                <div class="input-actions">
-                    <button class="action-icon-btn" title="Upload Question" onclick="document.getElementById('file-upload').click()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
+        <!-- Main Content Shell -->
+        <main class="chat-main">
+            <!-- Header -->
+            <header class="chat-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="icon-btn" onclick="toggleSidebar()" id="menu-toggle">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
                         </svg>
                     </button>
-                    <input type="file" id="file-upload" hidden accept="image/*" onchange="handleFileUpload(this)">
+                    <div class="header-info">
+                        <h2>BEEPREPARE AI</h2>
+                        <p>Ask anything. Learn faster.</p>
+                    </div>
                 </div>
-
-                <textarea class="chat-textarea" id="chat-input" placeholder="Paste question or ask anything..." rows="1" oninput="autoResize(this)"></textarea>
                 
-                <button class="send-pill-btn" id="send-btn" onclick="sendMessage()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
-            </div>
-            <div style="text-align: center; color: #444; font-size: 10px; margin-top: 8px; font-weight: 700; letter-spacing: 0.5px;">BEE AI CAN MAKE MISTAKES. VERIFY WITH YOUR TEACHER.</div>
-        </div>
-    </div>
-
-    <script>
-        let uploadedImage = null;
-
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-
-        function handleFileUpload(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedImage = e.target.result;
-                    // Show small notification or preview logic here
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            if (!message && !uploadedImage) return;
-
-            // 1. Add User Message
-            addUserMessage(message, uploadedImage);
-            
-            // Clear input
-            input.value = '';
-            input.style.height = 'auto';
-            const tempImg = uploadedImage;
-            uploadedImage = null;
-
-            // 2. Add AI Response (Simulated structure)
-            setTimeout(() => {
-                addAIStructuredResponse(message, tempImg);
-            }, 1000);
-        }
-
-        function addUserMessage(text, img) {
-            const container = document.getElementById('chat-window');
-            let content = text ? `<div>${text}</div>` : "";
-            if (img) content += `<img src="${img}" class="upload-preview">`;
-
-            container.innerHTML += `
-                <div class="message-row" style="justify-content: flex-end;">
-                    <div class="message-content" style="text-align: right; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px;">${content}</div>
-                    <div class="user-avatar-initials">VR</div>
+                <div class="header-actions">
+                    <button class="icon-btn" onclick="clearChat()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                    <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1);"></div>
+                    <div class="message-avatar" style="background: rgba(255,255,255,0.1); border-radius: 50%; width: 32px; height: 32px; cursor: pointer;">
+                        VR
+                    </div>
                 </div>
-            `;
-            container.scrollTop = container.scrollHeight;
-        }
+            </header>
 
-        function addAIStructuredResponse(query, wasImage) {
-            const container = document.getElementById('chat-window');
-            
-            const diagramSVG = `<svg width="100" height="60" viewBox="0 0 100 60"><circle cx="50" cy="30" r="20" stroke="#FFD700" stroke-width="2" fill="none"/><line x1="10" y1="10" x2="90" y2="50" stroke="#444" stroke-width="1"/></svg>`;
-
-            container.innerHTML += `
-                <div class="message-row">
-                    <div class="ai-avatar">B</div>
-                    <div class="message-content">
-                        Based on your question about <strong>${query || "the uploaded image"}</strong>, here is the detailed breakdown:
-                        
-                        <div class="solution-section">
-                            <div class="solution-title">🔍 DETAILED SOLUTION</div>
-                            To solve this, we must first identify the core principles. By applying the formula <strong>F = m × a</strong>, we can calculate the force required...
-                            
-                            <div class="diagram-box">
-                                <div style="font-size: 10px; color: #666; margin-bottom: 5px;">CONCEPTUAL DIAGRAM</div>
-                                ${diagramSVG}
-                                <div style="font-size: 9px; color: #aaa; margin-top: 5px;">Visualization of the Forces involved</div>
-                            </div>
-                            
-                            Step-by-step: 
-                            1. Define the variables.
-                            2. Substitute into the equation.
-                            3. Simplify to get the final answer.
+            <!-- Chat Area -->
+            <div class="messages-container" id="chat-window">
+                <!-- Empty State Shown Initially -->
+                <div class="empty-state" id="empty-state">
+                    <h1>How can I help you today?</h1>
+                    <div class="suggestion-grid">
+                        <div class="suggestion-chip" onclick="useSuggest('Explain Chapter 4 of Physics')">
+                            Explain this chapter
                         </div>
-
-                        <div class="mnemonic-box">
-                            <strong>💡 EASY WAY TO REMEMBER:</strong><br>
-                            Think of "Fma" as <strong>"Fast Men Accelerate"</strong> to remember Force = Mass × Acceleration!
+                        <div class="suggestion-chip" onclick="useSuggest('Generate important questions for Class 10 Maths')">
+                            Generate test questions
+                        </div>
+                        <div class="suggestion-chip" onclick="useSuggest('Summarize these chemical reactions')">
+                            Summarize my notes
+                        </div>
+                        <div class="suggestion-chip" onclick="useSuggest('Solve this quadratic equation step by step')">
+                            Solve this problem
                         </div>
                     </div>
                 </div>
-            `;
-            container.scrollTop = container.scrollHeight;
+                <!-- Messages will appear here -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-container">
+                <div class="input-box-wrapper">
+                    <div class="input-btns">
+                        <button class="action-btn" title="Upload File" onclick="document.getElementById('file-input').click()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </button>
+                        <input type="file" id="file-input" hidden>
+                    </div>
+
+                    <textarea id="chat-input" class="textarea-ai" placeholder="Ask anything..." rows="1" oninput="resizeTextarea()"></textarea>
+                    
+                    <div class="input-btns">
+                        <button class="action-btn" title="Voice Input">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="23"></line>
+                                <line x1="8" y1="23" x2="16" y2="23"></line>
+                            </svg>
+                        </button>
+                        <button class="send-btn-circle" onclick="sendMessage()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Action Bar -->
+                <div class="quick-toolbar" id="chat-tools" style="display: none;">
+                    <button class="tool-btn-sm">Explain like 5th class</button>
+                    <button class="tool-btn-sm">Exam important points</button>
+                    <button class="tool-btn-sm">Generate questions</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const chatInput = document.getElementById('chat-input');
+        const chatWindow = document.getElementById('chat-window');
+        const emptyState = document.getElementById('empty-state');
+        const sidebar = document.getElementById('sidebar');
+        const tools = document.getElementById('chat-tools');
+
+        function resizeTextarea() {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = chatInput.scrollHeight + 'px';
         }
 
-        // Key support
-        document.getElementById('chat-input').addEventListener('keydown', (e) => {
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+        }
+
+        function useSuggest(text) {
+            chatInput.value = text;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Hide empty state
+            emptyState.style.display = 'none';
+            tools.style.display = 'flex';
+
+            // 1. Add User Message
+            appendMessage('user', text);
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // 2. Add Typing Indicator
+            const typingId = showTyping();
+
+            // 3. Simulated Response
+            setTimeout(() => {
+                removeTyping(typingId);
+                const response = getMockResponse(text);
+                appendMessage('ai', response);
+            }, 1500);
+        }
+
+        function appendMessage(role, content) {
+            const msg = document.createElement('div');
+            msg.className = `message ${role}`;
+            
+            const avatar = role === 'user' ? 'VR' : 'B';
+            
+            msg.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="bubble">${content}</div>
+            `;
+            
+            chatWindow.appendChild(msg);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function showTyping() {
+            const id = 'typing-' + Date.now();
+            const msg = document.createElement('div');
+            msg.className = `message ai`;
+            msg.id = id;
+            msg.innerHTML = `
+                <div class="message-avatar">B</div>
+                <div class="bubble">
+                    <div class="typing">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            `;
+            chatWindow.appendChild(msg);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            return id;
+        }
+
+        function removeTyping(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function getMockResponse(query) {
+            if (query.toLowerCase().includes('physics')) {
+                return `That's a great topic! In Physics Chapter 4 (Electromagnetism), the most important concept is Faraday's Law.
+                <div class="answer-block">
+                    <div class="answer-header">💡 Faraday's Law Breakdown</div>
+                    <div class="answer-content">
+                        Ε = -N(dΦ/dt)
+                    </div>
+                </div>
+                Try to remember: <strong>"Many Nests Need Different Times"</strong> to memorize the Magnetic Flux change formula!`;
+            }
+            return "I've processed your request. Based on our current syllabus, focusing on this specific topic will help you in the upcoming practice tests. Would you like me to generate a 5-question quiz for this?";
+        }
+
+        function clearChat() {
+            chatWindow.innerHTML = '';
+            chatWindow.appendChild(emptyState);
+            emptyState.style.display = 'flex';
+            tools.style.display = 'none';
+        }
+
+        function startNewChat() {
+            clearChat();
+            if (window.innerWidth <= 768) toggleSidebar();
+        }
+
+        // Enter support
+        chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
