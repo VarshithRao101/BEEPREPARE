@@ -38,8 +38,10 @@
 
         /* Robust Profile Card isolated to prevent global CSS collapse */
         .d-profile-card {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(20, 20, 20, 0.98)) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: rgba(0, 0, 0, 0.6) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
             border-radius: 20px !important;
             padding: 32px 24px !important;
             display: flex !important;
@@ -47,7 +49,7 @@
             align-items: center !important;
             position: relative !important;
             margin-bottom: 32px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
             z-index: 10 !important;
             overflow: visible !important;
             height: auto !important;
@@ -820,14 +822,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt
-            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
-                max: 8,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.15,
-                scale: 1.02
-            });
+            // Apply 3D Tilt (Desktop only)
+            if (window.innerWidth > 768) {
+                VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
+                    max: 5,
+                    speed: 400,
+                    glare: true,
+                    "max-glare": 0.1,
+                    scale: 1.01
+                });
+            }
 
             // Apply Staggered HUD Load-in
             const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");

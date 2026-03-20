@@ -9,27 +9,27 @@
 .action-card {
     background: linear-gradient(145deg, rgba(20, 20, 20, 0.8), rgba(10, 10, 10, 0.95)) !important;
     border: 1px solid rgba(255, 215, 0, 0.2) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), inset 0 2px 15px rgba(255, 215, 0, 0.05) !important;
-    border-radius: 28px !important;
-    transform: perspective(1px) translateZ(0);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 24px !important;
+    transition: all 0.2s ease !important;
 }
 .action-card:hover {
-    transform: translateY(-10px) scale(1.02) !important;
+    transform: translateY(-2px) !important;
     border-color: #FFD700 !important;
-    box-shadow: 0 20px 50px rgba(255, 215, 0, 0.25), inset 0 2px 15px rgba(255, 215, 0, 0.1) !important;
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.15) !important;
 }
 
 /* Subject Mini Cards */
 .subject-mini-card {
     background: rgba(15, 15, 15, 0.8) !important;
     border: 1px solid var(--border) !important;
-    border-radius: 20px !important;
-    backdrop-filter: blur(15px) !important;
+    border-radius: 16px !important;
+    transition: all 0.2s ease !important;
 }
 .subject-mini-card:hover {
     background: rgba(30, 30, 30, 0.9) !important;
     border-color: #FFD700 !important;
-    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2) !important;
+    transform: translateY(-2px) !important;
 }
 
 /* Document & Chapter Boxes (Notes) */
@@ -128,12 +128,11 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
     background: linear-gradient(135deg, #FFD700, #FFA500) !important;
     color: #000 !important;
     border: none !important;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2) !important;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    transition: all 0.2s ease !important;
 }
 .btn-adv:hover, .btn-primary:hover, .btn-finish:hover, .unlock-btn:hover, .btn-enter-otp:hover {
-    transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3) !important;
 }
 
 /* SweetAlert Glassmorphism (Overriding defaults) */
@@ -152,97 +151,19 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 }
 
 
-/* --- EXTREME ENHANCEMENTS --- */
-/* Shimmering Welcome Text */
+/* --- SIMPLIFIED ENHANCEMENTS --- */
 .welcome-title {
-    background: linear-gradient(90deg, #fff 0%, #FFD700 50%, #fff 100%) !important;
-    background-size: 200% auto !important;
-    color: #fff;
-    -webkit-background-clip: text !important;
-    background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    animation: shine 4s linear infinite !important;
-}
-
-@keyframes shine {
-    to {
-        background-position: 200% center;
-    }
-}
-
-/* Floating Elements */
-.action-icon, .bank-banner-icon, .icon-header {
-    animation: floatIcon 3s ease-in-out infinite !important;
-}
-
-@keyframes floatIcon {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
-}
-
-/* Pulsing Timeline Dots */
-.timeline-dot {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-    animation: pulseDot 2s infinite !important;
-}
-.timeline-dot.warning {
-    box-shadow: 0 0 0 0 rgba(255, 165, 0, 0.7);
-    animation: pulseWarning 2s infinite !important;
-}
-
-@keyframes pulseDot {
-    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
-}
-@keyframes pulseWarning {
-    70% { box-shadow: 0 0 0 10px rgba(255, 165, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 165, 0, 0); }
+    color: #FFD700 !important;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3) !important;
 }
 
 /* HUD Load-in Animation */
 .hud-element {
     opacity: 0;
-    transform: translateY(30px);
-    animation: loadHUD 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: loadHUD 0.3s ease-out forwards;
 }
 
 @keyframes loadHUD {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    to { opacity: 1; }
 }
-
-/* Neon Borders on Hover */
-.subject-mini-card, .action-card, .document-item {
-    position: relative;
-}
-.subject-mini-card::after, .action-card::after, .document-item::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 2px;
-    background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.8), transparent);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0;
-    transition: 0.4s ease;
-    pointer-events: none;
-}
-.subject-mini-card:hover::after, .action-card:hover::after, .document-item:hover::after {
-    opacity: 1;
-    transform: scale(1);
-}
-
-/* TEACHER POV MAPPINGS */
-.subject-card, .class-card, .bank-card, .history-card { position: relative; }
-.subject-card::after, .class-card::after, .bank-card::after, .history-card::after {
-    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 2px;
-    background: linear-gradient(135deg, transparent, rgba(255, 215, 0, 0.8), transparent);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: 0.4s ease; pointer-events: none;
-}
-.subject-card:hover::after, .class-card:hover::after, .bank-card:hover::after, .history-card:hover::after { opacity: 1; transform: scale(1); }
 

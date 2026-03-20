@@ -401,33 +401,46 @@
             </div>
         </div>
 
-        <!-- Insights Section (New Section 5) -->
+        <!-- Insights Section -->
         <div class="section-divider">
-            <span class="section-label">Performance Insights</span>
+            <span class="section-label">Quick Analytics</span>
             <div class="divider-line"></div>
         </div>
 
-        <div class="insights-grid">
-            <div class="insight-card hud-element">
-                <span class="insight-label">Most Used Chapter</span>
-                <div class="insight-value">Light & Reflection</div>
-                <div class="fake-chart">
-                    <div class="chart-bar" style="height: 40%;"></div>
-                    <div class="chart-bar" style="height: 60%;"></div>
-                    <div class="chart-bar active" style="height: 100%;"></div>
-                    <div class="chart-bar" style="height: 70%;"></div>
-                    <div class="chart-bar" style="height: 50%;"></div>
+        <div class="insights-grid" style="grid-template-columns: 1fr; gap: 12px;">
+            <!-- Questions Chart -->
+            <div class="insight-card hud-element" style="background: rgba(255, 255, 255, 0.04);">
+                <span class="insight-label">Questions Chart</span>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                    <div class="insight-value" style="font-size: 24px;">1,240 <span style="font-size: 12px; color: var(--text-muted); font-weight: 400;">Total</span></div>
+                    <div class="fake-chart" style="height: 40px; flex: 1; margin-left: 20px;">
+                        <div class="chart-bar" style="height: 40%;"></div>
+                        <div class="chart-bar active" style="height: 70%;"></div>
+                        <div class="chart-bar" style="height: 50%;"></div>
+                        <div class="chart-bar active" style="height: 90%;"></div>
+                        <div class="chart-bar" style="height: 60%;"></div>
+                        <div class="chart-bar active" style="height: 100%;"></div>
+                        <div class="chart-bar" style="height: 75%;"></div>
+                    </div>
                 </div>
             </div>
-            <div class="insight-card hud-element">
-                <span class="insight-label">Recent Test Activity</span>
-                <div class="insight-value">85% Avg Score</div>
-                <div class="fake-chart">
-                    <div class="chart-bar" style="height: 80%;"></div>
-                    <div class="chart-bar active" style="height: 90%;"></div>
-                    <div class="chart-bar" style="height: 75%;"></div>
-                    <div class="chart-bar" style="height: 85%;"></div>
-                    <div class="chart-bar" style="height: 60%;"></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <!-- Chapters -->
+                <div class="insight-card hud-element" style="background: rgba(255, 255, 255, 0.04);">
+                    <span class="insight-label">Active Chapters</span>
+                    <div class="insight-value">23</div>
+                    <div style="font-size: 10px; color: var(--primary); font-weight: 700; margin-top: 4px;">+4 THIS WEEK</div>
+                </div>
+                <!-- Class Chart -->
+                <div class="insight-card hud-element" style="background: rgba(255, 255, 255, 0.04);">
+                    <span class="insight-label">Class Chart</span>
+                    <div class="insight-value">92% <span style="font-size: 10px; color: #4CAF50;">↑</span></div>
+                    <div class="fake-chart" style="height: 20px;">
+                        <div class="chart-bar active" style="height: 80%;"></div>
+                        <div class="chart-bar active" style="height: 90%;"></div>
+                        <div class="chart-bar active" style="height: 85%;"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -595,18 +608,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to Teacher Cards
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if (tiltElements.length > 0) {
-                try {
-                    VanillaTilt.init(tiltElements, {
-                        max: 8,
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.15,
-                        scale: 1.02
-                    });
-                } catch (e) { }
+            // Apply 3D Tilt (Only on Desktop/Larger screens for performance)
+            if (window.innerWidth > 768) {
+                const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
+                if (tiltElements.length > 0) {
+                    try {
+                        VanillaTilt.init(tiltElements, {
+                            max: 5,
+                            speed: 400,
+                            glare: true,
+                            "max-glare": 0.1,
+                            scale: 1.01
+                        });
+                    } catch (e) { }
+                }
             }
 
             // Apply Staggered HUD Load-in

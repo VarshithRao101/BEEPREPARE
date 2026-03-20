@@ -172,54 +172,56 @@
 
         .banks-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
             padding: 0 8px;
         }
 
         .bank-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 12px;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.2s ease;
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            min-height: 180px;
+            justify-content: center;
+            align-items: center;
+            min-height: 110px;
+            text-align: center;
         }
 
         .bank-card:hover {
             background: rgba(255, 255, 255, 0.05);
-            transform: translateY(-8px);
+            transform: translateY(-3px);
             border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
 
         .bank-icon-lg {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: rgba(255, 255, 255, 0.05);
-            font-size: 32px;
-            margin-bottom: 20px;
+            font-size: 20px;
+            margin-bottom: 8px;
         }
 
         .bank-title {
-            font-size: 20px;
+            font-size: 14px;
             font-weight: 700;
             color: #fff;
-            margin-bottom: 4px;
+            margin-bottom: 0px;
         }
 
         .bank-meta {
-            font-size: 12px;
+            font-size: 10px;
             color: #888;
             font-weight: 500;
         }
@@ -242,11 +244,12 @@
         }
 
         .bank-status {
-            margin-top: auto;
+            margin-top: 6px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 10px;
+            justify-content: center;
+            gap: 4px;
+            font-size: 8px;
             font-weight: 800;
             letter-spacing: 0.5px;
             text-transform: uppercase;
@@ -255,10 +258,10 @@
         .status-pending { color: #FFA500; }
 
         .status-pill {
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 1px 6px;
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.05);
-            font-size: 9px;
+            font-size: 8px;
         }
 
         /* CUSTOM MODAL - REPLACES INLINE EXPANSION */
@@ -440,8 +443,8 @@
 
 <body>
     <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
+        <div class="glow-orb orb-1" style="display: none;"></div>
+        <div class="glow-orb orb-3" style="display: none;"></div>
     </div>
 
     <div class="app-container">
@@ -711,14 +714,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt
-            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
-                max: 8,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.15,
-                scale: 1.02
-            });
+            // Apply 3D Tilt (Desktop only)
+            if (window.innerWidth > 768) {
+                VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card, .bank-card"), {
+                    max: 5,
+                    speed: 400,
+                    glare: true,
+                    "max-glare": 0.1,
+                    scale: 1.01
+                });
+            }
 
             // Apply Staggered HUD Load-in
             const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
