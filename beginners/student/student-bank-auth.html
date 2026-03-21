@@ -263,10 +263,10 @@
         </div>
 
         <div class="otp-container">
-            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 0)" onkeydown="handleKey(event, 0)">
-            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 1)" onkeydown="handleKey(event, 1)">
-            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 2)" onkeydown="handleKey(event, 2)">
-            <input type="number" class="otp-box digit-input" maxlength="1" oninput="handleInput(this, 3)" onkeydown="handleKey(event, 3)">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
         </div>
 
         <button class="unlock-btn" onclick="verify()">Verify & Unlock</button>
@@ -277,18 +277,43 @@
     <script>
         const inputs = document.querySelectorAll('.digit-input');
 
-        function handleInput(input, index) {
-            if (input.value.length > 1) input.value = input.value.slice(0, 1);
-            if (input.value.length === 1 && index < 3) {
-                inputs[index + 1].focus();
-            }
-        }
+        inputs.forEach((input, index) => {
+            // Handle paste event
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, ''); // Get only numbers
+                if (!pastedData) return;
+                
+                let pasteIndex = 0;
+                for (let i = index; i < inputs.length && pasteIndex < pastedData.length; i++) {
+                    inputs[i].value = pastedData[pasteIndex];
+                    pasteIndex++;
+                    if (i < inputs.length - 1) {
+                        inputs[i + 1].focus();
+                    }
+                }
+            });
 
-        function handleKey(e, index) {
-            if (e.key === 'Backspace' && !inputs[index].value && index > 0) {
-                inputs[index - 1].focus();
-            }
-        }
+            // Handle Input (typing)
+            input.addEventListener('input', (e) => {
+                // Ensure only numbers
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                if (e.target.value.length > 1) {
+                    e.target.value = e.target.value.slice(0, 1);
+                }
+                if (e.target.value.length === 1 && index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            });
+
+            // Handle Backspace
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                    inputs[index - 1].focus();
+                    inputs[index - 1].value = ''; // Optional: clear previous box directly for smooth delete
+                }
+            });
+        });
 
         function verify() {
             const code = Array.from(document.querySelectorAll('.otp-box')).map(e => e.value).join('');
