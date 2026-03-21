@@ -628,31 +628,13 @@
         });
     </script>
 
-    <!-- EXTREME UI SCRIPTS (Animations Only) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <!-- EXTREME UI SCRIPTS (OPTIMIZED) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt (Only on Desktop/Larger screens for performance)
-            if (window.innerWidth > 768) {
-                const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-                if (tiltElements.length > 0) {
-                    try {
-                        VanillaTilt.init(tiltElements, {
-                            max: 5,
-                            speed: 400,
-                            glare: true,
-                            "max-glare": 0.1,
-                            scale: 1.01
-                        });
-                    } catch (e) { }
-                }
-            }
-
-            // Apply Staggered HUD Load-in
+            // Apply Staggered HUD Load-in (Simplified)
             const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
             hudElements.forEach((el, index) => {
                 el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
             });
         });
 

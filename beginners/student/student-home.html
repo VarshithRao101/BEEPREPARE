@@ -89,11 +89,11 @@
         }
 
         .action-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-2px);
             background: linear-gradient(145deg, rgba(40, 40, 40, 0.8), rgba(30, 30, 30, 1));
             border-color: rgba(255, 215, 0, 0.3);
             /* Gold accent */
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
         }
 
         .action-icon {
@@ -609,8 +609,8 @@
             <div class="divider-line" style="background: rgba(0,0,0,0.1);"></div>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="action-card primary-action hud-element" onclick="window.location.href='student-generate.html'">
+        <div class="dashboard-grid skeleton-container">
+            <div class="action-card primary-action hud-element skeleton" onclick="window.location.href='student-generate.html'">
                 <div class="arrow-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="var(--primary)" stroke-width="2.5">
                         <line x1="7" y1="17" x2="17" y2="7"></line>
@@ -677,6 +677,18 @@
                 <div class="progress-track"><div class="progress-fill" style="width: 20%;"></div></div>
                 <div class="subj-progress-text">20%</div>
             </div>
+        </div>
+
+        <!-- Recent Doubts (Empty State Demo) -->
+        <div class="section-divider">
+            <span class="section-label">Recent Doubts</span>
+            <div class="divider-line" style="background: rgba(0,0,0,0.1);"></div>
+        </div>
+        <div class="empty-state hud-element" style="margin-top: 10px;">
+            <div class="empty-icon">❓</div>
+            <div class="empty-title">No Active Doubts</div>
+            <div class="empty-text">Your resolved or pending doubts from teachers will appear here once we link the database.</div>
+            <button class="btn-adv" style="padding: 10px 20px; font-size: 11px; border-radius: 10px; margin-top: 5px;" onclick="window.location.href='../ai-chat.html'">Ask BEE AI</button>
         </div>
 
         <!-- Activity Section -->
@@ -774,28 +786,27 @@
         });
     </script>
 
-    <!-- EXTREME UI SCRIPTS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <!-- EXTREME UI SCRIPTS (OPTIMIZED) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt
-            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
-                max: 8,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.15,
-                scale: 1.02
-            });
-
-            // Apply Staggered HUD Load-in
-            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
+            // Apply Staggered HUD Load-in (Simplified)
+            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container, .adv-card");
             elements.forEach((el, index) => {
                 el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
             });
 
-            // PIXEL FIRE ANIMATION
-            const canvases = document.querySelectorAll(".streak-canvas");
+
+            // PIXEL FIRE ANIMATION (Existing)
+            // ... (rest of flicker code) ...
+
+            // PERFORMANCE: Skeleton to Reality Loader
+            setTimeout(() => {
+                document.querySelectorAll('.skeleton').forEach(el => {
+                    el.classList.remove('skeleton');
+                });
+            }, 1200);
+        });
+    </script>
             const yArr = [2, 1, 0, 0, 0, 0, 1, 2];
             const maxArr = [7, 9, 11, 13, 13, 11, 9, 7];
             const minArr = [4, 7, 8, 10, 10, 8, 7, 4];
@@ -852,6 +863,13 @@
                 requestAnimationFrame(animateFlame);
             }
             animateFlame();
+
+            // SKELETON LOADER (TRANSITION TO REAL CONTENT)
+            setTimeout(() => {
+                document.querySelectorAll('.skeleton').forEach(el => {
+                    el.classList.remove('skeleton');
+                });
+            }, 1200);
         });
     </script>
 </body>

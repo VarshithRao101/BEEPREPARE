@@ -14,9 +14,7 @@
     transition: all 0.2s ease !important;
 }
 .action-card:hover {
-    transform: translateY(-2px) !important;
     border-color: #FFD700 !important;
-    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.15) !important;
 }
 
 /* Subject Mini Cards */
@@ -29,7 +27,6 @@
 .subject-mini-card:hover {
     background: rgba(30, 30, 30, 0.9) !important;
     border-color: #FFD700 !important;
-    transform: translateY(-2px) !important;
 }
 
 /* Document & Chapter Boxes (Notes) */
@@ -41,8 +38,6 @@
 }
 .document-item:hover {
     border-color: rgba(255, 215, 0, 0.4) !important;
-    transform: translateY(-5px) !important;
-    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.15) !important;
 }
 
 /* Timeline Cards */
@@ -53,8 +48,6 @@
 }
 .timeline-card:hover {
     border-color: rgba(255, 215, 0, 0.3) !important;
-    transform: translateX(8px) !important;
-    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.1) !important;
 }
 
 /* Test Area (Test) */
@@ -100,8 +93,6 @@
 }
 .request-card:hover {
     border-color: #FFD700 !important;
-    transform: translateY(-4px) !important;
-    box-shadow: 0 15px 35px rgba(255, 215, 0, 0.15) !important;
 }
 
 /* Auth / Validation */
@@ -131,7 +122,6 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
     transition: all 0.2s ease !important;
 }
 .btn-adv:hover, .btn-primary:hover, .btn-finish:hover, .unlock-btn:hover, .btn-enter-otp:hover {
-    transform: translateY(-2px) !important;
     box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3) !important;
 }
 
