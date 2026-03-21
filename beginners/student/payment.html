@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade License - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FFD700;
+            --accent: #FFA500;
+            --bg: #050505;
+            --card-glass: rgba(15, 15, 15, 0.9);
+            --border-gold: rgba(255, 215, 0, 0.2);
+        }
+        
+        body {
+            background-color: var(--bg) !important;
+            color: #fff !important;
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .payment-container {
+            width: 90%;
+            max-width: 500px;
+            padding: 32px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .close-btn {
+            color: #666;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: inline-block;
+            margin-bottom: 24px;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .pay-card {
+            background: var(--card-glass);
+            border: 1px solid var(--border-gold);
+            border-radius: 32px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(255, 215, 0, 0.03);
+            backdrop-filter: blur(20px);
+        }
+
+        .pay-card::before {
+            content: '';
+            position: absolute;
+            top: -20%; right: -20%;
+            width: 150px; height: 150px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            opacity: 0.1;
+            filter: blur(40px);
+        }
+
+        .bundle-label {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .price-section {
+            margin: 24px 0;
+            text-align: center;
+        }
+
+        .currency { font-size: 24px; font-weight: 800; color: #fff; vertical-align: top; margin-top: 10px; display: inline-block; }
+        .amount { font-size: 64px; font-weight: 800; color: var(--primary); letter-spacing: -2px; }
+        .duration { font-size: 16px; color: #666; font-weight: 500; }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 32px 0;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .check-icon {
+            color: var(--primary);
+            width: 18px; height: 18px;
+            flex-shrink: 0;
+        }
+
+        .btn-pay {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            border-radius: 16px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
+        }
+
+        .success-module {
+            display: none;
+            text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .key-box {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border-gold);
+            padding: 24px;
+            border-radius: 16px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .key-text {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 3px;
+        }
+
+        .return-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #888;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+        
+        .return-btn:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+
+        /* Loading Simulation */
+        .loader {
+            width: 20px; height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* GEOMETRIC BACKGROUND */
+        body { 
+            background: url('../../assets/images/bg.avif') no-repeat center center fixed !important;
+            background-size: cover !important;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+            opacity: 0.4;
+        }
+
+        .bg-lines {
+            position: fixed;
+            inset: 0;
+            background: 
+                linear-gradient(135deg, transparent 48%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 52%),
+                linear-gradient(45deg, transparent 48%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 52%);
+            background-size: 300px 300px;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-lines"></div>
+    <div class="payment-container" id="mainContainer" style="max-width: 520px;">
+        <div class="pay-card" style="background: #000 !important; border: 1px solid var(--primary) !important; box-shadow: 0 0 50px rgba(0,0,0,1) !important;">
+            <div class="header" style="border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 24px; margin-bottom: 24px;">
+                <div class="close-btn" onclick="window.history.back()">✕ Cancel Payment</div>
+                <h1 class="title">Secure Activation</h1>
+                <p class="subtitle" style="color: #aaa;">Complete payment to receive your unique system cluster key.</p>
+            </div>
+
+            <div id="paymentBody">
+                <span class="bundle-label">Access Cluster X-99</span>
+                
+                <div class="price-section">
+                    <span class="currency">₹</span>
+                    <span class="amount">250</span>
+                    <span class="duration">/ Lifetime</span>
+                </div>
+
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Lifetime Access Cluster (No Subscriptions)
+                    </li>
+                    <li class="feature-item">
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        BEE AI Advanced Mode (Unlimited User Input)
+                    </li>
+                    <li class="feature-item">
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Global Analytics Dashboard
+                    </li>
+                    <li class="feature-item">
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Unlimited Subject & Bank Connectivity
+                    </li>
+                </ul>
+
+                <button class="btn-pay" id="payBtn" onclick="handlePayment()">
+                    <div class="loader" id="payLoader"></div>
+                    <span id="btnText">Purchase Activation Key</span>
+                </button>
+
+                <p style="margin-top: 24px; font-size: 11px; color: #888; line-height: 1.5; text-align: center;">
+                    Payments are secured via 256-bit encryption. Your key will be generated instantly after payment verification.
+                </p>
+            </div>
+
+            <!-- Success Module -->
+            <div class="success-module" id="successModule">
+                <div style="font-size: 12px; color: #4CAF50; font-weight: 800; letter-spacing: 2px; margin-bottom: 8px;">PAYMENT VERIFIED</div>
+                <h2 style="font-size: 24px; font-weight: 800; margin: 10px 0;">Cluster Key Generated</h2>
+                
+                <div class="key-box">
+                    <div style="font-size: 10px; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Copy Key Below</div>
+                    <div class="key-text" id="finalKey">BEEP-XXXX-XXXX</div>
+                </div>
+
+                <p style="font-size: 12px; color: #888; margin-top: 32px; line-height: 1.6; text-align: center;">
+            By purchasing, you agree to BEEPREPARE's Licensing Terms. Each key is valid for single use extension only.
+        </p>
+                <p style="font-size: 12px; color: #888; line-height: 1.6;">Your cluster key is unique to this transaction. Please keep it safe. Use this key in the terminal to unlock full access.</p>
+                
+                <button class="return-btn" onclick="returnToTerminal()">Return to Terminal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handlePayment() {
+            const btn = document.getElementById('payBtn');
+            const loader = document.getElementById('payLoader');
+            const btnText = document.getElementById('btnText');
+
+            btn.disabled = true;
+            btnText.innerText = "AUTHENTICATING...";
+            loader.style.display = "block";
+
+            // Simulating payment process
+            setTimeout(() => {
+                btnText.innerText = "VERIFYING FUNDS...";
+                setTimeout(() => {
+                    document.getElementById('paymentBody').style.display = 'none';
+                    document.getElementById('successModule').style.display = 'block';
+                    
+                    // Generate a cool key
+                    const k1 = Math.random().toString(36).substring(2,6).toUpperCase();
+                    const k2 = Math.random().toString(36).substring(2,6).toUpperCase();
+                    const k3 = Math.floor(1000 + Math.random() * 8999);
+                    document.getElementById('finalKey').innerText = `BEEP-${k1}-${k2}-${k3}`;
+                }, 2000);
+            }, 1500);
+        }
+
+        function returnToTerminal() {
+            window.location.href = '../../activation.html';
+        }
+    </script>
+</body>
+</html>

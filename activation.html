@@ -390,7 +390,12 @@
                 <span>Authenticate Terminal</span>
             </button>
 
-            <a href="index.html" class="abort-link">Terminate Uplink</a>
+            <div style="margin-top: 32px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                <a href="beginners/student/payment.html" class="purchase-link" style="color: var(--primary-gold); font-size: 13px; font-weight: 700; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; padding: 10px 20px; border: 1px dashed var(--border-gold); border-radius: 12px; transition: 0.3s; display: inline-block;">
+                    Where do I find a key? Purchase License for Lifetime !!
+                </a>
+                <a href="index.html" class="abort-link" style="margin-top: 0;">Terminate Uplink</a>
+            </div>
         </div>
     </div>
 
@@ -399,7 +404,7 @@
         <div class="success-text" id="statusHeader">Synchronizing...</div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <!-- Terminal Logic -->
     <script>
         const inputs = document.querySelectorAll('.key-segment');
         const card = document.getElementById('activationBox');
@@ -410,12 +415,7 @@
 
         // Initial Load
         document.addEventListener('DOMContentLoaded', () => {
-            VanillaTilt.init(card, {
-                max: 5,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.1,
-            });
+            // Static Initialization
         });
 
         // Input Management

@@ -145,6 +145,13 @@
             border-color: var(--primary-yellow);
         }
 
+        .chip-imp.active {
+            background: #ff4d4d !important;
+            color: #fff !important;
+            border-color: #ff4d4d !important;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.3);
+        }
+
         /* MCQ Options */
         .mcq-options {
             display: grid;
@@ -319,7 +326,7 @@
             <div class="field-group">
                 <label class="field-label">Exam Focus Tags</label>
                 <div class="chips-container">
-                    <div class="chip" onclick="this.classList.toggle('active')">Important</div>
+                    <div class="chip chip-imp" onclick="this.classList.toggle('active')">Important</div>
                     <div class="chip" onclick="this.classList.toggle('active')">Repeated</div>
                     <div class="chip" onclick="this.classList.toggle('active')">Exam Focus</div>
                     <div class="chip" onclick="this.classList.toggle('active')">Formula Based</div>
