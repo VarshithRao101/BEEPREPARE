@@ -353,6 +353,171 @@
             margin-top: 8px;
             display: block;
         }
+
+        /* Streak System Styles */
+        .streak-badge {
+            background: rgba(255, 69, 0, 0.08);
+            border: 1px solid rgba(255, 69, 0, 0.3);
+            border-radius: 20px;
+            padding: 5px 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            z-index: 100;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.1);
+        }
+
+        .streak-badge:hover {
+            transform: scale(1.1) translateY(-2px);
+            background: rgba(255, 69, 0, 0.15);
+            border-color: rgba(255, 69, 0, 0.7);
+            box-shadow: 0 8px 25px rgba(255, 69, 0, 0.4);
+        }
+
+        .streak-canvas {
+            width: 24px;
+            height: 24px;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            filter: drop-shadow(0 0 5px rgba(255, 69, 0, 0.5));
+        }
+
+        .streak-count {
+            color: #fff;
+            font-weight: 900;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+            letter-spacing: 0.5px;
+        }
+
+        /* Streak Popout */
+        .streak-popout {
+            position: absolute;
+            top: calc(100% + 15px);
+            right: -10px;
+            background: linear-gradient(165deg, rgba(25, 25, 25, 0.98), rgba(15, 15, 15, 0.98));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 69, 0, 0.25);
+            border-radius: 24px;
+            padding: 24px;
+            width: 240px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 30px rgba(255, 69, 0, 0.1);
+            display: none;
+            z-index: 1000;
+            animation: slideInPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Pointer for Popout */
+        .streak-popout::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: 25px;
+            width: 12px;
+            height: 12px;
+            background: #191919;
+            border-left: 1px solid rgba(255, 69, 0, 0.25);
+            border-top: 1px solid rgba(255, 69, 0, 0.25);
+            transform: rotate(45deg);
+        }
+
+        .streak-badge:hover .streak-popout {
+            display: block;
+        }
+
+        .streak-pop-title {
+            font-size: 18px;
+            font-weight: 950;
+            color: #ff4500;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .streak-pop-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .streak-stat-box {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .streak-stat-val {
+            font-size: 22px;
+            font-weight: 900;
+            color: #fff;
+            background: linear-gradient(to bottom, #fff, #bbb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .streak-stat-lbl {
+            font-size: 10px;
+            color: #777;
+            text-transform: uppercase;
+            font-weight: 850;
+            letter-spacing: 1px;
+        }
+
+        .streak-tip-box {
+            margin-top: 20px;
+            padding: 14px;
+            background: rgba(255, 69, 0, 0.04);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 69, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .streak-tip-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: #ff4500;
+            box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+        }
+
+        .streak-tip-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes streakShine {
+            0% { left: -100%; }
+            20% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        @keyframes flamePulse {
+            0%, 100% { transform: scale(1) translateY(0); filter: drop-shadow(0 0 5px rgba(255, 69, 0, 0.5)); }
+            50% { transform: scale(1.2) translateY(-2px); filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.8)); }
+        }
+
+        @keyframes slideInPop {
+            from { opacity: 0; transform: translateY(-20px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
     </style>
     <script src="../../assets/js/icons.js"></script> <!-- Load BeeIcons -->
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
@@ -381,9 +546,39 @@
             <div class="header-title text-gold-glow"
                 style="color: var(--primary); font-weight: 800; font-size: 18px; letter-spacing: 1px;">MY DASHBOARD
             </div>
-            <div class="user-avatar" onclick="window.location.href='student-profile.html'"
-                style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; position: absolute; right: 0; cursor: pointer;">
-                ST</div>
+            
+            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 12px;">
+                <!-- Streak Badge -->
+                <div class="streak-badge adv-card" data-tilt>
+                    <canvas class="streak-canvas" width="16" height="16"></canvas>
+                    <span class="streak-count">5</span>
+                    
+                    <!-- Streak Popout -->
+                    <div class="streak-popout">
+                        <div class="streak-pop-title">
+                            <canvas class="streak-canvas" width="16" height="16" style="width: 28px; height: 28px;"></canvas>
+                            Streak Active!
+                        </div>
+                        <div class="streak-pop-stats">
+                            <div class="streak-stat-box">
+                                <div class="streak-stat-val">5</div>
+                                <div class="streak-stat-lbl">CURRENT</div>
+                            </div>
+                            <div class="streak-stat-box">
+                                <div class="streak-stat-val">12</div>
+                                <div class="streak-stat-lbl">BEST</div>
+                            </div>
+                        </div>
+                        <div class="streak-tip-box">
+                            <div class="streak-tip-text">Don't break the chain! Complete 1 test today to reach a 6-day streak.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-avatar" onclick="window.location.href='student-profile.html'"
+                    style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; cursor: pointer;">
+                    ST</div>
+            </div>
         </div>
 
         <!-- Welcome -->
@@ -540,9 +735,9 @@
             </svg>
             <span>Test</span>
         </a>
-        <!-- NEW BEE AI NAV -->
+        <!-- UNIFIED BEE AI NAV -->
         <a href="../ai-chat.html" class="nav-item ai-nav">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
                 <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
                 <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
@@ -598,6 +793,65 @@
                 el.classList.add('hud-element');
                 el.style.animationDelay = `${index * 0.08}s`;
             });
+
+            // PIXEL FIRE ANIMATION
+            const canvases = document.querySelectorAll(".streak-canvas");
+            const yArr = [2, 1, 0, 0, 0, 0, 1, 2];
+            const maxArr = [7, 9, 11, 13, 13, 11, 9, 7];
+            const minArr = [4, 7, 8, 10, 10, 8, 7, 4];
+            
+            let prev = Date.now();
+            const fps = 10;
+            const interval = 1000 / fps;
+
+            function animateFlame() {
+                const now = Date.now();
+                if (now - prev > interval) {
+                    prev = now;
+                    canvases.forEach(canvas => {
+                        const ctx = canvas.getContext("2d");
+                        ctx.setTransform(1, 0, 0, 1, 0, 0);
+                        ctx.clearRect(0, 0, 16, 16);
+                        ctx.translate(0, 16);
+                        ctx.scale(1, -1);
+
+                        // Outer Flame
+                        ctx.strokeStyle = "#d14234";
+                        for (let x = 4; x < 12; x++) {
+                            let i = x - 4;
+                            let a = Math.random() * (maxArr[i] - minArr[i] + 1) + minArr[i];
+                            ctx.beginPath();
+                            ctx.moveTo(x + 0.5, yArr[i]);
+                            ctx.lineTo(x + 0.5, a);
+                            ctx.stroke();
+                        }
+
+                        // Inner Flame
+                        ctx.strokeStyle = "#f2a55f";
+                        for (let x = 5; x < 11; x++) {
+                            let i = x - 4;
+                            let a = Math.random() * (maxArr[i] - 5 - (minArr[i] - 5) + 1) + (minArr[i] - 5);
+                            ctx.beginPath();
+                            ctx.moveTo(x + 0.5, yArr[i] + 1);
+                            ctx.lineTo(x + 0.5, a);
+                            ctx.stroke();
+                        }
+
+                        // Core Flame
+                        ctx.strokeStyle = "#e8dec5";
+                        for (let x = 7; x < 9; x++) {
+                            let i = x - 4;
+                            let a = Math.random() * (maxArr[i] - 9 - (minArr[i] - 9) + 1) + (minArr[i] - 9);
+                            ctx.beginPath();
+                            ctx.moveTo(x + 0.5, yArr[i]);
+                            ctx.lineTo(x + 0.5, a);
+                            ctx.stroke();
+                        }
+                    });
+                }
+                requestAnimationFrame(animateFlame);
+            }
+            animateFlame();
         });
     </script>
 </body>

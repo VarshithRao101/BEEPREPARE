@@ -8,6 +8,24 @@
     <link rel="stylesheet" href="../../assets/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* Doubts Indicator */
+        .doubt-badge-nav {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(20px);
+            background: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            border: 2px solid #141414;
+        }
         .app-container {
             padding-bottom: 90px;
         }
@@ -407,6 +425,15 @@
                     d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
             </svg>
             <span>Bank</span>
+        </a>
+        <!-- UNIFIED BEE AI NAV -->
+        <a href="../ai-chat.html" class="nav-item ai-nav">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
+                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
+                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
+            </svg>
+            <span>BEE AI</span>
         </a>
         <a href="generate-paper.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="currentColor">

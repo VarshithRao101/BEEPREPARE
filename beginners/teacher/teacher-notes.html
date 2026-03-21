@@ -13,6 +13,24 @@
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
     </script>
     <style>
+        /* Doubts Indicator */
+        .doubt-badge-nav {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(20px);
+            background: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            border: 2px solid #141414;
+        }
         .app-container {
             padding-bottom: 120px !important;
             display: block !important;
@@ -803,13 +821,21 @@
             </svg>
             <span>Bank</span>
         </a>
+        <a href="../ai-chat.html" class="nav-item ai-nav">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
+                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
+                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
+            </svg>
+            <span>BEE AI</span>
+        </a>
         <a href="generate-paper.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
             </svg>
             <span>Generate</span>
         </a>
-        <a href="teacher-profile.html" class="nav-item active">
+        <a href="teacher-profile.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <path
                     d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />

@@ -494,6 +494,25 @@
                 transform: translateY(0);
             }
         }
+
+        /* Doubts Indicator */
+        .doubt-badge-nav {
+            position: absolute;
+            top: 2px;
+            right: 50%;
+            transform: translateX(20px);
+            background: #ff4d4d;
+            color: white;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            border: 2px solid #141414;
+        }
     </style>
 
 <body>
@@ -654,6 +673,24 @@
                 </div>
             </div>
 
+            <!-- Student Doubts Option -->
+            <div class="menu-item" onclick="window.location.href='student-doubts.html'">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: var(--primary);">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="menu-text">Student Doubts</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="doubt-badge-profile" style="background: #ff4d4d; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
+                        3
+                    </div>
+                    <div class="menu-arrow">→</div>
+                </div>
+            </div>
+
             <!-- Manage Subjects (Monetization Section 1) -->
             <div class="menu-item featured-item hud-element" onclick="showPaywall()" style="border: 1px solid rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.05);">
                 <div class="menu-left">
@@ -670,6 +707,26 @@
                 <div style="background: var(--primary); color: #000; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 800;">UPGRADE</div>
             </div>
         </div>
+        <!-- Support -->
+        <div class="section-divider"><span class="section-label">Support</span>
+            <div class="divider-line"></div>
+        </div>
+        <div class="settings-menu">
+            <div class="menu-item" onclick="window.location.href='teacher-feedback.html'">
+                <div class="menu-left">
+                    <div class="menu-icon" style="color: #FFD700;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div class="menu-text">Help & Feedback</div>
+                </div>
+                <div class="menu-arrow">→</div>
+            </div>
+        </div>
+
         <!-- Preferences -->
         <div class="section-divider"><span class="section-label">Preferences</span>
             <div class="divider-line"></div>
@@ -747,9 +804,9 @@
             </svg>
             <span>Bank</span>
         </a>
-        <!-- NEW BEE AI NAV -->
+        <!-- UNIFIED BEE AI NAV -->
         <a href="../ai-chat.html" class="nav-item ai-nav">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
                 <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
                 <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>

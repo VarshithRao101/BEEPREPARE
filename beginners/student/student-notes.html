@@ -254,6 +254,114 @@
             margin: 0 auto 16px auto;
             color: rgba(255, 255, 255, 0.1);
         }
+
+        /* Inline Ask Doubt Section */
+        .ask-doubt-bar {
+            background: linear-gradient(90deg, rgba(255,165,0,0.1), rgba(255,215,0,0.05));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ask-doubt-bar:hover {
+            background: linear-gradient(90deg, rgba(255,165,0,0.15), rgba(255,215,0,0.1));
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1);
+        }
+
+        .ask-doubt-bar .bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ask-doubt-bar .bar-icon {
+            color: var(--primary);
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
+            border-radius: 10px;
+            display: flex;
+        }
+
+        .ask-doubt-bar .bar-text h4 {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .ask-doubt-bar .bar-text p {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+            margin: 2px 0 0 0;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Expanded Form */
+        .doubt-form-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1);
+            background: rgba(20, 20, 20, 0.4);
+            border-radius: 0 0 16px 16px;
+            margin-top: -12px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-top: none;
+        }
+
+        .doubt-form-container.active {
+            max-height: 1000px;
+            transition: max-height 0.4s ease-in;
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            color: var(--primary);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .btn-send-doubt {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn-send-doubt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
     </style>
 </head>
 
@@ -296,6 +404,63 @@
             <div class="subj-tab active">Mathematics</div>
             <div class="subj-tab">Physics</div>
             <div class="subj-tab">Chemistry</div>
+        </div>
+
+        <!-- Ask Doubt Inline Section -->
+        <div class="ask-doubt-bar hud-element" onclick="toggleDoubtForm()" id="doubtBar">
+            <div class="bar-left">
+                <div class="bar-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="bar-text">
+                    <h4>Have a doubt? Ask Mrs. Verma</h4>
+                    <p>Instant reply from your subject teacher</p>
+                </div>
+            </div>
+            <div class="bar-right">
+                <svg id="barChevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="transition: 0.3s;">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Hidden Doubt Form -->
+        <div class="doubt-form-container" id="doubtForm">
+            <div class="form-group">
+                <label class="form-label">Which Chapter?</label>
+                <select id="inline-doubt-chapter" class="subj-tab" style="width: 100%; border-radius: 12px; padding: 10px 16px; background: rgba(0,0,0,0.2);">
+                    <option>Real Numbers</option>
+                    <option>Polynomials</option>
+                    <option>Pair of Linear Equations</option>
+                    <option>Quadratic Equations</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Explain your problem</label>
+                <textarea id="inline-doubt-text" placeholder="Be specific so your teacher can help better..." 
+                    style="width: 100%; height: 120px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: #fff; font-family: inherit; resize: none;"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Attach Image (Optional)</label>
+                <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2); cursor: pointer;" onclick="document.getElementById('inline-doubt-file').click()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <span id="inline-file-label" style="font-size: 13px; color: #888;">Upload screenshot or photo</span>
+                    <input type="file" id="inline-doubt-file" style="display: none;" onchange="updateInlineFileName(this)">
+                </div>
+            </div>
+            <button class="btn-send-doubt" onclick="sendInlineDoubt()">
+                Send Doubt to Teacher
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
         </div>
 
         <!-- Real Numbers Chapter (Has Content) -->
@@ -393,7 +558,6 @@
                 <div style="font-size: 12px;">Your teacher hasn't uploaded notes for this chapter yet.</div>
             </div>
         </div>
-
     </div>
 
     <!-- Bottom Nav -->
@@ -415,8 +579,10 @@
             <span>Test</span>
         </a>
         <a href="../ai-chat.html" class="nav-item ai-nav">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
+                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
+                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
             </svg>
             <span>BEE AI</span>
         </a>
@@ -428,7 +594,7 @@
             </svg>
             <span>Banks</span>
         </a>
-        <a href="student-profile.html" class="nav-item active">
+        <a href="student-profile.html" class="nav-item">
             <svg viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
@@ -438,6 +604,67 @@
     </nav>
 
     <script>
+        function toggleDoubtForm() {
+            const form = document.getElementById('doubtForm');
+            const bar = document.getElementById('doubtBar');
+            const chevron = document.getElementById('barChevron');
+            
+            form.classList.toggle('active');
+            
+            if (form.classList.contains('active')) {
+                chevron.style.transform = 'rotate(180deg)';
+                bar.style.borderRadius = '16px 16px 0 0';
+            } else {
+                chevron.style.transform = 'rotate(0deg)';
+                bar.style.borderRadius = '16px';
+            }
+        }
+
+        function updateInlineFileName(input) {
+            const label = document.getElementById('inline-file-label');
+            if (input.files && input.files[0]) {
+                label.innerText = '✓ ' + input.files[0].name;
+                label.style.color = 'var(--primary)';
+            }
+        }
+
+        function sendInlineDoubt() {
+            const text = document.getElementById('inline-doubt-text').value;
+            const chapter = document.getElementById('inline-doubt-chapter').value;
+
+            if (!text) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Please describe your doubt before sending!',
+                    background: '#141414', color: '#fff'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Sending Doubt...',
+                text: 'Your question is being sent to Mrs. Verma',
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading() },
+                background: '#141414', color: '#fff'
+            }).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sent Successfully!',
+                    text: 'Mrs. Verma will be notified. You can track this in the Doubts section.',
+                    background: '#141414', color: '#fff'
+                });
+                
+                // Clear and close
+                document.getElementById('inline-doubt-text').value = '';
+                document.getElementById('inline-file-label').innerText = 'Upload screenshot or photo';
+                document.getElementById('inline-file-label').style.color = '#888';
+                toggleDoubtForm();
+            });
+        }
+
         function downloadFile(filename) {
             Swal.fire({
                 title: 'Preparing Download...',
@@ -447,9 +674,8 @@
                 didOpen: () => { Swal.showLoading() },
                 background: '#141414', color: '#fff'
             }).then(() => {
-                // Actually trigger browser download of a dummy payload simulating the PDF
                 const a = document.createElement('a');
-                a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('Simulated Document Content for: ' + filename + '\n\nThis confirms the download logic successfully streams the file payload from the server to your device.');
+                a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('Simulated Document Content for: ' + filename);
                 a.download = filename;
                 document.body.appendChild(a);
                 a.click();

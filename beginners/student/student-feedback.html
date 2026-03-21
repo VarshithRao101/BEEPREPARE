@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - BEEPREPARE</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <style>
+        :root {
+            --primary: #FFD700;
+            --bg-dark: #0A0A0A;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            padding: 24px 16px 100px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .back-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-4px);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feedback-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            color: #fff;
+            font-size: 15px;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        textarea {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            color: #fff;
+            font-size: 15px;
+            min-height: 120px;
+            resize: none;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .rating-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .star {
+            font-size: 32px;
+            color: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .star.active {
+            color: var(--primary);
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+            transform: scale(1.2);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.02);
+        }
+
+        .upload-icon {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .upload-text {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.2);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .auto-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* Success Message Overlay */
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+
+        .success-desc {
+            color: #888;
+            max-width: 300px;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <button class="back-btn" onclick="window.history.back()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+            <h1>Share Feedback</h1>
+        </div>
+
+        <div class="feedback-card">
+            <div class="form-group">
+                <label>Feedback Type</label>
+                <div class="select-wrapper">
+                    <select id="feedbackType">
+                        <option value="bug">🐞 Report a Bug</option>
+                        <option value="feature">💡 Suggest a Feature</option>
+                        <option value="star" selected>⭐ Rate Experience</option>
+                        <option value="content">🧠 Content Issue</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Tell us more</label>
+                <textarea id="feedbackMsg" placeholder="Describe your experience or suggest an improvement..."></textarea>
+                <div class="auto-tag">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    Page detected: student-profile.html
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Rating</label>
+                <div class="rating-container" id="ratingStars">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Screenshots (Optional)</label>
+                <div class="upload-area">
+                    <div class="upload-icon">📎</div>
+                    <div class="upload-text">Tap to upload image</div>
+                    <input type="file" id="fileUpload" style="display: none;">
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="submitFeedback()">
+                Submit Feedback
+            </button>
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-icon">✓</div>
+        <div class="success-title">Feedback Sent!</div>
+        <div class="success-desc">Thanks for helping improve BEEPREPARE. We'll look into this immediately.</div>
+        <button class="submit-btn" style="width: auto; padding: 14px 40px;" onclick="window.history.back()">
+            Back to Profile
+        </button>
+    </div>
+
+    <script>
+        // Star Rating Logic
+        const stars = document.querySelectorAll('.star');
+        let currentRating = 0;
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                currentRating = star.dataset.rating;
+                updateStars();
+            });
+        });
+
+        function updateStars() {
+            stars.forEach(star => {
+                if(star.dataset.rating <= currentRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Handle Form Submission
+        function submitFeedback() {
+            const msg = document.getElementById('feedbackMsg').value;
+            if(!msg && currentRating === 0) {
+                alert('Please provide some feedback or a rating!');
+                return;
+            }
+
+            // Simulate submission
+            document.getElementById('successOverlay').style.display = 'flex';
+        }
+
+        // Simple file upload trigger
+        document.querySelector('.upload-area').onclick = () => {
+            document.getElementById('fileUpload').click();
+        };
+
+        document.getElementById('fileUpload').onchange = (e) => {
+            if(e.target.files.length > 0) {
+                document.querySelector('.upload-text').innerText = e.target.files[0].name;
+                document.querySelector('.upload-area').style.borderColor = 'var(--primary)';
+            }
+        };
+    </script>
+</body>
+</html>
