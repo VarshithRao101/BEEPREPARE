@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upgrade License - BEEPREPARE</title>
     <link rel="stylesheet" href="../../assets/css/style.css">
     <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --primary: #FFD700;
@@ -15,7 +17,7 @@
             --card-glass: rgba(15, 15, 15, 0.9);
             --border-gold: rgba(255, 215, 0, 0.2);
         }
-        
+
         body {
             background-color: var(--bg) !important;
             color: #fff !important;
@@ -36,8 +38,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .header {
@@ -96,8 +105,10 @@
         .pay-card::before {
             content: '';
             position: absolute;
-            top: -20%; right: -20%;
-            width: 150px; height: 150px;
+            top: -20%;
+            right: -20%;
+            width: 150px;
+            height: 150px;
             background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
             opacity: 0.1;
             filter: blur(40px);
@@ -118,9 +129,27 @@
             text-align: center;
         }
 
-        .currency { font-size: 24px; font-weight: 800; color: #fff; vertical-align: top; margin-top: 10px; display: inline-block; }
-        .amount { font-size: 64px; font-weight: 800; color: var(--primary); letter-spacing: -2px; }
-        .duration { font-size: 16px; color: #666; font-weight: 500; }
+        .currency {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            vertical-align: top;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .amount {
+            font-size: 64px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -2px;
+        }
+
+        .duration {
+            font-size: 16px;
+            color: #666;
+            font-weight: 500;
+        }
 
         .feature-list {
             list-style: none;
@@ -141,7 +170,8 @@
 
         .check-icon {
             color: var(--primary);
-            width: 18px; height: 18px;
+            width: 18px;
+            height: 18px;
             flex-shrink: 0;
         }
 
@@ -177,12 +207,19 @@
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .key-box {
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             border: 1px solid var(--border-gold);
             padding: 24px;
             border-radius: 16px;
@@ -210,7 +247,7 @@
             margin-top: 20px;
             transition: 0.3s;
         }
-        
+
         .return-btn:hover {
             border-color: #fff;
             color: #fff;
@@ -218,28 +255,33 @@
 
         /* Loading Simulation */
         .loader {
-            width: 20px; height: 20px;
-            border: 3px solid rgba(0,0,0,0.1);
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
             border-top-color: #000;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             display: none;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
         /* GEOMETRIC BACKGROUND */
-        body { 
+        body {
             background: url('../../assets/images/bg.avif') no-repeat center center fixed !important;
             background-size: cover !important;
             overflow-x: hidden;
             position: relative;
         }
-        
+
         .bg-grid {
             position: fixed;
             inset: 0;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 60px 60px;
@@ -250,7 +292,7 @@
         .bg-lines {
             position: fixed;
             inset: 0;
-            background: 
+            background:
                 linear-gradient(135deg, transparent 48%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 52%),
                 linear-gradient(45deg, transparent 48%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 52%);
             background-size: 300px 300px;
@@ -258,12 +300,15 @@
         }
     </style>
 </head>
+
 <body>
     <div class="bg-grid"></div>
     <div class="bg-lines"></div>
     <div class="payment-container" id="mainContainer" style="max-width: 520px;">
-        <div class="pay-card" style="background: #000 !important; border: 1px solid var(--primary) !important; box-shadow: 0 0 50px rgba(0,0,0,1) !important;">
-            <div class="header" style="border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 24px; margin-bottom: 24px;">
+        <div class="pay-card"
+            style="background: #000 !important; border: 1px solid var(--primary) !important; box-shadow: 0 0 50px rgba(0,0,0,1) !important;">
+            <div class="header"
+                style="border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 24px; margin-bottom: 24px;">
                 <div class="close-btn" onclick="window.history.back()">✕ Cancel Payment</div>
                 <h1 class="title">Secure Activation</h1>
                 <p class="subtitle" style="color: #aaa;">Complete payment to receive your unique system cluster key.</p>
@@ -271,7 +316,7 @@
 
             <div id="paymentBody">
                 <span class="bundle-label">Access Cluster X-99</span>
-                
+
                 <div class="price-section">
                     <span class="currency">₹</span>
                     <span class="amount">250</span>
@@ -280,19 +325,27 @@
 
                 <ul class="feature-list">
                     <li class="feature-item">
-                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                         Lifetime Access Cluster (No Subscriptions)
                     </li>
                     <li class="feature-item">
-                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                         BEE AI Advanced Mode (Unlimited User Input)
                     </li>
                     <li class="feature-item">
-                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                         Global Analytics Dashboard
                     </li>
                     <li class="feature-item">
-                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <svg class="check-icon" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
                         Unlimited Subject & Bank Connectivity
                     </li>
                 </ul>
@@ -303,25 +356,32 @@
                 </button>
 
                 <p style="margin-top: 24px; font-size: 11px; color: #888; line-height: 1.5; text-align: center;">
-                    Payments are secured via 256-bit encryption. Your key will be generated instantly after payment verification.
+                    Payments are secured via 256-bit encryption. Your key will be generated instantly after payment
+                    verification.
                 </p>
             </div>
 
             <!-- Success Module -->
             <div class="success-module" id="successModule">
-                <div style="font-size: 12px; color: #4CAF50; font-weight: 800; letter-spacing: 2px; margin-bottom: 8px;">PAYMENT VERIFIED</div>
+                <div
+                    style="font-size: 12px; color: #4CAF50; font-weight: 800; letter-spacing: 2px; margin-bottom: 8px;">
+                    PAYMENT VERIFIED</div>
                 <h2 style="font-size: 24px; font-weight: 800; margin: 10px 0;">Cluster Key Generated</h2>
-                
+
                 <div class="key-box">
-                    <div style="font-size: 10px; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Copy Key Below</div>
+                    <div
+                        style="font-size: 10px; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                        Copy Key Below</div>
                     <div class="key-text" id="finalKey">BEEP-XXXX-XXXX</div>
                 </div>
 
                 <p style="font-size: 12px; color: #888; margin-top: 32px; line-height: 1.6; text-align: center;">
-            By purchasing, you agree to BEEPREPARE's Licensing Terms. Each key is valid for single use extension only.
-        </p>
-                <p style="font-size: 12px; color: #888; line-height: 1.6;">Your cluster key is unique to this transaction. Please keep it safe. Use this key in the terminal to unlock full access.</p>
-                
+                    By purchasing, you agree to BEEPREPARE's Licensing Terms. Each key is valid for single use extension
+                    only.
+                </p>
+                <p style="font-size: 12px; color: #888; line-height: 1.6;">Your cluster key is unique to this
+                    transaction. Please keep it safe. Use this key in the terminal to unlock full access.</p>
+
                 <button class="return-btn" onclick="returnToTerminal()">Return to Terminal</button>
             </div>
         </div>
@@ -343,10 +403,10 @@
                 setTimeout(() => {
                     document.getElementById('paymentBody').style.display = 'none';
                     document.getElementById('successModule').style.display = 'block';
-                    
+
                     // Generate a cool key
-                    const k1 = Math.random().toString(36).substring(2,6).toUpperCase();
-                    const k2 = Math.random().toString(36).substring(2,6).toUpperCase();
+                    const k1 = Math.random().toString(36).substring(2, 6).toUpperCase();
+                    const k2 = Math.random().toString(36).substring(2, 6).toUpperCase();
                     const k3 = Math.floor(1000 + Math.random() * 8999);
                     document.getElementById('finalKey').innerText = `BEEP-${k1}-${k2}-${k3}`;
                 }, 2000);
@@ -358,4 +418,5 @@
         }
     </script>
 </body>
+
 </html>

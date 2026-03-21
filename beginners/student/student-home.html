@@ -846,6 +846,27 @@
         </a>
     </nav>
     <script>
+        // PERMANENT BROWSER BACK DISABLE (FLATTEN HISTORY)
+        (function () {
+            // Lock the terminal anchor
+            history.pushState(null, document.title, location.href);
+            window.onpopstate = function () {
+                history.pushState(null, document.title, location.href);
+            };
+
+            // Capture all link clicks and force 'replace' for horizontal navigation
+            document.addEventListener('click', e => {
+                const link = e.target.closest('.nav-item, a');
+                if (link && !link.hasAttribute('download')) {
+                    const target = link.getAttribute('href');
+                    if (target && target.includes('.html') && !target.startsWith('http')) {
+                        e.preventDefault();
+                        window.location.replace(target);
+                    }
+                }
+            });
+        })();
+
         // Inject Subject Icons
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof BeeIcons !== 'undefined') {

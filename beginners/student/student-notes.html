@@ -716,6 +716,15 @@
             });
         });
     </script>
+    <script>
+        // History Guard: Force back to Home
+        (function() {
+            history.pushState(null, null, location.href);
+            window.onpopstate = function() {
+                window.location.replace('student-home.html');
+            };
+        })();
+    </script>
 </body>
 
 </html>

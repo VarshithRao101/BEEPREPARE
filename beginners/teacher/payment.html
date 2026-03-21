@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,55 +14,131 @@
             --bg: #0a0a0a;
             --card-bg: #141414;
         }
-        body { background: var(--bg); color: #fff; font-family: 'Inter', sans-serif; }
-        .payment-container { max-width: 500px; margin: 40px auto; padding: 24px; text-align: center; }
+
+        body {
+            background: var(--bg);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .payment-container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 24px;
+            text-align: center;
+        }
+
         .pay-card {
             background: var(--card-bg);
             border: 1px solid rgba(255, 215, 0, 0.1);
             border-radius: 24px;
             padding: 40px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
             position: relative;
             overflow: hidden;
         }
+
         .pay-card::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
             background: radial-gradient(circle, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
             pointer-events: none;
         }
-        .price-badge { font-size: 48px; font-weight: 800; color: var(--primary); margin: 24px 0; }
-        .price-badge span { font-size: 18px; color: #666; font-weight: 400; }
-        
-        .feature-list { text-align: left; margin: 32px 0; list-style: none; padding: 0; }
-        .feature-list li { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; color: #ccc; font-size: 14px; }
-        .feature-list svg { color: var(--primary); flex-shrink: 0; }
+
+        .price-badge {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 24px 0;
+        }
+
+        .price-badge span {
+            font-size: 18px;
+            color: #666;
+            font-weight: 400;
+        }
+
+        .feature-list {
+            text-align: left;
+            margin: 32px 0;
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .feature-list svg {
+            color: var(--primary);
+            flex-shrink: 0;
+        }
 
         .btn-buy {
-            width: 100%; padding: 18px; border-radius: 12px; background: var(--primary);
-            color: #000; font-weight: 800; border: none; cursor: pointer; font-size: 16px;
-            transition: 0.3s; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+            width: 100%;
+            padding: 18px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #000;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
         }
-        .btn-buy:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3); }
+
+        .btn-buy:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+        }
 
         .key-reveal {
-            display: none; background: #000; border: 1px dashed #444; padding: 20px;
-            border-radius: 12px; margin-top: 24px; animation: slideUp 0.5s ease-out;
+            display: none;
+            background: #000;
+            border: 1px dashed #444;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+            animation: slideUp 0.5s ease-out;
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } }
-        .access-key { font-family: monospace; font-size: 20px; color: var(--primary); letter-spacing: 2px; font-weight: 800; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+
+        .access-key {
+            font-family: monospace;
+            font-size: 20px;
+            color: var(--primary);
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
 
         /* GEOMETRIC BACKGROUND */
-        body { 
+        body {
             background: url('../../assets/images/bg.avif') no-repeat center center fixed !important;
             background-size: cover !important;
             overflow-x: hidden;
             position: relative;
         }
-        
+
         .bg-grid {
             position: fixed;
             inset: 0;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
             background-size: 60px 60px;
@@ -72,7 +149,7 @@
         .bg-lines {
             position: fixed;
             inset: 0;
-            background: 
+            background:
                 linear-gradient(135deg, transparent 48%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 52%),
                 linear-gradient(45deg, transparent 48%, rgba(255, 255, 255, 0.02) 49%, rgba(255, 255, 255, 0.02) 51%, transparent 52%);
             background-size: 300px 300px;
@@ -80,35 +157,54 @@
         }
     </style>
 </head>
+
 <body>
     <div class="bg-grid"></div>
     <div class="bg-lines"></div>
     <div class="payment-container" style="max-width: 520px;">
 
-        <div class="pay-card" style="background: #000 !important; border: 1px solid var(--primary) !important; box-shadow: 0 0 50px rgba(0,0,0,1) !important;">
+        <div class="pay-card"
+            style="background: #000 !important; border: 1px solid var(--primary) !important; box-shadow: 0 0 50px rgba(0,0,0,1) !important;">
             <header style="margin-bottom: 32px; border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 24px;">
-                <div onclick="window.history.back()" style="cursor:pointer; color:#888; font-size: 11px; font-weight: 700; margin-bottom: 16px; display: inline-block; text-transform: uppercase; letter-spacing: 2px;">✕ Close Page</div>
-                <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px;">Expand Your Capacity</h1>
+                <div onclick="window.history.back()"
+                    style="cursor:pointer; color:#888; font-size: 11px; font-weight: 700; margin-bottom: 16px; display: inline-block; text-transform: uppercase; letter-spacing: 2px;">
+                    ✕ Close Page</div>
+                <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px;">Expand Your Capacity
+                </h1>
                 <p style="color: #aaa; font-size: 14px;">Add a new permanent subject slot to your teacher account.</p>
             </header>
 
-            <div style="text-transform: uppercase; font-size: 11px; font-weight: 800; color: #888; letter-spacing: 2px;">Subject Expansion Pack</div>
-            <div class="price-badge" style="color: var(--primary); font-size: 54px; margin: 20px 0;">₹100 <span style="color: #666; font-size: 16px;">/ One-time</span></div>
-            
+            <div
+                style="text-transform: uppercase; font-size: 11px; font-weight: 800; color: #888; letter-spacing: 2px;">
+                Subject Expansion Pack</div>
+            <div class="price-badge" style="color: var(--primary); font-size: 54px; margin: 20px 0;">₹100 <span
+                    style="color: #666; font-size: 16px;">/ One-time</span></div>
+
             <ul class="feature-list" style="color: #eee;">
-                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> 1 Permanent Subject Slot</li>
-                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Unlimited Question Bank for Subject</li>
-                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Lifetime Student Access Rights</li>
-                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Priority Cloud Syncing</li>
+                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> 1 Permanent Subject Slot</li>
+                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Unlimited Question Bank for Subject</li>
+                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Lifetime Student Access Rights</li>
+                <li><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg> Priority Cloud Syncing</li>
             </ul>
 
             <button class="btn-buy" id="buy-btn" onclick="processPayment()">Purchase Subject Slot</button>
 
             <div id="key-result" class="key-reveal">
-                <p style="font-size: 12px; color: #888; margin-bottom: 12px; text-transform: uppercase;">Payment Successful! Your Key:</p>
+                <p style="font-size: 12px; color: #888; margin-bottom: 12px; text-transform: uppercase;">Payment
+                    Successful! Your Key:</p>
                 <div class="access-key" id="generated-key">BEEP-8291-ZX92</div>
-                <p style="font-size: 11px; color: #555; margin-top: 16px;">Copy this key and enter it in the "Redeem" popup in your profile editor.</p>
-                <button onclick="window.close()" style="margin-top: 20px; background: transparent; border: 1px solid #333; color: #888; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px;">Done</button>
+                <p style="font-size: 11px; color: #555; margin-top: 16px;">Copy this key and enter it in the "Redeem"
+                    popup in your profile editor.</p>
+                <button onclick="window.close()"
+                    style="margin-top: 20px; background: transparent; border: 1px solid #333; color: #888; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 12px;">Done</button>
             </div>
         </div>
 
@@ -127,12 +223,13 @@
             setTimeout(() => {
                 btn.style.display = 'none';
                 document.getElementById('key-result').style.display = 'block';
-                const k1 = Math.random().toString(36).substring(2,6).toUpperCase();
+                const k1 = Math.random().toString(36).substring(2, 6).toUpperCase();
                 const k2 = Math.floor(1000 + Math.random() * 9000);
-                const k3 = Math.random().toString(36).substring(2,6).toUpperCase();
+                const k3 = Math.random().toString(36).substring(2, 6).toUpperCase();
                 document.getElementById('generated-key').innerText = `BEEP-${k1}-${k2}-${k3}`;
             }, 2000);
         }
     </script>
 </body>
+
 </html>
