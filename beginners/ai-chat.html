@@ -250,39 +250,39 @@
         /* --- EMPTY LANDING (Step 10 Refined) --- */
         .empty-landing { 
             text-align: center; 
-            margin-top: 10vh; 
+            margin-top: 5vh; 
             animation: fadeIn 0.8s ease; 
             background: rgba(255, 215, 0, 0.1); /* Subtle light gold mist */
-            padding: 40px;
-            border-radius: 40px;
+            padding: 24px 30px;
+            border-radius: 30px;
             backdrop-filter: blur(20px);
             border: 1px solid rgba(0, 0, 0, 0.1);
-            max-width: 800px;
+            max-width: 700px;
             margin-left: auto;
             margin-right: auto;
         }
 
         .empty-landing h1 { 
-            font-size: 46px; 
+            font-size: 36px; 
             font-weight: 900; 
-            margin-bottom: 30px; 
+            margin-bottom: 20px; 
             color: #111; /* DARK TEXT (Requested) */
-            letter-spacing: -1.5px;
+            letter-spacing: -1px;
         }
 
         .suggestion-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            max-width: 700px; 
+            gap: 12px; 
+            max-width: 650px; 
             margin: 0 auto; 
         }
 
         .suggest-card {
             background: rgba(255, 255, 255, 0.3); /* Lighter card */
             border: 1px solid rgba(0, 0, 0, 0.2); /* DARK OUTLINE (Requested) */
-            padding: 24px;
-            border-radius: 20px;
+            padding: 16px 20px;
+            border-radius: 16px;
             cursor: pointer;
             transition: 0.3s;
             text-align: left;
@@ -291,20 +291,21 @@
         .suggest-card:hover { 
             background: var(--gold-primary); 
             border-color: #000; 
-            transform: translateY(-5px); 
+            transform: translateY(-3px); 
         }
 
         .suggest-card h3 { 
-            font-size: 15px; 
+            font-size: 14px; 
             color: #000; /* Darker heading */
-            margin-bottom: 6px; 
+            margin-bottom: 4px; 
             font-weight: 700; 
         }
 
         .suggest-card p { 
-            font-size: 13px; 
+            font-size: 12px; 
             color: rgba(0, 0, 0, 0.6); /* Darker secondary text */
             margin: 0; 
+            line-height: 1.3;
         }
 
         /* --- ULTIMATE INPUT --- */
@@ -313,22 +314,42 @@
             bottom: 0; 
             left: 0; 
             right: 0; 
-            padding: 20px 18% 45px; 
-            background: transparent; /* REMOVED DARK GRADIENT (Requested) */
+            padding: 10px 18% 15px; /* DRASTICALLY reduced bottom/top padding to drag it downwards */
+            background: transparent;
             z-index: 1000; 
         }
         .input-pill-modern {
-            background: rgba(20, 20, 20, 0.9);
+            background: rgba(20, 20, 20, 0.95);
             backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 10px 14px;
+            border-radius: 24px;
+            padding: 6px 12px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 1);
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
         }
-        .chat-textarea { flex: 1; background: transparent; border: none; color: #fff; padding: 12px 6px; font-size: 16px; outline: none; resize: none; max-height: 180px; font-family: inherit; }
+        .chat-textarea::-webkit-scrollbar {
+            display: none;
+        }
+        .chat-textarea { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            padding: 4px 6px; 
+            margin: 4px 0;
+            font-size: 15px; 
+            outline: none; 
+            resize: none; 
+            height: 24px;
+            min-height: 24px;
+            max-height: 120px; 
+            font-family: inherit; 
+            box-sizing: border-box;
+            line-height: 1.5;
+            scrollbar-width: none; /* Firefox */
+        }
 
         .btn-pill-action { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: none; color: #fff; cursor: pointer; transition: 0.2s; }
         .btn-pill-action:hover { background: rgba(255,215,0,0.1); color: var(--gold-primary); }
@@ -337,7 +358,7 @@
         .btn-send-yellow:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,215,0,0.5); }
 
         /* QUICK CHIPS (GREY - Requested) */
-        .quick-chips { display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; }
+        .quick-chips { display: flex; gap: 10px; margin-bottom: 8px; justify-content: center; }
         .q-chip { 
             background: rgba(50, 50, 50, 0.85); /* Solid Grey */
             border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -359,8 +380,8 @@
         @keyframes waveGrow { 0%, 100% { height: 20px; } 50% { height: 60px; } }
 
         .upload-popup { position: absolute; bottom: calc(100% + 20px); left: 15px; background: rgba(15, 15, 15, 0.95); border: 1px solid var(--glass-border); border-radius: 16px; padding: 10px; min-width: 180px; display: none; flex-direction: column; z-index: 1001; }
-        .upload-opt { padding: 12px 15px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; }
-        .upload-opt:hover { background: rgba(255, 215, 0, 0.1); color: var(--gold-primary); }
+        .upload-opt { padding: 12px 15px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; color: #ffffff !important; }
+        .upload-opt:hover { background: rgba(255, 215, 0, 0.1); color: var(--gold-primary) !important; }
 
         /* TYPING */
         .typing-bubble { display: flex; gap: 5px; padding: 14px 20px; }
@@ -460,9 +481,18 @@
 
                 <div class="input-pill-modern">
                     <div class="upload-popup" id="u-popup">
-                        <div class="upload-opt" onclick="closePopup()">📄 Upload PDF</div>
-                        <div class="upload-opt" onclick="closePopup()">🖼️ Upload Image</div>
-                        <div class="upload-opt" onclick="closePopup()">📝 My Notes</div>
+                        <div class="upload-opt" onclick="closePopup()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            Upload PDF
+                        </div>
+                        <div class="upload-opt" onclick="closePopup()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                            Upload Image
+                        </div>
+                        <div class="upload-opt" onclick="closePopup()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            My Notes
+                        </div>
                     </div>
 
                     <button class="btn-pill-action" onclick="toggleUpload()">
@@ -500,8 +530,8 @@
         const sidebar = document.getElementById('sidebar');
 
         function resizeText() {
-            input.style.height = 'auto';
-            input.style.height = input.scrollHeight + 'px';
+            input.style.height = '24px';
+            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
         }
 
         function toggleSidebar() { sidebar.classList.toggle('mobile-active'); }
@@ -526,7 +556,7 @@
             landing.style.display = 'none';
             addMessage('user', val);
             input.value = '';
-            input.style.height = 'auto';
+            input.style.height = '24px';
 
             const tId = showTyping();
 

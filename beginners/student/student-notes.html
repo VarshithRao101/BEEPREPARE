@@ -105,9 +105,9 @@
         }
 
         .notes-grid {
-            padding: 16px;
+            padding: 20px;
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;
         }
 
@@ -311,19 +311,34 @@
         .doubt-form-container {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             background: rgba(20, 20, 20, 0.4);
             border-radius: 0 0 16px 16px;
             margin-top: -12px;
             margin-bottom: 24px;
-            border: 1px solid rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0); /* Hidden initially */
             border-top: none;
+            padding: 0 24px; /* Fixed horizontal padding, zero vertical to prevent jump */
+            opacity: 0;
+            transform: scaleY(0.98);
+            transform-origin: top;
+            visibility: hidden;
         }
 
         .doubt-form-container.active {
-            max-height: 1000px;
-            transition: max-height 0.4s ease-in;
-            padding: 24px;
+            max-height: 600px;
+            border-color: rgba(255, 215, 0, 0.2);
+            opacity: 1;
+            transform: scaleY(1);
+            visibility: visible;
+        }
+
+        .doubt-form-container > .form-group:first-child {
+            margin-top: 24px;
+        }
+
+        .doubt-form-container > .btn-send-doubt {
+            margin-bottom: 24px;
         }
 
         .form-group {
