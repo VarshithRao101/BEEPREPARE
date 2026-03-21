@@ -194,9 +194,35 @@
             text-align: center;
         }
 
+        .bank-delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(255, 77, 77, 0.1);
+            color: #ff4d4d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .bank-delete-btn:hover {
+            background: rgba(255, 77, 77, 0.2);
+            color: #ff3333;
+        }
+
         .bank-card:hover {
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .bank-card:hover .bank-delete-btn {
+            opacity: 1;
         }
 
         .bank-icon-lg {
@@ -500,7 +526,12 @@
 
         <div class="banks-grid" id="my-banks-list">
             <!-- Bank 1 -->
-            <div class="bank-card hud-element" onclick="window.location.href='student-notes.html'">
+            <div class="bank-card hud-element" onclick="window.location.href='student-notes.html'" id="sb-1">
+                <div class="bank-delete-btn" onclick="event.stopPropagation(); confirmDeleteBank('sb-1', 'Physics')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                    </svg>
+                </div>
                 <div class="bank-bg-icon">⚛️</div>
                 <div class="bank-icon-lg" style="color: #4da6ff; background: rgba(77,166,255,0.1);">
                     <img src="../../assets/images/subjects/physics.svg" alt="" style="width: 40px; height: 40px;">
@@ -519,8 +550,13 @@
             </div>
 
             <!-- Bank 2 -->
-            <div class="bank-card hud-element"
+            <div class="bank-card hud-element" id="sb-2"
                 onclick="window.ActivityManager.showToast('Pending', 'Wait for teacher approval', 'info')">
+                <div class="bank-delete-btn" onclick="event.stopPropagation(); confirmDeleteBank('sb-2', 'Chemistry')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                    </svg>
+                </div>
                 <div class="bank-bg-icon">🧪</div>
                 <div class="bank-icon-lg" style="color: #ff4d4d; background: rgba(255,77,77,0.1);">
                     <img src="../../assets/images/subjects/chemistry.svg" alt="" style="width: 40px; height: 40px;">
@@ -538,7 +574,12 @@
             </div>
 
             <!-- Bank 3 -->
-            <div class="bank-card hud-element" onclick="window.location.href='student-notes.html'">
+            <div class="bank-card hud-element" onclick="window.location.href='student-notes.html'" id="sb-3">
+                <div class="bank-delete-btn" onclick="event.stopPropagation(); confirmDeleteBank('sb-3', 'Maths')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                    </svg>
+                </div>
                 <div class="bank-bg-icon">📐</div>
                 <div class="bank-icon-lg" style="color: #FFD700; background: rgba(255,215,0,0.1);">
                     <img src="../../assets/images/subjects/mathematics.svg" alt="" style="width: 40px; height: 40px;">
@@ -735,6 +776,40 @@
         document.getElementById('bankModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('bankModal')) closeModal();
         });
+
+        // Delete Bank Function
+        function confirmDeleteBank(cardId, bankName) {
+            Swal.fire({
+                title: 'Delete ' + bankName + '?',
+                text: "Once this bank is deleted, the data cannot be retrieved unless your teacher gives you another access key. Are you perfectly sure?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, Delete it',
+                background: '#1a1a1a', 
+                color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const card = document.getElementById(cardId);
+                    card.style.transform = "scale(0.8) translateY(20px)";
+                    card.style.opacity = "0";
+                    setTimeout(() => {
+                        card.remove();
+                    }, 300);
+                    
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: 'Bank has been removed from your account.',
+                        icon: 'success',
+                        background: '#1a1a1a', 
+                        color: '#fff',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
     </script>
 
     <!-- EXTREME UI SCRIPTS -->
