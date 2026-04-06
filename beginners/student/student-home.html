@@ -5,955 +5,402 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <style>
-        /* Premium Dark Home */
-        body {
-            background: #050505;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            color: #fff;
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 35px 0 15px 0;
         }
 
-        .app-container {
-            padding-bottom: 100px;
-            padding-top: 40px;
+        .divider-line {
+            height: 2px;
+            flex: 1;
+            background: linear-gradient(90deg, var(--border), transparent);
+            border-radius: 2px;
         }
 
-        .welcome-header {
-            text-align: left;
-            margin-bottom: 32px;
-            padding: 0 12px;
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Subjects Section - Match Teacher Subject Card */
+        .subject-card {
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .subject-icon-wrapper {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        /* Grades Section - Match Teacher Class Card */
+        .class-card {
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .insight-card {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .welcome-title {
             font-size: 32px;
             font-weight: 800;
-            color: #fff;
-            margin-bottom: 4px;
-            letter-spacing: -1px;
-            background: linear-gradient(to right, #fff, #aaa);
+            background: linear-gradient(135deg, #fff, var(--primary));
             -webkit-background-clip: text;
             background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
 
-        .welcome-subtitle {
-            color: #666;
-            font-size: 15px;
+        @media (min-width: 769px) {
+            .dashboard-sections {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
         }
 
-        .section-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-left: 12px;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 16px;
-            padding: 0 8px;
-        }
-
-        .action-card {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.6), rgba(20, 20, 20, 0.8));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            /* Dark theme border */
-            border-radius: 24px;
-            padding: 24px;
-            height: 160px;
+        /* Command Cards - Standardizing with Teacher style */
+        .command-node {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-radius: 18px;
+            padding: 20px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            /* Dark shadow */
-            backdrop-filter: blur(10px);
-        }
-
-        .action-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at top right, rgba(0, 0, 0, 0.02), transparent 50%);
-        }
-
-        .action-card:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(145deg, rgba(40, 40, 40, 0.8), rgba(30, 30, 30, 1));
-            border-color: rgba(255, 215, 0, 0.3);
-            /* Gold accent */
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-        }
-
-        .action-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            background: rgba(255, 255, 255, 0.05);
-            /* border: 1px solid rgba(255,255,255,0.1); */
-        }
-
-        .ac-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            /* White title */
-            margin-bottom: 4px;
-            z-index: 10;
-        }
-
-        .ac-desc {
-            font-size: 13px;
-            color: #aaa;
-            /* Gray desc */
-            z-index: 10;
-            line-height: 1.4;
-        }
-
-        .ac-btn {
-            background: rgba(255, 255, 255, 0.1);
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-            color: #fff;
-            /* White icon */
-        }
-
-        .action-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 2px;
-        }
-
-        .action-desc {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .arrow-icon {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            color: rgba(255, 255, 255, 0.2);
-            transition: 0.2s;
-        }
-
-        .action-card:hover .arrow-icon {
-            transform: translateX(4px) translateY(-4px);
-            color: #fff;
-        }
-
-        /* --- PRO STUDENT ENHANCEMENTS --- */
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-            padding: 0 8px;
-        }
-
-        .stat-mini-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 16px 12px;
-            text-align: center;
-        }
-
-        .stat-mini-val {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 4px;
-        }
-
-        .stat-mini-lbl {
-            font-size: 9px;
-            color: #666;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .action-card.primary-action {
-            background: linear-gradient(145deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
-            border-color: rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
-        }
-
-        .action-card.primary-action:hover {
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
-            border-color: var(--primary);
-        }
-
-        .progress-track {
-            width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 2px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            box-shadow: 0 0 8px var(--primary);
-        }
-
-        .subj-progress-text {
-            font-size: 9px;
-            color: #666;
-            margin-top: 4px;
-            font-weight: 700;
-        }
-
-        /* Subject Cards Redesign */
-        .subject-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 12px;
-            padding: 0 8px;
-        }
-
-        .subject-mini-card {
-            background: rgba(255, 255, 255, 0.03);
-            /* Glass dark */
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 6px;
-            /* Compact */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .subject-mini-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-4px);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .sub-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            transition: 0.3s;
             margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.05);
         }
 
-        .subj-icon {
-            width: 40px;
-            height: 40px;
+        .command-node:hover {
+            background: rgba(255, 215, 0, 0.05);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .command-icon-box {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.1);
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            /* Icon bg */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-
-        .sub-name {
-            font-size: 12px;
-            color: #444;
-            font-weight: 600;
-            text-align: center;
-        }
-
-        .subj-name {
-            font-size: 11px;
-            font-weight: 600;
-            color: #ccc;
-            /* Light gray text */
-            text-align: center;
-        }
-
-        /* Timeline Redesign */
-        .timeline {
-            position: relative;
-            padding-left: 12px;
-            border-left: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 24px;
-            padding-left: 20px;
-        }
-
-        .timeline-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #333;
-            /* Dark dot */
-            border: 2px solid #555;
-            position: relative;
-            z-index: 1;
-            flex-shrink: 0;
-        }
-
-        .timeline-dot.active {
-            background: #4CAF50;
-            border-color: #4CAF50;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
-        }
-
-        .timeline-dot.info {
-            background: #4da6ff;
-        }
-
-        .timeline-dot.warning {
-            background: #FFA500;
-        }
-
-        .timeline-card {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.6), rgba(20, 20, 20, 0.8));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .t-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 2px;
-        }
-
-        .t-desc {
-            font-size: 12px;
-            color: #666;
-        }
-
-        .t-sub {
-            font-size: 12px;
-            color: #888;
-        }
-
-        .t-date {
-            font-size: 10px;
-            color: #888;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-top: 8px;
-            display: block;
-        }
-
-        /* Streak System Styles */
-        .streak-badge {
-            background: rgba(255, 69, 0, 0.08);
-            border: 1px solid rgba(255, 69, 0, 0.3);
-            border-radius: 20px;
-            padding: 5px 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            z-index: 100;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.1);
-        }
-
-        .streak-badge:hover {
-            transform: scale(1.1) translateY(-2px);
-            background: rgba(255, 69, 0, 0.15);
-            border-color: rgba(255, 69, 0, 0.7);
-            box-shadow: 0 8px 25px rgba(255, 69, 0, 0.4);
-        }
-
-        .streak-canvas {
-            width: 24px;
-            height: 24px;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            filter: drop-shadow(0 0 5px rgba(255, 69, 0, 0.5));
-        }
-
-        .streak-count {
-            color: #fff;
-            font-weight: 900;
-            font-size: 16px;
-            text-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
-            letter-spacing: 0.5px;
-        }
-
-        /* Streak Popout */
-        .streak-popout {
-            position: absolute;
-            top: calc(100% + 15px);
-            right: -10px;
-            background: linear-gradient(165deg, rgba(25, 25, 25, 0.98), rgba(15, 15, 15, 0.98));
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 69, 0, 0.25);
-            border-radius: 24px;
-            padding: 24px;
-            width: 240px;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 69, 0, 0.1);
-            display: none;
-            z-index: 1000;
-            animation: slideInPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        /* Pointer for Popout */
-        .streak-popout::before {
-            content: '';
-            position: absolute;
-            top: -6px;
-            right: 25px;
-            width: 12px;
-            height: 12px;
-            background: #191919;
-            border-left: 1px solid rgba(255, 69, 0, 0.25);
-            border-top: 1px solid rgba(255, 69, 0, 0.25);
-            transform: rotate(45deg);
-        }
-
-        .streak-badge:hover .streak-popout {
-            display: block;
-        }
-
-        .streak-pop-title {
-            font-size: 18px;
-            font-weight: 950;
-            color: #ff4500;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .streak-pop-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .streak-stat-box {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .streak-stat-val {
-            font-size: 22px;
-            font-weight: 900;
-            color: #fff;
-            background: linear-gradient(to bottom, #fff, #bbb);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .streak-stat-lbl {
-            font-size: 10px;
-            color: #777;
-            text-transform: uppercase;
-            font-weight: 850;
-            letter-spacing: 1px;
-        }
-
-        .streak-tip-box {
-            margin-top: 20px;
-            padding: 14px;
-            background: rgba(255, 69, 0, 0.04);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 69, 0, 0.15);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .streak-tip-box::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: #ff4500;
-            box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
-        }
-
-        .streak-tip-text {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.85);
-            line-height: 1.6;
-            font-weight: 500;
-        }
-
-        /* Animations */
-        @keyframes streakShine {
-            0% {
-                left: -100%;
-            }
-
-            20% {
-                left: 150%;
-            }
-
-            100% {
-                left: 150%;
-            }
-        }
-
-        @keyframes flamePulse {
-
-            0%,
-            100% {
-                transform: scale(1) translateY(0);
-                filter: drop-shadow(0 0 5px rgba(255, 69, 0, 0.5));
-            }
-
-            50% {
-                transform: scale(1.2) translateY(-2px);
-                filter: drop-shadow(0 0 15px rgba(255, 69, 0, 0.8));
-            }
-        }
-
-        @keyframes slideInPop {
-            from {
-                opacity: 0;
-                transform: translateY(-20px) scale(0.9);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            color: var(--primary);
+            margin-right: 15px;
         }
     </style>
-    <script src="../../assets/js/icons.js"></script> <!-- Load BeeIcons -->
-    <link rel="stylesheet" href="../../assets/css/student-theme.css">
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
-    </div>
+    <div class="main-layout">
+        <!-- Lean Student Sidebar -->
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEE COMMAND</div>
+            <nav class="sidebar-nav">
+                <a href="student-home.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Home Hub</span>
+                </a>
+                <a href="student-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="student-generate.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    <span>Practice</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 13.14L2 8.27L8.91 7.26L12 1Z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="student-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
 
-    <div class="app-container">
-
-        <!-- Header -->
-        <div class="top-header"
-            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
-            <div class="back-button" onclick="window.history.back()"
-                style="position: absolute; left: 0; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </div>
-            <div class="header-title text-gold-glow"
-                style="color: var(--primary); font-weight: 800; font-size: 16px; letter-spacing: 1px; display: flex; align-items: center;">
-                <div
-                    style="width: 28px; height: 28px; margin-right: 10px; display: flex; align-items: center; justify-content: center;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
-                        <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z" fill="rgba(255, 215, 0, 0.1)"></path>
-                        <circle cx="12" cy="12" r="3" fill="#FFD700"></circle>
-                        <path d="M12 12L16 10M12 12L8 10M12 12L12 17" stroke="#000" stroke-width="1.5"></path>
-                    </svg>
+        <!-- Main Content Wrapper -->
+        <!-- Main Content Wrapper -->
+        <main class="content-wrapper">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <div style="display: block;">
+                    <h2 class="welcome-title">Hello, Scholar</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your learning environment is fully synchronized.</p>
                 </div>
-                DASHBOARD
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                </div>
+            </header>
+
+            <!-- Active banks -->
+            <div class="section-divider">
+                <span class="section-label">Active banks</span>
+                <div class="divider-line"></div>
+            </div>
+            <div style="margin-bottom: 40px;">
+                <div id="subject-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px;">
+                    <!-- Subjects injected by JS -->
+                </div>
             </div>
 
-            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 12px;">
-                <!-- Streak Badge -->
-                <div class="streak-badge adv-card" data-tilt>
-                    <canvas class="streak-canvas" width="16" height="16"></canvas>
-                    <span class="streak-count">5</span>
-
-                    <!-- Streak Popout -->
-                    <div class="streak-popout">
-                        <div class="streak-pop-title">
-                            <canvas class="streak-canvas" width="16" height="16"
-                                style="width: 28px; height: 28px;"></canvas>
-                            Streak Active!
-                        </div>
-                        <div class="streak-pop-stats">
-                            <div class="streak-stat-box">
-                                <div class="streak-stat-val">5</div>
-                                <div class="streak-stat-lbl">CURRENT</div>
-                            </div>
-                            <div class="streak-stat-box">
-                                <div class="streak-stat-val">12</div>
-                                <div class="streak-stat-lbl">BEST</div>
-                            </div>
-                        </div>
-                        <div class="streak-tip-box">
-                            <div class="streak-tip-text">Don't break the chain! Complete 1 test today to reach a 6-day
-                                streak.</div>
+            <div class="dashboard-sections">
+                <!-- Left Column -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">Recent Doubts</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div class="recent-doubts">
+                        <div class="empty-state" style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 12px; background: rgba(255,255,255,0.02); border-radius: 18px; border: 1px dashed var(--border);">
+                            No recent unresolved queries.
                         </div>
                     </div>
                 </div>
 
-                <div class="user-avatar" onclick="window.location.href='student-profile.html'"
-                    style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; position: relative; cursor: pointer;">
-                    ST</div>
-            </div>
-        </div>
-
-        <!-- Welcome -->
-        <div style="margin-bottom: 28px; padding: 0 12px;">
-            <div class="welcome-title text-gold-glow">Hello, Student!</div>
-            <div style="color: #666; font-size: 14px; font-weight: 500;">Ready to practice today?</div>
-        </div>
-
-        <!-- Progress Stats -->
-        <div class="stat-grid hud-element">
-            <div class="stat-mini-card">
-                <div class="stat-mini-val">12</div>
-                <div class="stat-mini-lbl">Tests Taken</div>
-            </div>
-            <div class="stat-mini-card">
-                <div class="stat-mini-val">84%</div>
-                <div class="stat-mini-lbl">Avg Score</div>
-            </div>
-            <div class="stat-mini-card">
-                <div class="stat-mini-val">4</div>
-                <div class="stat-mini-lbl">Active Banks</div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="section-divider">
-            <span class="section-label">Quick Actions</span>
-            <div class="divider-line" style="background: rgba(0,0,0,0.1);"></div>
-        </div>
-
-        <div class="dashboard-grid skeleton-container">
-            <div class="action-card primary-action hud-element skeleton"
-                onclick="window.location.href='student-generate.html'">
-                <div class="arrow-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="var(--primary)" stroke-width="2.5">
-                        <line x1="7" y1="17" x2="17" y2="7"></line>
-                        <polyline points="7 7 17 7 17 17"></polyline>
-                    </svg></div>
-                <div class="action-icon"
-                    style="background: rgba(255,215,0,0.2); color: #FFD700; box-shadow: 0 0 15px rgba(255,215,0,0.2);">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-                    </svg>
-                </div>
+                <!-- Right Column -->
                 <div>
-                    <div class="action-title" style="color: var(--primary);">Start Practice</div>
-                    <div class="action-desc" style="color: rgba(255,215,0,0.6);">Generate a test instantly</div>
+                    <div class="section-divider">
+                        <span class="section-label">Log History</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div class="insight-card adv-card" style="padding: 20px;">
+                        <div id="activity-log-wrapper">
+                            <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 12px; opacity: 0.5;">
+                                Fetching activity history...
+                            </div>
+                        </div>
+                    </div>
+                        
+                        <button onclick="window.location.href='student-profile.html'" style="width: 100%; margin-top: 10px; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; color: var(--primary); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(255,215,0,0.1)';this.style.borderColor='var(--primary)';" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='var(--border)';">
+                            View Full History →
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <div class="action-card hud-element" onclick="window.location.href='student-bank.html'">
-                <div class="arrow-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2">
-                        <line x1="7" y1="17" x2="17" y2="7"></line>
-                        <polyline points="7 7 17 7 17 17"></polyline>
-                    </svg></div>
-                <div class="action-icon" style="background: rgba(255,255,255,0.05); color: #888;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </div>
-                <div>
-                    <div class="action-title">My Banks</div>
-                    <div class="action-desc">Manage your question banks</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Subjects Section -->
-        <div class="section-divider">
-            <span class="section-label">Active Subjects</span>
-            <div class="divider-line" style="background: rgba(0,0,0,0.1);"></div>
-        </div>
-
-        <div class="subject-grid">
-            <div class="subject-mini-card hud-element">
-                <div class="sub-icon" id="icon-physics" style="color: #4da6ff;"></div>
-                <div class="subj-name">Physics</div>
-                <div class="progress-track">
-                    <div class="progress-fill" style="width: 45%;"></div>
-                </div>
-                <div class="subj-progress-text">45%</div>
-            </div>
-            <div class="subject-mini-card hud-element">
-                <div class="sub-icon" id="icon-chemistry" style="color: #ff4d4d;"></div>
-                <div class="subj-name">Chemistry</div>
-                <div class="progress-track">
-                    <div class="progress-fill" style="width: 72%;"></div>
-                </div>
-                <div class="subj-progress-text">72%</div>
-            </div>
-            <div class="subject-mini-card hud-element">
-                <div class="sub-icon" id="icon-math" style="color: #ffd700;"></div>
-                <div class="subj-name">Maths</div>
-                <div class="progress-track">
-                    <div class="progress-fill" style="width: 90%;"></div>
-                </div>
-                <div class="subj-progress-text">90%</div>
-            </div>
-            <div class="subject-mini-card hud-element">
-                <div class="sub-icon" id="icon-biology" style="color: #4caf50;"></div>
-                <div class="subj-name">Biology</div>
-                <div class="progress-track">
-                    <div class="progress-fill" style="width: 20%;"></div>
-                </div>
-                <div class="subj-progress-text">20%</div>
-            </div>
-        </div>
-
-        <!-- Recent Doubts (Empty State Demo) -->
-        <div class="section-divider">
-            <span class="section-label">Recent Doubts</span>
-            <div class="divider-line" style="background: rgba(0,0,0,0.1);"></div>
-        </div>
-        <div class="empty-state hud-element" style="margin-top: 10px;">
-            <div class="empty-icon">❓</div>
-            <div class="empty-title">No Active Doubts</div>
-            <div class="empty-text">Your resolved or pending doubts from teachers will appear here once we link the
-                database.</div>
-            <button class="btn-adv" style="padding: 10px 20px; font-size: 11px; border-radius: 10px; margin-top: 5px;"
-                onclick="window.location.href='../ai-chat.html'">Ask BEE AI</button>
-        </div>
-
-        <!-- Activity Section -->
-        <div class="section-divider">
-            <span class="section-label">Recent Activity</span>
-            <div class="divider-line" style="background: rgba(0,0,0,0.1);"></div>
-        </div>
-
-        <div class="timeline" id="home-activity-list">
-            <!-- Simulated Items -->
-            <div class="timeline-item">
-                <div class="timeline-dot" style="background: #FFD700; border-color: rgba(255,215,0,0.3);"></div>
-                <div class="timeline-card">
-                    <div class="t-title">New Study Material Added!</div>
-                    <div class="t-desc">Mr. Sharma uploaded 'Real Numbers Complete Guide.pdf' to Maths Class 10.</div>
-                    <span class="t-date" style="color: #FFD700;">Just Now</span>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot info"></div>
-                <div class="timeline-card">
-                    <div class="t-title">Math Practice Test</div>
-                    <div class="t-desc">Completed 20 Questions. Score: 85%</div>
-                    <span class="t-date">Today</span>
-                </div>
-            </div>
-            <div class="timeline-item">
-                <div class="timeline-dot warning"></div>
-                <div class="timeline-card">
-                    <div class="t-title">Unlock Request Pending</div>
-                    <div class="t-desc">Physics Class 10 Bank</div>
-                    <span class="t-date">Yesterday</span>
-                </div>
-            </div>
-        </div>
-
+        </main>
     </div>
 
     <!-- Bottom Nav -->
-    <!-- Bottom Nav -->
     <nav class="nav-bottom">
         <a href="student-home.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
-        <a href="student-generate.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-            <span>Test</span>
-        </a>
-        <!-- UNIFIED BEE AI NAV -->
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path
-                    d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z">
-                </path>
-                <path
-                    d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z">
-                </path>
-                <path
-                    d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z">
-                </path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <span>Banks</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Bank</span>
+        </a>
+        <a href="student-generate.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+            <span>Practice</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+            <span>AI</span>
         </a>
         <a href="student-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
-    <script>
-        // PERMANENT BROWSER BACK DISABLE (FLATTEN HISTORY)
-        (function () {
-            // Lock the terminal anchor
-            history.pushState(null, document.title, location.href);
-            window.onpopstate = function () {
-                history.pushState(null, document.title, location.href);
-            };
 
-            // Capture all link clicks and force 'replace' for horizontal navigation
-            document.addEventListener('click', e => {
-                const link = e.target.closest('.nav-item, a');
-                if (link && !link.hasAttribute('download')) {
-                    const target = link.getAttribute('href');
-                    if (target && target.includes('.html') && !target.startsWith('http')) {
-                        e.preventDefault();
-                        window.location.replace(target);
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          guardStudent, 
+          BP 
+        } from '../../assets/js/bee-core.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
+        async function loadDashboard() {
+            if (!guardStudent()) return;
+
+            // Show name immediately
+            const welcomeTitle = document.querySelector('.welcome-title');
+            const studentName = localStorage.getItem(BP.NAME) || 'Scholar';
+            welcomeTitle.textContent = `Hello, ${studentName.split(' ')[0]}`;
+
+            // Show loading state
+            document.querySelectorAll('.adv-card').forEach(card => card.classList.add('loading'));
+
+            const result = await apiCall('/student/dashboard');
+            
+            document.querySelectorAll('.adv-card').forEach(card => card.classList.remove('loading'));
+
+            if (result && result.success) {
+                const d = result.data;
+
+                // Streak — find existing streak element or use profile area
+                const streakEl = document.querySelector('.streak-count, .streak-badge span, [data-streak], .flame-count');
+                if (streakEl) {
+                    streakEl.textContent = d.streak?.current || 0;
+                } else {
+                    // Map to header sub-text if no specific streak element found
+                    const subHeader = document.querySelector('header p');
+                    if (subHeader && d.streak?.current > 0) {
+                        subHeader.textContent = `🔥 ${d.streak.current} Day Streak • Active Session Synchronized`;
                     }
                 }
-            });
-        })();
 
-        // Inject Subject Icons
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof BeeIcons !== 'undefined') {
-                document.getElementById('icon-physics').innerHTML = BeeIcons.physics;
-                document.getElementById('icon-chemistry').innerHTML = BeeIcons.chemistry;
-                document.getElementById('icon-math').innerHTML = BeeIcons.math;
-                document.getElementById('icon-biology').innerHTML = BeeIcons.biology;
-                document.getElementById('icon-english').innerHTML = BeeIcons.english;
-            }
-        });
-    </script>
 
-    <!-- EXTREME UI SCRIPTS (OPTIMIZED) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply Staggered HUD Load-in (Simplified)
-            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container, .adv-card");
-            elements.forEach((el, index) => {
-                el.classList.add('hud-element');
-            });
 
-            // PIXEL FIRE ANIMATION (Restored)
-            const canvases = document.querySelectorAll('.streak-canvas');
-            const yArr = [2, 1, 0, 0, 0, 0, 1, 2];
-            const maxArr = [7, 9, 11, 13, 13, 11, 9, 7];
-            const minArr = [4, 7, 8, 10, 10, 8, 7, 4];
+                // Sync subjects
+                const subjectContainer = document.getElementById('subject-container');
+                if (!subjectContainer) return;
+                
+                subjectContainer.innerHTML = '';
 
-            let prev = Date.now();
-            const fps = 10;
-            const interval = 1000 / fps;
+                if (d.subjects && d.subjects.length > 0) {
+                    d.subjects.forEach(sub => {
+                        const card = document.createElement('div');
+                        card.className = 'adv-card subject-card';
+                        card.innerHTML = `
+                            <div class="subject-icon-wrapper">
+                                <img src="../../assets/images/subjects/${sub.subject.toLowerCase()}.svg" style="width: 30px; height: 30px;" onerror="this.src='../../assets/images/subjects/default.svg'">
+                            </div>
+                            <div style="font-weight: 800; font-size: 13px; color: #fff; text-align: center;">${sub.subject}</div>
+                        `;
+                        
+                        card.onclick = () => {
+                             window.location.href = `student-bank.html?subject=${sub.subject}`;
+                        };
+                        subjectContainer.appendChild(card);
+                    });
+                } else {
+                    subjectContainer.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.02); border: 1px dashed var(--border); border-radius: 20px;">
+                            <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">No joined banks in your repository</div>
+                            <button onclick="window.location.href='student-bank.html'" style="padding: 12px 24px; background: var(--primary); color: #000; border: none; border-radius: 12px; font-weight: 800; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;">Add New Bank</button>
+                        </div>
+                    `;
+                }
 
-            function animateFlame() {
-                const now = Date.now();
-                if (now - prev > interval) {
-                    prev = now;
-                    canvases.forEach(canvas => {
-                        const ctx = canvas.getContext("2d");
-                        ctx.setTransform(1, 0, 0, 1, 0, 0);
-                        ctx.clearRect(0, 0, 16, 16);
-                        ctx.translate(0, 16);
-                        ctx.scale(1, -1);
-
-                        // Outer Flame
-                        ctx.strokeStyle = "#d14234";
-                        for (let x = 4; x < 12; x++) {
-                            let i = x - 4;
-                            let a = Math.random() * (maxArr[i] - minArr[i] + 1) + minArr[i];
-                            ctx.beginPath();
-                            ctx.moveTo(x + 0.5, yArr[i]);
-                            ctx.lineTo(x + 0.5, a);
-                            ctx.stroke();
-                        }
-
-                        // Inner Flame
-                        ctx.strokeStyle = "#f2a55f";
-                        for (let x = 5; x < 11; x++) {
-                            let i = x - 4;
-                            let a = Math.random() * (maxArr[i] - 5 - (minArr[i] - 5) + 1) + (minArr[i] - 5);
-                            ctx.beginPath();
-                            ctx.moveTo(x + 0.5, yArr[i] + 1);
-                            ctx.lineTo(x + 0.5, a);
-                            ctx.stroke();
-                        }
-
-                        // Core Flame
-                        ctx.strokeStyle = "#e8dec5";
-                        for (let x = 7; x < 9; x++) {
-                            let i = x - 4;
-                            let a = Math.random() * (maxArr[i] - 9 - (minArr[i] - 9) + 1) + (minArr[i] - 9);
-                            ctx.beginPath();
-                            ctx.moveTo(x + 0.5, yArr[i]);
-                            ctx.lineTo(x + 0.5, a);
-                            ctx.stroke();
-                        }
+                // Activity Log
+                const logWrapper = document.getElementById('activity-log-wrapper');
+                const historyBtn = document.querySelector('button[onclick*="profile.html"]');
+                
+                if (logWrapper && d.activityLog && d.activityLog.length > 0) {
+                    logWrapper.innerHTML = '';
+                    d.activityLog.slice(0, 5).reverse().forEach(log => {
+                        const item = document.createElement('div');
+                        item.style = "display: flex; gap: 15px; align-items: flex-start; margin-bottom: 20px;";
+                        item.innerHTML = `
+                            <div style="width: 40px; height: 40px; min-width: 40px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 14px; font-weight: 800; color: #fff;">${log.title}</div>
+                                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">${log.description} • ${timeAgo(log.timestamp)}</div>
+                            </div>
+                        `;
+                        logWrapper.appendChild(item);
                     });
                 }
-                requestAnimationFrame(animateFlame);
-            }
-            animateFlame();
 
-            // PERFORMANCE: Skeleton to Reality Loader
-            setTimeout(() => {
-                document.querySelectorAll('.skeleton').forEach(el => {
-                    el.classList.remove('skeleton');
+                // Load recent doubts
+                loadRecentDoubts();
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Sync Failed',
+                    text: 'Failed to synchronize hub data. Tap to retry.',
+                    background: '#0a0a1a',
+                    color: '#ffffff'
+                }).then(() => {
+                    location.reload();
                 });
-            }, 1200);
-        });
+            }
+        }
+
+        async function loadRecentDoubts() {
+            const result = await apiCall('/student/doubts');
+            if (!result || !result.success) return;
+
+            const doubts = result.data.slice(0, 3);
+            const container = document.querySelector('.recent-doubts');
+            if (!container) return;
+
+            const emptyState = container.querySelector('.empty-state');
+            if (doubts.length > 0) {
+                if (emptyState) emptyState.style.display = 'none';
+                // Only clear if we have data to show, but remove previous cards (not the empty state div itself if it's hidden)
+                const existingCards = container.querySelectorAll('.doubt-card');
+                existingCards.forEach(c => c.remove());
+            }
+
+            doubts.forEach(doubt => {
+                const card = document.createElement('div');
+                card.className = 'doubt-card'; // Assumes existing class from doubts page or themes
+                card.style = "background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 15px; padding: 15px; margin-bottom: 10px; cursor: pointer;";
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span class="subject-tag" style="font-size: 10px; color: var(--primary); font-weight: 800;">${doubt.subject}</span>
+                        <span class="status-badge" style="font-size: 9px; padding: 2px 6px; border-radius: 4px; background: ${doubt.status === 'replied' ? 'rgba(0,255,0,0.1)' : 'rgba(255,165,0,0.1)'}; color: ${doubt.status === 'replied' ? '#00FF00' : '#FFA500'};">${doubt.status.toUpperCase()}</span>
+                    </div>
+                    <p style="font-size: 13px; color: #fff; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${doubt.questionPreview || doubt.messages?.[0]?.content?.substring(0, 60) || 'Doubt details...'}
+                    </p>
+                `;
+                card.onclick = () => window.location.href = 'student-doubts.html';
+                container.appendChild(card);
+            });
+        }
+
+        window.addEventListener('load', loadDashboard);
     </script>
 </body>
 

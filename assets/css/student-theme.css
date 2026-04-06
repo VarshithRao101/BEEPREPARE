@@ -11,9 +11,9 @@
 }
 
 body {
-    background-color: #f8f9fa !important;
-    /* LIGHT BACKGROUND AS REQUESTED */
+    background-color: #080808 !important; /* OBSIDIAN BACKGROUND */
     color: var(--adv-text) !important;
+    overflow-x: hidden;
 }
 
 /* Adjust orbs for light background */
@@ -45,71 +45,32 @@ body {
 .menu-item,
 .custom-modal,
 .hero-section {
-    background: linear-gradient(145deg, rgba(35, 36, 38, 0.85), rgba(20, 21, 23, 0.95)) !important;
+    background: rgba(25, 26, 28, 0.95) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 20px !important;
     position: relative;
     overflow: hidden;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
-    backdrop-filter: blur(12px) !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(8px) !important;
 }
 
 .custom-modal {
     border-radius: 32px !important;
 }
 
-.adv-card::before,
-.subject-card::before,
-.class-card::before,
-.dash-card::before,
-.role-card::before,
-.action-card::before,
-.subject-mini-card::before,
-.bank-card::before,
-.test-card::before,
-.menu-item::before,
-.profile-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 207, 0, 0.15), transparent) !important;
-    transform: skewX(-25deg);
-    transition: 0.7s ease-in-out;
-    z-index: 1;
-    pointer-events: none;
-}
-
-.adv-card>*,
-.subject-card>*,
-.class-card>*,
-.dash-card>*,
-.role-card>*,
-.action-card>*,
-.subject-mini-card>*,
-.bank-card>*,
-.test-card>*,
-.menu-item>*,
-.profile-card>* {
-    position: relative;
-    z-index: 2;
-}
-
-.adv-card:hover::before,
-.subject-card:hover::before,
-.class-card:hover::before,
-.dash-card:hover::before,
-.role-card:hover::before,
-.action-card:hover::before,
-.subject-mini-card:hover::before,
-.bank-card:hover::before,
-.test-card:hover::before,
-.menu-item:hover::before,
-.profile-card:hover::before {
-    left: 200%;
+/* Performance Optimization: Removed pseudo-element sweeps for better low-end device support */
+.adv-card:hover,
+.subject-card:hover,
+.class-card:hover,
+.dash-card:hover,
+.role-card:hover,
+.action-card:hover,
+.bank-card:hover,
+.test-card:hover,
+.menu-item:hover,
+.profile-card:hover {
+    border-color: rgba(255, 207, 0, 0.5) !important;
 }
 
 .adv-card:hover,
@@ -124,10 +85,9 @@ body {
 .test-card:hover,
 .menu-item:not(.no-hover):hover,
 .profile-card:hover {
-    transform: translateY(-8px) scale(1.02) !important;
-    border-color: rgba(255, 207, 0, 0.5) !important;
-    box-shadow: 0 20px 50px rgba(255, 207, 0, 0.15), inset 0 0 20px rgba(255, 207, 0, 0.05) !important;
-    z-index: 10;
+    transform: translateY(-4px) !important;
+    border-color: rgba(255, 207, 0, 0.8) !important;
+    box-shadow: 0 10px 30px rgba(255, 207, 0, 0.15) !important;
 }
 
 /* Menu Item Specifics */
@@ -282,18 +242,15 @@ textarea:focus {
     background: rgba(40, 41, 44, 0.9) !important;
 }
 
-/* Animations for mounting */
+/* Optimized animations for low-end devices */
 @keyframes fadeInUpAdv {
     0% {
         opacity: 0;
-        transform: translateY(40px) scale(0.95);
-        filter: blur(5px);
+        transform: translateY(10px);
     }
-
     100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
+        transform: translateY(0);
     }
 }
 
@@ -302,7 +259,7 @@ textarea:focus {
 .subject-grid>*,
 .timeline-item,
 .banks-grid>* {
-    animation: fadeInUpAdv 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: fadeInUpAdv 0.2s ease-out both;
 }
 
 .app-container>*:nth-child(1),
@@ -736,5 +693,147 @@ textarea:focus {
     border-radius: 16px !important;
     font-size: 16px !important;
     margin-top: 48px !important;
-    letter-spacing: 1.5px !important;
+    letter-spacing: 1.5px !important;}
+
+/* ------------------------------------------- */
+/* COMMAND CENTER SHELL ARCHITECTURE           */
+/* ------------------------------------------- */
+
+.main-layout {
+    display: flex;
+    min-height: 100vh;
+    background: #080808;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+}
+
+/* Lean Persistent Sidebar */
+.pc-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: rgba(15, 15, 15, 0.8);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.sidebar-brand {
+    font-size: 18px;
+    font-weight: 950;
+    color: var(--primary);
+    letter-spacing: 2px;
+    margin-bottom: 50px;
+    padding-left: 15px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 20px;
+    border-radius: 14px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    transition: 0.3s;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 215, 0, 0.05);
+    color: #fff;
+}
+
+.sidebar-link.active {
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 10px 25px rgba(255, 215, 0, 0.2);
+}
+
+.sidebar-link svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Main Content Shell */
+.content-wrapper {
+    flex: 1;
+    padding: 40px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Profiles & Headers */
+.profile-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(255, 215, 0, 0.15);
+    transition: 0.3s;
+}
+
+.profile-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Unified Bottom Nav (Mobile) */
+.nav-bottom {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 450px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 10px;
+    border-radius: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    z-index: 2000;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 9px;
+    font-weight: 800;
+    transition: 0.3s;
+}
+
+.nav-item svg { width: 22px; height: 22px; }
+.nav-item.active { color: var(--primary); }
+
+@media (max-width: 991px) {
+    .pc-sidebar { display: none; }
+    .content-wrapper { padding: 30px 20px 120px 20px; }
+}
+
+@media (min-width: 992px) {
+    .nav-bottom { display: none; }
 }

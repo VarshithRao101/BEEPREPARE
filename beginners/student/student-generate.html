@@ -4,875 +4,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Practice Test - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // Pre-load banks simulation
-        const myBanks = [
-            { id: 'bank_math_10', name: 'Mathematics', teacher: 'Mr. Sharma', class: 'Class 10', icon: '' },
-            { id: 'bank_sci_10', name: 'Physics', teacher: 'Mrs. Verma', class: 'Class 10', icon: '' }
-        ];
-    </script>
+    <title>Configure Practice - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <style>
-        /* Updated Generator        /* Premium Dark Generate */
-        body {
-            background: #050505;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            color: #fff;
-        }
-
-        .app-container {
-            padding-bottom: 100px;
-            padding-top: 40px;
-        }
-
-        .gen-header {
-            margin-bottom: 32px;
-            padding: 0 12px;
-        }
-
-        .gen-title {
-            font-size: 28px;
-            font-weight: 800;
-            color: #fff;
-            /* White title */
-            margin-bottom: 4px;
-            background: linear-gradient(to right, #fff, #aaa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .gen-desc {
-            font-size: 14px;
-            color: #888;
-            /* Gray desc */
-            margin-bottom: 32px;
-        }
-
         .section-divider {
             display: flex;
             align-items: center;
-            gap: 16px;
-            margin: 32px 0 20px 0;
-            padding: 0 8px;
+            gap: 12px;
+            margin: 30px 0 15px 0;
         }
 
         .divider-line {
+            height: 2px;
             flex: 1;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            /* Dark theme divider */
+            background: linear-gradient(90deg, var(--border), transparent);
+            border-radius: 2px;
         }
 
         .section-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: #666;
-            /* Dark gray label */
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            background: #050505;
-            /* Black bg */
-            padding-right: 12px;
-            white-space: nowrap;
         }
 
-        /* Bank Grid Horizontal Scroll */
-        .bank-scroll-container {
-            display: flex;
-            gap: 16px;
-            overflow-x: auto;
-            padding: 10px 8px 24px 8px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-        .bank-scroll-container::-webkit-scrollbar { display: none; }
-
-        .bank-option-card {
-            flex: 0 0 130px;
-            scroll-snap-align: start;
-            background: rgba(30, 30, 30, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-            overflow: hidden;
-            aspect-ratio: 1/1.1;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
+        .context-card {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        .bank-option-card:hover {
-            background: rgba(40, 40, 40, 0.8);
-            transform: translateY(-4px);
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-        }
-
-        .bank-option-card.selected {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: #FFD700;
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
-        }
-
-        .bank-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            /* Dark icon bg */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            font-size: 24px;
-        }
-
-        .bank-option-card.selected .bank-icon {
-            background: #FFD700;
-            color: #000;
-        }
-
-        .bank-name {
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            /* White title */
+        .total-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 24px;
+            padding: 25px;
             text-align: center;
-        }
-
-        .bank-teacher {
-            font-size: 10px;
-            color: #888;
-            /* Gray text */
-            margin-top: 4px;
-            text-align: center;
-        }
-
-        .check-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #FFD700;
             color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-            opacity: 0;
-            transform: scale(0);
-            transition: 0.2s;
-        }
-
-        .bank-option-card.selected .check-badge {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        /* Chapters Box */
-        .chapters-box {
-            background: rgba(30, 30, 30, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            /* Dark border */
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
         }
 
         .chapter-row {
             display: flex;
             align-items: center;
-            padding: 14px 16px;
+            padding: 15px;
             background: rgba(255, 255, 255, 0.03);
-            /* Dark row */
-            margin-bottom: 8px;
+            border-radius: 15px;
+            margin-bottom: 10px;
             border: 1px solid transparent;
             cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .chapter-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .chapter-row:hover {
-            background: rgba(255, 255, 255, 0.08);
+            transition: 0.3s;
         }
 
         .chapter-row.selected {
-            background: rgba(255, 215, 0, 0.1);
-            /* Gold tint */
-            border-color: rgba(255, 215, 0, 0.3);
-            /* box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); */
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
         }
 
         .chk-visual {
             width: 20px;
             height: 20px;
+            border: 2px solid var(--border);
             border-radius: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            margin-right: 14px;
+            margin-right: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: transparent;
-            transition: 0.2s;
         }
 
         .chapter-row.selected .chk-visual {
-            background: #FFD700;
+            background: var(--primary);
+            border-color: var(--primary);
             color: #000;
-        }
-
-        .bp-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px;
-            background: rgba(30, 30, 30, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .counter-control {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 4px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .cnt-btn {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-size: 16px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .cnt-btn:hover {
-            background: #FFD700;
-            color: #000;
-        }
-
-        .total-badge {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            border-radius: 20px;
-            padding: 24px;
-            text-align: center;
-            color: #000;
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
-            margin: 24px 0;
-            animation: pulse-gold 2s infinite;
-        }
-
-        @keyframes pulse-gold {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.02);
-            }
-
-            100% {
-                transform: scale(1);
-            }
         }
 
         .primary-action-btn {
-            background: #1a1a1a;
-            color: #fff;
             width: 100%;
-            padding: 20px;
-            border-radius: 16px;
-            font-weight: 800;
-            font-size: 16px;
+            background: linear-gradient(135deg, var(--primary), #FFD700);
             border: none;
-            margin-top: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
-            transition: 0.2s;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .primary-action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
-        }
-
-        .generate-btn-premium {
-            background: var(--primary);
-            color: #000;
-            width: 100%;
-            padding: 24px;
+            padding: 22px;
             border-radius: 20px;
+            color: #000;
+            font-size: 16px;
             font-weight: 900;
-            font-size: 18px;
-            border: none;
-            margin-top: 32px;
-            cursor: pointer;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            transition: 0.3s;
-            letter-spacing: 2px;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 40px;
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
+            transition: 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-        }
-        .generate-btn-premium:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+            gap: 15px;
         }
 
-        .hidden-section {
-            display: none;
+        .primary-action-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);
         }
 
-        .visible-section {
+        @media (min-width: 769px) {
+            .paper-layout {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+        }
+
+        /* COMPACT DESIGN SYSTEM */
+        .bp-card {
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(15, 15, 15, 0.4);
+            transition: 0.3s;
+        }
+
+        .bp-card:hover {
+            border-color: var(--primary);
+            background: rgba(15, 15, 15, 0.6);
+        }
+
+        .field-label {
             display: block;
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .glass-select-clean {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
+        .glass-select {
             width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #fff;
+            font-size: 14px;
             outline: none;
             appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFD700' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right center;
-            background-size: 16px;
-            padding-right: 24px;
+            background-position: right 15px center;
+            transition: 0.3s;
         }
 
-        .glass-select-clean option {
-            background: #111;
-            color: #fff;
+        .glass-select:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .counter-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .cnt-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .cnt-btn:hover { background: rgba(255, 215, 0, 0.1); }
+
+        .section-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media screen and (max-width: 768px) {
+            .paper-layout { padding-bottom: 50px; }
+            .counter-overlay { position: static; margin-bottom: 20px; justify-content: center; }
+        }
+
+        /* GENERATION ANIMATION OVERLAY */
+        .gen-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(25px);
+            z-index: 10000;
+        }
+
+        .gen-overlay.active { display: flex; }
+
+        .scanner-beam {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            box-shadow: 0 0 30px var(--primary);
+            animation: scannLoop 2s infinite ease-in-out;
+            z-index: 2;
+        }
+
+        @keyframes scannLoop { 0% { top: 0%; opacity: 0; } 50% { top: 50%; opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        .assembly-container {
+            position: relative;
+            width: 120px; height: 160px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .data-fill {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
+            background: linear-gradient(to top, var(--primary), #FFD700);
+            opacity: 0.4;
+            animation: fillPaperData 2.5s forwards ease-in-out;
+        }
+
+        @keyframes fillPaperData { 100% { height: 100%; } }
+
+        .gen-status {
+            font-size: 13px; font-weight: 900; color: var(--primary); letter-spacing: 4px;
+            text-transform: uppercase; text-align: center;
         }
     </style>
-    <link rel="stylesheet" href="../../assets/css/student-theme.css">
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
+    <div class="main-layout">
+        <!-- Lean Student Sidebar -->
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEE COMMAND</div>
+            <nav class="sidebar-nav">
+                <a href="student-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Home Hub</span>
+                </a>
+                <a href="student-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="student-generate.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    <span>Practice</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 13.14L2 8.27L8.91 7.26L12 1Z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="student-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content-wrapper">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Practice Architecture</h2>
+                    <p style="color: var(--text-muted); font-size: 14px;">Define your practice blueprint.</p>
+                </div>
+                <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+            </header>
+
+            <div class="paper-layout">
+                <!-- Left: Configuration & Chapters -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">1. Context & Scope</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 30px;">
+                        <div class="context-card adv-card">
+                            <div style="margin-right: 15px; grid-column: 1 / -1;">
+                                <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Target Bank</div>
+                                <select id="bank-select" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: #fff; font-weight: 600; outline: none;">
+                                    <option value="">Loading Banks...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="total-badge" style="display:flex; flex-direction:column; justify-content:center;">
+                            <div style="font-size: 28px; font-weight: 900; line-height: 1;" id="total-marks">0</div>
+                            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase;">Marks</div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">
+                        <span class="section-label">2. Focus Nodes (Chapters)</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div id="chapters-list">
+                        <div style="color:var(--text-muted); font-size:12px; padding:20px; text-align:center; border: 1px dashed var(--border); border-radius: 15px;">Select a bank to load chapters</div>
+                    </div>
+                </div>
+
+                <!-- Right: Blueprint -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">3. Structure Blueprint</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div id="blueprint-container">
+                        <!-- Blueprint cards injected by JS -->
+                    </div>
+
+                    <button class="primary-action-btn" onclick="startGeneration()">
+                        Generate Paper Architecture →
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 60px 0 20px 0; opacity: 0.6;">
+                <div style="height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3));"></div>
+                <div style="font-size: 11px; font-weight: 900; color: var(--primary); letter-spacing: 4px; text-transform: uppercase;">BS</div>
+                <div style="height: 1px; flex: 1; background: linear-gradient(270deg, transparent, rgba(255, 215, 0, 0.3));"></div>
+            </div>
+        </main>
     </div>
 
-    <!-- Container -->
-    <div class="app-container">
-
-        <!-- Header -->
-        <div class="gen-header">
-            <div class="gen-title">Generate Test</div>
-            <div class="gen-desc">Customize your practice paper in seconds.</div>
+    <!-- Generation Animation Overlay -->
+    <div class="gen-overlay" id="genOverlay">
+        <div class="scanner-beam"></div>
+        <div class="assembly-container">
+            <div class="data-fill"></div>
         </div>
-
-        <!-- STAGE 1: Select Bank (Grid Icon View) -->
-        <div class="section-divider">
-            <span class="section-label">1. Select Question Bank</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="bank-scroll-container">
-            <!-- Bank Card 1 -->
-            <div class="bank-option-card hud-element" onclick="selectBank(this, 'bank_math_10')">
-                <div class="check-badge">✓</div>
-                <div class="bank-icon"><img src="../../assets/images/subjects/mathematics.svg" alt="Math"
-                        style="width: 100%; height: 100%; object-fit: contain;"></div>
-                <div class="bank-name">Mathematics</div>
-                <div class="bank-teacher">Mr. Sharma</div>
-            </div>
-
-            <!-- Bank Card 2 -->
-            <div class="bank-option-card hud-element" onclick="selectBank(this, 'bank_sci_10')">
-                <div class="check-badge">✓</div>
-                <div class="bank-icon"><img src="../../assets/images/subjects/physics.svg" alt="Physics"
-                        style="width: 100%; height: 100%; object-fit: contain;"></div>
-                <div class="bank-name">Physics</div>
-                <div class="bank-teacher">Mrs. Verma</div>
-            </div>
-
-            <!-- Bank Card 3 -->
-            <div class="bank-option-card hud-element" onclick="selectBank(this, 'bank_chem_10')">
-                <div class="check-badge">✓</div>
-                <div class="bank-icon"><img src="../../assets/images/subjects/chemistry.svg" alt="Chemistry"
-                        style="width: 100%; height: 100%; object-fit: contain;"></div>
-                <div class="bank-name">Chemistry</div>
-                <div class="bank-teacher">Mr. Rao</div>
-            </div>
-
-            <!-- Bank Card 4 -->
-            <div class="bank-option-card hud-element" onclick="selectBank(this, 'bank_bio_10')">
-                <div class="check-badge">✓</div>
-                <div class="bank-icon"><img src="../../assets/images/subjects/biology.svg" alt="Biology"
-                        style="width: 100%; height: 100%; object-fit: contain;"></div>
-                <div class="bank-name">Biology</div>
-                <div class="bank-teacher">Ms. Sitha</div>
-            </div>
-        </div>
-
-        <button id="btn-next-step" class="primary-action-btn" onclick="showConfigStage()"
-            style="margin-top: 12px; opacity: 0.5; pointer-events: none;">
-            Start Configuration
-        </button>
-
-        <!-- STAGE 2: Test Configuration (Hidden Initially) -->
-        <div id="config-stage" class="hidden-section">
-
-            <div style="height: 30px;"></div> <!-- Spacer -->
-
-            <!-- Section: Chapters -->
-            <div class="section-divider">
-                <span class="section-label">2. Select Chapters</span>
-                <div class="divider-line"></div>
-                <button onclick="toggleAll()"
-                    style="background:none; border:none; color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer;">Select
-                    All</button>
-            </div>
-
-            <div class="chapters-box">
-                <!-- Chapter 1 -->
-                <div class="chapter-row selected" onclick="toggleRow(this)">
-                    <div class="chk-visual"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="4">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg></div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Real Numbers</div>
-                    </div>
-                    <div
-                        style="font-size: 11px; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px;">
-                        3 Qs</div>
-                </div>
-                <!-- Chapter 2 -->
-                <div class="chapter-row" onclick="toggleRow(this)">
-                    <div class="chk-visual"></div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Polynomials</div>
-                    </div>
-                    <div
-                        style="font-size: 11px; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px;">
-                        5 Qs</div>
-                </div>
-                <!-- Chapter 3 -->
-                <div class="chapter-row" onclick="toggleRow(this)">
-                    <div class="chk-visual"></div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Pair of Linear Eqs</div>
-                    </div>
-                    <div
-                        style="font-size: 11px; color: #aaa; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px;">
-                        8 Qs</div>
-                </div>
-            </div>
-
-            <!-- Section: Blueprint -->
-            <div class="section-divider">
-                <span class="section-label">3. Configure Questions</span>
-                <div class="divider-line"></div>
-            </div>
-
-            <div
-                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px;">
-                <!-- MCQ -->
-                <div class="bp-row">
-                    <div>
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">MCQ <span
-                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(1m)</span>
-                        </div>
-                    </div>
-                    <div class="counter-control">
-                        <button class="cnt-btn" onclick="update('mcq', -1)">−</button>
-                        <span id="cnt-mcq"
-                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
-                        <button class="cnt-btn" onclick="update('mcq', 1)">+</button>
-                    </div>
-                </div>
-                <!-- VSA -->
-                <div class="bp-row">
-                    <div>
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">V. Short <span
-                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(1m)</span>
-                        </div>
-                    </div>
-                    <div class="counter-control">
-                        <button class="cnt-btn" onclick="update('vshort', -1)">−</button>
-                        <span id="cnt-vshort"
-                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
-                        <button class="cnt-btn" onclick="update('vshort', 1)">+</button>
-                    </div>
-                </div>
-                <!-- Short -->
-                <div class="bp-row">
-                    <div>
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Short <span
-                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(2m)</span>
-                        </div>
-                    </div>
-                    <div class="counter-control">
-                        <button class="cnt-btn" onclick="update('short', -1)">−</button>
-                        <span id="cnt-short"
-                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
-                        <button class="cnt-btn" onclick="update('short', 1)">+</button>
-                    </div>
-                </div>
-                <!-- Long -->
-                <div class="bp-row">
-                    <div>
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Long <span
-                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(4m)</span>
-                        </div>
-                    </div>
-                    <div class="counter-control">
-                        <button class="cnt-btn" onclick="update('long', -1)">−</button>
-                        <span id="cnt-long"
-                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
-                        <button class="cnt-btn" onclick="update('long', 1)">+</button>
-                    </div>
-                </div>
-                <!-- Essay -->
-                <div class="bp-row">
-                    <div>
-                        <div style="font-weight: 600; font-size: 14px; color: #fff;">Essay <span
-                                style="font-size: 11px; color: #aaa; font-weight: 400; margin-left: 6px;">(6m)</span>
-                        </div>
-                    </div>
-                    <div class="counter-control">
-                        <button class="cnt-btn" onclick="update('essay', -1)">−</button>
-                        <span id="cnt-essay"
-                            style="width: 24px; text-align: center; color: #fff; font-weight: 600;">0</span>
-                        <button class="cnt-btn" onclick="update('essay', 1)">+</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="total-badge">
-                <div style="font-size: 14px; font-weight: 700; color: #000; text-transform: uppercase;">Total Marks
-                </div>
-                <div style="font-size: 32px; font-weight: 800; line-height: 1; color: #000;" id="total-marks">0</div>
-            </div>
-
-            <!-- Layout Preference Section -->
-            <div class="section-divider">
-                <span class="section-label">4. Layout Preference</span>
-                <div class="divider-line"></div>
-            </div>
-
-            <div class="chapters-box" style="margin-bottom: 24px;">
-                <div style="font-size: 11px; color: #888; margin-bottom: 16px; padding: 0 4px;">
-                    Map question types to paper sections.
-                </div>
-
-                <!-- Section A -->
-                <div
-                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-weight: 700; color: #FFD700; font-size: 13px;">SECTION A</div>
-                    <div style="position: relative; width: 160px;">
-                        <select class="glass-select-clean" style="font-size: 12px; padding-right: 20px;">
-                            <option value="none">None</option>
-                            <option value="mcq" selected>MCQ / Objective</option>
-                            <option value="vsa">Very Short Answer</option>
-                            <option value="sa">Short Answer</option>
-                            <option value="la">Long Answer</option>
-                            <option value="essay">Essay / Descriptive</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Section B -->
-                <div
-                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-weight: 700; color: #fff; font-size: 13px;">SECTION B</div>
-                    <div style="position: relative; width: 160px;">
-                        <select class="glass-select-clean" style="font-size: 12px; padding-right: 20px;">
-                            <option value="none">None</option>
-                            <option value="mcq">MCQ / Objective</option>
-                            <option value="vsa" selected>Very Short Answer</option>
-                            <option value="sa">Short Answer</option>
-                            <option value="la">Long Answer</option>
-                            <option value="essay">Essay / Descriptive</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Section C -->
-                <div
-                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-weight: 700; color: #fff; font-size: 13px;">SECTION C</div>
-                    <div style="position: relative; width: 160px;">
-                        <select class="glass-select-clean" style="font-size: 12px; padding-right: 20px;">
-                            <option value="none">None</option>
-                            <option value="mcq">MCQ / Objective</option>
-                            <option value="vsa">Very Short Answer</option>
-                            <option value="sa" selected>Short Answer</option>
-                            <option value="la">Long Answer</option>
-                            <option value="essay">Essay / Descriptive</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Section D -->
-                <div
-                    style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div style="font-weight: 700; color: #fff; font-size: 13px;">SECTION D</div>
-                    <div style="position: relative; width: 160px;">
-                        <select class="glass-select-clean" style="font-size: 12px; padding-right: 20px;">
-                            <option value="none">None</option>
-                            <option value="mcq">MCQ / Objective</option>
-                            <option value="vsa">Very Short Answer</option>
-                            <option value="sa">Short Answer</option>
-                            <option value="la" selected>Long Answer</option>
-                            <option value="essay">Essay / Descriptive</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Section E -->
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px;">
-                    <div style="font-weight: 700; color: #fff; font-size: 13px;">SECTION E</div>
-                    <div style="position: relative; width: 160px;">
-                        <select class="glass-select-clean" style="font-size: 12px; padding-right: 20px;">
-                            <option value="none">None</option>
-                            <option value="mcq">MCQ / Objective</option>
-                            <option value="vsa">Very Short Answer</option>
-                            <option value="sa">Short Answer</option>
-                            <option value="la">Long Answer</option>
-                            <option value="essay" selected>Essay / Descriptive</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <button class="generate-btn-premium" onclick="generateTest()">
-                <span>GENERATE PAPER</span>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-            </button>
-
-            <div style="height: 20px;"></div>
-        </div>
-
+        <div class="gen-status">Assembling Architectural Blueprint...</div>
     </div>
 
     <!-- Bottom Nav -->
     <nav class="nav-bottom">
         <a href="student-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
-        <a href="student-generate.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-            <span>Test</span>
-        </a>
-        <!-- UNIFIED BEE AI NAV -->
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <span>Banks</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2V20c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" /></svg>
+            <span>Inventory</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>
+            <span>AI</span>
+        </a>
+        <a href="student-generate.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            <span>Practice</span>
         </a>
         <a href="student-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
-        const counts = { mcq: 0, vshort: 0, short: 0, long: 0, essay: 0 };
-        const marks = { mcq: 1, vshort: 1, short: 2, long: 4, essay: 6 };
-        let selectedBankId = null;
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="student-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+            <span>Home</span>
+        </a>
+        <a href="student-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Bank</span>
+        </a>
+        <a href="student-generate.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+            <span>Practice</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+            <span>AI</span>
+        </a>
+        <a href="student-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          guardStudent, 
+          BP 
+        } from '../../assets/js/bee-core.js';
 
-        function selectBank(el, id) {
-            // Remove previous selection
-            document.querySelectorAll('.bank-option-card').forEach(c => c.classList.remove('selected'));
-            // Add new selection
-            el.classList.add('selected');
-            selectedBankId = id;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-            // Enable Next
-            const btn = document.getElementById('btn-next-step');
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
+        let blueprint = [
+            { id: 'mcq', type: 'MCQ', marks: 1, count: 5 },
+            { id: 'veryShort', type: 'Very Short', marks: 1, count: 4 },
+            { id: 'short', type: 'Short', marks: 2, count: 3 },
+            { id: 'long', type: 'Long', marks: 4, count: 2 },
+            { id: 'essay', type: 'Essay', marks: 8, count: 1 }
+        ];
+
+        let availableChapters = [];
+        let selectedChapters = [];
+
+        async function loadBanks() {
+            const result = await apiCall('/student/banks');
+            const bankSelect = document.getElementById('bank-select');
+            bankSelect.innerHTML = '<option value="">Select a Bank</option>';
+
+            if (result && result.success) {
+                const activeBanks = result.data.filter(b => b.status === 'active');
+                activeBanks.forEach(b => {
+                    const opt = document.createElement('option');
+                    opt.value = b.bankId;
+                    opt.textContent = `${b.subject} - Class ${b.class}`;
+                    bankSelect.appendChild(opt);
+                });
+
+                bankSelect.onchange = (e) => loadChapters(e.target.value);
+                
+                // If subject in URL, pre-select
+                const urlParams = new URLSearchParams(window.location.search);
+                const sub = urlParams.get('subject');
+                if (sub) {
+                    const target = activeBanks.find(b => b.subject === sub);
+                    if (target) {
+                        bankSelect.value = target.bankId;
+                        loadChapters(target.bankId);
+                    }
+                }
+            }
         }
 
-        function showConfigStage() {
-            // Hide the next button
-            const btn = document.getElementById('btn-next-step');
-            btn.style.display = 'none';
-            // Show the config
-            const stage = document.getElementById('config-stage');
-            stage.classList.remove('hidden-section');
-            stage.classList.add('visible-section');
-
-            // Scroll to config
-            setTimeout(() => {
-                stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
+        async function loadChapters(bankId) {
+            if (!bankId) {
+                document.getElementById('chapters-list').innerHTML = '<div style="color:var(--text-muted); font-size:12px; padding:20px;">Select a bank first.</div>';
+                return;
+            }
+            const result = await apiCall(`/student/banks/${bankId}/chapters`);
+            if (result && result.success) {
+                availableChapters = result.data.chapters;
+                renderChapters();
+            }
         }
 
-        function update(type, diff) {
-            counts[type] = Math.max(0, counts[type] + diff);
-            document.getElementById('cnt-' + type).innerText = counts[type];
+        function renderChapters() {
+            const list = document.getElementById('chapters-list');
+            list.innerHTML = availableChapters.map(chap => {
+                const isSelected = selectedChapters.includes(chap._id);
+                return `
+                    <div class="chapter-row adv-card ${isSelected ? 'selected' : ''}" onclick="window.toggleChapter('${chap._id}')">
+                        <div class="chk-visual">${isSelected ? '✓' : ''}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 800; font-size: 14px;">${chap.chapterName}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">${chap.questionCount} Available Node${chap.questionCount === 1 ? '' : 's'}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.toggleChapter = (id) => {
+            if (selectedChapters.includes(id)) {
+                selectedChapters = selectedChapters.filter(cid => cid !== id);
+            } else {
+                selectedChapters.push(id);
+            }
+            renderChapters();
+        };
+
+        window.renderBlueprint = () => {
+            const container = document.getElementById('blueprint-container');
+            container.innerHTML = blueprint.map((sec, idx) => `
+                <div class="bp-card" data-section="${sec.id}">
+                    <div class="counter-overlay">
+                        <button class="cnt-btn" onclick="window.updateQty(${idx}, -1)">−</button>
+                        <span id="qty-${idx}" class="qty-value" style="min-width: 20px; text-align: center; font-weight: 950; color: var(--primary); font-size: 16px;">${sec.count}</span>
+                        <button class="cnt-btn" onclick="window.updateQty(${idx}, 1)">+</button>
+                    </div>
+
+                    <div class="section-header">
+                        <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Type ${idx + 1}</div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Configuration Node</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label class="field-label">Complexity Type</label>
+                            <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'type', this.value)">
+                                <option value="Very Short" ${sec.type === 'Very Short' ? 'selected' : ''}>Very Short</option>
+                                <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
+                                <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
+                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
+                                <option value="Essay" ${sec.type === 'Essay' ? 'selected' : ''}>Essay</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="field-label">Credit Value (Marks)</label>
+                            <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'marks', this.value)">
+                                ${Array.from({length: 10}, (_, m) => `<option value="${m+1}" ${sec.marks == m+1 ? 'selected' : ''}>${m+1} Mark${m > 0 ? 's' : ''}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
             calcTotal();
-        }
+        };
+
+        window.updateBlueprint = (idx, key, val) => {
+            blueprint[idx][key] = (key === 'marks') ? parseInt(val) : val;
+            window.renderBlueprint();
+        };
+
+        window.updateQty = (idx, diff) => {
+            blueprint[idx].count = Math.max(0, blueprint[idx].count + diff);
+            window.renderBlueprint();
+        };
 
         function calcTotal() {
             let t = 0;
-            for (let k in counts) t += counts[k] * marks[k];
+            blueprint.forEach(s => t += s.count * s.marks);
             document.getElementById('total-marks').innerText = t;
         }
 
-        function toggleRow(el) {
-            el.classList.toggle('selected');
-            const visual = el.querySelector('.chk-visual');
-            if (el.classList.contains('selected')) {
-                visual.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        window.startGeneration = async function() {
+            const bankSelect = document.querySelectorAll('select')[0];
+            const bankId = bankSelect.value;
+            const selectedSubject = bankSelect.options[bankSelect.selectedIndex]?.text.split(' - ')[0];
+
+            if (!bankId) return Swal.fire({ icon: 'warning', title: 'Scope Missing', text: 'Select a target syllabus node first.', background: '#0a0a1a', color: '#fff' });
+            if (selectedChapters.length === 0) return Swal.fire({ icon: 'warning', title: 'Focus Nodes Missing', text: 'Select at least one chapter to focus.', background: '#0a0a1a', color: '#fff' });
+
+            document.getElementById('genOverlay').classList.add('active');
+
+            const payload = {
+                bankId,
+                selectedChapters, // Match Fix 4 naming
+                blueprint: blueprint.filter(s => s.count > 0),
+                layout: {}
+            };
+
+            const result = await apiCall('/student/tests/generate', 'POST', payload);
+
+            if (result && result.success) {
+                // Save paperHtml
+                localStorage.setItem('bp_paper_html', result.data.paperHtml);
+                
+                // ADDED - Persistence forsessionId and meta
+                localStorage.setItem('bp_session_id', result.data.sessionId);
+                localStorage.setItem('bp_paper_marks', result.data.totalMarks);
+                localStorage.setItem('bp_paper_subject', selectedSubject || '');
+                localStorage.setItem('bp_paper_meta', JSON.stringify(result.data.meta || {}));
+
+                setTimeout(() => {
+                    window.location.href = 'student-edit-paper.html';
+                }, 2500);
             } else {
-                visual.innerHTML = '';
+                setTimeout(() => {
+                    document.getElementById('genOverlay').classList.remove('active');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Generation Failed',
+                        text: result?.error?.message || result?.message || 'Insufficient questions in node for this blueprint.',
+                        background: '#0a0a1a',
+                        color: '#fff'
+                    });
+                }, 500);
             }
-        }
+        };
 
-        function toggleAll() {
-            const rows = document.querySelectorAll('.chapter-row');
-            const allSelected = Array.from(rows).every(r => r.classList.contains('selected'));
-            rows.forEach(r => {
-                if (allSelected) {
-                    r.classList.remove('selected');
-                    r.querySelector('.chk-visual').innerHTML = '';
-                    r.querySelector('.chk-visual').style.background = 'rgba(0,0,0,0.05)';
-                    r.querySelector('.chk-visual').style.color = 'transparent';
-                } else {
-                    r.classList.add('selected');
-                    r.querySelector('.chk-visual').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                    r.querySelector('.chk-visual').style.background = '#FFD700';
-                    r.querySelector('.chk-visual').style.color = '#000';
-                }
-            });
-        }
-
-        function generateTest() {
-            if (counts.mcq + counts.vshort + counts.short + counts.long + counts.essay === 0) {
-                Swal.fire({
-                    icon: 'warning', title: 'Empty Test', text: 'Please add at least one question type.',
-                    background: '#141414', color: '#fff'
-                });
-                return;
-            }
-
-            Swal.fire({
-                title: 'Generating Paper...',
-                html: 'Our AI is assembling your custom practice test from the bank.<br><br><b>Analyzing topics...</b>',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                    const content = Swal.getHtmlContainer().querySelector('b');
-                    setTimeout(() => content.textContent = 'Selecting optimal questions...', 1000);
-                    setTimeout(() => content.textContent = 'Formatting PDF...', 2000);
-                },
-                background: '#141414', color: '#fff',
-                timer: 3000
-            }).then(() => {
-                window.location.href = 'student-paper-view.html';
-            });
-        }
-    </script>
-
-    <!-- EXTREME UI SCRIPTS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt
-            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
-                max: 8,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.15,
-                scale: 1.02
-            });
-
-            // Apply Staggered HUD Load-in
-            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
-            elements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
+        window.addEventListener('load', () => {
+            if (!guardStudent()) return;
+            loadBanks();
+            window.renderBlueprint();
         });
     </script>
 </body>
-
 </html>

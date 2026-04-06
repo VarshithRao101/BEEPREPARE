@@ -9,180 +9,99 @@
     <link rel="stylesheet" href="./assets/css/premium-student-ui.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #FFD700;
+            --bg-dark: #000000;
+            --surface: #121212;
+            --text-main: #FFFFFF;
+            --text-muted: #AAAAAA;
+            --border: rgba(255, 215, 0, 0.3);
+            --gradient-gold: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+
         body {
-            background-color: #FFFFFF !important;
+            background-color: var(--bg-dark) !important;
             font-family: 'Outfit', sans-serif;
-            color: #000000 !important;
+            color: var(--text-main) !important;
             margin: 0 !important;
             padding: 0 !important;
-            overflow: hidden;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            width: 100vw !important;
+            overflow: hidden;
         }
 
-        /* Background Orbs */
-        .background-animation {
+        .main-bg {
             position: fixed;
             inset: 0;
-            overflow: hidden;
+            background: url('assets/images/premium-bg.png') no-repeat center center;
+            background-size: cover;
             z-index: -1;
-        }
-
-        .glow-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-            animation: orbFloat 20s infinite alternate;
-        }
-
-        .orb-1 {
-            width: 600px;
-            height: 600px;
-            background: #FFD700;
-            top: -100px;
-            left: -100px;
-        }
-
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            background: #FFA500;
-            bottom: -100px;
-            right: -100px;
-            animation-duration: 25s;
-        }
-
-        @keyframes orbFloat {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            100% {
-                transform: translate(100px, 50px) scale(1.1);
-            }
-        }
-
-        /* Cyber Grid (Light Theme) */
-        .cyber-grid {
-            position: absolute;
-            inset: -50%;
-            background-image:
-                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
-            animation: gridMove 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes gridMove {
-            0% {
-                transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);
-            }
-
-            100% {
-                transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px);
-            }
+            filter: brightness(0.5);
         }
 
         .auth-container {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 380px;
-            padding: 20px;
+            width: 100%;
+            height: 100vh;
             display: flex;
+            align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
         .glass-auth-card {
-            background: linear-gradient(145deg, rgba(20, 20, 20, 0.98), rgba(10, 10, 10, 1));
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(18, 18, 18, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
             border-radius: 40px;
-            padding: 48px 40px;
-            box-shadow: 
-                0 30px 60px rgba(0, 0, 0, 0.5), 
-                inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            padding: 50px 40px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
             text-align: center;
-            width: 420px;
-            max-width: 100%;
+            width: 100%;
+            max-width: 420px;
             position: relative;
-            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* Neon Corner Accents */
-        .glass-auth-card::before,
-        .glass-auth-card::after {
-            content: '';
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            filter: blur(50px);
-            z-index: -1;
-            opacity: 0.2;
-        }
-
-        .glass-auth-card::before {
-            top: -30px;
-            right: -30px;
-            background: var(--primary);
-        }
-
-        .glass-auth-card::after {
-            bottom: -30px;
-            left: -30px;
-            background: #FFA500;
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .logo-hexa {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 24px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02));
-            border: 1px solid rgba(255, 215, 0, 0.4);
-            border-radius: 15px;
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 30px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
-            transform: rotate(45deg);
-            animation: pulseLogo 3s infinite alternate;
-        }
-
-        .logo-hexa svg {
-            transform: rotate(-45deg);
-        }
-
-        @keyframes pulseLogo {
-            to {
-                box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
-                border-color: #FFD700;
-                transform: rotate(45deg) scale(1.05);
-            }
+            transition: 0.3s;
         }
 
         .auth-title {
-            font-size: 36px;
+            font-size: 42px;
             font-weight: 900;
-            background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+            background: linear-gradient(180deg, #fff 0%, #FFD700 100%);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            margin: 0 0 12px 0;
+            margin: 0 0 8px 0;
             letter-spacing: -1px;
         }
 
         .auth-subtitle {
-            color: rgba(255, 255, 255, 0.5);
+            color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 40px;
+            margin-bottom: 45px;
             font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
         .google-auth-btn {
@@ -191,113 +110,220 @@
             border: none;
             width: 100%;
             padding: 18px;
-            border-radius: 16px;
-            font-size: 15px;
+            border-radius: 18px;
+            font-size: 16px;
             font-weight: 800;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 16px;
-            transition: 0.3s;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            font-family: 'Outfit', sans-serif;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .google-auth-btn:hover {
-            transform: translateY(-2px);
-            background: #f8f8f8;
-            box-shadow: 0 15px 30px rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px) scale(1.02);
+            background: #FFD700;
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
         }
 
-        /* Trust Signals */
         .trust-banner {
-            margin-top: 40px;
+            margin-top: 45px;
             display: flex;
             justify-content: center;
-            gap: 24px;
-            opacity: 0.4;
-            filter: grayscale(1);
-            transition: 0.3s;
-        }
-
-        .trust-banner:hover {
-            opacity: 0.8;
-            filter: none;
+            gap: 30px;
+            opacity: 0.6;
+            color: #fff;
         }
 
         .trust-item {
-            color: #FFFFFF; /* Added for high-contrast white */
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .terms-text {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.2);
-            margin-top: 32px;
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 40px;
+            line-height: 1.6;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .glass-auth-card {
+                padding: 40px 25px;
+                border-radius: 30px;
+            }
+            .auth-title {
+                font-size: 36px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="background-animation"></div>
+    <div class="main-bg"></div>
 
     <div class="auth-container">
         <div class="glass-auth-card">
-            <div class="logo-hexa" style="transform: rotate(0); margin-bottom: 24px;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2">
-                    <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z" fill="rgba(255, 215, 0, 0.1)"></path>
+            <div class="logo-hexa">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2.5">
+                    <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
                     <circle cx="12" cy="12" r="3" fill="#FFD700"></circle>
-                    <path d="M12 12L16 10M12 12L8 10M12 12L12 17" stroke="#000" stroke-width="1.5"></path>
                 </svg>
             </div>
 
             <h1 class="auth-title">BEEPREPARE</h1>
-            <div class="auth-subtitle">Elevating Student Excellence</div>
+            <div class="auth-subtitle">Elevating Excellence</div>
 
-            <button class="google-auth-btn" onclick="window.location.href='activation.html'">
+            <button id="googleSignInBtn" class="google-auth-btn">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="22">
-                <span>Continue with Google</span>
+                <span id="btnText">Continue with Google</span>
             </button>
 
             <div class="trust-banner">
                 <div class="trust-item">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
-                    AES-256
+                    ENCRYPTED
                 </div>
                 <div class="trust-item">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                     </svg>
-                    SECURE HUB
+                    SECURED
                 </div>
             </div>
 
-            <div class="terms-text" style="opacity: 0.3; font-size: 9px; margin-top: 32px;">
+            <div class="terms-text">
                 Institutional Security Protocol Active.<br>
-                Certified Academic Resource Node.
+                Official Academic Resource Node.
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          getFreshToken, 
+          BP 
+        } from './assets/js/bee-core.js';
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Static card - No VanillaTilt init
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-            // Slide up animation
-            const el = document.querySelector('.glass-auth-card');
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(40px)';
-            setTimeout(() => {
-                el.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
-                el.style.opacity = '1';
-                el.style.transform = 'translateY(0)';
-            }, 100);
-        });
+        async function handleGoogleLogin() {
+          const btn = document.getElementById('googleSignInBtn');
+          const btnText = document.getElementById('btnText');
+          
+          btn.disabled = true;
+          btnText.innerText = "Signing in...";
+          btn.style.opacity = "0.7";
+          btn.style.cursor = "not-allowed";
+
+          try {
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            const idToken = await user.getIdToken(true);
+
+            // Step 3: Call backend
+            const response = await apiCall(
+              '/auth/google-login',
+              'POST',
+              { idToken },
+              false // no auth header needed for this call
+            );
+
+            if (!response || !response.success) {
+              throw new Error(response?.message || 'Login failed');
+            }
+
+            // Step 4: Save to localStorage
+            const u = response.data.user;
+            localStorage.setItem(BP.TOKEN, idToken);
+            localStorage.setItem(BP.UID, u.googleUid);
+            localStorage.setItem(BP.NAME, u.displayName);
+            localStorage.setItem(BP.EMAIL, u.email);
+            localStorage.setItem(BP.PHOTO, u.photoUrl || '');
+            localStorage.setItem(BP.ROLE, u.role || '');
+            // CRITICAL — always set from server not cache:
+            localStorage.setItem(BP.ACTIVATED,
+              u.isActivated ? 'true' : 'false');
+            localStorage.setItem(BP.PLAN,
+              u.planType || 'free');
+
+            // Step 5: Redirect based on backend response
+            const redirect = response.data.redirectTo;
+            if (redirect === 'activation') {
+              window.location.href = 'activation.html';
+            } else if (redirect === 'role-select') {
+              window.location.href = 'beginners/role-select.html';
+            } else if (redirect === 'teacher-home') {
+              window.location.href = 'beginners/teacher/teacher-home.html';
+            } else if (redirect === 'student-home') {
+              window.location.href = 'beginners/student/student-home.html';
+            }
+
+          } catch (err) {
+            console.error('Login error:', err);
+            
+            btn.disabled = false;
+            btnText.innerText = "Continue with Google";
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
+
+            Swal.fire({
+              icon: 'error',
+              title: 'Sign In Failed',
+              text: err.message || 'Please try again.',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              background: '#1a1a2e',
+              color: '#ffffff'
+            });
+          }
+        }
+
+        document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleLogin);
+
+        // Auto redirect only if Firebase auth confirms we have a user
+        async function handleAutoRedirect() {
+          const auth = getAuth();
+          
+          // Wait for auth to initialize
+          await new Promise(resolve => {
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+              unsubscribe();
+              resolve(user);
+            });
+            setTimeout(resolve, 1500); // 1.5s max wait for auth
+          });
+
+          const user = auth.currentUser;
+          const role = localStorage.getItem(BP.ROLE);
+          const activated = localStorage.getItem(BP.ACTIVATED);
+
+          if (user && activated === 'true' && role === 'teacher') {
+            window.location.replace('beginners/teacher/teacher-home.html');
+          } else if (user && activated === 'true' && role === 'student') {
+            window.location.replace('beginners/student/student-home.html');
+          }
+        }
+
+        window.addEventListener('load', handleAutoRedirect);
     </script>
 </body>
 

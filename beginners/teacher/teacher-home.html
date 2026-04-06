@@ -5,670 +5,330 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Dashboard - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
     <style>
-        /* Modern Reset & Base */
-        .app-container {
-            padding-bottom: 90px;
-        }
-
-        /* Section Dividers */
         .section-divider {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 32px 0 16px 0;
+            margin: 35px 0 15px 0;
         }
 
         .divider-line {
             height: 2px;
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(90deg, var(--border), transparent);
             border-radius: 2px;
         }
 
         .section-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 1px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        /* Subject Cards */
         .subject-card {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.6), rgba(20, 20, 20, 0.8));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 24px;
+            height: 140px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 140px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
             cursor: pointer;
         }
 
-        .subject-card:hover {
-            transform: translateY(-4px);
-            background: rgba(40, 40, 40, 0.8);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
         .subject-icon-wrapper {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 24px;
-            transition: 0.2s;
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid var(--border);
+            transition: 0.3s;
         }
 
-        .subject-card:hover .subject-icon-wrapper {
-            transform: scale(1.1);
-        }
-
-        /* Class Cards */
         .class-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 20px;
+            height: 90px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100px;
-            transition: 0.2s;
             cursor: pointer;
         }
 
-        .class-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--adv-yellow);
-            transform: translateY(-2px);
-        }
-
-        /* Timeline Styles */
-        .timeline {
-            position: relative;
-            padding-left: 12px;
-            margin-top: 10px;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 6px;
-            top: 8px;
-            bottom: 20px;
-            width: 2px;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 0;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 28px;
-            padding-left: 28px;
-        }
-
-        .timeline-dot {
-            width: 12px;
-            height: 12px;
-            background: var(--primary);
-            border-radius: 50%;
-            position: absolute;
-            left: 1px;
-            top: 5px;
-            z-index: 1;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-        }
-
-        .timeline-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--adv-text);
-            margin-bottom: 4px;
-        }
-
-        .timeline-desc {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .timeline-date {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.3);
-            margin-top: 6px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* --- PRO UI ENHANCEMENTS --- */
-        
-        /* 1. Progress Bar (Monetization) */
-        .limit-container {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin: 16px auto;
-            max-width: 400px;
-        }
-        .limit-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-        .progress-bar-bg {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), #FFA500);
-            border-radius: 3px;
-            width: 75%; /* Simulating 3/4 subjects used */
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-        }
-
-        /* 2. Insights Grid */
-        .insights-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
         .insight-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .insight-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .insight-value {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--adv-text);
-        }
-        .fake-chart {
-            height: 30px;
-            display: flex;
-            align-items: flex-end;
-            gap: 3px;
-            margin-top: 4px;
-        }
-        .chart-bar {
-            flex: 1;
-            background: rgba(255, 215, 0, 0.2);
-            border-radius: 2px 2px 0 0;
-            transition: 0.3s;
-        }
-        .chart-bar.active { background: var(--primary); }
-
-        /* Doubts Indicator */
-        .doubt-badge-nav {
-            position: absolute;
-            top: 2px;
-            right: 50%;
-            transform: translateX(20px);
-            background: #ff4d4d;
-            color: white;
-            border-radius: 50%;
-            width: 14px;
-            height: 14px;
-            font-size: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            border: 2px solid #141414;
-        }
-
-        /* 3. Skeleton Loader */
-        .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
-            background-size: 200% 100%;
-            animation: skeleton-loading 1.5s infinite;
-            border-radius: 4px;
-        }
-        @keyframes skeleton-loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* 4. Toast Notification */
-        .toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 9999;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            pointer-events: none;
         }
-        .toast {
-            background: rgba(20, 20, 20, 0.95);
-            border: 1px solid var(--primary);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-            animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            pointer-events: auto;
+
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(50px); }
-            to { opacity: 1; transform: translateX(0); }
+
+        @media (min-width: 769px) {
+            .dashboard-sections {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
         }
     </style>
-    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
-    <!-- PREMIUM ANIMATION STYLES -->
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
-    </div>
+    <div class="main-layout">
+        <!-- Persistent Sidebar for PC -->
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEEPREPARE</div>
+            <nav class="sidebar-nav">
+                <a href="teacher-home.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="question-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="generate-paper.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                    <span>Generate Paper</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="teacher-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
 
-    <div class="app-container">
-
-        <!-- Header -->
-        <div class="top-header"
-            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
-            <div class="header-title text-gold-glow"
-                style="color: var(--adv-yellow); font-weight: 700; font-size: 16px; letter-spacing: 1px; display: flex; align-items: center;">
-                <div style="width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--primary); display: flex; align-items: center; justify-content: center; background: rgba(255,215,0,0.1); margin-right: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
-                    </svg>
+        <!-- Main Content Wrapper -->
+        <main class="content-wrapper">
+            <!-- Top Bar for Content -->
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <div style="display: block;">
+                    <h2 class="welcome-title">Welcome back, Professor</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your digital ecosystem is
+                        ready.</p>
                 </div>
-                BEEPREPARE
-            </div>
-            <div style="position: absolute; right: 0; display: flex; align-items: center; gap: 16px;">
-                <div style="position: relative; cursor: pointer;"
-                    onclick="window.location.href='activity-history.html'">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    </svg>
-                    <div id="notif-badge"
-                        style="position: absolute; top: -2px; right: -2px; background: #ff4d4d; color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: none; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #141414;">
-                        0</div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <button onclick="window.location.href='activity-history.html'"
+                        style="background: none; border: none; cursor: pointer; color: var(--primary);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </button>
+                    <div class="profile-icon" onclick="window.location.href='teacher-profile.html'">T</div>
                 </div>
-                <div class="profile-icon"
-                    style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;"
-                    onclick="window.location.href='teacher-profile.html'">
-                    T</div>
+            </header>
+
+            <div id="zero-state" style="display:none; text-align:center; padding: 80px 20px;">
+                <div style="font-size: 60px; margin-bottom: 20px;">🎯</div>
+                <h3 style="font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 12px;">No Banks Created Yet</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px; line-height: 1.7;">Select your subjects and classes in your profile<br>to auto-create your question banks.</p>
+                <button onclick="window.location.href='teacher-profile.html'" style="background: var(--primary); color: #000; border: none; padding: 16px 36px; border-radius: 16px; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 10px 25px rgba(255,215,0,0.3);">Set Up Profile →</button>
             </div>
-        </div>
 
-        <!-- Subheader -->
-        <div style="text-align: center; margin-bottom: 24px;">
-            <div style="font-size: 24px; font-weight: 700; color: var(--adv-text); margin-bottom: 6px;">Welcome Back,
-                Teacher</div>
-            <p style="color: var(--text-muted); font-size: 14px;">Here is an overview of your activity</p>
-        </div>
+            <div id="dashboard-content" class="dashboard-sections">
+                <!-- Left Column -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">My Banks</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;" id="subjects-container">
+                        <!-- Dynamic banks injected here -->
+                    </div>
 
-        <!-- Section 1: Monetization Limit Bar -->
-        <div class="limit-container hud-element">
-            <div class="limit-header">
-                <span>Subjects Used</span>
-                <span style="color: var(--primary);">2 / 2 (Free Plan)</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: 100%;"></div>
-            </div>
-            <p style="font-size: 10px; color: #ffbc00; margin-top: 8px; font-weight: 600; text-align: center; cursor: pointer;" onclick="showUpgradeModal()">
-                ⚡ UPGRADE TO UNLOCK MORE SUBJECTS
-            </p>
-        </div>
-
-        <!-- Subjects Section -->
-        <div class="section-divider">
-            <span class="section-label">Your Subjects</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="dashboard-grid"
-            style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 0;">
-            <div class="subject-card">
-                <div class="subject-icon-wrapper" style="color: #4da6ff; border-color: rgba(77, 166, 255, 0.3);">
-                    <img src="../../assets/images/subjects/physics.svg" alt="Physics"
-                        style="width: 100%; height: 100%; object-fit: contain;">
+                    <div class="section-divider">
+                        <span class="section-label">Stats</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;" id="grades-container"></div>
                 </div>
-                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Physics</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">4 Chapters</div>
-            </div>
 
-            <div class="subject-card">
-                <div class="subject-icon-wrapper" style="color: #ff4d4d; border-color: rgba(255, 77, 77, 0.3);">
-                    <img src="../../assets/images/subjects/chemistry.svg" alt="Chemistry"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Chemistry</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">6 Chapters</div>
-            </div>
-
-            <div class="subject-card">
-                <div class="subject-icon-wrapper" style="color: #ffd700; border-color: rgba(255, 215, 0, 0.3);">
-                    <img src="../../assets/images/subjects/mathematics.svg" alt="Mathematics"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Mathematics</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">8 Chapters</div>
-            </div>
-
-            <div class="subject-card">
-                <div class="subject-icon-wrapper" style="color: #4caf50; border-color: rgba(76, 175, 80, 0.3);">
-                    <img src="../../assets/images/subjects/biology.svg" alt="Biology"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div style="font-weight: 700; font-size: 16px; color: var(--adv-text);">Biology</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">5 Chapters</div>
-            </div>
-        </div>
-
-        <!-- Classes Section -->
-        <div class="section-divider">
-            <span class="section-label">Your Classes</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 0; gap: 12px;">
-            <div class="class-card">
-                <div style="font-weight: 700; font-size: 18px; color: var(--adv-text);">8</div>
-                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Class</div>
-            </div>
-            <div class="class-card">
-                <div style="font-weight: 700; font-size: 18px; color: var(--adv-text);">9</div>
-                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Class</div>
-            </div>
-            <div class="class-card">
-                <div style="font-weight: 700; font-size: 18px; color: var(--adv-text);">10</div>
-                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Class</div>
-            </div>
-        </div>
-
-        <!-- Insights Section -->
-        <div class="section-divider">
-            <span class="section-label">Quick Analytics</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="insights-grid" style="grid-template-columns: 1fr; gap: 12px;">
-            <!-- Questions Chart -->
-            <div class="insight-card hud-element" style="background: rgba(255, 255, 255, 0.04);">
-                <span class="insight-label">Questions Chart</span>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                    <div class="insight-value" style="font-size: 24px;">1,240 <span style="font-size: 12px; color: var(--text-muted); font-weight: 400;">Total</span></div>
-                    <div class="fake-chart" style="height: 40px; flex: 1; margin-left: 20px;">
-                        <div class="chart-bar" style="height: 40%;"></div>
-                        <div class="chart-bar active" style="height: 70%;"></div>
-                        <div class="chart-bar" style="height: 50%;"></div>
-                        <div class="chart-bar active" style="height: 90%;"></div>
-                        <div class="chart-bar" style="height: 60%;"></div>
-                        <div class="chart-bar active" style="height: 100%;"></div>
-                        <div class="chart-bar" style="height: 75%;"></div>
+                <!-- Right Column -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">Recent Activity</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <div class="insight-card adv-card" style="padding: 20px;" id="activity-container">
+                            <!-- Dynamic Activity Logs Injected Here -->
+                            <button onclick="window.location.href='activity-history.html'" style="width: 100%; margin-top: 25px; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; color: var(--primary); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(255,215,0,0.1)';this.style.borderColor='var(--primary)';" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='var(--border)';">
+                                View Full History →
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <!-- Chapters -->
-                <div class="insight-card hud-element" style="background: rgba(255, 255, 255, 0.04);">
-                    <span class="insight-label">Active Chapters</span>
-                    <div class="insight-value">23</div>
-                    <div style="font-size: 10px; color: var(--primary); font-weight: 700; margin-top: 4px;">+4 THIS WEEK</div>
-                </div>
-                <!-- Class Chart -->
-                <div class="insight-card hud-element" style="background: rgba(255, 255, 255, 0.04); cursor: pointer;" onclick="window.location.href='student-doubts.html'">
-                    <span class="insight-label">Pending Doubts</span>
-                    <div class="insight-value" style="color: #ff4d4d;">02</div>
-                    <div style="font-size: 10px; color: #aaa; font-weight: 500; margin-top: 4px;">Click to answer now →</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Activity Section -->
-        <div class="section-divider">
-            <span class="section-label">Recent Activity</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="timeline" id="home-activity-list">
-            <!-- Dynamic Activity List -->
-        </div>
-
-        <style>
-            /* Timeline CSS */
-            .timeline {
-                position: relative;
-                padding-left: 16px;
-                margin-top: 20px;
-            }
-
-            .timeline::before {
-                content: '';
-                position: absolute;
-                left: 6px;
-                top: 0;
-                bottom: 0;
-                width: 2px;
-                background: rgba(255, 255, 255, 0.1);
-                border-radius: 2px;
-            }
-
-            .timeline-item {
-                position: relative;
-                margin-bottom: 24px;
-                padding-left: 24px;
-            }
-
-            .timeline-dot {
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                background: var(--primary);
-                position: absolute;
-                left: 1px;
-                top: 5px;
-                z-index: 2;
-                border: 2px solid #141414;
-                /* contrast border */
-            }
-
-            .timeline-title {
-                color: var(--adv-text);
-                font-size: 14px;
-                font-weight: 600;
-                line-height: 1.4;
-            }
-
-            .timeline-date {
-                font-size: 10px;
-                color: rgba(255, 255, 255, 0.4);
-                margin-top: 4px;
-                font-weight: 600;
-                text-transform: uppercase;
-            }
-
-            .timeline-dot.info {
-                background: #2196F3;
-                box-shadow: 0 0 10px rgba(33, 150, 243, 0.4);
-            }
-
-            .timeline-dot.success {
-                background: #4CAF50;
-                box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
-            }
-
-            .timeline-dot.warning {
-                background: #FFC107;
-                box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
-            }
-
-            .timeline-dot.error {
-                background: #ff4d4d;
-                box-shadow: 0 0 10px rgba(255, 77, 77, 0.4);
-            }
-        </style>
-
-
+        </main>
     </div>
 
-    <!-- Bottom Nav -->
+    <!-- Bottom Nav (Mobile Only) -->
+    <!-- Bottom Nav (Mobile Only) -->
     <nav class="nav-bottom">
         <a href="teacher-home.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
         <a href="question-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
             <span>Bank</span>
         </a>
-        <!-- UNIFIED BEE AI NAV -->
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="generate-paper.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>Generate</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+            <span>Paper</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+            <span>AI</span>
         </a>
         <a href="teacher-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
-    <!-- Notifications Script -->
-    <script src="../../assets/js/notifications.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('home-activity-list');
 
-            // Check ActivityManager
-            if (window.ActivityManager) {
-                const log = ActivityManager.getLog().slice(0, 3);
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { apiCall, guardTeacher, BP } from '../../assets/js/bee-core.js';
 
-                // Fallback if empty to show UI
-                if (log.length === 0) {
-                    log.push({
-                        action: 'Welcome to BeePrepare',
-                        description: 'Your recent activities will appear here.',
-                        type: 'info',
-                        timestamp: new Date().toISOString()
-                    });
-                }
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
 
-                let html = '';
-                log.forEach((item, index) => {
-                    const delay = index * 0.1;
-                    const date = new Date(item.timestamp).toLocaleDateString();
+        async function loadDashboard() {
+            if (!guardTeacher()) return;
 
-                    html += `
-                        <div class="timeline-item" style="opacity: 0; animation: fadeIn 0.5s ${delay}s forwards;">
-                            <div class="timeline-dot ${item.type || 'info'}"></div>
-                            <div class="timeline-title">${item.action}</div>
-                            <div class="timeline-desc" style="color: #aaa; font-size: 13px; line-height: 1.4; margin-top: 2px;">${item.description}</div>
-                            <div class="timeline-date">${date}</div>
+            const teacherName = localStorage.getItem(BP.NAME) || 'Professor';
+            document.querySelector('.welcome-title').textContent = `Welcome back, ${teacherName.split(' ')[0]}`;
+
+            const response = await apiCall('/teacher/dashboard');
+            if (!response || !response.success) {
+                Swal.fire({ icon: 'error', title: 'Load Failed', text: 'Failed to load dashboard.', background: '#080808', color: '#fff' });
+                return;
+            }
+
+            const data = response.data;
+
+            // ── Zero State ────────────────────────────────────
+            if (data.needsSetup || data.subjects.length === 0) {
+                document.getElementById('zero-state').style.display = 'block';
+                document.getElementById('dashboard-content').style.display = 'none';
+                return;
+            }
+            document.getElementById('zero-state').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = '';
+
+            // ── Stats row ─────────────────────────────────────
+            const stats = data.stats;
+            document.getElementById('grades-container').innerHTML = `
+                <div class="class-card adv-card">
+                    <div style="font-size: 22px; font-weight: 900; color: var(--primary);">${stats.totalQuestions || 0}</div>
+                    <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Questions</div>
+                </div>
+                <div class="class-card adv-card">
+                    <div style="font-size: 22px; font-weight: 900; color: var(--primary);">${stats.activeStudents || 0}</div>
+                    <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Students</div>
+                </div>
+                <div class="class-card adv-card">
+                    <div style="font-size: 22px; font-weight: 900; color: var(--primary);">${data.subjects.length}</div>
+                    <div style="font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Banks</div>
+                </div>
+            `;
+
+            // ── Bank Cards (subject × class) ──────────────────
+            const subjectContainer = document.getElementById('subjects-container');
+            subjectContainer.innerHTML = '';
+            data.subjects.forEach(bank => {
+                const card = document.createElement('div');
+                card.className = 'subject-card adv-card';
+                card.onclick = () => window.location.href = `question-bank.html?bankId=${bank.bankId}`;
+                const subLower = bank.subject.toLowerCase();
+                card.innerHTML = `
+                    <div class="subject-icon-wrapper">
+                        <img src="../../assets/images/subjects/${subLower}.svg" style="width: 25px;" onerror="this.style.display='none'">
+                    </div>
+                    <div style="font-weight: 800; font-size: 14px;">${bank.subject}</div>
+                    <div style="font-size: 10px; color: var(--primary); font-weight: 800; margin-top: 3px;">Class ${bank.class}</div>
+                    <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">${bank.totalQuestions || 0} Qs · ${bank.chapterCount || 0} Ch</div>
+                `;
+                subjectContainer.appendChild(card);
+            });
+
+            // ── Activity Log ──────────────────────────────────
+            const activityContainer = document.getElementById('activity-container');
+            const historyBtn = activityContainer.querySelector('button');
+            // Remove old items
+            activityContainer.querySelectorAll('.activity-item').forEach(el => el.remove());
+
+            if (data.activityLog && data.activityLog.length > 0) {
+                data.activityLog.slice(0, 8).forEach(log => {
+                    const item = document.createElement('div');
+                    item.className = 'activity-item';
+                    item.style = 'display: flex; gap: 15px; align-items: flex-start; margin-bottom: 18px;';
+                    item.innerHTML = `
+                        <div style="width: 38px; height: 38px; min-width: 38px; background: rgba(255,215,0,0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 13px; font-weight: 800; color: #fff;">${log.title}</div>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">${log.description || ''}</div>
                         </div>
                     `;
+                    activityContainer.insertBefore(item, historyBtn);
                 });
-                container.innerHTML = html;
-
-                const style = document.createElement('style');
-                style.innerHTML = `@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`;
-                document.head.appendChild(style);
+            } else {
+                const empty = document.createElement('div');
+                empty.style = 'color: var(--text-muted); text-align: center; padding: 30px 0; font-size: 13px;';
+                empty.textContent = 'No activity yet. Start adding questions!';
+                activityContainer.insertBefore(empty, historyBtn);
             }
-        });
-    </script>
 
-    <!-- EXTREME UI SCRIPTS (OPTIMIZED) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply Staggered HUD Load-in (Simplified)
-            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            hudElements.forEach((el, index) => {
-                el.classList.add('hud-element');
-            });
-        });
-
-        // Pro Features Logic
-        function showToast(message) {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                <span>${message}</span>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(-20px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            // ── Notification Badge ────────────────────────────
+            if (data.pendingRequestsCount > 0 || data.pendingDoubtsCount > 0) {
+                const profileIcon = document.querySelector('.profile-icon');
+                if (profileIcon && !profileIcon.querySelector('.notif-dot')) {
+                    const dot = document.createElement('div');
+                    dot.className = 'notif-dot';
+                    dot.style = 'position:absolute;top:-2px;right:-2px;width:12px;height:12px;background:#ff4444;border-radius:50%;border:2px solid #050505;';
+                    profileIcon.style.position = 'relative';
+                    profileIcon.appendChild(dot);
+                }
+            }
         }
 
-        function showUpgradeModal() {
-            // Simplified for Dashboard: redirects to profile upgrade section
-            window.location.href = 'teacher-profile.html?upgrade=true';
-        }
+        window.addEventListener('load', loadDashboard);
     </script>
-    <div class="toast-container" id="toast-container"></div>
 </body>
 
 </html>

@@ -1,0 +1,16 @@
+node_modules/
+.env
+firebase-admin.json
+
+beeprepare_keys.json
+*.json.bak
+out.log
+test-out.txt
+logs/
+debug-env.js
+check-connectivity.js
+test-count.js
+test-db.js
+test-prompt5.js
+test-prompt6.js
+test-student-flow.js

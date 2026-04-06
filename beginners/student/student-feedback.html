@@ -338,21 +338,35 @@
         </button>
     </div>
 
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          guardStudent, 
+          BP,
+          getFreshToken,
+          API_BASE
+        } from '../../assets/js/bee-core.js';
+
+        const app = initializeApp(firebaseConfig);
+
         // Star Rating Logic
         const stars = document.querySelectorAll('.star');
         let currentRating = 0;
 
         stars.forEach(star => {
             star.addEventListener('click', () => {
-                currentRating = star.dataset.rating;
+                currentRating = parseInt(star.dataset.rating);
                 updateStars();
             });
         });
 
         function updateStars() {
             stars.forEach(star => {
-                if(star.dataset.rating <= currentRating) {
+                if(parseInt(star.dataset.rating) <= currentRating) {
                     star.classList.add('active');
                 } else {
                     star.classList.remove('active');
@@ -360,19 +374,56 @@
             });
         }
 
-        // Handle Form Submission
-        function submitFeedback() {
-            const msg = document.getElementById('feedbackMsg').value;
-            if(!msg && currentRating === 0) {
-                alert('Please provide some feedback or a rating!');
-                return;
+        window.submitFeedback = async function() {
+            const feedbackType = document.getElementById('feedbackType').value;
+            const message = document.getElementById('feedbackMsg').value.trim();
+            const fileInput = document.getElementById('fileUpload');
+
+            if (!message && currentRating === 0) {
+                return Swal.fire({ icon: 'warning', title: 'Input Required', text: 'Please provide a message or a rating.', background: '#0a0a1a', color: '#fff' });
             }
 
-            // Simulate submission
-            document.getElementById('successOverlay').style.display = 'flex';
-        }
+            const btn = document.querySelector('.submit-btn');
+            btn.disabled = true;
+            btn.textContent = 'Sending Node...';
 
-        // Simple file upload trigger
+            try {
+                const formData = new FormData();
+                formData.append('feedbackType', feedbackType);
+                if (message) formData.append('message', message);
+                if (currentRating > 0) formData.append('rating', currentRating);
+                formData.append('context', 'student');
+
+                // Attach file if exists
+                if (fileInput && fileInput.files && fileInput.files[0]) {
+                    formData.append('attachment', fileInput.files[0]);
+                }
+
+                const token = await getFreshToken();
+                const response = await fetch(API_BASE + '/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result && result.success) {
+                    document.getElementById('successOverlay').style.display = 'flex';
+                } else {
+                    throw new Error(result?.message || 'Server error');
+                }
+            } catch (err) {
+                console.error('Feedback Error:', err);
+                btn.disabled = false;
+                btn.textContent = 'Submit Feedback';
+                Swal.fire({ icon: 'error', title: 'Submission Failed', text: 'Terminal error. Please try again later.', background: '#0a0a1a', color: '#fff' });
+            }
+        };
+
+        // File upload trigger
         document.querySelector('.upload-area').onclick = () => {
             document.getElementById('fileUpload').click();
         };
@@ -380,9 +431,16 @@
         document.getElementById('fileUpload').onchange = (e) => {
             if(e.target.files.length > 0) {
                 document.querySelector('.upload-text').innerText = e.target.files[0].name;
-                document.querySelector('.upload-area').style.borderColor = 'var(--primary)';
+                document.querySelector('.upload-area').style.borderColor = '#FFD700';
+                document.querySelector('.upload-area').style.background = 'rgba(255, 215, 0, 0.05)';
             }
         };
+
+        window.addEventListener('load', () => {
+            if (!guardStudent()) return;
+        });
     </script>
+</body>
+</html>
 </body>
 </html>

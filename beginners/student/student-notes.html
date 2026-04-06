@@ -4,741 +4,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Notes - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <title>Material & Note Hub - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .app-container {
-            padding-bottom: 120px !important;
-            display: block !important;
-        }
-
-        .header-title.text-gold-glow {
-            color: var(--primary);
-        }
-
-        /* Subjects Filter */
-        .subject-selector {
+        .section-divider {
             display: flex;
+            align-items: center;
             gap: 12px;
+            margin: 35px 0 15px 0;
+        }
+
+        .divider-line {
+            height: 2px;
+            flex: 1;
+            background: linear-gradient(90deg, var(--border), transparent);
+            border-radius: 2px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Vault Tabs */
+        .vault-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
             overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 24px;
+            padding-bottom: 10px;
         }
 
-        .subject-selector::-webkit-scrollbar {
-            display: none;
-        }
-
-        .subj-tab {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.95));
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .vault-tab {
             padding: 12px 24px;
-            border-radius: 16px;
+            background: rgba(15, 15, 15, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 50px;
             color: var(--text-muted);
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 800;
             cursor: pointer;
             white-space: nowrap;
             transition: 0.3s;
         }
 
-        .subj-tab.active {
+        .vault-tab.active {
             border-color: var(--primary);
             color: #fff;
-            background: linear-gradient(145deg, rgba(40, 40, 40, 0.9), rgba(25, 25, 25, 1));
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
-        }
-
-        /* Bank Info Banner */
-        .bank-banner {
             background: rgba(255, 215, 0, 0.05);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
         }
 
-        .bank-banner-icon {
-            color: var(--primary);
+        /* Chapter Node */
+        .chapter-node {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            margin-bottom: 25px;
+            overflow: hidden;
         }
 
-        /* Chapter Boxes */
-        .chapter-box {
-            background: linear-gradient(145deg, rgba(25, 25, 25, 0.8), rgba(18, 18, 18, 0.95));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            transition: 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .chapter-box:last-child {
-            margin-bottom: 80px;
-        }
-
-        .chapter-box:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
-            transform: translateY(-2px);
-        }
-
-        .chapter-header {
-            padding: 16px 20px;
-            background: rgba(15, 15, 15, 0.9);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .chapter-node-header {
+            padding: 20px 24px;
+            background: rgba(255, 215, 0, 0.03);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .chapter-title {
-            font-size: 17px;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: 0.5px;
-        }
-
-        .notes-grid {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-        }
-
-        /* Document Component */
-        .document-item {
-            display: flex;
-            align-items: center;
-            background: linear-gradient(145deg, rgba(20, 20, 20, 0.6), rgba(12, 12, 12, 0.8));
-            padding: 16px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
-            gap: 20px;
-            transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .document-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(145deg, rgba(255, 215, 0, 0.05), transparent);
-            pointer-events: none;
-            opacity: 0;
-            transition: 0.3s;
-        }
-
-        .document-item:hover {
-            background: linear-gradient(145deg, rgba(25, 25, 25, 0.8), rgba(15, 15, 15, 0.9));
-            border-color: rgba(255, 215, 0, 0.2);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .document-item:hover::before {
-            opacity: 1;
-        }
-
-        .doc-icon-container {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--primary);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .doc-info {
-            flex: 1;
-        }
-
-        .doc-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .doc-meta {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .badge-type {
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .badge-comprehensive {
-            background: rgba(0, 204, 102, 0.15);
-            color: var(--success);
-        }
-
-        .badge-short {
-            background: rgba(255, 215, 0, 0.15);
-            color: var(--primary);
-        }
-
-        .act-btn {
-            background: var(--primary);
-            color: #000;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
-
-        .act-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
-        }
-
-        .act-btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
-            flex-shrink: 0;
-        }
-        .act-btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #fff;
-            transform: scale(1.1);
-        }
-
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-        }
-
-        .empty-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 16px auto;
-            color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Inline Ask Doubt Section */
-        .ask-doubt-bar {
-            background: linear-gradient(90deg, rgba(255,165,0,0.1), rgba(255,215,0,0.05));
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            cursor: pointer;
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
         }
 
-        .ask-doubt-bar:hover {
-            background: linear-gradient(90deg, rgba(255,165,0,0.15), rgba(255,215,0,0.1));
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1);
+        .chapter-node-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: -0.5px;
         }
 
-        .ask-doubt-bar .bar-left {
+        /* Material List */
+        .material-grid {
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .material-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            padding: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-
-        .ask-doubt-bar .bar-icon {
-            color: var(--primary);
-            background: rgba(0,0,0,0.3);
-            padding: 8px;
-            border-radius: 10px;
-            display: flex;
-        }
-
-        .ask-doubt-bar .bar-text h4 {
-            color: #fff;
-            font-size: 15px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .ask-doubt-bar .bar-text p {
-            color: rgba(255,255,255,0.5);
-            font-size: 11px;
-            margin: 2px 0 0 0;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        /* Expanded Form */
-        .doubt-form-container {
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(20, 20, 20, 0.4);
-            border-radius: 0 0 16px 16px;
-            margin-top: -12px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(255, 215, 0, 0); /* Hidden initially */
-            border-top: none;
-            padding: 0 24px; /* Fixed horizontal padding, zero vertical to prevent jump */
-            opacity: 0;
-            transform: scaleY(0.98);
-            transform-origin: top;
-            visibility: hidden;
-        }
-
-        .doubt-form-container.active {
-            max-height: 600px;
-            border-color: rgba(255, 215, 0, 0.2);
-            opacity: 1;
-            transform: scaleY(1);
-            visibility: visible;
-        }
-
-        .doubt-form-container > .form-group:first-child {
-            margin-top: 24px;
-        }
-
-        .doubt-form-container > .btn-send-doubt {
-            margin-bottom: 24px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 11px;
-            color: var(--primary);
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .btn-send-doubt {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            width: 100%;
-            font-weight: 800;
-            font-size: 14px;
+            gap: 18px;
+            transition: 0.3s;
             cursor: pointer;
+            position: relative;
+        }
+
+        .material-item:hover {
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .material-icon-box {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 215, 0, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+            color: var(--primary);
         }
 
-        .btn-send-doubt:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        .material-name {
+            font-size: 14px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+
+        .material-meta {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .dl-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            transition: 0.3s;
+        }
+
+        .dl-btn:hover {
+            background: var(--primary);
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        /* Intervention Engine (Doubt Bar) */
+        .intervention-bar {
+            background: linear-gradient(135deg, rgba(255, 109, 0, 0.1), transparent);
+            border: 1px solid rgba(255, 109, 0, 0.3);
+            border-radius: 20px;
+            padding: 22px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 30px;
+        }
+
+        .intervention-bar:hover {
+            border-color: #ff6d00;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 109, 0, 0.1);
+        }
+
+        .intervention-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 109, 0, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff6d00;
+        }
+
+        @media (min-width: 900px) {
+            .vault-layout {
+                display: grid;
+                grid-template-columns: 1fr 320px;
+                gap: 40px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-2" style="display: none;"></div>
-    </div>
+    <div class="main-layout">
+        <!-- Lean Student Sidebar -->
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEE COMMAND</div>
+            <nav class="sidebar-nav">
+                <a href="student-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Home Hub</span>
+                </a>
+                <a href="student-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2V20c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" /></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="student-generate.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    <span>Practice</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="student-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
 
-    <div class="app-container">
-        <!-- Header -->
-        <div class="top-header"
-            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
-            <div style="position: absolute; left: 0; cursor: pointer; padding: 8px;" onclick="window.history.back()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </div>
-            <div class="header-title text-gold-glow"
-                style="font-weight: 700; font-size: 18px; letter-spacing: 1px; text-transform: uppercase;">
-                Study Notes
-            </div>
-        </div>
-
-        <div class="bank-banner">
-            <svg class="bank-banner-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <div>
-                <div style="font-size: 14px; font-weight: 700; color: #fff;">Accessing Teacher's Bank Notes</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Your teacher uploaded these
-                    materials for you.</div>
-            </div>
-        </div>
-
-        <!-- Subject Selection -->
-        <div class="subject-selector">
-            <div class="subj-tab active">Mathematics</div>
-            <div class="subj-tab">Physics</div>
-            <div class="subj-tab">Chemistry</div>
-        </div>
-
-        <!-- Ask Doubt Inline Section -->
-        <div class="ask-doubt-bar hud-element" onclick="toggleDoubtForm()" id="doubtBar">
-            <div class="bar-left">
-                <div class="bar-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
+        <main class="content-wrapper">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button onclick="window.history.back()" class="btn-adv"
+                        style="padding: 10px; width: 40px; height: 40px;"><svg width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg></button>
+                    <h2 class="welcome-title">Material & Note Vault</h2>
                 </div>
-                <div class="bar-text">
-                    <h4>Have a doubt? Ask Mrs. Verma</h4>
-                    <p>Instant reply from your subject teacher</p>
-                </div>
-            </div>
-            <div class="bar-right">
-                <svg id="barChevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="transition: 0.3s;">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </div>
-        </div>
+                <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+            </header>
 
-        <!-- Hidden Doubt Form -->
-        <div class="doubt-form-container" id="doubtForm">
-            <div class="form-group">
-                <label class="form-label">Which Chapter?</label>
-                <select id="inline-doubt-chapter" class="subj-tab" style="width: 100%; border-radius: 12px; padding: 10px 16px; background: rgba(0,0,0,0.2);">
-                    <option>Real Numbers</option>
-                    <option>Polynomials</option>
-                    <option>Pair of Linear Equations</option>
-                    <option>Quadratic Equations</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Explain your problem</label>
-                <textarea id="inline-doubt-text" placeholder="Be specific so your teacher can help better..." 
-                    style="width: 100%; height: 120px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: #fff; font-family: inherit; resize: none;"></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Attach Image (Optional)</label>
-                <div style="display: flex; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.2); cursor: pointer;" onclick="document.getElementById('inline-doubt-file').click()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                    </svg>
-                    <span id="inline-file-label" style="font-size: 13px; color: #888;">Upload screenshot or photo</span>
-                    <input type="file" id="inline-doubt-file" style="display: none;" onchange="updateInlineFileName(this)">
-                </div>
-            </div>
-            <button class="btn-send-doubt" onclick="sendInlineDoubt()">
-                Send Doubt to Teacher
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Real Numbers Chapter (Has Content) -->
-        <div class="chapter-box">
-            <div class="chapter-header">
-                <div class="chapter-title">Ch 1: Real Numbers</div>
-            </div>
-
-            <div class="notes-grid">
-
-                <div class="document-item">
-                    <div class="doc-icon-container">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <div class="vault-layout">
+                <!-- Learning Resources -->
+                <div>
+                    <!-- Doubt Intervention -->
+                    <div class="intervention-bar" onclick="window.location.href='student-doubts.html'">
+                        <div class="intervention-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 900; color: #fff; font-size: 16px;">Node Intervention Required?
+                            </div>
+                            <div style="font-size: 10px; font-weight: 800; color: #ff6d00; text-transform: uppercase;">
+                                Direct Signal to Mr. Sharma Active</div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3" style="opacity: 0.3;">
+                            <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
                     </div>
-                    <div class="doc-info">
-                        <div class="doc-name">Real Numbers Complete Guide</div>
-                        <div class="doc-meta">
-                            <span class="badge-type badge-comprehensive" style="box-shadow: 0 0 10px rgba(0, 204, 102, 0.1);">COMPLETE</span>
-                            <span>4.2 MB</span>
-                        </div>
+
+                    <div class="vault-tabs">
+                        <div class="vault-tab active">Mathematics</div>
+                        <div class="vault-tab">Physics Hub</div>
+                        <div class="vault-tab">Chemistry Vault</div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="act-btn-secondary" onclick="window.ActivityManager.showToast('Previewing', 'Loading document...', 'info')">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
-                        <button class="act-btn" onclick="downloadFile('Real Numbers Complete Guide.pdf')">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </button>
+
+                    <div class="section-divider">
+                        <span class="section-label">Active Chapters</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div class="active-nodes-container">
+                        <!-- Dynamic Nodes Inject Here -->
                     </div>
                 </div>
 
-                <div class="document-item">
-                    <div class="doc-icon-container">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
+                <!-- HUD Status -->
+                <aside>
+                    <div class="section-divider">
+                        <span class="section-label">Vault Status</span>
+                        <div class="divider-line"></div>
                     </div>
-                    <div class="doc-info">
-                        <div class="doc-name">Formula Cheatsheet</div>
-                        <div class="doc-meta">
-                            <span class="badge-type badge-short" style="box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);">SHORT</span>
-                            <span>1.1 MB</span>
-                        </div>
+                    <div class="adv-card" style="padding: 24px;">
+                        <div
+                            style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">
+                            Repository Engagement</div>
+                        <div id="engagementVal" style="font-size: 32px; font-weight: 900; margin-top: 5px;">0 / 0</div>
+                        <div style="font-size: 9px; color: var(--primary); font-weight: 700; margin-top: 10px;">ALL
+                            SYLLABUS NODES ACCESSIBLE</div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="act-btn-secondary" onclick="window.ActivityManager.showToast('Previewing', 'Loading document...', 'info')">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
-                        <button class="act-btn" onclick="downloadFile('Formula Cheatsheet.pdf')">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </button>
+
+                    <div class="adv-card" style="padding: 24px; margin-top: 20px;">
+                        <div
+                            style="font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase; margin-bottom: 15px;">
+                            Teacher Annotations</div>
+                        <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px;">
+                            View real-time highlights and remarks added by Mrs. Verma to your materials.</p>
+                        <button class="btn-adv"
+                            style="width: 100%; border-radius: 10px; font-size: 10px; background: rgba(0,230,118,0.05); border-color: #00E676; color: #00E676;">ENABLE
+                            ANALYTICS VIEW</button>
                     </div>
-                </div>
-
+                </aside>
             </div>
-        </div>
-
-        <!-- Polynomials Chapter (Empty State) -->
-        <div class="chapter-box">
-            <div class="chapter-header">
-                <div class="chapter-title">Ch 2: Polynomials</div>
-            </div>
-
-            <div class="empty-state">
-                <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                    <polyline points="13 2 13 9 20 9"></polyline>
-                </svg>
-                <div style="font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px;">No Notes Available
-                </div>
-                <div style="font-size: 12px;">Your teacher hasn't uploaded notes for this chapter yet.</div>
-            </div>
-        </div>
+        </main>
     </div>
 
     <!-- Bottom Nav -->
     <nav class="nav-bottom">
         <a href="student-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
-        <a href="student-generate.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-            <span>Test</span>
-        </a>
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <span>Banks</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2V20c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" /></svg>
+            <span>Inventory</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>
+            <span>AI</span>
+        </a>
+        <a href="student-generate.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+            <span>Practice</span>
         </a>
         <a href="student-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
-        function toggleDoubtForm() {
-            const form = document.getElementById('doubtForm');
-            const bar = document.getElementById('doubtBar');
-            const chevron = document.getElementById('barChevron');
-            
-            form.classList.toggle('active');
-            
-            if (form.classList.contains('active')) {
-                chevron.style.transform = 'rotate(180deg)';
-                bar.style.borderRadius = '16px 16px 0 0';
+    <script type="module">
+        import {
+            apiCall,
+            getFreshToken,
+            guardStudent,
+            getIndexPath,
+            BP,
+            API_BASE
+        } from '../../assets/js/bee-core.js';
+
+        if (!guardStudent()) throw new Error('denied');
+
+        const tabsContainer = document.querySelector('.vault-tabs');
+        const nodesContainer = document.querySelector('.active-nodes-container');
+        const engagementVal = document.getElementById('engagementVal');
+
+        let activeBankId = null;
+
+        async function init() {
+            try {
+                // 1. Load active banks
+                const result = await apiCall('/student/banks');
+                if (result && result.success) {
+                    const activeBanks = result.data.filter(b => b.status === 'active');
+                    renderTabs(activeBanks);
+
+                    if (activeBanks.length > 0) {
+                        selectBank(activeBanks[0]._id);
+                    } else {
+                        nodesContainer.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No active banks found.</div>';
+                    }
+                }
+            } catch (err) {
+                console.error('Init failed:', err);
+            }
+        }
+
+        function renderTabs(banks) {
+            tabsContainer.innerHTML = banks.map(bank => `
+                <div class="vault-tab" data-id="${bank._id}" onclick="selectBank('${bank._id}')">
+                    ${bank.subjectName || bank.name}
+                </div>
+            `).join('');
+        }
+
+        window.selectBank = async function (bankId) {
+            activeBankId = bankId;
+
+            // UI Update
+            document.querySelectorAll('.vault-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.id === bankId);
+            });
+
+            await loadNotes(bankId);
+        };
+
+        async function loadNotes(bankId, chapterId = '') {
+            nodesContainer.innerHTML = '<div style="padding: 40px; text-align: center;"><div class="loading-ring" style="margin: 0 auto;"></div></div>';
+
+            let endpoint = `/student/notes?bankId=${bankId}`;
+            if (chapterId) endpoint += `&chapterId=${chapterId}`;
+
+            const result = await apiCall(endpoint);
+            if (result && result.success) {
+                renderNotes(result.data);
             } else {
-                chevron.style.transform = 'rotate(0deg)';
-                bar.style.borderRadius = '16px';
+                nodesContainer.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">Failed to load notes.</div>';
             }
         }
 
-        function updateInlineFileName(input) {
-            const label = document.getElementById('inline-file-label');
-            if (input.files && input.files[0]) {
-                label.innerText = '✓ ' + input.files[0].name;
-                label.style.color = 'var(--primary)';
-            }
+        function formatSize(bytes) {
+            if (!bytes) return '0 KB';
+            const kb = bytes / 1024;
+            if (kb < 1024) return kb.toFixed(1) + ' KB';
+            return (kb / 1024).toFixed(1) + ' MB';
         }
 
-        function sendInlineDoubt() {
-            const text = document.getElementById('inline-doubt-text').value;
-            const chapter = document.getElementById('inline-doubt-chapter').value;
-
-            if (!text) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Please describe your doubt before sending!',
-                    background: '#141414', color: '#fff'
-                });
+        function renderNotes(groups) {
+            if (Object.keys(groups).length === 0) {
+                nodesContainer.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No notes available in this vault.</div>';
+                engagementVal.innerText = '0 / 0';
                 return;
             }
 
-            Swal.fire({
-                title: 'Sending Doubt...',
-                text: 'Your question is being sent to Mrs. Verma',
-                timer: 2000,
-                timerProgressBar: true,
-                didOpen: () => { Swal.showLoading() },
-                background: '#141414', color: '#fff'
-            }).then(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sent Successfully!',
-                    text: 'Mrs. Verma will be notified. You can track this in the Doubts section.',
-                    background: '#141414', color: '#fff'
-                });
-                
-                // Clear and close
-                document.getElementById('inline-doubt-text').value = '';
-                document.getElementById('inline-file-label').innerText = 'Upload screenshot or photo';
-                document.getElementById('inline-file-label').style.color = '#888';
-                toggleDoubtForm();
-            });
-        }
+            let html = '';
+            let totalNotes = 0;
 
-        function downloadFile(filename) {
-            Swal.fire({
-                title: 'Preparing Download...',
-                text: 'Fetching ' + filename + ' securely from teacher bank...',
-                timer: 1500,
-                timerProgressBar: true,
-                didOpen: () => { Swal.showLoading() },
-                background: '#141414', color: '#fff'
-            }).then(() => {
-                const a = document.createElement('a');
-                a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent('Simulated Document Content for: ' + filename);
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+            for (const [chapterId, data] of Object.entries(groups)) {
+                const notes = data.notes || [];
+                totalNotes += notes.length;
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Downloaded!',
-                    text: 'File saved to your device.',
-                    background: '#141414', color: '#fff',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            });
-        }
-    </script>
-
-    <!-- EXTREME UI SCRIPTS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt (Desktop only)
-            if (window.innerWidth > 768) {
-                VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
-                    max: 5,
-                    speed: 400,
-                    glare: true,
-                    "max-glare": 0.1,
-                    scale: 1.01
-                });
+                html += `
+                    <div class="chapter-node">
+                        <div class="chapter-node-header">
+                            <div class="chapter-node-title">${data.chapterName || 'General Resources'}</div>
+                            <div style="font-size: 10px; font-weight: 800; color: var(--primary);">${notes.length} RESOURCES</div>
+                        </div>
+                        <div class="material-grid">
+                            ${notes.map(note => `
+                                <div class="material-item">
+                                    <div class="material-icon-box" onclick="viewNote('${note._id}')">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                    </div>
+                                    <div style="flex: 1;" onclick="viewNote('${note._id}')">
+                                        <div class="material-name">${note.fileName}</div>
+                                        <div class="material-meta">${note.fileType?.toUpperCase() || 'PDF'} • ${formatSize(note.fileSize)} • <span style="color: ${note.noteType === 'complete' ? '#00ff88' : 'var(--primary)'};">${note.noteType?.toUpperCase() || 'COMPREHENSIVE'}</span></div>
+                                    </div>
+                                    <button class="dl-btn" onclick="downloadNote('${note._id}')">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
             }
+            nodesContainer.innerHTML = html;
+            engagementVal.innerText = `${totalNotes} / ${totalNotes}`;
+        }
 
-            // Apply Staggered HUD Load-in
-            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
-            elements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
-        });
-    </script>
-    <script>
-        // History Guard: Force back to Home
-        (function() {
-            history.pushState(null, null, location.href);
-            window.onpopstate = function() {
-                window.location.replace('student-home.html');
-            };
-        })();
+        window.viewNote = async function (noteId) {
+            const result = await apiCall(`/student/notes/${noteId}/download`);
+            if (result && result.success) {
+                window.open(result.data.signedUrl, '_blank');
+            }
+        };
+
+        window.downloadNote = async function (noteId) {
+            const result = await apiCall(`/student/notes/${noteId}/download`);
+            if (result && result.success) {
+                // To force download instead of view, we'd need to fetch and blob, 
+                // but window.open is the standard for signed URLs.
+                window.open(result.data.signedUrl, '_blank');
+            }
+        };
+
+        init();
     </script>
 </body>
 

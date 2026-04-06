@@ -4,359 +4,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Notes Library - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <title>Notebook Hub - BEE COMMAND CENTER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
-    <!-- Include PDF.js for actual PDF parsing on Canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-    </script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Doubts Indicator */
-        .doubt-badge-nav {
-            position: absolute;
-            top: 2px;
-            right: 50%;
-            transform: translateX(20px);
-            background: #ff4d4d;
-            color: white;
-            border-radius: 50%;
-            width: 14px;
-            height: 14px;
-            font-size: 8px;
+        :root {
+            --primary-glow: rgba(255, 215, 0, 0.15);
+            --card-bg: rgba(15, 15, 15, 0.7);
+        }
+
+        body {
+            background: #050505;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .section-divider {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            border: 2px solid #141414;
-        }
-        .app-container {
-            padding-bottom: 120px !important;
-            display: block !important;
-        }
-
-        .header-title.text-gold-glow {
-            color: var(--adv-yellow);
-        }
-
-        /* Notes Dashboard Grid */
-        .subject-selector {
-            display: flex;
             gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 12px;
-            margin-bottom: 24px;
+            margin: 35px 0 15px 0;
         }
 
-        .subject-selector::-webkit-scrollbar {
+        .divider-line {
+            height: 2px;
+            flex: 1;
+            background: linear-gradient(90deg, var(--border), transparent);
+            border-radius: 2px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Selection Architecture */
+        .selection-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(20px);
+        }
+
+        .tabs-group {
+            margin-bottom: 15px;
+        }
+
+        .tabs-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .tab-list {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            scrollbar-width: none;
+        }
+
+        .tab-list::-webkit-scrollbar {
             display: none;
         }
 
-        .subj-tab {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.9), rgba(20, 20, 20, 0.95));
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 24px;
-            border-radius: 16px;
+        .tab-pill {
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 800;
             color: var(--text-muted);
-            font-weight: 600;
             cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
             white-space: nowrap;
-            transition: 0.3s;
-        }
-
-        .subj-tab.active {
-            border-color: var(--primary);
-            color: #fff;
-            background: linear-gradient(145deg, rgba(40, 40, 40, 0.9), rgba(25, 25, 25, 1));
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
-        }
-
-        .chapter-box {
-            background: linear-gradient(145deg, rgba(25, 25, 25, 0.8), rgba(18, 18, 18, 0.95));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            margin-bottom: 32px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-            transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            flex-shrink: 0;
-        }
-
-        .chapter-box:last-child {
-            margin-bottom: 80px;
-        }
-
-        .chapter-box:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transform: translateY(-1px);
-        }
-
-        .chapter-header {
-            padding: 24px 32px;
-            background: rgba(15, 15, 15, 0.9);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .chapter-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: 0.5px;
-        }
-
-        .notes-grid {
-            padding: 24px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        @media (max-width: 768px) {
-            .notes-grid {
-                padding: 20px;
-                grid-template-columns: 1fr;
-            }
-
-            .chapter-header {
-                padding: 20px;
-            }
-
-            .note-type-block {
-                padding: 20px !important;
-            }
-
-            .upload-area {
-                padding: 20px !important;
-            }
-        }
-
-        /* Note Types */
-        .note-type-block {
-            background: linear-gradient(145deg, rgba(20, 20, 20, 0.6), rgba(12, 12, 12, 0.8));
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
-            border-radius: 20px;
-            padding: 28px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            transition: 0.3s;
-        }
-
-        .note-type-block:hover {
-            background: linear-gradient(145deg, rgba(25, 25, 25, 0.8), rgba(15, 15, 15, 0.9));
-            border-color: rgba(255, 215, 0, 0.1);
-        }
-
-        .note-type-header {
             display: flex;
             align-items: center;
-            gap: 16px;
-        }
-
-        .note-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 215, 0, 0.08);
-            color: var(--primary);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.15);
-            flex-shrink: 0;
-        }
-
-        .note-type-title {
-            font-weight: 800;
-            color: #fff;
-            font-size: 16px;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        /* Upload Placeholder */
-        .upload-area {
-            border: 2px dashed rgba(255, 215, 0, 0.2);
-            background: rgba(255, 215, 0, 0.02);
-            padding: 32px 20px;
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .upload-area:hover {
-            background: rgba(255, 215, 0, 0.06);
-            border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.1);
-        }
-
-        /* Document Item */
-        .document-item {
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 16px 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            gap: 16px;
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .document-item:hover {
-            background: rgba(20, 20, 20, 0.5);
-            border-color: rgba(255, 215, 0, 0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .doc-icon {
-            color: #ff4d4d;
-            font-size: 28px;
-            flex-shrink: 0;
-        }
-
-        .doc-info {
-            flex: 1;
-        }
-
-        .doc-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 2px;
-            word-break: break-all;
-        }
-
-        .doc-meta {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: flex;
             gap: 8px;
         }
 
-        .doc-actions {
+        .tab-pill.active {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+
+        /* Chapter Node */
+        .chapter-node {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chapter-title {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 20px;
             display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .chapter-indicator {
+            width: 5px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
+        /* Notebook Grid */
+        .notebook-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .notebook-card {
+            background: rgba(25, 25, 25, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* Responsive Mobile Architecture */
+        @media (max-width: 480px) {
+            .notebook-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .notebook-card {
+                padding: 12px;
+                gap: 8px;
+                border-radius: 12px;
+            }
+
+            .chapter-node {
+                padding: 15px;
+            }
+
+            .note-icon-box {
+                width: 32px;
+                height: 32px;
+                border-radius: 8px;
+            }
+
+            .note-icon-box svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            .card-type {
+                font-size: 7px;
+            }
+
+            .note-header {
+                gap: 8px;
+            }
+
+            .note-header div div:first-child {
+                font-size: 11px !important;
+            }
+
+            .note-header div div:last-child {
+                font-size: 7px !important;
+            }
+
+            .vault-upload-zone {
+                padding: 10px;
+            }
+
+            .vault-upload-zone svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .vault-upload-zone div {
+                font-size: 7px !important;
+            }
+        }
+
+
+        .notebook-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 215, 0, 0.02);
+        }
+
+        .card-type {
+            font-size: 9px;
+            font-weight: 950;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .note-icon-box {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            transition: 0.3s;
+        }
+
+        .notebook-card:hover .note-icon-box {
+            background: var(--primary);
+            color: #000;
+            transform: scale(1.05) rotate(3deg);
+        }
+
+        .vault-upload-zone {
+            border: 2px dashed rgba(255, 215, 0, 0.15);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 14px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .vault-upload-zone svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .notebook-card:hover .vault-upload-zone {
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        /* Documentation & Action */
+        .document-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .doc-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
         }
 
         .act-btn {
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            transition: 0.2s;
-            padding: 6px;
-            border-radius: 6px;
-        }
-
-        .act-btn:hover,
-        .tool-icon:hover {
-            color: var(--primary);
-            background: rgba(255, 215, 0, 0.1);
-        }
-
-        /* --- PRO NOTES ENHANCEMENTS --- */
-        .note-badge {
-            font-size: 8px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            margin-left: 8px;
-        }
-        .badge-important { background: rgba(255, 77, 77, 0.1); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.2); }
-        .badge-revision { background: rgba(77, 166, 255, 0.1); color: #4da6ff; border: 1px solid rgba(77, 166, 255, 0.2); }
-
-        .doc-actions-grid {
-            display: flex;
-            gap: 6px;
-            margin-top: 12px;
-        }
-        .action-icon-btn {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
             padding: 8px;
-            color: #ccc;
-            cursor: pointer;
-            transition: 0.2s;
+            color: #ddd;
+            font-size: 10px;
+            font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .action-icon-btn:hover {
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-        .action-icon-btn.btn-danger:hover {
-            background: rgba(255, 77, 77, 0.1);
-            color: #ff4d4d;
-            border-color: #ff4d4d;
-        }
-        
-        /* Glassy Upload Area */
-        .upload-area.saas-drop {
-            background: rgba(255, 215, 0, 0.03);
-            border: 2px dashed rgba(255, 215, 0, 0.15);
-            position: relative;
-            overflow: hidden;
-        }
-        .upload-area.saas-drop::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .edit-btn {
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--primary);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 8px;
+            gap: 6px;
             cursor: pointer;
             transition: 0.2s;
+            text-transform: uppercase;
         }
 
-        .edit-btn:hover {
+        .act-btn:hover {
             background: var(--primary);
             color: #000;
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
         }
 
-        /* PDF Editor Overlay */
+        /* --- PDF ANNOTATION ENGINE --- */
         .pdf-editor-modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: #111;
-            z-index: 9999;
+            inset: 0;
+            background: #080808;
+            z-index: 10000;
             display: none;
             flex-direction: column;
         }
 
         .pdf-editor-modal.active {
             display: flex;
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
@@ -370,818 +354,432 @@
         }
 
         .editor-header {
-            min-height: 60px;
-            background: #1A1A1A;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            background: #111;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 8px 24px;
-            flex-wrap: wrap;
-            /* Helps on mobile */
-            gap: 12px;
+            align-items: center;
         }
 
-        .editor-tools {
+        .tool-group {
             display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-            /* Helps on smaller desktop screens */
+            gap: 10px;
         }
 
         .tool-icon {
-            color: #fff;
-            cursor: pointer;
             padding: 10px;
-            border-radius: 8px;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.05);
+            color: #888;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        .tool-icon.active-tool {
-            background: var(--primary) !important;
-            color: #000 !important;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        .tool-icon.active {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
 
         .editor-workspace {
-            display: flex;
             flex: 1;
+            display: flex;
             overflow: hidden;
-            position: relative;
         }
 
-        .editor-sidebar {
-            width: 260px;
-            background: #151515;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-
-        .document-canvas {
+        .canvas-container {
             flex: 1;
-            background: #0A0A0A;
+            background: #050505;
+            overflow: auto;
+            position: relative;
+            cursor: grab;
             display: flex;
             align-items: flex-start;
             justify-content: center;
-            position: relative;
-            overflow: auto;
             padding: 40px;
         }
 
-        /* Layered Canvas Container */
-        #canvasWrapper {
+        #layered-canvas-hub {
             position: relative;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
             background: #fff;
-            transform-origin: top center;
         }
 
         #pdfLayer {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             z-index: 1;
             pointer-events: none;
-            /* Let drawLayer catch interactions */
         }
 
         #drawLayer {
             position: absolute;
-            /* Sits exactly on top of pdfLayer */
-            top: 0;
-            left: 0;
+            inset: 0;
             z-index: 2;
         }
 
-        /* Mobile specific Editor tweaks */
-        @media (max-width: 768px) {
-            .editor-header {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 16px;
-            }
-
-            .editor-header>div:first-child {
-                justify-content: space-between;
-                width: 100%;
-            }
-
-            .editor-tools {
-                justify-content: center;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                padding-top: 16px;
-                gap: 8px;
-            }
-
-            .tool-icon {
-                padding: 8px;
-                /* Slightly smaller touches on mobile */
-            }
-
-            .editor-sidebar {
-                display: none;
-                /* Hide sidebar completely to give max room to canvas */
-            }
-
-            .document-canvas {
-                padding: 16px;
-                /* Less empty space around document on mobile */
-            }
-
-            .edit-btn {
-                width: 100%;
-                margin: 0 !important;
-                text-align: center;
-                padding: 12px !important;
-            }
-        }
-
-        .upload-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .upload-modal.active {
-            display: flex;
-            animation: fadeIn 0.3s forwards;
-        }
-
-        .upload-box {
-            background: linear-gradient(145deg, #1e1e1e, #141414);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 24px;
-            padding: 32px;
-            width: 90%;
-            max-width: 400px;
+        .empty-state {
             text-align: center;
+            padding: 100px 20px;
+            color: #666;
         }
     </style>
-    <!-- PREMIUM ANIMATION STYLES -->
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-2"></div>
+    <div class="main-layout">
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEE COMMAND</div>
+            <nav class="sidebar-nav">
+                <a href="teacher-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="question-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="generate-paper.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                    <span>Generate Paper</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="teacher-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content-wrapper">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <div>
+                    <h2 style="font-size: 32px; font-weight: 900; color: #fff; letter-spacing: -1.5px;">Notebook Hub
+                    </h2>
+                    <p style="color: var(--text-muted); font-size: 14px; font-weight: 600;">Architectural study
+                        materials & syllabus blueprints.</p>
+                </div>
+                <div class="profile-icon" onclick="window.location.href='teacher-profile.html'">T</div>
+            </header>
+
+            <div class="selection-panel">
+                <div class="tabs-group">
+                    <label class="section-label" style="display: block; margin-bottom: 12px;">Select Class</label>
+                    <div class="tab-list" id="class-tabs">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="tabs-group">
+                    <label class="section-label" style="display: block; margin-bottom: 12px;">Select Subject</label>
+                    <div class="tab-list" id="subject-tabs">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="chapters-container">
+                <!-- Chapters populated by JS -->
+            </div>
+        </main>
     </div>
 
-    <div class="app-container" style="max-width: 1024px; margin: 0 auto; padding-top: 20px;">
-        <!-- Header -->
-        <div class="top-header"
-            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
-            <div style="position: absolute; left: 0; cursor: pointer; padding: 8px;" onclick="window.history.back()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </div>
-            <div class="header-title text-gold-glow"
-                style="font-weight: 700; font-size: 18px; letter-spacing: 1px; text-transform: uppercase;">
-                My Notes Library
-            </div>
-        </div>
+    <input type="file" id="architect-upload" style="display: none;" accept=".pdf">
 
-        <!-- Subject Selection -->
-        <div class="subject-selector">
-            <div class="subj-tab active">Mathematics</div>
-            <div class="subj-tab">Physics</div>
-            <div class="subj-tab">Chemistry</div>
-        </div>
-
-        <!-- Real Numbers Chapter -->
-        <div class="chapter-box">
-            <div class="chapter-header">
-                <div class="chapter-title">Ch 1: Real Numbers</div>
-            </div>
-
-            <div class="notes-grid">
-                <!-- COMPREHENSIVE NOTES -->
-                <div class="note-type-block" id="ch1-complete">
-                    <div class="note-type-header">
-                        <div class="note-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="note-type-title">Complete Class Notes</div>
-                            <div style="font-size: 11px; color: #888;">Detailed topic explanations</div>
-                        </div>
-                    </div>
-
-                    <div class="upload-area saas-drop" onclick="openUploadModal('ch1-complete')">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
-                            stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <span style="color: var(--primary); font-weight: 600; font-size: 13px;">Upload File</span>
-                    </div>
-                </div>
-
-                <!-- SHORT NOTES -->
-                <div class="note-type-block" id="ch1-short">
-                    <div class="note-type-header">
-                        <div class="note-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="note-type-title">Short Notes</div>
-                            <div style="font-size: 11px; color: #888;">Quick formulas & concepts</div>
-                        </div>
-                    </div>
-
-                    <div class="upload-area" onclick="openUploadModal('ch1-short')">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
-                            stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <span style="color: var(--primary); font-weight: 600; font-size: 13px;">Upload PDF /
-                            Photos</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Polynomials Chapter -->
-        <div class="chapter-box">
-            <div class="chapter-header">
-                <div class="chapter-title">Ch 2: Polynomials</div>
-            </div>
-
-            <div class="notes-grid">
-                <!-- COMPREHENSIVE -->
-                <div class="note-type-block" id="ch2-complete">
-                    <div class="note-type-header">
-                        <div class="note-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="note-type-title">Complete Class Notes</div>
-                            <div style="font-size: 11px; color: #888;">Detailed topic explanations</div>
-                        </div>
-                    </div>
-                    <div class="upload-area" onclick="openUploadModal('ch2-complete')">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
-                            stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <span style="color: var(--primary); font-weight: 600; font-size: 13px;">Upload PDF /
-                            Photos</span>
-                    </div>
-                </div>
-
-                <!-- SHORT -->
-                <div class="note-type-block" id="ch2-short">
-                    <div class="note-type-header">
-                        <div class="note-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="note-type-title">Short Notes</div>
-                            <div style="font-size: 11px; color: #888;">Quick formulas & concepts</div>
-                        </div>
-                    </div>
-                    <div class="upload-area" onclick="openUploadModal('ch2-short')">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)"
-                            stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="17 8 12 3 7 8"></polyline>
-                            <line x1="12" y1="3" x2="12" y2="15"></line>
-                        </svg>
-                        <span style="color: var(--primary); font-weight: 600; font-size: 13px;">Upload PDF /
-                            Photos</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Upload Modal -->
-    <div class="upload-modal" id="uploadModal">
-        <div class="upload-box">
-            <h3 style="color: #fff; margin-bottom: 24px;">Upload Notes</h3>
-            <div id="dropZone"
-                style="border: 2px dashed rgba(255,215,0,0.5); padding: 40px; border-radius: 16px; margin-bottom: 24px; background: rgba(255,215,0,0.05); cursor: pointer; transition: 0.3s;">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"
-                    style="margin-bottom: 12px;">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-                <div style="color: #fff; font-weight: 600;">Drag & Drop or Click</div>
-                <div style="color: #888; font-size: 11px; margin-top: 8px;">Supports PDF, JPG, PNG</div>
-                <input type="file" id="fileInput" accept=".pdf,image/*" style="display: none;">
-            </div>
-            <button class="btn btn-primary" onclick="closeUploadModal()"
-                style="width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: 700;">Cancel</button>
-        </div>
-    </div>
-
-    <!-- Canvas Based PDF Editor Overlay -->
-    <div class="pdf-editor-modal" id="pdfEditor">
-        <div class="editor-header">
-            <div style="display: flex; align-items: center; gap: 16px; width: 100%;">
-                <button class="act-btn" onclick="closeEditor()" style="color: #fff;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                </button>
-                <div id="editorFileName"
-                    style="color: var(--primary); font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    View PDF</div>
-            </div>
-
-            <div class="editor-tools">
-                <div class="tool-icon" id="toolView" title="Pan / View" onclick="setMode('view')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </div>
-                <div class="tool-icon" id="toolText" title="Add Text" onclick="setMode('text')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
-                        <line x1="9" y1="20" x2="15" y2="20"></line>
-                        <line x1="12" y1="4" x2="12" y2="20"></line>
-                    </svg>
-                </div>
-                <div class="tool-icon" id="toolDraw" title="Draw Pencil" onclick="setMode('draw')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path
-                            d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z">
-                        </path>
-                    </svg>
-                </div>
-                <!-- Highlight -->
-                <div class="tool-icon" id="toolHighlight" title="Highlight Yellow" onclick="setMode('highlight')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 20h9"></path>
-                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                    </svg>
-                </div>
-                <!-- ERASER TOOL ADDED -->
-                <div class="tool-icon" id="toolEraser" title="Eraser" onclick="setMode('eraser')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path
-                            d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1.172a2 2 0 0 0-.586-1.414l-8.414-8.414a2 2 0 0 0-2.828 0">
-                        </path>
-                        <path d="m14 7 3 3"></path>
-                        <path d="M5 11l4-4"></path>
-                        <path d="M22 6l-3-3"></path>
-                        <path
-                            d="M19 3a2 2 0 0 0-2.828 0l-5.586 5.586a2 2 0 0 0 0 2.828l1.414 1.414a2 2 0 0 0 2.828 0l5.586-5.586A2 2 0 0 0 19 3Z">
-                        </path>
-                    </svg>
-                </div>
-
-                <button class="edit-btn"
-                    style="background: var(--primary); color: #000; padding: 10px 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;"
-                    onclick="saveEditorChanges()">Download Changes</button>
-            </div>
-        </div>
-        <div class="editor-workspace">
-            <div class="editor-sidebar">
-                <div style="font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase;">Pages Thumbnail
-                </div>
-                <div
-                    style="background: #222; border: 1px solid var(--primary); height: 120px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #555; font-size: 24px; font-weight: bold; position: relative;">
-                    1 <div style="position: absolute; bottom: 8px; right: 8px; font-size: 10px; color: var(--primary);">
-                        Current</div>
-                </div>
-                <div style="margin-top:20px; color: #888; font-size: 12px; line-height: 1.5;">
-                    Select a tool from the top menu, then drag on the document. <br><br>The Eraser tool safely clears
-                    ink without wiping your document!
-                </div>
-            </div>
-            <!-- Scrollable workspace for the canvas -->
-            <div class="document-canvas" id="canvasScrollContainer">
-                <div id="canvasWrapper">
-                    <!-- Layer 1: Holds The Document Base (PDF/Image) -->
-                    <canvas id="pdfLayer"></canvas>
-                    <!-- Layer 2: Transparent overlay where we actually stamp Ink & Eraser -->
-                    <canvas id="drawLayer"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom Nav -->
     <nav class="nav-bottom">
         <a href="teacher-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
         <a href="question-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
             <span>Bank</span>
         </a>
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="generate-paper.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>Generate</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+            <span>Paper</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+            <span>AI</span>
         </a>
         <a href="teacher-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
-        // Global references
-        let currentUploadedFiles = {}; // store file refs for editor
+    <script type="module">
+        import {
+            apiCall,
+            getFreshToken,
+            guardTeacher,
+            getIndexPath,
+            BP,
+            API_BASE
+        } from "../../assets/js/bee-core.js";
 
-        let currentTargetId = null;
-        const uploadModal = document.getElementById('uploadModal');
-        const fileInput = document.getElementById('fileInput');
-        const dropZone = document.getElementById('dropZone');
-
-        function openUploadModal(targetId) {
-            currentTargetId = targetId;
-            uploadModal.classList.add('active');
+        if (!guardTeacher()) {
+            window.location.href = getIndexPath();
         }
 
-        function closeUploadModal() {
-            uploadModal.classList.remove('active');
-            currentTargetId = null;
-            fileInput.value = '';
-        }
+        let allBanks = [];
+        let selectedClass = "";
+        let selectedSubject = "";
+        let selectedBankId = "";
+        let currentTargetNode = "";
 
-        uploadModal.addEventListener('click', (e) => {
-            if (e.target === uploadModal) closeUploadModal();
-        });
+        const architectUpload = document.getElementById("architect-upload");
 
-        dropZone.addEventListener('click', () => { fileInput.click(); });
-
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-            document.body.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
-
-        ['dragenter', 'dragover'].forEach(eventName => { dropZone.addEventListener(eventName, highlight, false); });
-        ['dragleave', 'drop'].forEach(eventName => { dropZone.addEventListener(eventName, unhighlight, false); });
-
-        function highlight(e) {
-            dropZone.style.borderColor = '#fff'; dropZone.style.background = 'rgba(255,255,255,0.1)';
-        }
-
-        function unhighlight(e) {
-            dropZone.style.borderColor = 'rgba(255,215,0,0.5)'; dropZone.style.background = 'rgba(255,215,0,0.05)';
-        }
-
-        dropZone.addEventListener('drop', (e) => {
-            let dt = e.dataTransfer;
-            let files = dt.files;
-            if (files && files.length > 0) handleFile(files[0]);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files.length > 0) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            if (!currentTargetId) return;
-
-            let fileId = 'file_' + Math.random().toString(36).substr(2, 9);
-            currentUploadedFiles[fileId] = file;
-
-            let fileName = file.name;
-            let fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
-            let isImg = file.type.includes('image');
-
-            let docEl = document.createElement('div');
-            docEl.className = 'document-item';
-            docEl.style.flexDirection = 'column';
-            docEl.style.alignItems = 'stretch';
-            docEl.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <svg class="doc-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                    </svg>
-                    <div class="doc-info">
-                        <div class="doc-name">${fileName} 
-                            <span class="note-badge badge-revision">NEW</span>
-                        </div>
-                        <div class="doc-meta"><span>${fileSize}</span> • <span>Revision</span></div>
-                    </div>
-                </div>
-                <div class="doc-actions-grid">
-                    <button class="action-icon-btn" onclick="openEditor('${fileId}')" title="Preview / Annotate">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        <span style="margin-left: 6px; font-size: 11px;">Preview</span>
-                    </button>
-                    <button class="action-icon-btn" onclick="window.ActivityManager.showToast('Success', 'File downloading...', 'success')" title="Download">
-                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    </button>
-                    <button class="action-icon-btn btn-danger" onclick="this.closest('.document-item').remove()" title="Delete">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6L18 20a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    </button>
-                </div>
-            `;
-
-            let targetBlock = document.getElementById(currentTargetId);
-            let uploadArea = targetBlock.querySelector('.upload-area');
-            targetBlock.insertBefore(docEl, uploadArea);
-
-            closeUploadModal();
-        }
-
-        // --- ENHANCED LAYERED CANVAS EDITOR ---
-        const pdfEditor = document.getElementById('pdfEditor');
-        const canvasWrapper = document.getElementById('canvasWrapper');
-
-        // Bottom layer for the PDF/Image untouched
-        const pdfLayer = document.getElementById('pdfLayer');
-        const pdfCtx = pdfLayer.getContext('2d');
-
-        // Top layer for all ink and edits (transparent)
-        const drawLayer = document.getElementById('drawLayer');
-        const drawCtx = drawLayer.getContext('2d');
-
-        const editorFileName = document.getElementById('editorFileName');
-
-        let editorMode = 'view';
-        let isDrawing = false;
-        let lastX = 0; let lastY = 0;
-
-        function setMode(mode) {
-            editorMode = mode;
-            document.querySelectorAll('.tool-icon').forEach(el => el.classList.remove('active-tool'));
-
-            if (mode === 'view') {
-                document.getElementById('toolView').classList.add('active-tool');
-                drawLayer.style.cursor = 'grab';
-            } else if (mode === 'draw' || mode === 'highlight') {
-                document.getElementById(mode === 'draw' ? 'toolDraw' : 'toolHighlight').classList.add('active-tool');
-                drawLayer.style.cursor = 'crosshair';
-            } else if (mode === 'text') {
-                document.getElementById('toolText').classList.add('active-tool');
-                drawLayer.style.cursor = 'text';
-            } else if (mode === 'eraser') {
-                document.getElementById('toolEraser').classList.add('active-tool');
-                drawLayer.style.cursor = 'url(https://cdn3.iconfinder.com/data/icons/design-tools-46/24/eraser-draw-edit-delete-24.png) 12 12, auto';
-            }
-        }
-
-        function setCanvasDimensions(w, h) {
-            canvasWrapper.style.width = w + 'px';
-            canvasWrapper.style.height = h + 'px';
-
-            pdfLayer.width = w;
-            pdfLayer.height = h;
-
-            drawLayer.width = w;
-            drawLayer.height = h;
-        }
-
-        function openEditor(fileId) {
-            let file = currentUploadedFiles[fileId];
-            if (!file) return;
-
-            editorFileName.textContent = "Editing: " + file.name;
-            pdfEditor.classList.add('active');
-            setMode('view');
-
-            let fileUrl = URL.createObjectURL(file);
-            pdfCtx.clearRect(0, 0, pdfLayer.width, pdfLayer.height);
-            drawCtx.clearRect(0, 0, drawLayer.width, drawLayer.height);
-
-            if (file.type.includes('image')) {
-                let img = new Image();
-                img.onload = () => {
-                    setCanvasDimensions(img.width, img.height);
-                    pdfCtx.drawImage(img, 0, 0);
-                };
-                img.src = fileUrl;
-            } else {
-                pdfjsLib.getDocument(fileUrl).promise.then(pdf => {
-                    return pdf.getPage(1);
-                }).then(page => {
-                    const scale = (window.innerWidth < 768) ? window.innerWidth / page.getViewport({ scale: 1 }).width : 1.5;
-                    const viewport = page.getViewport({ scale: scale });
-
-                    setCanvasDimensions(viewport.width, viewport.height);
-
-                    const renderContext = {
-                        canvasContext: pdfCtx,
-                        viewport: viewport
-                    };
-                    page.render(renderContext);
-                }).catch(err => {
-                    setCanvasDimensions(600, 400);
-                    pdfCtx.fillStyle = '#f5f5f5'; pdfCtx.fillRect(0, 0, 600, 400);
-                    pdfCtx.fillStyle = '#ff4d4d'; pdfCtx.font = "20px Arial";
-                    pdfCtx.fillText("Failed to load preview.", 50, 50);
-                });
-            }
-        }
-
-        function closeEditor() {
-            pdfEditor.classList.remove('active');
-        }
-
-        function saveEditorChanges() {
-            // Flatten layers!
-            const exportCanvas = document.createElement('canvas');
-            exportCanvas.width = pdfLayer.width;
-            exportCanvas.height = pdfLayer.height;
-            const expCtx = exportCanvas.getContext('2d');
-
-            // Draw original PDF, then draw all ink annotations over
-            expCtx.drawImage(pdfLayer, 0, 0);
-            expCtx.drawImage(drawLayer, 0, 0);
-
-            const dataUrl = exportCanvas.toDataURL("image/png");
-            const a = document.createElement('a');
-            a.href = dataUrl;
-            a.download = "Edited_" + editorFileName.textContent.replace('Editing: ', '') + ".png";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            alert("Changes saved and downloaded locally!");
-        }
-
-        // --- MOUSE EVENTS ON DRAW LAYER ---
-        function getMousePos(evt) {
-            const rect = drawLayer.getBoundingClientRect();
-            const scaleX = drawLayer.width / rect.width;
-            const scaleY = drawLayer.height / rect.height;
-
-            // Handle touch as well
-            let clientX = evt.clientX;
-            let clientY = evt.clientY;
-            if (evt.touches && evt.touches.length > 0) {
-                clientX = evt.touches[0].clientX;
-                clientY = evt.touches[0].clientY;
-            }
-
-            return {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top) * scaleY
-            };
-        }
-
-        function handlePointerDown(e) {
-            if (editorMode === 'view') return;
-            // dont preventDefault so touch scrolling works if in view mode
-            if (e.type.startsWith('touch')) e.preventDefault();
-
-            const pos = getMousePos(e);
-
-            if (editorMode === 'text') {
-                let txt = prompt("Enter text to stamp on document:");
-                if (txt) {
-                    drawCtx.font = "bold 24px Arial";
-                    drawCtx.fillStyle = "#FFD700";
-                    drawCtx.fillText(txt, pos.x, pos.y);
+        async function initNotes() {
+            try {
+                const result = await apiCall("/teacher/dashboard");
+                if (result && result.success) {
+                    allBanks = result.data.subjects || [];
+                    renderClassTabs();
                 }
+            } catch (err) {
+                console.error("Init Error:", err);
+            }
+        }
+
+        function renderClassTabs() {
+            const container = document.getElementById("class-tabs");
+            const classes = [...new Set(allBanks.map(b => b.class))].sort((a, b) => b - a);
+            
+            if (classes.length === 0) {
+                container.innerHTML = `<div class="tab-pill">No Classes Found</div>`;
                 return;
             }
 
-            if (editorMode === 'draw' || editorMode === 'highlight' || editorMode === 'eraser') {
-                isDrawing = true;
-                lastX = pos.x;
-                lastY = pos.y;
-            }
-        }
+            container.innerHTML = classes.map((c, i) => `
+                <div class="tab-pill ${i === 0 ? "active" : ""}" data-class="${c}">Class ${c}</div>
+            `).join("");
 
-        function handlePointerMove(e) {
-            if (!isDrawing) return;
-            if (e.type.startsWith('touch')) e.preventDefault();
-
-            const pos = getMousePos(e);
-
-            drawCtx.beginPath();
-            drawCtx.moveTo(lastX, lastY);
-            drawCtx.lineTo(pos.x, pos.y);
-
-            drawCtx.lineCap = 'round';
-            drawCtx.lineJoin = 'round';
-
-            if (editorMode === 'draw') {
-                drawCtx.globalCompositeOperation = 'source-over';
-                drawCtx.strokeStyle = '#ff4d4d'; // Red pen
-                drawCtx.lineWidth = 3;
-                drawCtx.globalAlpha = 1.0;
-            } else if (editorMode === 'highlight') {
-                drawCtx.globalCompositeOperation = 'source-over';
-                drawCtx.strokeStyle = '#FFD700'; // Yellow highlighter
-                drawCtx.lineWidth = 15;
-                drawCtx.globalAlpha = 0.3;
-            } else if (editorMode === 'eraser') {
-                drawCtx.globalCompositeOperation = 'destination-out'; // This purely erases strokes!
-                drawCtx.lineWidth = 25; // Large eraser brush
-                drawCtx.globalAlpha = 1.0;
-            }
-
-            drawCtx.stroke();
-
-            // reset alpha for safety
-            drawCtx.globalAlpha = 1.0;
-
-            lastX = pos.x;
-            lastY = pos.y;
-        }
-
-        function handlePointerUp() { isDrawing = false; }
-
-        drawLayer.addEventListener('mousedown', handlePointerDown, { passive: false });
-        drawLayer.addEventListener('mousemove', handlePointerMove, { passive: false });
-        drawLayer.addEventListener('mouseup', handlePointerUp);
-        drawLayer.addEventListener('mouseout', handlePointerUp);
-
-        drawLayer.addEventListener('touchstart', handlePointerDown, { passive: false });
-        drawLayer.addEventListener('touchmove', handlePointerMove, { passive: false });
-        drawLayer.addEventListener('touchend', handlePointerUp);
-        drawLayer.addEventListener('touchcancel', handlePointerUp);
-
-    </script>
-
-    <!-- EXTREME UI SCRIPTS (Animations Only) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to Teacher Cards
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if (tiltElements.length > 0) {
-                try {
-                    VanillaTilt.init(tiltElements, {
-                        max: 8,
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.15,
-                        scale: 1.02
-                    });
-                } catch (e) { }
-            }
-
-            // Apply Staggered HUD Load-in
-            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            hudElements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
+            // Add Event Listeners
+            container.querySelectorAll(".tab-pill").forEach(pill => {
+                pill.onclick = () => selectClass(pill.dataset.class);
             });
-        });
+
+            selectClass(classes[0]);
+        }
+
+        function selectClass(cls) {
+            selectedClass = cls;
+            document.querySelectorAll("#class-tabs .tab-pill").forEach(p => {
+                p.classList.toggle("active", p.dataset.class === cls);
+            });
+            const subjects = [...new Set(allBanks.filter(b => b.class === cls).map(b => b.subject))];
+            renderSubjectTabs(subjects);
+        }
+
+        function renderSubjectTabs(subjects) {
+            const container = document.getElementById("subject-tabs");
+            
+            if (subjects.length === 0) {
+                container.innerHTML = `<div class="tab-pill">No Subjects</div>`;
+                return;
+            }
+
+            container.innerHTML = subjects.map((s, i) => `
+                <div class="tab-pill ${i === 0 ? "active" : ""}" data-subject="${s}">${s}</div>
+            `).join("");
+
+            // Add Event Listeners
+            container.querySelectorAll(".tab-pill").forEach(pill => {
+                pill.onclick = () => selectSubject(pill.dataset.subject);
+            });
+
+            selectSubject(subjects[0]);
+        }
+
+        function selectSubject(sub) {
+            if (!sub) return;
+            selectedSubject = sub;
+            
+            // Visual Update
+            document.querySelectorAll("#subject-tabs .tab-pill").forEach(p => {
+                p.classList.toggle("active", p.dataset.subject === sub);
+            });
+
+            // Find matching data bank (case-insensitive)
+            const bank = allBanks.find(b => 
+                b.class.toString() === selectedClass.toString() && 
+                b.subject.toLowerCase() === sub.toLowerCase()
+            );
+
+            if (bank && bank.bankId) {
+                selectedBankId = bank.bankId;
+                loadChapters(bank.bankId);
+            } else {
+                console.warn("No Bank record found for:", selectedClass, sub);
+                const container = document.getElementById("chapters-container");
+                container.innerHTML = `<div class="empty-state">No syllabus blueprint found for Class ${selectedClass} ${sub}. Create it in Bank Inventory first.</div>`;
+            }
+        }
+
+        async function loadChapters(bankId) {
+            const container = document.getElementById("chapters-container");
+            container.innerHTML = `<div class="empty-state">SYNCING REPOSITORY...</div>`;
+            try {
+                const result = await apiCall("/teacher/notes/" + bankId);
+                if (result && result.success) {
+                    renderChapters(result.data.chapters);
+                } else {
+                    container.innerHTML = `<div class="empty-state">Vault bridge failed to sync.</div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<div class="empty-state">Network fault in Notebook Hub.</div>`;
+            }
+        }
+
+        function renderChapters(chapters) {
+            const container = document.getElementById("chapters-container");
+            if (!chapters || chapters.length === 0) {
+                container.innerHTML = `<div class="empty-state">No syllabus nodes defined.</div>`;
+                return;
+            }
+            container.innerHTML = chapters.map(chap => `
+                <div class="chapter-node">
+                    <div class="chapter-title"><div class="chapter-indicator"></div> ${chap.chapterName}</div>
+                    <div class="notebook-grid">
+                        ${renderNoteCard(chap, "complete", "Master Blueprint", "DETAILED NOTES")}
+                        ${renderNoteCard(chap, "flash", "Short Memo", "QUICK REVISION")}
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderNoteCard(chap, type, title, subtitle) {
+            const note = chap.notes.find(n => n.noteType === type);
+            const cardId = "card-" + Math.random().toString(36).substr(2, 9);
+            
+            // We use a timeout to attach listeners after innerHTML is set
+            setTimeout(() => {
+                const zone = document.getElementById(cardId);
+                if (zone) {
+                    zone.onclick = () => {
+                        if (note) {
+                            window.open(note.fileUrl, "_blank");
+                        } else {
+                            triggerVaultUpload(chap.chapterId, type, chap.chapterName);
+                        }
+                    };
+                }
+                const wipeBtn = document.getElementById("wipe-" + cardId);
+                if (wipeBtn) {
+                    wipeBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteNote(note.noteId);
+                    };
+                }
+            }, 0);
+
+            return `
+                <div class="notebook-card" id="${cardId}">
+                    <div class="card-type">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        </svg>
+                        ${type === "complete" ? "COMPREHENSIVE NODE" : "FLASH NODE"}
+                    </div>
+                    <div class="note-header">
+                        <div class="note-icon-box">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                ${type === "complete" ? `<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>` : `<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>`}
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-weight: 900; font-size: 14px; color: #fff;">${title}</div>
+                            <div style="font-size: 9px; font-weight: 700; color: var(--text-muted); opacity: 0.7;">${subtitle}</div>
+                        </div>
+                    </div>
+                    ${note ? `
+                        <div class="document-item">
+                            <div style="font-size: 10px; font-weight: 850; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${note.fileName}</div>
+                            <div class="doc-actions">
+                                <button class="act-btn">VIEW</button>
+                                <button class="act-btn" id="wipe-${cardId}" style="color: #ff4444; border-color: rgba(255,68,68,0.2);">WIPE</button>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="vault-upload-zone">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color: var(--primary);">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div style="font-size: 9px; font-weight: 900; color: var(--primary);">VAULT ${type.toUpperCase()}</div>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function triggerVaultUpload(chapId, noteType, chapName) {
+            currentTargetNode = chapId + ":" + noteType + ":" + chapName;
+            architectUpload.click();
+        }
+
+        architectUpload.onchange = async function(e) {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                const [chapId, noteType, chapName] = currentTargetNode.split(":");
+                await uploadNote(file, chapId, noteType, chapName);
+            }
+        };
+
+        async function uploadNote(file, chapId, noteType, chapName) {
+            Swal.fire({
+                title: "CLOUD SYNC...",
+                text: "Vaulting PDF to Cloudinary",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); },
+                background: "#0a0a1a", color: "#fff"
+            });
+            try {
+                const { performNoteUpload } = await import("../../assets/js/cloudinary-uploader.js");
+                const existingNotesArr = await apiCall("/teacher/notes/" + selectedBankId);
+                if (existingNotesArr && existingNotesArr.success) {
+                    const dup = existingNotesArr.data.chapters.flatMap(c => c.notes).find(n => n.chapterId === chapId && n.noteType === noteType);
+                    if (dup) await apiCall("/teacher/notes/" + dup.noteId, "DELETE");
+                }
+                const user = await BP.getAuthUser();
+                const metadata = { userId: user.uid, bankId: selectedBankId, chapterId: chapId, chapterName: chapName, noteType: noteType };
+                const result = await performNoteUpload(file, metadata, (p) => {
+                    Swal.update({ text: "TRANSMITTING: " + p + "%" });
+                });
+                if (result && result.success) {
+                    Swal.fire({ icon: "success", title: "CLOUD VAULTED", text: "PDF Sync Complete!", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
+                    loadChapters(selectedBankId);
+                }
+            } catch (err) {
+                console.error("Migration Error:", err);
+                Swal.fire({ icon: "error", title: "SYNC FAILED", text: err.message, background: "#0a0a1a", color: "#fff" });
+            }
+        }
+
+        async function deleteNote(noteId) {
+            const confirm = await Swal.fire({
+                title: "PURGE NODE?",
+                text: "This metadata will be permanently deleted.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "PURGE",
+                background: "#0a0a1a", color: "#fff",
+                confirmButtonColor: "#ff4444"
+            });
+            if (confirm.isConfirmed) {
+                const result = await apiCall("/teacher/notes/" + noteId, "DELETE");
+                if (result && result.success) loadChapters(selectedBankId);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initNotes);
     </script>
 </body>
 

@@ -1,185 +1,183 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activity History - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
     <style>
         .timeline {
             position: relative;
-            padding-left: 20px;
-            margin-top: 24px;
+            padding-left: 40px;
+            margin-top: 30px;
         }
 
         .timeline::before {
             content: '';
             position: absolute;
-            left: 6px;
+            left: 0;
             top: 0;
             bottom: 0;
             width: 2px;
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(180deg, var(--primary), transparent);
+            border-radius: 2px;
         }
 
         .timeline-item {
             position: relative;
-            margin-bottom: 32px;
-            padding-left: 24px;
-            opacity: 0;
-            transform: translateY(10px);
-            animation: fadeInItem 0.4s forwards;
-        }
-
-        @keyframes fadeInItem {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            margin-bottom: 40px;
         }
 
         .timeline-dot {
             width: 14px;
             height: 14px;
-            border-radius: 50%;
             background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
+            border: 3px solid #000;
+            border-radius: 50%;
             position: absolute;
-            left: 0;
-            top: 4px;
-            z-index: 2;
+            left: -47px;
+            top: 5px;
+            box-shadow: 0 0 15px var(--primary);
         }
 
-        .timeline-dot.info {
-            background: #2196F3;
-            box-shadow: 0 0 10px #2196F3;
+        .timeline-dot.success { background: #00E676; box-shadow: 0 0 15px #00E676; }
+        .timeline-dot.error { background: #ff4d4d; box-shadow: 0 0 15px #ff4d4d; }
+
+        .timeline-card {
+            padding: 25px;
+            transition: 0.3s;
         }
 
-        .timeline-dot.success {
-            background: #4CAF50;
-            box-shadow: 0 0 10px #4CAF50;
-        }
-
-        .timeline-dot.warning {
-            background: #FFC107;
-            box-shadow: 0 0 10px #FFC107;
-        }
-
-        .timeline-dot.error {
-            background: #ff4d4d;
-            box-shadow: 0 0 10px #ff4d4d;
-        }
-
-        .timeline-content {
-            background: rgba(30, 30, 30, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .t-title {
-            font-weight: 700;
-            color: var(--adv-text);
-            font-size: 16px;
-            margin-bottom: 4px;
-        }
-
-        .t-desc {
-            color: #aaa;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .t-time {
-            margin-top: 12px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .empty-state {
-            text-align: center;
-            color: #666;
-            padding: 40px;
-        }
+        .t-title { font-weight: 800; font-size: 17px; margin-bottom: 8px; }
+        .t-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+        .t-time { font-size: 10px; font-weight: 900; color: var(--primary); margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
 
         .clear-btn {
-            background: rgba(255, 77, 77, 0.1);
-            color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.05);
             border: 1px solid rgba(255, 77, 77, 0.2);
-            padding: 8px 16px;
-            border-radius: 8px;
+            color: #ff4d4d;
+            padding: 12px 25px;
+            border-radius: 12px;
             font-size: 12px;
+            font-weight: 800;
             cursor: pointer;
-            margin-top: 20px;
+            transition: 0.3s;
         }
+        .clear-btn:hover { background: rgba(255, 77, 77, 0.1); border-color: #ff4d4d; }
     </style>
-    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
-    <!-- PREMIUM ANIMATION STYLES -->
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
-    </div>
+    <div class="main-layout">
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEEPREPARE</div>
+            <nav class="sidebar-nav">
+                <a href="teacher-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="question-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="generate-paper.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                    <span>Generate Paper</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="teacher-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
 
-    <div class="app-container" style="max-width: 800px; margin: 0 auto; padding: 20px;">
-        <!-- Header -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px;">
-            <div style="cursor: pointer; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 50%;"
-                onclick="window.history.back()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
+        <main class="content-wrapper">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                <div>
+                    <h2 style="font-size: 32px; font-weight: 800; color: #fff;">Activity History</h2>
+                    <p style="color: var(--text-muted); font-size: 15px;">System-wide interaction logs.</p>
+                </div>
+                <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+            </header>
+
+            <div id="activity-container" style="max-width: 800px;">
+                <!-- Activity will be injected here -->
             </div>
-            <div style="font-weight: 800; font-size: 20px; letter-spacing: 1px; color: var(--adv-text);">ACTIVITY HISTORY</div>
-            <div style="width: 40px;"></div> <!-- Spacer -->
-        </div>
-
-        <div id="activity-container">
-            <!-- Timeline will be injected here -->
-        </div>
-
-        <div style="text-align: center;">
-            <button class="clear-btn" onclick="clearHistory()">Clear History</button>
-        </div>
+        </main>
     </div>
+
+    <!-- Bottom Nav (Mobile Only) -->
+    <nav class="nav-bottom">
+        <a href="teacher-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+            <span>Home</span>
+        </a>
+        <a href="question-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+            <span>Bank</span>
+        </a>
+        <a href="generate-paper.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+            <span>Paper</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+            <span>AI</span>
+        </a>
+        <a href="teacher-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+            <span>Profile</span>
+        </a>
+    </nav>
 
     <script src="../../assets/js/notifications.js"></script>
-    <script>
-        function renderHistory() {
-            const container = document.getElementById('activity-container');
-            const log = ActivityManager.getLog();
+    <script type="module">
+        import {
+            apiCall,
+            guardTeacher,
+            BP
+        } from '../../assets/js/bee-core.js';
 
-            if (log.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div style="font-size: 40px; margin-bottom: 16px;"></div>
-                        <div>No recent activity found.</div>
-                    </div>
-                `;
+        if (!guardTeacher()) throw new Error('denied');
+
+        async function loadActivity() {
+            const container = document.getElementById('activity-container');
+            container.innerHTML = '<div style="padding: 50px; text-align: center;"><div class="loading-ring" style="margin: 0 auto; width: 40px; height: 40px; border-top-color: var(--primary);"></div></div>';
+
+            const result = await apiCall('/teacher/activity');
+            
+            if (result && result.success) {
+                const activities = result.data;
+                renderActivities(activities);
+            } else {
+                container.innerHTML = '<div style="color: var(--text-muted); padding: 50px; text-align: center;">Failed to load activity logs.</div>';
+            }
+        }
+
+        function renderActivities(activities) {
+            const container = document.getElementById('activity-container');
+
+            if (!activities || activities.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-muted); padding: 50px; text-align: center;">No activity recorded yet.</div>';
                 return;
             }
 
             let html = '<div class="timeline">';
-            log.forEach((item, index) => {
-                const typeClass = item.type || 'info';
-                // Format relative time if possible, or simple date
-                const date = new Date(item.timestamp).toLocaleString();
-
+            activities.forEach((item) => {
+                const typeClass = item.type === 'error' ? 'error' : (item.type === 'success' ? 'success' : 'info');
                 html += `
-                    <div class="timeline-item" style="animation-delay: ${index * 0.05}s">
+                    <div class="timeline-item">
                         <div class="timeline-dot ${typeClass}"></div>
-                        <div class="timeline-content">
-                            <div class="t-title">${item.action}</div>
-                            <div class="t-desc">${item.description}</div>
-                            <div class="t-time">${date}</div>
+                        <div class="timeline-card adv-card" style="padding: 25px;">
+                            <div class="t-title">${item.action || item.type?.toUpperCase()}</div>
+                            <div class="t-desc">${item.description || item.details || ''}</div>
+                            <div class="t-time">${new Date(item.timestamp || item.createdAt).toLocaleString()}</div>
                         </div>
                     </div>
                 `;
@@ -188,46 +186,19 @@
             container.innerHTML = html;
         }
 
-        function clearHistory() {
-            if (confirm('Clear all activity history?')) {
-                ActivityManager.clear();
-                renderHistory();
+        window.clearHistory = async function() {
+            if (confirm('Are you sure you want to clear your activity history? This action cannot be undone.')) {
+                const result = await apiCall('/teacher/activity', 'DELETE');
+                if (result && result.success) {
+                    loadActivity();
+                } else {
+                    alert('Failed to clear history');
+                }
             }
-        }
+        };
 
-        // On Load
-        document.addEventListener('DOMContentLoaded', () => {
-            renderHistory();
-            ActivityManager.markAsRead(); // Logic: visiting history marks them as seen? Maybe.
-        });
-    </script>
-
-    <!-- EXTREME UI SCRIPTS (Animations Only) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to Teacher Cards
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if(tiltElements.length > 0) {
-                try {
-                    VanillaTilt.init(tiltElements, {
-                        max: 8,
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.15,
-                        scale: 1.02
-                    });
-                } catch(e) {}
-            }
-
-            // Apply Staggered HUD Load-in
-            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            hudElements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
-        });
+        // Initialize
+        loadActivity();
     </script>
 </body>
-
 </html>

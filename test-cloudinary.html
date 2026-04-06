@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEEPREPARE - Cloudinary + Firestore Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/teacher-theme.css">
+    <style>
+        body {
+            background: #050505;
+            color: #fff;
+            padding: 50px;
+            font-family: 'Outfit', sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--primary, #ffd700);
+            letter-spacing: -2px;
+            margin: 0;
+        }
+        .header p {
+            color: #888;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1>BEE ARCHIVE</h1>
+        <p>SECURE STORAGE & METADATA MANAGEMENT</p>
+    </header>
+
+    <!-- MOUNT POINT -->
+    <div id="uploader-mount"></div>
+
+    <div style="margin-top: 50px; text-align: center;">
+        <p style="font-size: 10px; color: #444; letter-spacing: 2px;">ENCRYPTED VIA CLOUDINARY | INDEXED VIA FIRESTORE</p>
+    </div>
+</div>
+
+<script type="module">
+    import { createUploader } from './assets/js/CloudinaryUploaderComponent.js';
+
+    // Initialize the component
+    // In production, userId would come from your auth state
+    const userId = localStorage.getItem('bp_uid') || 'demo_user_123';
+
+    createUploader('uploader-mount', {
+        userId: userId,
+        subject: 'Engineering Protocol',
+        onComplete: (data) => {
+            console.log('Sync Complete:', data);
+        }
+    });
+
+    console.log('Architectural Sync Engine Initialized.');
+</script>
+
+</body>
+</html>

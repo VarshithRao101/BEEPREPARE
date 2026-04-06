@@ -263,10 +263,10 @@
         </div>
 
         <div class="otp-container">
-            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
-            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
-            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
-            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric", pattern="[0-9]*">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+            <input type="text" class="otp-box digit-input" maxlength="1" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
         </div>
 
         <button class="unlock-btn" onclick="verify()">Verify & Unlock</button>
@@ -274,96 +274,150 @@
         <a href="student-profile.html" class="back-link">Cancel and return to Profile</a>
     </div>
 
-    <script>
-        const inputs = document.querySelectorAll('.digit-input');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          guardStudent, 
+          BP 
+        } from '../../assets/js/bee-core.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const requestId = localStorage.getItem('bp_otp_request_id');
+
+        async function loadRequestContext() {
+            if (!requestId) {
+                window.location.href = 'student-requests.html';
+                return;
+            }
+
+            const result = await apiCall('/student/banks');
+            if (result && result.success) {
+                const req = result.data.find(b => b.requestId === requestId || b.bankId === requestId);
+                if (req) {
+                    document.querySelector('.meta-info h4').textContent = `${req.subject} - Class ${req.class}`;
+                    document.querySelector('.meta-info p').textContent = `Teacher: ${req.teacherName}`;
+                    document.querySelector('.meta-avatar').textContent = req.subject.substring(0,2).toUpperCase();
+                }
+            }
+        }
+
+        window.inputs = document.querySelectorAll('.digit-input');
 
         inputs.forEach((input, index) => {
-            // Handle paste event
             input.addEventListener('paste', (e) => {
                 e.preventDefault();
-                const pastedData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, ''); // Get only numbers
+                const pastedData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
                 if (!pastedData) return;
-                
                 let pasteIndex = 0;
                 for (let i = index; i < inputs.length && pasteIndex < pastedData.length; i++) {
                     inputs[i].value = pastedData[pasteIndex];
                     pasteIndex++;
-                    if (i < inputs.length - 1) {
-                        inputs[i + 1].focus();
-                    }
+                    if (i < inputs.length - 1) inputs[i + 1].focus();
                 }
             });
 
-            // Handle Input (typing)
             input.addEventListener('input', (e) => {
-                // Ensure only numbers
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                if (e.target.value.length > 1) {
-                    e.target.value = e.target.value.slice(0, 1);
-                }
-                if (e.target.value.length === 1 && index < inputs.length - 1) {
-                    inputs[index + 1].focus();
-                }
+                if (e.target.value.length > 1) e.target.value = e.target.value.slice(0, 1);
+                if (e.target.value.length === 1 && index < inputs.length - 1) inputs[index + 1].focus();
             });
 
-            // Handle Backspace
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
                     inputs[index - 1].focus();
-                    inputs[index - 1].value = ''; // Optional: clear previous box directly for smooth delete
+                    inputs[index - 1].value = '';
                 }
             });
         });
 
-        function verify() {
-            const code = Array.from(document.querySelectorAll('.otp-box')).map(e => e.value).join('');
-            if (code.length === 4) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Access Granted!',
-                    text: 'Question Bank added to your library.',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    confirmButtonColor: '#FFD700'
-                }).then(() => {
-                    // Clear pending status and redirect to active banks or home
-                    localStorage.removeItem('pendingBankOTP');
-                    // Ideally add to active banks list in storage
-                    window.location.href = 'student-bank.html';
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Code',
-                    background: '#1a1a1a',
-                    color: '#fff',
-                    confirmButtonColor: '#d33'
-                });
+        window.verify = async function() {
+            const otpCode = Array.from(inputs).map(b => b.value.trim()).join('');
+
+            if (otpCode.length !== 4) {
+                const card = document.querySelector('.auth-card');
+                card.style.animation = 'none';
+                void card.offsetWidth;
+                card.style.animation = 'shake 0.4s';
+                return;
             }
-        }
-    </script>
 
-    <!-- EXTREME UI SCRIPTS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt
-            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .d-profile-card, .adv-card"), {
-                max: 8,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.15,
-                scale: 1.02
-            });
+            const btn = document.querySelector('.unlock-btn');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
 
-            // Apply Staggered HUD Load-in
-            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
-            elements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
+            try {
+                const result = await apiCall('/student/banks/verify-otp', 'POST', { requestId, otpCode });
+
+                if (result && result.success) {
+                    localStorage.removeItem('bp_pending_otp');
+                    localStorage.removeItem('bp_otp_request_id');
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Access Granted!',
+                        text: `You now have access to ${result.data.subject} - ${result.data.class}`,
+                        background: '#0a0a1a',
+                        color: '#ffffff',
+                        confirmButtonColor: '#FFD700'
+                    }).then(() => {
+                        window.location.href = 'student-bank.html';
+                    });
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Verify & Unlock';
+
+                    const code = result?.error?.code;
+                    if (code === 'WRONG_OTP') {
+                        const remaining = result.data?.attemptsRemaining;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Wrong OTP',
+                            text: remaining ? `${remaining} attempts remaining.` : 'Please try again.',
+                            background: '#0a0a1a',
+                            color: '#ffffff'
+                        });
+                        inputs.forEach(b => b.value = '');
+                        inputs[0].focus();
+                    } else if (code === 'OTP_EXPIRED') {
+                        Swal.fire({ icon: 'warning', title: 'OTP Expired', text: 'Ask your teacher to approve again.', background: '#0a0a1a', color: '#ffffff' }).then(() => {
+                            window.location.href = 'student-requests.html';
+                        });
+                    } else if (code === 'REQUEST_LOCKED') {
+                        Swal.fire({ icon: 'error', title: 'Access Locked', text: 'Too many wrong attempts. Ask your teacher to re-approve.', background: '#0a0a1a', color: '#ffffff' }).then(() => {
+                            window.location.href = 'student-requests.html';
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Verification Failed', text: result?.message || 'Invalid code.', background: '#0a0a1a', color: '#ffffff' });
+                    }
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = 'Verify & Unlock';
+                console.error('OTP verify error:', err);
+            }
+        };
+
+        window.addEventListener('load', () => {
+            if (!guardStudent()) return;
+            loadRequestContext();
         });
     </script>
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+    </style>
+</body>
+
+</html>
 </body>
 
 </html>

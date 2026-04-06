@@ -46,11 +46,23 @@
             min-height: 297mm;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             padding: 20mm;
+            padding-bottom: 30mm;
             box-sizing: border-box;
             font-family: 'Times New Roman', serif;
             position: relative;
             transform-origin: top center;
             transition: transform 0.2s ease;
+        }
+
+        .paper-footer {
+            position: absolute;
+            bottom: 15mm;
+            left: 20mm;
+            right: 20mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
 
         .floating-toolbar {
@@ -136,6 +148,11 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin: 0;
+        }
+
+        .question-item, .section-header {
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .paper-meta-row {
@@ -390,6 +407,13 @@
                     </div>
                 </div>
 
+                <!-- Visible Footer at the absolute bottom of the sheet -->
+                <div class="paper-footer" contenteditable="false">
+                    <div style="height: 1px; flex: 1; background: #000;"></div>
+                    <div style="font-size: 16px; font-weight: bold; color: #000; letter-spacing: 4px; padding-bottom: 1px;">BS</div>
+                    <div style="height: 1px; flex: 1; background: #000;"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -477,22 +501,66 @@
     <!-- html2pdf Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <script>
-        let currentZoom = 1;
-        const paper = document.getElementById('paper');
-        const modal = document.getElementById('layoutModal');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          guardStudent, 
+          BP 
+        } from '../../assets/js/bee-core.js';
 
-        window.onload = () => {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        function loadPaper() {
+            const html = localStorage.getItem('bp_paper_html');
+            const metaStr = localStorage.getItem('bp_paper_meta');
+
+            if (!html) {
+                window.location.href = 'student-generate.html';
+                return;
+            }
+
+            const paperElement = document.getElementById('paper');
+            paperElement.innerHTML = html;
+
+            if (metaStr) {
+                const meta = JSON.parse(metaStr);
+                const header = paperElement.querySelector('.paper-header');
+                if (header) {
+                    const metaRow = header.querySelector('.paper-meta-row');
+                    if (metaRow) {
+                        metaRow.innerHTML = `
+                            <span>Class: ${meta.class}</span>
+                            <span>Subject: ${meta.subject}</span>
+                            <span>Time: ${meta.time || '2 Hours'}</span>
+                            <span>Max. Marks: ${meta.totalMarks}</span>
+                        `;
+                    }
+                }
+            }
+
             setTimeout(() => {
                 document.getElementById('loader').classList.add('hidden');
-            }, 1800);
-        };
+            }, 1500);
+        }
 
-        function adjustZoom(delta) {
+        window.addEventListener('load', () => {
+            if (!guardStudent()) return;
+            loadPaper();
+        });
+
+        // Expose functions for original UI buttons
+        let currentZoom = 1;
+        window.adjustZoom = (delta) => {
             currentZoom += delta;
             if (currentZoom < 0.5) currentZoom = 0.5;
             if (currentZoom > 2.0) currentZoom = 2.0;
 
+            const paper = document.getElementById('paper');
             paper.style.transform = `scale(${currentZoom})`;
 
             if (currentZoom > 1) {
@@ -502,60 +570,59 @@
                 paper.style.marginBottom = '0';
                 paper.style.marginTop = '0';
             }
-        }
+        };
 
-        function toggleLayoutModal() { modal.classList.toggle('active'); }
+        window.toggleLayoutModal = () => {
+            document.getElementById('layoutModal').classList.toggle('active');
+        };
 
-        function updatePaperStyle() {
+        window.updatePaperStyle = () => {
             const font = document.getElementById('fontFamilySelect').value;
             const size = document.getElementById('fontSizeRange').value;
             const padding = document.getElementById('paddingRange').value;
+            const paper = document.getElementById('paper');
             paper.style.fontFamily = font;
             paper.style.fontSize = `${size}px`;
             paper.style.padding = `${padding}mm`;
-        }
+        };
 
-        function downloadPDF() {
+        window.downloadPDF = () => {
+             const paper = document.getElementById('paper');
             const originalTransform = paper.style.transform;
             const originalMargin = paper.style.margin;
             paper.style.transform = 'none';
             paper.style.margin = '0';
 
             const opt = {
-                margin: 0, filename: 'beeprepare-practice-paper.pdf',
+                margin: [15, 0, 20, 0], 
+                filename: `Practice_Paper_${new Date().getTime()}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            html2pdf().set(opt).from(paper).save().then(() => {
+            html2pdf().set(opt).from(paper).toPdf().get('pdf').then(function (pdf) {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setLineWidth(0.4);
+                    const y = 285;
+                    pdf.line(20, y, 100, y);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(12);
+                    pdf.setTextColor(0,0,0);
+                    pdf.text("BS", 102, y + 1.2);
+                    pdf.line(110, y, 190, y);
+                }
+            }).save().then(() => {
                 paper.style.transform = originalTransform;
-                adjustZoom(0);
             });
         }
     </script>
+</body>
 
-    <!-- EXTREME UI SCRIPTS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt
-            VanillaTilt.init(document.querySelectorAll(".action-card, .subject-mini-card, .timeline-card, .chapter-box, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card"), {
-                max: 8,
-                speed: 400,
-                glare: true,
-                "max-glare": 0.15,
-                scale: 1.02
-            });
-
-            // Apply Staggered HUD Load-in
-            const elements = document.querySelectorAll(".action-card, .subject-mini-card, .timeline-item, .chapter-box, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container");
-            elements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
-        });
-    </script>
+</html>
 </body>
 
 </html>

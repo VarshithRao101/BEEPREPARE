@@ -4,831 +4,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Profile - BEEPREPARE</title>
+    <title>Node Profile - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
-    <link rel="stylesheet" href="../../assets/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Modern Reset & Base */
-        .app-container {
-            padding-bottom: 90px;
-        }
-
-        /* Section Dividers */
         .section-divider {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 32px 0 16px 0;
+            margin: 35px 0 15px 0;
         }
 
         .divider-line {
             height: 2px;
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(90deg, var(--border), transparent);
             border-radius: 2px;
         }
 
         .section-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 1px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        /* Robust Profile Card isolated to prevent global CSS collapse */
-        .d-profile-card {
-            background: rgba(0, 0, 0, 0.6) !important;
-            backdrop-filter: blur(15px) !important;
-            -webkit-backdrop-filter: blur(15px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 20px !important;
-            padding: 32px 24px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            position: relative !important;
-            margin-bottom: 32px !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-            z-index: 10 !important;
-            overflow: visible !important;
-            height: auto !important;
-            min-height: 380px !important;
-            opacity: 1 !important;
-            visibility: visible !important;
+        /* Profile Hub - Professional Refined */
+        .profile-hub {
+            background: rgba(18, 18, 18, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(25px);
+            position: relative;
         }
 
-        .d-profile-avatar {
-            width: 100px !important;
-            height: 100px !important;
-            border-radius: 50% !important;
-            background: linear-gradient(135deg, #FFD700, #FFA500) !important;
-            border: 4px solid rgba(255, 255, 255, 0.1) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin: 0 auto 16px auto !important;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3) !important;
-            position: relative !important;
-            opacity: 1 !important;
-            visibility: visible !important;
+        .profile-avatar-node {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), #ffa000);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            color: #000;
+            font-size: 36px;
+            font-weight: 900;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+            border: 4px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Avatar Text (Initials) */
-        .d-avatar-text {
-            font-size: 36px !important;
-            font-weight: 800 !important;
-            color: #000 !important;
-            line-height: 1 !important;
+        .profile-name {
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 5px;
         }
 
-        .d-profile-name {
-            font-size: 24px !important;
-            font-weight: 800 !important;
-            color: #ffffff !important;
-            margin-bottom: 8px !important;
-            letter-spacing: 0.5px !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
-            display: block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-
-        /* Subject Tags Row */
-        .d-tags-row {
-            display: flex !important;
-            gap: 10px !important;
-            flex-wrap: wrap !important;
-            justify-content: center !important;
-            margin-bottom: 24px !important;
-            width: 100% !important;
-        }
-
-        .d-subject-pill {
-            display: flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            background: rgba(255, 255, 255, 0.08) !important;
-            border: 1px solid rgba(255, 255, 255, 0.15) !important;
-            border-radius: 20px !important;
-            padding: 8px 16px !important;
-            font-size: 13px !important;
-            color: #f0f0f0 !important;
-            font-weight: 600 !important;
-        }
-
-        .d-subject-pill:hover {
-            background: rgba(255, 255, 255, 0.15) !important;
-            border-color: var(--primary) !important;
-        }
-
-        /* Stats Row */
-        .d-profile-stats {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr 1fr !important;
-            width: 100% !important;
-            gap: 12px !important;
-            padding-top: 20px !important;
-        }
-
-        .d-xp-container {
-            width: 100% !important;
-            margin-bottom: 24px !important;
-        }
-
-        .xp-label {
-            display: flex !important;
-            justify-content: space-between !important;
-            font-size: 11px !important;
-            color: #aaa !important;
-            margin-bottom: 6px !important;
-            text-transform: uppercase !important;
-            font-weight: 700 !important;
-        }
-
-        .xp-track {
-            height: 6px !important;
-            background: rgba(255, 255, 255, 0.1) !important;
-            border-radius: 3px !important;
-            overflow: hidden !important;
-        }
-
-        .xp-fill {
-            height: 100% !important;
-            background: var(--primary) !important;
-            width: 65% !important;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
-        }
-
-        .d-stat-box {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-        }
-
-        .stat-value {
-            font-size: 20px !important;
-            font-weight: 700 !important;
-            color: #ffffff !important;
-        }
-
-        .stat-label {
-            font-size: 11px !important;
-            color: rgba(255, 255, 255, 0.6) !important;
-            margin-top: 4px !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-        }
-
-        .d-tags-row {
-            display: flex !important;
-            gap: 10px !important;
-            flex-wrap: wrap !important;
-            justify-content: center !important;
-            margin: 16px 0 24px 0 !important;
-            width: 100% !important;
-            position: relative !important;
-            z-index: 5 !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        .d-subject-pill {
-            display: flex !important;
-            align-items: center !important;
-            gap: 6px !important;
-            background: rgba(255, 255, 255, 0.1) !important;
-            border: 1px solid rgba(255, 255, 255, 0.2) !important;
-            border-radius: 20px !important;
-            padding: 8px 16px !important;
-            font-size: 13px !important;
-            color: #fff !important;
-            font-weight: 600 !important;
-            backdrop-filter: blur(4px) !important;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        /* Menu Items */
-        .settings-menu {
+        /* Stats Grid - Professional Style */
+        .stats-grid {
             display: grid;
-            gap: 12px;
+            grid-template-columns: repeat(3, 1fr);
+            width: 100%;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
         }
 
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-val {
+            font-size: 22px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .stat-lab {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Menu Links - Refined */
         .menu-item {
-            background: rgba(30, 30, 30, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid transparent;
+            border-radius: 18px;
+            padding: 18px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 12px;
         }
 
-        .menu-left {
+        .menu-item:hover {
+            background: rgba(255, 215, 0, 0.04);
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .menu-icon-box {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 215, 0, 0.05);
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 16px;
-        }
-
-        .menu-icon {
+            justify-content: center;
             color: var(--primary);
-            opacity: 0.8;
-            display: flex;
+            margin-right: 18px;
         }
 
-        .menu-text {
-            font-size: 14px;
-            font-weight: 600;
-            color: #eeeeee;
-        }
-
-        .menu-arrow {
-            color: rgba(255, 255, 255, 0.2);
-            font-size: 18px;
-        }
-
-        /* Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            width: 44px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: var(--primary);
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(20px);
-            background-color: #000;
-        }
-
-        /* Logout Button */
-        .logout-btn {
+        /* Authenticate Key Styling */
+        .auth-btn {
             width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 77, 77, 0.3);
-            color: #ff4d4d;
-            background: rgba(255, 77, 77, 0.05);
-            font-weight: 700;
-            font-size: 14px;
-            margin-top: 32px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        /* --- Logout Modal & Animation --- */
-        .modal-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            opacity: 1; /* Instant show */
-        }
-
-        .modal-active {
-            display: flex;
-        }
-
-        .logout-modal {
-            background: linear-gradient(145deg, #1a1a1a, #111);
-            border: 1px solid rgba(255, 77, 77, 0.2);
-            padding: 32px;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 340px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-        }
-
-        .modal-icon {
-            width: 64px;
-            height: 64px;
-            background: rgba(255, 77, 77, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            color: #ff4d4d;
-            box-shadow: 0 0 20px rgba(255, 77, 77, 0.1);
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-        }
-
-        .modal-desc {
-            font-size: 13px;
-            color: #aaa;
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-cancel {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .btn-logout {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            background: #ff4d4d;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), #FFD700);
             border: none;
-            color: #fff;
-            font-weight: 600;
+            border-radius: 15px;
+            color: #000;
+            font-weight: 950;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
-        }
-
-
-        /* Cinematic Exit Overlay (Simplified) */
-        .exit-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 3000;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .exit-logo {
-            width: 80px;
-            height: 80px;
-        }
-
-        .exit-text {
-            margin-top: 20px;
-            font-size: 14px;
-            letter-spacing: 3px;
-            color: var(--primary);
             text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
         }
 
-        .start-exit .exit-overlay {
-            display: flex;
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
         }
 
-        @keyframes slideInPop {
-            from { opacity: 0; transform: translateY(-20px) scale(0.9); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+        .redeem-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px;
+            color: #fff;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 4px;
+            font-size: 18px;
+            margin-bottom: 15px;
+            outline: none;
         }
 
-        /* --- THE ULTIMATE PERFORMANCE KILL-SWITCH (STOPS ALL LAG) --- */
-        *, *::before, *::after {
-            animation: none !important;
-            transition: none !important;
-            transition-property: none !important;
-            transition-duration: 0s !important;
+        /* Terminate Protocol */
+        .terminate-btn {
+            width: 100%;
+            padding: 20px;
+            background: rgba(255, 77, 77, 0.05);
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            border-radius: 18px;
+            color: #ff4d4d;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* Stop theme-based hover movements and highlights, but preserve layout transforms */
-        *:not(.nav-bottom):not(.nav-item):hover {
-            transform: none !important;
-            transition: none !important;
-            box-shadow: inherit !important;
-            border-color: inherit !important;
+        .terminate-btn:hover {
+            background: rgba(255, 77, 77, 0.1);
+            border-color: #ff4d4d;
         }
 
-        /* Specifically kill movements but allow the bottom nav to stay centered */
-        .nav-bottom {
-            transform: translateX(-50%) !important; /* Force layout transform back */
-            animation: none !important;
-            transition: none !important;
-        }
-
-        /* Kill background orb animations */
-        .glow-orb, .orb-1, .orb-2, .orb-3, .background-animation {
-            animation: none !important;
-            transform: none !important;
-        }
-
-        /* Fix specific profile elements and ensure they don't move */
-        .d-profile-card, .menu-item, .d-subject-pill, .logout-btn {
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
-            transition: none !important;
-            transform: none !important;
-        }
-
-        /* Specific override for profile avatar shine and spin if any - RESTORED for visibility */
-        .d-profile-avatar::before, .profile-avatar::before {
-            display: block !important;
-            animation: none !important;
+        @media (min-width: 769px) {
+            .profile-layout {
+                display: grid;
+                grid-template-columns: 1fr 1.5fr;
+                gap: 40px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-2"></div>
-    </div>
-    <!-- Container -->
-    <div class="app-container">
-        <!-- Header -->
-        <div class="top-header"
-            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
-            <div style="position: absolute; left: 0; cursor: pointer; padding: 8px;" onclick="window.location.replace('student-home.html')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </div>
-            <div class="header-title text-gold-glow"
-                style="color: var(--primary); font-weight: 700; font-size: 16px; letter-spacing: 1px; display: flex; align-items: center;">
-                <div style="width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--primary); display: flex; align-items: center; justify-content: center; background: rgba(255,215,0,0.1); margin-right: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
-                    </svg>
-                </div>
-                PROFILE
-            </div>
-            <div style="position: absolute; right: 0; cursor: pointer; padding: 8px; display: flex; align-items: center; gap: 10px;">
-                <div onclick="window.location.href='student-requests.html'" style="position: relative; display: flex;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" style="color: #666;">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    </svg>
-                    <!-- Show dot if requests exist -->
-                    <div id="notif-badge"
-                        style="position: absolute; top: -2px; right: -2px; background: #ff4d4d; color: white; border-radius: 50%; width: 14px; height: 14px; font-size: 9px; display: none; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #141414;">
-                        0</div>
-                </div>
-                <div class="profile-icon"
-                    style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #FFD700, #FFA500); display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);">
-                    ST</div>
-            </div>
-        </div>
-        <!-- Redesigned Profile Card -->
-        <div class="d-profile-card">
-            <div class="d-profile-avatar">
-                <span class="d-avatar-text">ST</span>
-            </div>
-            <div class="d-profile-name">Student Name</div>
-            <div class="d-tags-row">
-                <div class="d-subject-pill">Class 10 </div>
-                <div class="d-subject-pill">Intermediate </div>
-            </div>
+    <div class="main-layout">
+        <!-- Persistent Sidebar -->
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEE COMMAND</div>
+            <nav class="sidebar-nav">
+                <a href="student-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Home Hub</span>
+                </a>
+                <a href="student-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="student-generate.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    <span>Practice</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="student-profile.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
 
-            <div class="d-xp-container">
-                <div class="xp-label">
-                    <span>Level 5</span>
-                    <span>1250 / 2000 XP</span>
+        <main class="content-wrapper">
+            <header style="display: flex; gap: 20px; align-items: center; margin-bottom: 30px;">
+                <button onclick="window.location.href='student-home.html'" style="background: none; border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                <div>
+                  <h2 style="font-size: 24px; font-weight: 800; color: #fff;">Student Node</h2>
+                  <p style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Academic profile & credentials</p>
                 </div>
-                <div class="xp-track">
-                    <div class="xp-fill"></div>
-                </div>
-            </div>
+            </header>
 
-            <div class="d-profile-stats">
-                <div class="d-stat-box">
-                    <div class="stat-value">5</div>
-                    <div class="stat-label">Tests</div>
-                </div>
-                <div class="d-stat-box">
-                    <div class="stat-value">85%</div>
-                    <div class="stat-label">Avg. Score</div>
-                </div>
-                <div class="d-stat-box">
-                    <div class="stat-value">3</div>
-                    <div class="stat-label">Banks</div>
-                </div>
-            </div>
-        </div>
-        <!-- Core Actions -->
-        <div class="section-divider"><span class="section-label">Account</span>
-            <div class="divider-line"></div>
-        </div>
-        <div class="settings-menu">
-            <!-- My Banks Option -->
-            <div class="menu-item featured-item" onclick="window.location.replace('student-bank.html')"
-                style="flex-direction: column; align-items: flex-start; gap: 12px; background: linear-gradient(145deg, rgba(40, 40, 40, 0.7), rgba(30, 30, 30, 0.9)); border: 1px solid var(--primary); box-shadow: 0 4px 20px rgba(255, 215, 0, 0.1);">
-                <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                    <div class="menu-left">
-                        <div class="menu-icon" style="color: var(--primary);"><svg width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                                <line x1="8" y1="21" x2="16" y2="21" />
-                                <line x1="12" y1="17" x2="12" y2="21" />
-                            </svg></div>
-                        <div class="menu-text" style="font-size: 16px; color: #fff;">My
-                            Banks</div>
+            <div class="profile-layout">
+                <!-- User Dashboard Card -->
+                <div>
+                    <div class="profile-hub adv-card" style="padding: 30px;">
+                        <div class="profile-avatar-node">--</div>
+                        <div class="profile-name">Loading...</div>
+                        <p style="color: var(--text-muted); font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-top: 5px;" id="node-id-display">IDENTIFIER: --</p>
+                        
+                        <div class="stats-grid" style="margin-top: 25px;">
+                            <div class="stat-item">
+                                <div class="stat-val" id="stat-banks">0</div>
+                                <div class="stat-lab">Banks</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-val" id="stat-tests">0</div>
+                                <div class="stat-lab">Tests</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-val" id="stat-queries">0</div>
+                                <div class="stat-lab">Queries</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="menu-arrow" style="color: var(--primary);">→</div>
-                </div>
-                <!-- Feature Pills -->
-                <div style="display: flex; gap: 8px; width: 100%;">
-                    <div
-                        style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #ccc; border: 1px solid rgba(255,255,255,0.05);">
-                        Access</div>
-                    <div
-                        style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #ccc; border: 1px solid rgba(255,255,255,0.05);">
-                        Practice</div>
-                    <div
-                        style="background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 10px; color: #ccc; border: 1px solid rgba(255,255,255,0.05);">
-                        History</div>
-                </div>
-            </div>
 
-            <div class="menu-item" onclick="window.location.replace('student-notes.html')">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: var(--primary);">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
+                    <div class="section-divider" style="margin-top: 25px;">
+                        <span class="section-label">Academic Hub</span>
+                        <div class="divider-line"></div>
                     </div>
-                    <div class="menu-text">Study Notes</div>
-                </div>
-                <div class="menu-arrow">→</div>
-            </div>
-
-
-
-            <!-- My Doubts Option -->
-            <div class="menu-item" onclick="window.location.href='student-doubts.html'">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: var(--primary);">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
+                    
+                    <div class="menu-item adv-card" onclick="window.location.href='student-bank.html'" style="background: rgba(255, 215, 0, 0.05); border: 1px dashed var(--primary); padding: 20px; justify-content: center; cursor: pointer;">
+                        <span style="font-weight: 900; color: var(--primary); letter-spacing: 2px; font-size: 12px;">+ JOIN NEW BANK NODE</span>
                     </div>
-                    <div class="menu-text">My Doubts</div>
                 </div>
-                <div class="menu-arrow">→</div>
-            </div>
 
-            <!-- Access Requests Option -->
-            <div class="menu-item" onclick="window.location.href='student-requests.html'">
-                <div class="menu-left">
-                    <div class="menu-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="8.5" cy="7" r="4"></circle>
-                            <line x1="20" y1="8" x2="20" y2="14"></line>
-                            <line x1="23" y1="11" x2="17" y2="11"></line>
-                        </svg>
+                <!-- Navigation Hub -->
+                <aside>
+                    <div class="section-divider">
+                        <span class="section-label">Inventory & Support</span>
+                        <div class="divider-line"></div>
                     </div>
-                    <div class="menu-text">My Requests</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div id="req-count"
-                        style="display: none; background: var(--primary); color: #000; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px;">
-                        1</div>
-                    <div class="menu-arrow">→</div>
-                </div>
-            </div>
-        </div>
-        <!-- Support -->
-        <div class="section-divider"><span class="section-label">Support</span>
-            <div class="divider-line"></div>
-        </div>
-        <div class="settings-menu">
-            <div class="menu-item" onclick="window.location.href='student-feedback.html'">
-                <div class="menu-left">
-                    <div class="menu-icon" style="color: #FFD700;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
+                    
+                    <div class="menu-item adv-card" onclick="window.location.href='student-requests.html'">
+                        <div style="display: flex; align-items: center;">
+                            <div class="menu-icon-box" style="width: 36px; height: 36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" /></svg></div>
+                            <span style="font-weight: 700; color: #fff; font-size: 13px;">Activation Requests</span>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity: 0.3;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
-                    <div class="menu-text">Help & Feedback</div>
-                </div>
-                <div class="menu-arrow">→</div>
-            </div>
-        </div>
 
-        <!-- Preferences -->
-        <div class="section-divider"><span class="section-label">Preferences</span>
-            <div class="divider-line"></div>
-        </div>
-        <div class="settings-menu">
-            <div class="menu-item no-hover" style="cursor: default;">
-                <div class="menu-left">
-                    <div class="menu-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                        </svg></div>
-                    <div class="menu-text">Notifications</div>
-                </div><label class="toggle-switch"><input type="checkbox" id="notif-toggle" checked><span
-                        class="slider"></span></label>
-            </div>
-            <button class="logout-btn" onclick="openLogoutModal()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                Log Out
-            </button>
+                    <div class="menu-item adv-card" onclick="window.location.href='student-doubts.html'">
+                        <div style="display: flex; align-items: center;">
+                            <div class="menu-icon-box" style="width: 36px; height: 36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" /></svg></div>
+                            <span style="font-weight: 700; color: #fff; font-size: 13px;">Academic Queries</span>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity: 0.3;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
 
-        </div>
-    </div> <!-- Close App Container -->
+                    <div class="menu-item adv-card" onclick="window.location.href='student-feedback.html'">
+                        <div style="display: flex; align-items: center;">
+                            <div class="menu-icon-box" style="width: 36px; height: 36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z" /></svg></div>
+                            <span style="font-weight: 700; color: #fff; font-size: 13px;">Feedback Node</span>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity: 0.3;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
 
-    <!-- Logout Confirmation Modal -->
-    <div class="modal-backdrop" id="logoutModal">
-        <div class="logout-modal">
-            <div class="modal-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
+                    <button onclick="handleLogout()" class="terminate-btn" style="padding: 16px; font-size: 12px; margin-top: 15px;">TERMINATE SESSION</button>
+                </aside>
             </div>
-            <h3 class="modal-title">Sign Out?</h3>
-            <p class="modal-desc">Are you sure you want to log out of your account?</p>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeLogoutModal()">Cancel</button>
-                <button class="btn-logout" onclick="confirmLogout()">Yes, Sign
-                    Out</button>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Cinematic Exit Overlay -->
-    <div class="exit-overlay" id="exitOverlay">
-        <div class="exit-logo">
-            <svg viewBox="0 0 24 24" fill="#FFD700" stroke="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-        </div>
-        <div class="exit-text">BEEPREPARE</div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Bottom Nav -->
     <nav class="nav-bottom">
         <a href="student-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
-        <a href="student-generate.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-            <span>Test</span>
-        </a>
-        <!-- UNIFIED BEE AI NAV -->
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <span>Banks</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Bank</span>
+        </a>
+        <a href="student-generate.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+            <span>Practice</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+            <span>AI</span>
         </a>
         <a href="student-profile.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
-        const modal = document.getElementById('logoutModal');
-        const body = document.body;
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          guardStudent, 
+          BP,
+          getIndexPath
+        } from '../../assets/js/bee-core.js';
 
-        function openLogoutModal() {
-            modal.style.display = 'flex';
-            setTimeout(() => {
-                modal.classList.add('modal-active');
-            }, 10);
+        const app = initializeApp(firebaseConfig);
+
+        async function loadProfile() {
+            // Show data from localStorage immediately (fast display)
+            const localName = localStorage.getItem(BP.NAME) || 'BEE User';
+            const localEmail = localStorage.getItem(BP.EMAIL) || '';
+            const localPlan = localStorage.getItem(BP.PLAN) || 'BASIC';
+            const localUid = localStorage.getItem(BP.UID) || 'BEE-NODE';
+
+            const nameEl = document.querySelector('.profile-name, .node-name, #profileName');
+            if (nameEl) nameEl.textContent = localName;
+            
+            const avatarEl = document.querySelector('.profile-avatar-node, .profile-icon, .user-avatar');
+            if (avatarEl) avatarEl.textContent = localName.substring(0, 2).toUpperCase();
+
+            const emailEl = document.querySelector('.profile-email, .node-email, #profileEmail');
+            if (emailEl) emailEl.textContent = localEmail;
+
+            const idEl = document.querySelector('p[style*="IDENTIFIER"], .node-id-display');
+            if (idEl) idEl.textContent = `NODE ID: ${localUid.substring(0, 8).toUpperCase()}`;
+
+            // Load profile and streak from backend simultaneously
+            const [profileResult, streakResult] = await Promise.all([
+                apiCall('/student/profile'),
+                apiCall('/student/streak')
+            ]);
+
+            if (profileResult && profileResult.success) {
+                const p = profileResult.data;
+
+                if (nameEl) nameEl.textContent = p.displayName;
+                if (emailEl) emailEl.textContent = p.email;
+                
+                const planEl = document.querySelector('.plan-badge, .plan-tag, .tier-badge');
+                if (planEl) planEl.textContent = p.planType?.toUpperCase() || 'BASIC';
+
+                // Update stats numbers
+                const statEls = document.querySelectorAll('.stat-val, .stat-value, .stat-number');
+                if (statEls[0]) statEls[0].textContent = p.activeBanks?.length || 0;
+                if (statEls[1]) statEls[1].textContent = p.stats?.testsTaken || 0;
+                if (statEls[2]) statEls[2].textContent = p.stats?.totalQuestionsSolved || (p.stats?.testsTaken * 10) || 0;
+            }
+
+            if (streakResult && streakResult.success) {
+                const s = streakResult.data;
+
+                // Map to existing streak elements if any, or use indicators
+                const currentEl = document.querySelector('.streak-current, .streak-value, [data-streak-current]');
+                if (currentEl) currentEl.textContent = s.currentStreak || 0;
+
+                const bestEl = document.querySelector('.streak-best, [data-streak-best]');
+                if (bestEl) bestEl.textContent = s.bestStreak || 0;
+
+                const daysEl = document.querySelector('.streak-days, [data-active-days]');
+                if (daysEl) daysEl.textContent = s.totalActiveDays || 0;
+            }
         }
 
-        function closeLogoutModal() {
-            modal.classList.remove('modal-active');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
+        window.executeRedemption = async function() {
+            const codeInput = document.querySelector('#redeem-input, .redeem-input, input[placeholder*="redeem"]');
+            const code = codeInput?.value?.trim()?.toUpperCase();
+
+            if (!code) {
+                return Swal.fire({
+                    icon: 'warning',
+                    title: 'Enter Code',
+                    text: 'Please enter a valid BEE-XXXXXX protocol key.',
+                    toast: true, position: 'top-end',
+                    showConfirmButton: false, timer: 2000,
+                    background: '#0a0a1a', color: '#fff'
+                });
+            }
+
+            const result = await apiCall('/auth/redeem-code', 'POST', { code });
+
+            if (result && result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Knowledge Unlocked',
+                    text: result.data?.message || 'New subject repository synchronized.',
+                    background: '#0a0a1a', color: '#fff',
+                    confirmButtonColor: '#FFD700'
+                });
+                if (codeInput) codeInput.value = '';
+                loadProfile(); // Reload with new data
+            } else {
+                const errCode = result?.error?.code;
+                let msg = 'Invalid or expired code.';
+                if (errCode === 'CODE_ALREADY_USED') msg = 'This code has already been used.';
+                else if (errCode === 'CODE_EXPIRED') msg = 'This code has expired.';
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Sync Failed',
+                    text: msg,
+                    background: '#0a0a1a', color: '#fff'
+                });
+            }
         }
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeLogoutModal();
-        });
+        window.handleLogout = async function() {
+            const result = await Swal.fire({
+                title: 'Terminate Session?',
+                text: 'Your node connection will be securely placed in standby.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                confirmButtonText: 'TERMINATE',
+                cancelButtonText: 'CANCEL',
+                background: '#0a0a1a', color: '#fff'
+            });
 
-        function confirmLogout() {
-            closeLogoutModal();
-            body.classList.add('start-exit');
-            setTimeout(() => {
-                window.location.href = '../../index.html';
-            }, 1000);
-        }
+            if (result.isConfirmed) {
+                // Set lockout flag BEFORE anything else
+                localStorage.setItem('bp_logging_out', 'true');
 
-        // Removed legacy OTP popup logic per user request
-    </script>
-
-    <!-- EXTREME UI SCRIPTS (FULLY STATIC) -->
-    <script>
-        // PERMANENT BROWSER BACK DISABLE (SUB-PATH LOCK)
-        (function() {
-            // Flatten History immediately
-            history.pushState(null, document.title, location.href);
-            window.onpopstate = function() {
-                // If they press browser back, force stay on page or redirect to home if desired
-                history.pushState(null, document.title, location.href);
-                // Optional: window.location.replace('student-home.html');
-            };
-
-            // Convert all existing click-based nav
-            document.addEventListener('click', function(e) {
-                const link = e.target.closest('.menu-item, a');
-                if (link) {
-                    const target = link.getAttribute('href') || (link.getAttribute('onclick') && link.getAttribute('onclick').match(/'([^']+)'/)?.[1]);
-                    if (target && target.includes('.html') && !target.startsWith('http')) {
-                        e.preventDefault();
-                        window.location.replace(target);
-                    }
+                try {
+                    // Try to notify backend but don't hang if it fails
+                    apiCall('/auth/logout', 'POST').catch(() => {});
+                    
+                    const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+                    const auth = getAuth();
+                    await signOut(auth).catch(() => {});
+                    
+                    // Scorched earth clear
+                    Object.values(BP).forEach(k => localStorage.removeItem(k));
+                    localStorage.clear();
+                    
+                    // Force redirect to landing
+                    window.location.replace('../../index.html');
+                } catch (err) {
+                    console.error('Logout sequence failed:', err);
+                    window.location.replace('../../index.html');
                 }
-            }, true);
-        })();
+            }
+        }
+
+        window.addEventListener('load', () => {
+            if (!guardStudent()) return;
+            loadProfile();
+        });
     </script>
 </body>
 

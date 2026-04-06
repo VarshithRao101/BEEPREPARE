@@ -1,0 +1,1172 @@
+const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
+const { db, bucket } = require('../config/firebase');
+const User = require('../models/User');
+const Bank = require('../models/Bank');
+const Question = require('../models/Question');
+const AccessRequest = require('../models/AccessRequest');
+const Doubt = require('../models/Doubt');
+const TestSession = require('../models/TestSession');
+const Streak = require('../models/Streak');
+const Bookmark = require('../models/Bookmark');
+const ActivityLog = require('../models/ActivityLog');
+const updateStreak = require('../utils/streakHelper');
+const { success, error } = require('../utils/responseHelper');
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const shuffleArray = (arr) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+const logActivity = async (userId, type, title, description, color = '#FFD700') => {
+  try {
+    await ActivityLog.create({ userId, type, title, description, color });
+  } catch (e) {
+    console.error('ActivityLog write failed:', e.message);
+  }
+};
+
+// Extract Firebase Storage path from a URL or return as-is if it's already a path
+const getStoragePath = (fileUrl) => {
+  try {
+    const url = new URL(fileUrl);
+    const pathMatch = url.pathname.match(/\/o\/(.+)/);
+    if (pathMatch) return decodeURIComponent(pathMatch[1]);
+  } catch (_) {}
+  // Already a plain path
+  return fileUrl;
+};
+
+const generateSignedUrl = async (fileUrl) => {
+  try {
+    if (!fileUrl) return null;
+    // If it's a Cloudinary URL, return it directly
+    if (fileUrl.includes('cloudinary.com')) return fileUrl;
+
+    const storagePath = getStoragePath(fileUrl);
+    // If it's not a Firebase URL (no bucket reference), return as is
+    if (!fileUrl.includes('storage.googleapis.com') && !fileUrl.includes('firebasestorage')) {
+      return fileUrl;
+    }
+
+    const [signedUrl] = await bucket.file(storagePath).getSignedUrl({
+      action: 'read',
+      expires: Date.now() + parseInt(process.env.SIGNED_URL_EXPIRY_SECONDS || 3600) * 1000
+    });
+    return signedUrl;
+  } catch (e) {
+    console.warn('Firebase Signed URL skipped/failed:', e.message);
+    return fileUrl; // Fallback to raw URL
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 1. GET /api/student/dashboard
+// ══════════════════════════════════════════════════════════════════════════════
+const getDashboard = async (req, res) => {
+  try {
+    const studentId = req.user.googleUid;
+
+    const [streak, testSessions, recentDoubts, activityLogs] = await Promise.all([
+      Streak.findOne({ userId: studentId }),
+      TestSession.find({ studentId, status: 'completed' }).select('subject scorePercent bankId createdAt'),
+      Doubt.find({ studentId }).sort({ createdAt: -1 }).limit(3).lean(),
+      ActivityLog.find({ userId: studentId }).sort({ createdAt: -1 }).limit(10)
+    ]);
+
+    const activeBanks = req.user.activeBanks || [];
+    const testsTaken = testSessions.length;
+    const avgScorePercent = testsTaken > 0
+      ? Math.round(testSessions.reduce((sum, t) => sum + (t.scorePercent || 0), 0) / testsTaken)
+      : 0;
+
+    // Build subjects from active banks
+    const bankIds = activeBanks.map(b => b.bankId);
+    const banks = bankIds.length > 0 ? await Bank.find({ _id: { $in: bankIds } }).select('subject class totalQuestions') : [];
+
+    const subjects = banks.map(bank => {
+      const bankTests = testSessions.filter(t => t.bankId?.toString() === bank._id.toString());
+      const progressPercent = bank.totalQuestions > 0
+        ? Math.min(Math.round((bankTests.length / Math.max(bank.totalQuestions, 1)) * 100), 100)
+        : 0;
+      return {
+        subject: bank.subject,
+        class: bank.class,
+        bankId: bank._id,
+        totalQuestions: bank.totalQuestions,
+        progressPercent
+      };
+    });
+
+    return success(res, 'Dashboard data fetched', {
+      displayName: req.user.displayName,
+      photoUrl: req.user.photoUrl,
+      streak: streak
+        ? { current: streak.currentStreak, best: streak.bestStreak, lastActiveDate: streak.lastActiveDate }
+        : { current: 0, best: 0, lastActiveDate: null },
+      stats: {
+        testsTaken,
+        avgScorePercent,
+        activeBanks: activeBanks.length
+      },
+      subjects,
+      recentDoubts: recentDoubts.map(d => ({
+        doubtId: d._id,
+        subject: d.subject,
+        status: d.status,
+        preview: d.messages?.[0]?.content?.substring(0, 50) || '',
+        unreadByStudent: d.unreadByStudent,
+        lastReplyAt: d.lastReplyAt
+      })),
+      activityLog: activityLogs
+    });
+  } catch (err) {
+    console.error('getDashboard error:', err);
+    return error(res, 'Failed to fetch dashboard', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 2. GET /api/student/profile
+// ══════════════════════════════════════════════════════════════════════════════
+const getProfile = async (req, res) => {
+  try {
+    const studentId = req.user.googleUid;
+
+    const [streak, testAgg] = await Promise.all([
+      Streak.findOne({ userId: studentId }),
+      TestSession.aggregate([
+        { $match: { studentId, status: 'completed' } },
+        { $group: { _id: null, count: { $sum: 1 }, avgScore: { $avg: '$scorePercent' } } }
+      ])
+    ]);
+
+    const stats = testAgg[0] || { count: 0, avgScore: 0 };
+
+    return success(res, 'Profile fetched', {
+      googleUid: req.user.googleUid,
+      email: req.user.email,
+      displayName: req.user.displayName,
+      photoUrl: req.user.photoUrl,
+      phone: req.user.phone,
+      class: req.user.class,
+      planType: req.user.planType,
+      isActivated: req.user.isActivated,
+      activeBanksCount: (req.user.activeBanks || []).length,
+      streak: streak
+        ? { currentStreak: streak.currentStreak, bestStreak: streak.bestStreak, totalActiveDays: streak.totalActiveDays }
+        : { currentStreak: 0, bestStreak: 0, totalActiveDays: 0 },
+      stats: {
+        testsTaken: stats.count,
+        avgScore: Math.round(stats.avgScore || 0)
+      },
+      createdAt: req.user.createdAt,
+      lastLoginAt: req.user.lastLoginAt
+    });
+  } catch (err) {
+    console.error('getProfile error:', err);
+    return error(res, 'Failed to fetch profile', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 3. PUT /api/student/profile
+// ══════════════════════════════════════════════════════════════════════════════
+const updateProfile = async (req, res) => {
+  try {
+    const { displayName, phone, class: className } = req.body;
+    const updates = {};
+
+    if (displayName !== undefined) {
+      if (typeof displayName !== 'string' || displayName.trim().length < 2) {
+        return error(res, 'Display name must be at least 2 characters', 'INVALID_NAME', 400);
+      }
+      updates.displayName = displayName.trim();
+    }
+
+    if (phone !== undefined) updates.phone = phone;
+
+    if (className !== undefined) {
+      const validClasses = ['Class 7', 'Class 8', 'Class 9', 'Class 10'];
+      if (!validClasses.includes(className)) {
+        return error(res, 'Class must be Class 7, 8, 9, or 10', 'INVALID_CLASS', 400);
+      }
+      updates.class = className;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return error(res, 'No valid fields to update', 'NO_UPDATES', 400);
+    }
+
+    await User.updateOne({ googleUid: req.user.googleUid }, updates);
+    return success(res, 'Profile updated successfully', updates);
+  } catch (err) {
+    console.error('updateProfile error:', err);
+    return error(res, 'Failed to update profile', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 4. POST /api/student/banks/search
+// ══════════════════════════════════════════════════════════════════════════════
+const searchBank = async (req, res) => {
+  try {
+    const { bankCode } = req.body;
+    if (!bankCode || !bankCode.trim()) {
+      return error(res, 'bankCode is required', 'MISSING_BANKCODE', 400);
+    }
+
+    const bank = await Bank.findOne({ bankCode: bankCode.trim().toUpperCase() })
+      .select('-approvedStudents'); // Never return this list to students
+
+    if (!bank) return error(res, 'Bank not found. Check the code and try again.', 'BANK_NOT_FOUND', 404);
+
+    const studentId = req.user.googleUid;
+    const existingRequest = await AccessRequest.findOne({ bankId: bank._id, studentId });
+
+    return success(res, 'Bank found', {
+      bankId: bank._id,
+      subject: bank.subject,
+      class: bank.class,
+      teacherName: bank.teacherName,
+      bankCode: bank.bankCode,
+      totalQuestions: bank.totalQuestions,
+      notesCount: bank.notesCount,
+      chaptersCount: bank.chapters.length,
+      updatedAt: bank.updatedAt,
+      alreadyRequested: !!existingRequest,
+      alreadyActive: existingRequest?.status === 'active',
+      requestStatus: existingRequest?.status || null
+    });
+  } catch (err) {
+    console.error('searchBank error:', err);
+    return error(res, 'Failed to search bank', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 5. POST /api/student/banks/request
+// ══════════════════════════════════════════════════════════════════════════════
+const requestAccess = async (req, res) => {
+  try {
+    const { bankId } = req.body;
+    const studentId = req.user.googleUid;
+
+    if (!bankId) return error(res, 'bankId is required', 'MISSING_BANKID', 400);
+
+    const bank = await Bank.findById(bankId);
+    if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
+
+    const existing = await AccessRequest.findOne({ bankId, studentId });
+    if (existing) {
+      return error(res, `You already have a ${existing.status} request for this bank`, 'DUPLICATE_REQUEST', 409);
+    }
+
+    const request = await AccessRequest.create({
+      studentId,
+      studentName: req.user.displayName,
+      bankId,
+      teacherId: bank.teacherId,
+      status: 'pending',
+      requestedAt: new Date()
+    });
+
+    await logActivity(
+      studentId,
+      'bank_joined',
+      'Bank Access Requested',
+      `Requested access to ${bank.subject} - ${bank.class}`,
+      '#3B82F6'
+    );
+
+    return success(res, 'Access request sent to teacher', {
+      requestId: request._id,
+      status: 'pending',
+      teacherName: bank.teacherName
+    }, 201);
+  } catch (err) {
+    console.error('requestAccess error:', err);
+    return error(res, 'Failed to send access request', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 6. GET /api/student/banks
+// ══════════════════════════════════════════════════════════════════════════════
+const getMyBanks = async (req, res) => {
+  try {
+    const studentId = req.user.googleUid;
+
+    const requests = await AccessRequest.find({ studentId })
+      .populate('bankId', 'subject class teacherName bankCode totalQuestions notesCount')
+      .lean();
+
+    const banks = requests.map(r => ({
+      requestId: r._id,
+      bankId: r.bankId?._id,
+      subject: r.bankId?.subject,
+      class: r.bankId?.class,
+      teacherName: r.bankId?.teacherName,
+      bankCode: r.bankId?.bankCode,
+      totalQuestions: r.bankId?.totalQuestions,
+      notesCount: r.bankId?.notesCount,
+      status: r.status,
+      requestedAt: r.requestedAt,
+      activatedAt: r.otpVerifiedAt || null
+    }));
+
+    // Sort: active first, then pending, then rejected
+    const order = { active: 0, approved: 1, pending: 2, rejected: 3, locked: 4 };
+    banks.sort((a, b) => (order[a.status] ?? 9) - (order[b.status] ?? 9));
+
+    return success(res, 'Banks fetched', banks);
+  } catch (err) {
+    console.error('getMyBanks error:', err);
+    return error(res, 'Failed to fetch banks', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 7. DELETE /api/student/banks/:bankId
+// ══════════════════════════════════════════════════════════════════════════════
+const deleteBank = async (req, res) => {
+  try {
+    const { bankId } = req.params;
+    const studentId = req.user.googleUid;
+
+    const request = await AccessRequest.findOne({ bankId, studentId });
+    if (!request) return error(res, 'No request found for this bank', 'NOT_FOUND', 404);
+
+    // If active, clean up approvedStudents and activeBanks
+    if (request.status === 'active') {
+      await Promise.all([
+        Bank.updateOne({ _id: bankId }, { $pull: { approvedStudents: studentId } }),
+        User.updateOne({ googleUid: studentId }, { $pull: { activeBanks: { bankId } } }),
+        User.updateOne(
+          { googleUid: request.teacherId },
+          { $inc: { activeStudents: -1 } }
+        )
+      ]);
+    }
+
+    await AccessRequest.findByIdAndDelete(request._id);
+    return success(res, 'Bank access removed successfully', null);
+  } catch (err) {
+    console.error('deleteBank error:', err);
+    return error(res, 'Failed to remove bank', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 8. POST /api/student/banks/verify-otp  (Security-critical)
+// ══════════════════════════════════════════════════════════════════════════════
+const verifyOTP = async (req, res) => {
+  try {
+    const { requestId, otpCode } = req.body;
+    const studentId = req.user.googleUid;
+
+    if (!requestId || !otpCode) {
+      return error(res, 'requestId and otpCode are required', 'MISSING_FIELDS', 400);
+    }
+
+    const request = await AccessRequest.findById(requestId);
+    if (!request) return error(res, 'Access request not found', 'NOT_FOUND', 404);
+
+    // Security checks
+    if (request.studentId !== studentId) {
+      return error(res, 'Access denied', 'FORBIDDEN', 403);
+    }
+    if (request.status === 'locked') {
+      return error(res, 'This request is locked after too many wrong attempts. Contact your teacher.', 'REQUEST_LOCKED', 423);
+    }
+    if (request.status !== 'approved') {
+      return error(res, 'This request has not been approved by your teacher yet', 'NOT_APPROVED', 400);
+    }
+    if (request.status === 'active') {
+      return error(res, 'This bank is already active', 'ALREADY_ACTIVE', 409);
+    }
+    if (request.otpExpiresAt && new Date() > request.otpExpiresAt) {
+      return error(res, 'OTP has expired. Ask your teacher to re-approve.', 'OTP_EXPIRED', 410);
+    }
+
+    const maxAttempts = parseInt(process.env.MAX_OTP_ATTEMPTS || 5);
+    if (request.otpAttempts >= maxAttempts) {
+      await AccessRequest.updateOne({ _id: requestId }, { status: 'locked' });
+      return error(res, 'Account locked after too many attempts. Contact your teacher.', 'TOO_MANY_ATTEMPTS', 423);
+    }
+
+    // Verify OTP using bcrypt — NEVER plain text comparison
+    const isCorrect = await bcrypt.compare(String(otpCode), request.otpHash);
+
+    if (!isCorrect) {
+      const newAttempts = request.otpAttempts + 1;
+      const remaining = maxAttempts - newAttempts;
+      const updateData = { otpAttempts: newAttempts };
+      if (newAttempts >= maxAttempts) updateData.status = 'locked';
+      await AccessRequest.updateOne({ _id: requestId }, updateData);
+
+      if (newAttempts >= maxAttempts) {
+        return error(res, 'Wrong OTP. Request locked — contact your teacher.', 'REQUEST_LOCKED', 423);
+      }
+      return error(res, `Wrong OTP. ${remaining} attempt${remaining !== 1 ? 's' : ''} remaining.`, 'WRONG_OTP', 400, { attemptsRemaining: remaining });
+    }
+
+    // OTP correct — activate access
+    const bank = await Bank.findById(request.bankId);
+    if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
+
+    const now = new Date();
+    await Promise.all([
+      AccessRequest.updateOne({ _id: requestId }, {
+        status: 'active',
+        otpVerifiedAt: now
+      }),
+      Bank.updateOne({ _id: request.bankId }, {
+        $addToSet: { approvedStudents: studentId }
+      }),
+      User.updateOne({ googleUid: studentId }, {
+        $push: {
+          activeBanks: {
+            bankId: bank._id,
+            subject: bank.subject,
+            teacherId: bank.teacherId,
+            activatedAt: now
+          }
+        }
+      }),
+      User.updateOne({ googleUid: bank.teacherId }, {
+        $inc: { activeStudents: 1 }
+      })
+    ]);
+
+    await logActivity(
+      studentId,
+      'bank_joined',
+      'Bank Access Activated',
+      `Now have access to ${bank.subject} - ${bank.class}`,
+      '#4CAF50'
+    );
+
+    return success(res, 'OTP verified! Bank access granted.', {
+      bankId: bank._id,
+      subject: bank.subject,
+      class: bank.class,
+      teacherName: bank.teacherName
+    });
+  } catch (err) {
+    console.error('verifyOTP error:', err);
+    return error(res, 'Failed to verify OTP', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 9. GET /api/student/banks/:bankId/chapters
+// ══════════════════════════════════════════════════════════════════════════════
+const getBankChapters = async (req, res) => {
+  try {
+    const { bankId } = req.params;
+    const studentId = req.user.googleUid;
+
+    const bank = await Bank.findById(bankId);
+    if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
+
+    if (!bank.approvedStudents.includes(studentId)) {
+      return error(res, 'You do not have access to this bank', 'FORBIDDEN', 403);
+    }
+
+    return success(res, 'Chapters fetched', {
+      bankId,
+      subject: bank.subject,
+      class: bank.class,
+      teacherName: bank.teacherName,
+      chapters: bank.chapters.sort((a, b) => a.order - b.order)
+    });
+  } catch (err) {
+    console.error('getBankChapters error:', err);
+    return error(res, 'Failed to fetch chapters', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 10. GET /api/student/notes
+// ══════════════════════════════════════════════════════════════════════════════
+const getNotes = async (req, res) => {
+  try {
+    const { bankId, chapterId } = req.query;
+    const studentId = req.user.googleUid;
+
+    if (!bankId) return error(res, 'bankId is required', 'MISSING_BANKID', 400);
+
+    const bank = await Bank.findById(bankId).select('approvedStudents subject class teacherName');
+    if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
+
+    if (!bank.approvedStudents.includes(studentId)) {
+      return error(res, 'You do not have access to this bank', 'FORBIDDEN', 403);
+    }
+
+    // Fetch notes from Firestore instead of MongoDB
+    let notesQuery = db.collection('notes').where('bankId', '==', bankId);
+    if (chapterId) notesQuery = notesQuery.where('chapterId', '==', chapterId);
+    
+    const notesSnapshot = await notesQuery.get();
+    const notes = notesSnapshot.docs.map(doc => ({
+      _id: doc.id,
+      ...doc.data()
+    }));
+
+    // Generate signed URLs — NEVER expose raw storage URLs
+    const notesWithSignedUrls = await Promise.all(
+      notes.map(async (note) => {
+        const signedUrl = note.fileUrl ? await generateSignedUrl(note.fileUrl) : null;
+        return {
+          noteId: note._id,
+          chapterId: note.chapterId,
+          chapterName: note.chapterName,
+          noteType: note.noteType,
+          fileName: note.fileName,
+          fileType: note.fileType,
+          fileSize: note.fileSize,
+          signedUrl,           // signed, expiring URL — NOT the raw fileUrl
+          expiresIn: parseInt(process.env.SIGNED_URL_EXPIRY_SECONDS || 3600),
+          uploadedAt: note.createdAt?.toDate ? note.createdAt.toDate() : note.createdAt
+        };
+      })
+    );
+
+    // Group by chapterId
+    const grouped = {};
+    for (const note of notesWithSignedUrls) {
+      if (!grouped[note.chapterId]) {
+        grouped[note.chapterId] = {
+          chapterId: note.chapterId,
+          chapterName: note.chapterName,
+          notes: []
+        };
+      }
+      grouped[note.chapterId].notes.push(note);
+    }
+
+    return success(res, 'Notes fetched', {
+      bankId,
+      subject: bank.subject,
+      class: bank.class,
+      chapters: Object.values(grouped)
+    });
+  } catch (err) {
+    console.error('getNotes error:', err);
+    return error(res, 'Failed to fetch notes', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 11. POST /api/student/tests/generate
+// ══════════════════════════════════════════════════════════════════════════════
+const generateTest = async (req, res) => {
+  try {
+    const { bankId, selectedChapters, blueprint } = req.body;
+    const studentId = req.user.googleUid;
+
+    if (!bankId || !selectedChapters || !blueprint) {
+      return error(res, 'bankId, selectedChapters, and blueprint are required', 'MISSING_FIELDS', 400);
+    }
+
+    const bank = await Bank.findById(bankId);
+    if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
+
+    if (!bank.approvedStudents.includes(studentId)) {
+      return error(res, 'You do not have access to this bank', 'FORBIDDEN', 403);
+    }
+
+    const allQuestions = await Question.find({
+      bankId,
+      chapterId: { $in: selectedChapters }
+    });
+
+    const pools = {
+      MCQ: { key: 'MCQ', questions: [] },
+      'Very Short': { key: 'Very Short', questions: [] },
+      Short: { key: 'Short', questions: [] },
+      Long: { key: 'Long', questions: [] },
+      Essay: { key: 'Essay', questions: [] }
+    };
+
+    for (const q of allQuestions) {
+      if (pools[q.questionType]) pools[q.questionType].questions.push(q);
+    }
+
+    const selected = [];
+    const sectionDefs = [];
+    const labels = ['A', 'B', 'C', 'D', 'E'];
+
+    // blueprint: [{ type: 'MCQ', marks: 1, count: 5 }, ...]
+    blueprint.forEach((sectionReq, idx) => {
+      const typeName = sectionReq.type;
+      const needed = parseInt(sectionReq.count) || 0;
+      const requestedMarks = parseInt(sectionReq.marks) || 1;
+
+      if (needed === 0) return;
+
+      const foundPool = pools[typeName];
+      if (!foundPool || foundPool.questions.length === 0) return;
+
+      const importantPool = foundPool.questions.filter(q => q.isImportant || (q.tags && q.tags.includes('Important')));
+      const normalPool = foundPool.questions.filter(q => !q.isImportant && !(q.tags && q.tags.includes('Important')));
+
+      const importantNeeded = Math.ceil(needed * 0.70);
+      const normalNeeded = needed - importantNeeded;
+
+      let fromImportant, fromNormal;
+
+      if (importantPool.length < importantNeeded) {
+        const deficit = importantNeeded - importantPool.length;
+        fromImportant = importantPool;
+        fromNormal = shuffleArray(normalPool).slice(0, normalNeeded + deficit);
+      } else {
+        fromImportant = shuffleArray(importantPool).slice(0, importantNeeded);
+        fromNormal = shuffleArray(normalPool).slice(0, normalNeeded);
+      }
+
+      let typeSelected = [...fromImportant, ...fromNormal].slice(0, needed);
+      
+      // Map to plain objects and apply blueprint marks
+      typeSelected = typeSelected.map(q => ({
+        ...(q.toObject ? q.toObject() : q),
+        marks: requestedMarks
+      }));
+
+      if (typeSelected.length > 0) {
+        selected.push(...typeSelected);
+        sectionDefs.push({
+          label: labels[sectionDefs.length] || '?',
+          type: typeName,
+          marksEach: requestedMarks,
+          count: typeSelected.length,
+          total: typeSelected.length * requestedMarks
+        });
+      }
+    });
+
+    const totalMarks = selected.reduce((sum, q) => sum + (q.marks || 0), 0);
+
+    // Build Premium Paper HTML (Professional Style)
+    let paperHtml = `
+<div class="paper-header" style="font-family: 'Times New Roman', serif;">
+  <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
+    <h2 style="margin: 0; font-size: 1.4em;">BEEPREPARE ACADEMIC NODE — PRACTICE ARCHITECTURE</h2>
+    <h3 style="margin: 5px 0; font-size: 1.1em; text-transform: uppercase;">SUBJECT: ${bank.subject} (CLASS: ${bank.class})</h3>
+    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold; font-size: 0.9em;">
+      <span>Subject Code: ${bank.bankCode}</span>
+      <span>Max Marks: ${totalMarks}</span>
+    </div>
+  </div>`;
+
+    let qNumber = 1;
+    for (const [idx, section] of sectionDefs.entries()) {
+      const sectionQs = selected.filter(q => q.questionType === section.type);
+      if (sectionQs.length === 0) continue;
+
+      paperHtml += `
+      <div style="text-align: center; font-weight: bold; text-transform: uppercase; padding: 5px; background: #f2f2f2; border: 1px solid #ccc; margin: 20px 0 10px 0; font-family: sans-serif; font-size: 14px;">
+        SECTION - ${section.label} (${section.type})
+      </div>
+      <div style="text-align: right; font-style: italic; font-size: 12px; margin-bottom: 10px;">
+        (${section.count} Questions × ${section.marksEach} Mark${section.marksEach > 1 ? 's' : ''} Each)
+      </div>`;
+
+      for (const q of sectionQs) {
+        paperHtml += `
+        <div class="question-item" style="margin-bottom: 15px; font-family: 'Times New Roman', serif; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="flex: 1; padding-right: 30px;">
+              <strong>Q${qNumber}.</strong> ${q.questionText}
+            </div>
+            <div style="font-weight: bold; min-width: 30px; text-align: right;">
+              [${q.marks}]
+            </div>
+          </div>`;
+
+        if (q.questionType === 'MCQ' && q.mcqOptions) {
+          paperHtml += `
+          <div class="mcq-options-grid" style="margin: 8px 0 0 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.95em;">
+            <div>(A) ${q.mcqOptions.A || ''}</div>
+            <div>(B) ${q.mcqOptions.B || ''}</div>
+            <div>(C) ${q.mcqOptions.C || ''}</div>
+            <div>(D) ${q.mcqOptions.D || ''}</div>
+          </div>`;
+        }
+
+        paperHtml += `
+          <div class="q-actions" style="position: absolute; right: -30px; top: 0; display: none;">
+            <div class="action-icon" title="Delete">×</div>
+          </div>
+        </div>`;
+        qNumber++;
+      }
+    }
+    paperHtml += `</div>`;
+
+    const session = await TestSession.create({
+      studentId,
+      bankId: bank._id,
+      teacherId: bank.teacherId,
+      subject: bank.subject,
+      class: bank.class,
+      questions: selected,
+      blueprint,
+      totalMarks,
+      status: 'in_progress',
+      startedAt: new Date()
+    });
+
+    return success(res, 'Test generated successfully', {
+      sessionId: session._id,
+      paperHtml,
+      totalMarks,
+      questionCount: selected.length
+    }, 201);
+  } catch (err) {
+    console.error('generateTest error:', err);
+    return error(res, 'Failed to generate test', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 12. POST /api/student/tests/:sessionId/submit
+// ══════════════════════════════════════════════════════════════════════════════
+const submitTest = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { answers } = req.body;
+    const studentId = req.user.googleUid;
+
+    if (!answers || !Array.isArray(answers)) {
+      return error(res, 'answers array is required', 'MISSING_ANSWERS', 400);
+    }
+
+    const session = await TestSession.findById(sessionId);
+    if (!session) return error(res, 'Test session not found', 'NOT_FOUND', 404);
+    if (session.studentId !== studentId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+    if (session.status === 'completed') return error(res, 'This test has already been submitted', 'ALREADY_SUBMITTED', 409);
+
+    let score = 0;
+    let correctCount = 0;
+    let incorrectCount = 0;
+
+    const gradedAnswers = answers.map(ans => {
+      const question = session.questions.find(q => q.questionId?.toString() === ans.questionId?.toString());
+      if (!question) return { questionId: ans.questionId, studentAnswer: ans.studentAnswer, isCorrect: null };
+
+      let isCorrect = null;
+      if (question.questionType === 'MCQ') {
+        isCorrect = ans.studentAnswer === question.correctOption;
+        if (isCorrect) {
+          score += question.marks || 1;
+          correctCount++;
+        } else if (ans.studentAnswer) {
+          incorrectCount++;
+        }
+      }
+      // Non-MCQ: isCorrect stays null (manual review)
+      return { questionId: ans.questionId, studentAnswer: ans.studentAnswer, isCorrect };
+    });
+
+    const scorePercent = session.totalMarks > 0
+      ? Math.round((score / session.totalMarks) * 100)
+      : 0;
+
+    await TestSession.updateOne({ _id: sessionId }, {
+      status: 'completed',
+      answers: gradedAnswers,
+      score,
+      scorePercent,
+      completedAt: new Date()
+    });
+
+    // Update streak
+    const streak = await updateStreak(studentId);
+
+    // Write activity log
+    await logActivity(
+      studentId,
+      'test_completed',
+      'Test Completed',
+      `Scored ${scorePercent}% in ${session.subject}`,
+      '#2196F3'
+    );
+
+    return success(res, 'Test submitted successfully', {
+      score,
+      scorePercent,
+      totalMarks: session.totalMarks,
+      correctCount,
+      incorrectCount,
+      streak: {
+        currentStreak: streak.currentStreak,
+        bestStreak: streak.bestStreak,
+        totalActiveDays: streak.totalActiveDays
+      }
+    });
+  } catch (err) {
+    console.error('submitTest error:', err);
+    return error(res, 'Failed to submit test', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 13. GET /api/student/tests/history
+// ══════════════════════════════════════════════════════════════════════════════
+const getTestHistory = async (req, res) => {
+  try {
+    const { page = 1, limit = 10 } = req.query;
+    const studentId = req.user.googleUid;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [sessions, total] = await Promise.all([
+      TestSession.find({ studentId, status: 'completed' })
+        .select('subject class totalMarks score scorePercent questions completedAt createdAt')
+        .sort({ completedAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      TestSession.countDocuments({ studentId, status: 'completed' })
+    ]);
+
+    return success(res, 'Test history fetched', {
+      tests: sessions.map(s => ({
+        sessionId: s._id,
+        subject: s.subject,
+        class: s.class,
+        totalMarks: s.totalMarks,
+        score: s.score,
+        scorePercent: s.scorePercent,
+        questionCount: s.questions?.length || 0,
+        completedAt: s.completedAt
+      })),
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit))
+    });
+  } catch (err) {
+    console.error('getTestHistory error:', err);
+    return error(res, 'Failed to fetch test history', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 14. GET /api/student/doubts
+// ══════════════════════════════════════════════════════════════════════════════
+const getDoubts = async (req, res) => {
+  try {
+    const studentId = req.user.googleUid;
+
+    const doubts = await Doubt.find({ studentId })
+      .sort({ unreadByStudent: -1, lastReplyAt: -1 })
+      .lean();
+
+    return success(res, 'Doubts fetched', {
+      doubts: doubts.map(d => ({
+        doubtId: d._id,
+        subject: d.subject,
+        status: d.status,
+        unreadByStudent: d.unreadByStudent,
+        preview: d.messages?.[0]?.content?.substring(0, 60) || '',
+        messageCount: d.messages?.length || 0,
+        createdAt: d.createdAt,
+        lastReplyAt: d.lastReplyAt
+      }))
+    });
+  } catch (err) {
+    console.error('getDoubts error:', err);
+    return error(res, 'Failed to fetch doubts', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 15. POST /api/student/doubts
+// ══════════════════════════════════════════════════════════════════════════════
+const submitDoubt = async (req, res) => {
+  try {
+    const { bankId, subject, questionText, imageUrl } = req.body;
+    const studentId = req.user.googleUid;
+
+    if (!bankId || !questionText) {
+      return error(res, 'bankId and questionText are required', 'MISSING_FIELDS', 400);
+    }
+    if (questionText.trim().length < 10) {
+      return error(res, 'Question must be at least 10 characters', 'TOO_SHORT', 400);
+    }
+
+    const bank = await Bank.findById(bankId);
+    if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
+
+    if (!bank.approvedStudents.includes(studentId)) {
+      return error(res, 'You do not have access to this bank', 'FORBIDDEN', 403);
+    }
+
+    const doubtRef = db.collection('doubts').doc();
+    const now = new Date();
+
+    await doubtRef.set({
+      studentId,
+      studentName: req.user.displayName,
+      teacherId: bank.teacherId,
+      bankId,
+      subject: subject || bank.subject,
+      status: 'pending',
+      unreadByTeacher: true,
+      unreadByStudent: false,
+      lastMessage: questionText.trim(),
+      lastMessageRole: 'student',
+      lastReplyAt: null,
+      createdAt: now,
+      updatedAt: now
+    });
+
+    const msgRef = doubtRef.collection('messages').doc();
+    await msgRef.set({
+      messageId: uuidv4(),
+      senderId: studentId,
+      senderRole: 'student',
+      content: questionText.trim(),
+      imageUrl: imageUrl || null,
+      timestamp: now
+    });
+
+    return success(res, 'Doubt submitted successfully', {
+      doubtId: doubtRef.id,
+      status: 'pending'
+    }, 201);
+  } catch (err) {
+    console.error('submitDoubt error:', err);
+    return error(res, 'Failed to submit doubt', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 16. GET /api/student/doubts/:id/messages
+// ══════════════════════════════════════════════════════════════════════════════
+const getDoubtMessages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const studentId = req.user.googleUid;
+
+    const doubtDoc = await db.collection('doubts').doc(id).get();
+    if (!doubtDoc.exists) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
+    
+    const doubtData = doubtDoc.data();
+    if (doubtData.studentId !== studentId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+
+    // Mark as read by student
+    if (doubtData.unreadByStudent) {
+      await db.collection('doubts').doc(id).update({ unreadByStudent: false });
+    }
+
+    const messagesSnapshot = await db.collection('doubts').doc(id).collection('messages')
+      .orderBy('timestamp', 'asc')
+      .get();
+
+    const messages = messagesSnapshot.docs.map(doc => {
+      const d = doc.data();
+      return {
+        messageId: d.messageId,
+        senderRole: d.senderRole,
+        content: d.content,
+        imageUrl: d.imageUrl || null,
+        timestamp: d.timestamp?.toDate ? d.timestamp.toDate() : d.timestamp
+      };
+    });
+
+    return success(res, 'Messages fetched', {
+      doubtId: id,
+      subject: doubtData.subject,
+      status: doubtData.status,
+      messages
+    });
+  } catch (err) {
+    console.error('getDoubtMessages error:', err);
+    return error(res, 'Failed to fetch messages', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 17. POST /api/student/doubts/:id/messages
+// ══════════════════════════════════════════════════════════════════════════════
+const sendDoubtMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content, imageUrl } = req.body;
+    const studentId = req.user.googleUid;
+
+    if (!content || content.trim().length < 2) {
+      return error(res, 'Message must be at least 2 characters', 'TOO_SHORT', 400);
+    }
+
+    const doubt = await Doubt.findById(id);
+    if (!doubt) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
+    if (doubt.studentId !== studentId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+    if (doubt.status === 'resolved') {
+      return error(res, 'This doubt is already resolved', 'ALREADY_RESOLVED', 400);
+    }
+
+    const message = {
+      messageId: uuidv4(),
+      senderRole: 'student',
+      content: content.trim(),
+      imageUrl: imageUrl || null,
+      timestamp: new Date()
+    };
+
+    doubt.messages.push(message);
+    doubt.unreadByTeacher = true;
+    doubt.lastReplyAt = new Date();
+    await doubt.save();
+
+    return success(res, 'Message sent', {
+      doubtId: doubt._id,
+      message,
+      totalMessages: doubt.messages.length
+    });
+  } catch (err) {
+    console.error('sendDoubtMessage error:', err);
+    return error(res, 'Failed to send message', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 18. GET /api/student/bookmarks
+// ══════════════════════════════════════════════════════════════════════════════
+const getBookmarks = async (req, res) => {
+  try {
+    const studentId = req.user.googleUid;
+
+    const bookmarks = await Bookmark.find({ studentId })
+      .sort({ createdAt: -1 })
+      .populate('questionId', 'difficulty marks tags questionType')
+      .lean();
+
+    return success(res, 'Bookmarks fetched', {
+      bookmarks: bookmarks.map(b => ({
+        bookmarkId: b._id,
+        questionId: b.questionId?._id || b.questionId,
+        questionText: b.questionText,
+        subject: b.subject,
+        chapterName: b.chapterName,
+        difficulty: b.questionId?.difficulty,
+        marks: b.questionId?.marks,
+        tags: b.questionId?.tags,
+        questionType: b.questionId?.questionType,
+        bookmarkedAt: b.createdAt
+      }))
+    });
+  } catch (err) {
+    console.error('getBookmarks error:', err);
+    return error(res, 'Failed to fetch bookmarks', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 19. POST /api/student/bookmarks
+// ══════════════════════════════════════════════════════════════════════════════
+const addBookmark = async (req, res) => {
+  try {
+    const { questionId } = req.body;
+    const studentId = req.user.googleUid;
+
+    if (!questionId) return error(res, 'questionId is required', 'MISSING_FIELD', 400);
+
+    const question = await Question.findById(questionId);
+    if (!question) return error(res, 'Question not found', 'NOT_FOUND', 404);
+
+    // Verify student has access to the bank this question belongs to
+    const bank = await Bank.findById(question.bankId).select('approvedStudents');
+    if (!bank || !bank.approvedStudents.includes(studentId)) {
+      return error(res, 'You do not have access to this question', 'FORBIDDEN', 403);
+    }
+
+    // Check duplicate
+    const existing = await Bookmark.findOne({ studentId, questionId });
+    if (existing) return error(res, 'Question already bookmarked', 'ALREADY_BOOKMARKED', 409);
+
+    const bookmark = await Bookmark.create({
+      studentId,
+      questionId,
+      questionText: question.questionText,
+      subject: question.subject,
+      chapterName: question.chapterName
+    });
+
+    return success(res, 'Bookmark added', {
+      bookmarkId: bookmark._id,
+      questionText: question.questionText.substring(0, 80)
+    }, 201);
+  } catch (err) {
+    console.error('addBookmark error:', err);
+    return error(res, 'Failed to add bookmark', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 20. DELETE /api/student/bookmarks/:questionId
+// ══════════════════════════════════════════════════════════════════════════════
+const deleteBookmark = async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const studentId = req.user.googleUid;
+
+    const result = await Bookmark.findOneAndDelete({ studentId, questionId });
+    if (!result) return error(res, 'Bookmark not found', 'NOT_FOUND', 404);
+
+    return success(res, 'Bookmark removed', null);
+  } catch (err) {
+    console.error('deleteBookmark error:', err);
+    return error(res, 'Failed to remove bookmark', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 21. GET /api/student/streak
+// ══════════════════════════════════════════════════════════════════════════════
+const getStreak = async (req, res) => {
+  try {
+    const streak = await Streak.findOne({ userId: req.user.googleUid });
+
+    return success(res, 'Streak data fetched', {
+      currentStreak: streak?.currentStreak || 0,
+      bestStreak: streak?.bestStreak || 0,
+      lastActiveDate: streak?.lastActiveDate || null,
+      totalActiveDays: streak?.totalActiveDays || 0,
+      weeklyActivity: streak?.weeklyActivity || [false, false, false, false, false, false, false]
+    });
+  } catch (err) {
+    console.error('getStreak error:', err);
+    return error(res, 'Failed to fetch streak', 'SERVER_ERROR', 500);
+  }
+};
+
+module.exports = {
+  getDashboard,
+  getProfile,
+  updateProfile,
+  searchBank,
+  requestAccess,
+  getMyBanks,
+  deleteBank,
+  verifyOTP,
+  getBankChapters,
+  getNotes,
+  generateTest,
+  submitTest,
+  getTestHistory,
+  getDoubts,
+  submitDoubt,
+  getDoubtMessages,
+  sendDoubtMessage,
+  getBookmarks,
+  addBookmark,
+  deleteBookmark,
+  getStreak
+};

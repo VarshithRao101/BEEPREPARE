@@ -4,494 +4,391 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Identity Verification - BEEPREPARE</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <title>Identity Selection - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #FFD700;
+            --accent: #FFA500;
+            --bg-dark: #000000;
+            --surface: rgba(18, 18, 18, 0.85);
+            --text-main: #FFFFFF;
+            --text-muted: #AAAAAA;
+            --border: rgba(255, 215, 0, 0.25);
+        }
+
         body {
             background-color: var(--bg-dark) !important;
             margin: 0 !important;
             padding: 0 !important;
-            width: 100vw !important;
-            max-width: none !important;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
+            font-family: 'Outfit', sans-serif;
             color: var(--text-main) !important;
+            overflow-x: hidden;
         }
 
-        .selection-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 30px 20px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: center;
-            position: relative;
-            flex: 1;
+        .main-bg {
+            position: fixed;
+            inset: 0;
+            background: url('../assets/images/premium-bg.png') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+            filter: brightness(0.4);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .selection-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .selection-header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .role-grid {
+            display: flex;
+            gap: 30px;
+            width: 100%;
             justify-content: center;
-            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+        }
+
+        .selection-card {
+            background: var(--surface);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 30px 20px;
+            width: 280px;
+            cursor: pointer;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
         .selection-card:hover {
-            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-15px) scale(1.02);
             border-color: var(--primary);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 40px 80px rgba(255, 215, 0, 0.15);
         }
 
         .selection-card.selected {
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(255, 215, 0, 0.05);
             border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2);
         }
 
-        .verification-section {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 24px;
-            display: none;
-            /* Hidden strictly until role selected */
-            animation: slideDown 0.4s ease-out;
-            text-align: left;
+        .role-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.5));
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .verify-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            margin-top: 8px;
-            letter-spacing: 1px;
-            transition: 0.3s;
+        .role-name {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
             text-transform: uppercase;
         }
 
-        .verify-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
+        .role-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
         }
 
-        .verify-input.valid {
-            border-color: #00E676;
-            background: rgba(0, 230, 118, 0.05);
-        }
-
-        .verify-input.invalid {
-            border-color: #FF4444;
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #555;
-            margin-right: 8px;
-        }
-
-        .status-indicator.active {
-            background: #00E676;
-            box-shadow: 0 0 8px #00E676;
-        }
-
-        #lock-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
+        .verify-section {
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
+            max-width: 450px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 30px;
+            margin-top: 40px;
             display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .input-premium {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 15px 20px;
+            border-radius: 12px;
+            color: #fff;
+            margin-top: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-premium:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-finalize {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: 0.3s;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .btn-finalize.active {
+            opacity: 1;
+            pointer-events: all;
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-finalize:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .role-grid {
+                flex-direction: row !important;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .selection-card {
+                width: calc(50% - 10px);
+                max-width: 170px;
+                padding: 20px 10px;
+                border-radius: 20px;
+            }
+            .role-icon {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 12px;
+            }
+            .role-name {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            .role-desc {
+                font-size: 10px;
+                line-height: 1.2;
+            }
+            .selection-header h1 {
+                font-size: 24px;
+            }
         }
     </style>
-    <!-- PREMIUM ANIMATION STYLES -->
-    <link rel="stylesheet" href="../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-    </div>
+    <div class="main-bg"></div>
 
-    <!-- MFA / Security Overlay -->
-    <div id="lock-overlay">
-        <!-- Professional Gold Lock SVG -->
-        <svg width="100" height="120" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg"
-            style="margin-bottom: 24px; filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.2));">
-            <defs>
-                <linearGradient id="gold-gradient" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#FFD700" />
-                    <stop offset="40%" stop-color="#FDB931" />
-                    <stop offset="100%" stop-color="#9E7F06" />
-                </linearGradient>
-                <linearGradient id="shackle-gradient" x1="50" y1="0" x2="50" y2="60" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stop-color="#E0E0E0" />
-                    <stop offset="100%" stop-color="#888888" />
-                </linearGradient>
-            </defs>
-            <!-- Shackle -->
-            <path d="M25 45 V 30 A 25 25 0 0 1 75 30 V 45" stroke="url(#shackle-gradient)" stroke-width="12"
-                stroke-linecap="round" fill="none" />
-            <!-- Body -->
-            <rect x="10" y="45" width="80" height="70" rx="12" fill="url(#gold-gradient)" />
-            <!-- Keyhole -->
-            <circle cx="50" cy="70" r="8" fill="#332200" />
-            <path d="M50 70 L 44 95 L 56 95 Z" fill="#332200" />
-            <!-- Shine/Highlight -->
-            <path d="M20 50 H 40" stroke="rgba(255,255,255,0.4)" stroke-width="3" stroke-linecap="round" />
-        </svg>
-        <h2 style="color: #fff; margin-bottom: 10px;">Securing Identity</h2>
-        <div style="color: #888; font-size: 14px;">Writing immutable record to database...</div>
-        <div
-            style="width: 200px; height: 4px; background: #333; margin-top: 20px; border-radius: 2px; overflow: hidden;">
-            <div style="width: 50%; height: 100%; background: var(--primary); animation: progress 2s infinite linear;">
+    <div class="app-container">
+        <div class="selection-header">
+            <h1 class="text-gradient-gold">Define Your Identity</h1>
+            <p style="color: var(--text-muted); font-size: 14px; letter-spacing: 1px; text-transform: uppercase;">Step 3 of 3: System Access Configuration</p>
+        </div>
+
+        <div class="role-grid">
+            <!-- Student Option -->
+            <div class="selection-card" onclick="selectRole(this, 'student')">
+                <img src="../assets/images/student.png" alt="Student" class="role-icon">
+                <div class="role-name">Student</div>
+                <div class="role-desc">Access lecture notes, practice tests, and performance analytics.</div>
+            </div>
+
+            <!-- Teacher Option -->
+            <div class="selection-card" onclick="selectRole(this, 'teacher')">
+                <img src="../assets/images/teacher.png" alt="Teacher" class="role-icon">
+                <div class="role-name">Teacher</div>
+                <div class="role-desc">Manage class modules, create assessments, and track student progress.</div>
             </div>
         </div>
-        <style>
-            @keyframes progress {
-                0% {
-                    transform: translateX(-100%);
-                }
 
-                100% {
-                    transform: translateX(100%);
-                }
-            }
-        </style>
-    </div>
+        <div id="verify-box" class="verify-section">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 10px; color: var(--primary); font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">Security Verification</div>
+                <div style="font-size: 13px; color: #fff;">Confirm your selection by typing <span id="target-text" style="color: var(--primary); font-weight: 900;">STUDENT</span></div>
+            </div>
+            
+            <input type="text" id="role-input" class="input-premium" placeholder="Type here..." oninput="checkVerification()">
 
-    <div class="app-container"
-        style="display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-top: 40px; padding-bottom: 40px;">
-
-        <div class="card-premium"
-            style="max-width: 500px; padding: 0; background: rgba(20,20,20,0.9); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 24px;">
-            <!-- Merged Header Section -->
-            <div
-                style="background: rgba(255,255,255,0.03); padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div>
-                        <div class="industrial-tag"
-                            style="color: var(--primary); border-color: var(--primary); font-size: 9px; padding: 4px 8px;">
-                            SYSTEM CONFIRMATION</div>
-                        <h1 class="text-gradient-silver"
-                            style="font-size: 20px; font-weight: 800; margin-top: 4px; letter-spacing: -0.5px;">Identity
-                            & Role</h1>
-                    </div>
-                    <div style="text-align: right;">
-                        <div class="text-gradient-gold" style="font-size: 28px; font-weight: 900; line-height: 1;">03
-                        </div>
-                        <div style="font-size: 9px; color: var(--text-muted); font-weight: 600; letter-spacing: 1px;">
-                            STEP 3/3</div>
-                    </div>
-                </div>
-
-                <!-- Slim Progress -->
-                <div class="wizard-progress-track"
-                    style="height: 4px; background: rgba(255,255,255,0.05); margin-bottom: 12px;">
-                    <div class="wizard-progress-fill" style="width: 100%; box-shadow: none;"></div>
-                </div>
-
-                <div style="font-size: 12px; color: #888; line-height: 1.4;">
-                    Final Step: Define your ecosystem role.
-                </div>
+            <div style="display: flex; gap: 10px; align-items: flex-start; margin-top: 20px;">
+                <input type="checkbox" id="terms-check" style="margin-top: 4px; accent-color: var(--primary);" onclick="checkVerification()">
+                <label for="terms-check" style="font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+                    I confirm this role and understand this identity cannot be changed later.
+                </label>
             </div>
 
-            <!-- Content Body -->
-            <div style="padding: 24px;">
-                <!-- Role Selector -->
-                <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-                    <!-- Student Option -->
-                    <div class="selection-card" onclick="selectRole(this, 'student')" style="flex: 1;">
-                        <div class="selection-icon"
-                            style="width: 64px; height: 64px; margin: 0 auto 12px auto; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-                            <!-- SVG: Student Cap -->
-                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="stu-blue" x1="0" y1="0" x2="64" y2="64">
-                                        <stop offset="0" stop-color="#448AFF" />
-                                        <stop offset="1" stop-color="#1565C0" />
-                                    </linearGradient>
-                                    <linearGradient id="cap-dark" x1="0" y1="0" x2="0" y2="64">
-                                        <stop offset="0" stop-color="#3C4858" />
-                                        <stop offset="1" stop-color="#2c3e50" />
-                                    </linearGradient>
-                                </defs>
-                                <!-- Body/Gown -->
-                                <path d="M12 64 L 12 50 Q 32 40 52 50 L 52 64 Z" fill="url(#stu-blue)" />
-                                <!-- Head -->
-                                <circle cx="32" cy="38" r="12" fill="#e0e0e0" />
-                                <!-- Cap -->
-                                <path d="M32 26 L 56 16 L 32 6 L 8 16 Z" fill="#333" stroke="rgba(255,255,255,0.2)"
-                                    stroke-width="1" />
-                                <path d="M32 6 L 56 16 L 32 26 L 8 16 Z" fill="url(#cap-dark)" />
-                                <path d="M56 16 V 26" stroke="#333" stroke-width="2" />
-                                <!-- Tassel -->
-                                <circle cx="32" cy="16" r="2" fill="#FDB931" />
-                                <path d="M32 16 Q 44 20 48 24" stroke="#FDB931" stroke-width="2" fill="none" />
-                                <circle cx="48" cy="24" r="3" fill="#FFC107" />
-                            </svg>
-                        </div>
-                        <div
-                            style="font-weight: 800; color: #fff; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 4px;">
-                            STUDENT</div>
-                        <div style="font-size: 11px; color: #888; line-height: 1.4;">Access Learning Material, Tests &
-                            Analytics</div>
-                    </div>
-
-                    <!-- Teacher Option -->
-                    <div class="selection-card" onclick="selectRole(this, 'teacher')" style="flex: 1;">
-                        <div class="selection-icon"
-                            style="width: 64px; height: 64px; margin: 0 auto 12px auto; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-                            <!-- SVG: Teacher with Pointer -->
-                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <defs>
-                                    <linearGradient id="teach-grad" x1="0" y1="0" x2="64" y2="64">
-                                        <stop offset="0" stop-color="#43A047" />
-                                        <stop offset="1" stop-color="#1B5E20" />
-                                    </linearGradient>
-                                </defs>
-                                <!-- Board Behind -->
-                                <rect x="36" y="10" width="24" height="20" rx="2" fill="#333" stroke="#555"
-                                    stroke-width="1" />
-                                <line x1="40" y1="16" x2="56" y2="16" stroke="#AAA" stroke-width="1"
-                                    stroke-linecap="round" />
-                                <line x1="40" y1="22" x2="50" y2="22" stroke="#AAA" stroke-width="1"
-                                    stroke-linecap="round" />
-
-                                <!-- Body -->
-                                <path d="M10 64 L 10 50 Q 28 40 46 50 L 46 64 Z" fill="url(#teach-grad)" />
-                                <!-- Head -->
-                                <circle cx="28" cy="34" r="11" fill="#e0e0e0" />
-                                <!-- Pointer Stick -->
-                                <line x1="20" y1="50" x2="40" y2="20" stroke="#8D6E63" stroke-width="3"
-                                    stroke-linecap="round" />
-                                <circle cx="40" cy="20" r="2" fill="#FF7043" />
-                            </svg>
-                        </div>
-                        <div
-                            style="font-weight: 800; color: #fff; font-size: 18px; letter-spacing: 0.5px; margin-bottom: 4px;">
-                            TEACHER</div>
-                        <div style="font-size: 11px; color: #888; line-height: 1.4;">Create Content, Manage Classes &
-                            Assessments</div>
-                    </div>
-                </div>
-
-                <!-- Verification Section (MFA Style) -->
-                <div id="verification-box" class="verification-section"
-                    style="background: rgba(0,0,0,0.3); border: 1px solid var(--border);">
-                    <div style="display: flex; align-items: center; margin-bottom: 16px;">
-                        <div class="status-indicator" id="status-dot"></div>
-                        <span
-                            style="font-size: 12px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px;">Two-Factor
-                            Verification</span>
-                    </div>
-
-                    <!-- Match 1: Selected Role -->
-                    <div style="font-size: 12px; color: #ccc; margin-bottom: 8px;">
-                        1. Type <b id="target-role-text" style="color: var(--primary);">STUDENT</b> to confirm:
-                    </div>
-                    <input type="text" id="verify-input" class="input-premium" placeholder="Type selected role..."
-                        oninput="checkInput()" style="margin-bottom: 16px; padding: 12px 16px; font-size: 14px;">
-
-                    <!-- Match 2: Rejected Role -->
-                    <div style="font-size: 12px; color: #ccc; margin-bottom: 8px;">
-                        2. Type <b id="reject-role-text" style="color: #FF4444;">TEACHER</b> to reject:
-                    </div>
-                    <input type="text" id="reject-input" class="input-premium" placeholder="Type rejected role..."
-                        oninput="checkInput()" style="margin-bottom: 16px; padding: 12px 16px; font-size: 14px;">
-
-                    <!-- Strict Checkbox -->
-                    <div style="display: flex; align-items: flex-start; margin-top: 12px; gap: 12px;">
-                        <input type="checkbox" id="strict-check" style="margin-top: 4px; accent-color: var(--primary);"
-                            onclick="checkInput()">
-                        <label for="strict-check"
-                            style="font-size: 12px; color: #aaa; line-height: 1.4; cursor: pointer;">
-                            I verify that I have made the correct choice. I understand this action cannot be undone.
-                        </label>
-                    </div>
-
-                    <div id="match-msg"
-                        style="font-size: 11px; margin-top: 12px; height: 15px; text-align: center; font-weight: 600; letter-spacing: 0.5px;">
-                    </div>
-                </div>
-
-                <!-- Final Confirm -->
-                <button id="btn-final-confirm" class="btn-premium" onclick="finalizeRegistration()" disabled
-                    style="width: 100%; margin-top: 24px; opacity: 0.5;">
-                    Finalize & Enter Dashboard →
-                </button>
-
-                <button class="btn btn-outline"
-                    style="margin-top: 20px; border:none; width: 100%; color: var(--text-muted); font-size: 12px; opacity: 0.6; transition: 0.3s;"
-                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"
-                    onclick="window.location.href='../index.html'">
-                    Cancel & Logout
-                </button>
-            </div>
+            <button id="final-btn" class="btn-finalize" onclick="confirmRole()">
+                Initialize Profile →
+            </button>
         </div>
     </div>
-    </div>
 
-    <script>
-        let selectedRole = null;
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          BP 
+        } from '../assets/js/bee-core.js';
 
-        function selectRole(element, role) {
-            // UI Update
-            document.querySelectorAll('.selection-card').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-            // Logic Update
-            selectedRole = role;
-            const rejectedRole = role === 'student' ? 'teacher' : 'student';
+        let selectedRoleLocal = '';
 
-            // Show Verification Box
-            const box = document.getElementById('verification-box');
+        window.selectRole = function(card, role) {
+            document.querySelectorAll('.selection-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedRoleLocal = role;
+
+            const box = document.getElementById('verify-box');
             box.style.display = 'block';
-
-            // Update Text
-            document.getElementById('target-role-text').innerText = role.toUpperCase();
-            document.getElementById('reject-role-text').innerText = rejectedRole.toUpperCase();
-
-            // Clear Matches
-            document.getElementById('verify-input').value = '';
-            document.getElementById('reject-input').value = '';
-            document.getElementById('strict-check').checked = false;
-
-            // Reset Styles
-            const inputs = document.querySelectorAll('.verify-input');
-            inputs.forEach(i => i.classList.remove('valid', 'invalid'));
-
-            document.getElementById('verify-input').focus();
-            checkInput();
+            document.getElementById('target-text').innerText = role.toUpperCase();
+            document.getElementById('role-input').value = '';
+            document.getElementById('terms-check').checked = false;
+            checkVerification();
         }
 
-        function checkInput() {
-            if (!selectedRole) return;
+        window.checkVerification = function() {
+            const input = document.getElementById('role-input').value.toUpperCase();
+            const checked = document.getElementById('terms-check').checked;
+            const btn = document.getElementById('final-btn');
 
-            const verifyInput = document.getElementById('verify-input');
-            const rejectInput = document.getElementById('reject-input');
-            const checkBox = document.getElementById('strict-check');
-            const btn = document.getElementById('btn-final-confirm');
-            const dot = document.getElementById('status-dot');
-            const msg = document.getElementById('match-msg');
-
-            const selected = selectedRole.toUpperCase();
-            const rejected = (selectedRole === 'student' ? 'teacher' : 'student').toUpperCase();
-
-            const val1 = verifyInput.value.trim().toUpperCase();
-            const val2 = rejectInput.value.trim().toUpperCase();
-            const isChecked = checkBox.checked;
-
-            // Check 1: Selected Role
-            if (val1 === selected) {
-                // Manually add valid/invalid styles if needed for input-premium, 
-                // but input-premium manages its own focus. 
-                // We can add a border color override here.
-                verifyInput.style.borderColor = '#00E676';
+            if (input === selectedRoleLocal.toUpperCase() && checked) {
+                btn.classList.add('active');
             } else {
-                verifyInput.style.borderColor = (val1.length > 0) ? '#FF4444' : 'rgba(255,255,255,0.1)';
+                btn.classList.remove('active');
             }
+        }
 
-            // Check 2: Rejected Role
-            if (val2 === rejected) {
-                rejectInput.style.borderColor = '#00E676';
+        async function confirmRole() {
+          const btn = document.getElementById('final-btn');
+          btn.disabled = true;
+          btn.innerText = 'Initializing...';
+
+          try {
+            const result = await apiCall('/auth/set-role', 'POST', { role: selectedRoleLocal });
+
+            if (result && result.success) {
+              localStorage.setItem(BP.ROLE, selectedRoleLocal);
+              localStorage.setItem(BP.ACTIVATED, 'true'); // Final safety mark
+              
+              // Success feedback with fallback
+              if (window.Swal) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Identity Confirmed',
+                  text: 'Welcome to BEEPREPARE',
+                  timer: 2000,
+                  showConfirmButton: false,
+                  background: '#1a1a2e',
+                  color: '#ffffff'
+                });
+                setTimeout(() => {
+                  window.location.href = selectedRoleLocal === 'teacher' ? 'teacher/teacher-home.html' : 'student/student-home.html';
+                }, 2000);
+              } else {
+                console.warn('SweetAlert blocked - forcing immediate redirect');
+                window.location.href = selectedRoleLocal === 'teacher' ? 'teacher/teacher-home.html' : 'student/student-home.html';
+              }
+
             } else {
-                rejectInput.style.borderColor = (val2.length > 0) ? '#FF4444' : 'rgba(255,255,255,0.1)';
-            }
+              const code = result?.error?.code;
 
-            // Final Validation
-            if (val1 === selected && val2 === rejected && isChecked) {
-                dot.classList.add('active');
-                msg.style.color = '#00E676';
-                msg.innerText = '✓ IDENTITY CONFIRMED';
+              if (code === 'ROLE_ALREADY_SET') {
+                const role = localStorage.getItem(BP.ROLE) || result.data.role;
+                window.location.href = role === 'teacher' ? 'teacher/teacher-home.html' : 'student/student-home.html';
+              } else if (code === 'NOT_ACTIVATED') {
+                // User somehow bypassed guard
+                window.location.href = '../activation.html';
+              } else {
                 btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.innerHTML = 'Initialize Profile';
-            } else {
-                dot.classList.remove('active');
-                msg.innerText = '';
-                btn.disabled = true;
-                btn.style.opacity = '0.5';
-                btn.innerHTML = 'Complete All Verification Steps...';
-            }
-        }
-
-        function finalizeRegistration() {
-            // Show Locking Overlay
-            document.getElementById('lock-overlay').style.display = 'flex';
-
-            // Artificial delay for "Security" feel
-            setTimeout(() => {
-                localStorage.setItem('user_role', selectedRole);
-                localStorage.setItem('role_locked', 'true');
-
-                // Redirect to Dashboard (Final Step)
-                if (selectedRole === 'student') {
-                    window.location.href = 'student/student-profile.html';
-                } else if (selectedRole === 'teacher') {
-                    window.location.href = 'teacher/teacher-home.html';
+                btn.innerText = 'Initialize Profile →';
+                if (window.Swal) {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result?.message || 'Something went wrong',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    background: '#1a1a2e',
+                    color: '#ffffff'
+                  });
                 } else {
-                    // Fallback
-                    window.location.href = 'teacher/teacher-home.html';
+                  alert(result?.message || 'Error occurred during role selection.');
                 }
-            }, 2500);
-        }
-    </script>
-
-    <!-- EXTREME UI SCRIPTS (Animations Only) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to all interactive elements
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .auth-card, .d-profile-card, .adv-card, .role-card, .dash-card, .paper-card, .stream-card");
-            if (tiltElements.length > 0) {
-                try {
-                    VanillaTilt.init(tiltElements, {
-                        max: 8,
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.15,
-                        scale: 1.02
-                    });
-                } catch (e) { }
+              }
             }
+          } catch (err) {
+            btn.disabled = false;
+            btn.innerText = 'Initialize Profile →';
+            console.error('Role set error:', err);
+            window.location.href = selectedRoleLocal === 'teacher' ? 'teacher/teacher-home.html' : 'student/student-home.html';
+          }
+        }
+        window.confirmRole = confirmRole;
 
-            // Apply Staggered HUD Load-in
-            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item, .action-card, .subject-mini-card, .document-item, .result-card, .request-card, .d-profile-stats, .d-xp-container, .dash-card, .role-card, .paper-card, .stream-card");
-            hudElements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
+        // Page guard
+        window.addEventListener('load', () => {
+          const uid = localStorage.getItem(BP.UID);
+          if (!uid) {
+            window.location.href = '../index.html';
+            return;
+          }
+          if (localStorage.getItem(BP.ACTIVATED) !== 'true') {
+            window.location.href = '../activation.html';
+            return;
+          }
+          const role = localStorage.getItem(BP.ROLE);
+          if (role === 'teacher') {
+            window.location.href = 'teacher/teacher-home.html';
+          } else if (role === 'student') {
+            window.location.href = 'student/student-home.html';
+          }
         });
     </script>
 </body>

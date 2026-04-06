@@ -43,15 +43,26 @@
             background: #fff !important;
             color: #000 !important;
             width: 210mm;
-
             min-height: 297mm;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             padding: 20mm;
+            padding-bottom: 30mm;
             box-sizing: border-box;
             font-family: 'Times New Roman', serif;
             position: relative;
             transform-origin: top center;
             transition: transform 0.2s ease;
+        }
+
+        .paper-footer {
+            position: absolute;
+            bottom: 15mm;
+            left: 20mm;
+            right: 20mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
         }
 
         .floating-toolbar {
@@ -72,8 +83,6 @@
             z-index: 1000;
             transition: 0.3s;
         }
-
-
 
         .tool-btn {
             background: rgba(255, 255, 255, 0.05);
@@ -106,12 +115,6 @@
             letter-spacing: 0.5px;
         }
 
-        .tool-btn.primary:hover {
-            background: #f0f0f0;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-        }
-
         /* Fix blur/gradients from global theme for the paper content */
         .paper-sheet h1,
         .paper-sheet h2,
@@ -125,30 +128,6 @@
             text-shadow: none !important;
         }
 
-        /* Paper Content Styles */
-        .paper-header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 12px;
-            margin-bottom: 24px;
-        }
-
-        .paper-title {
-            font-size: 24px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 0;
-        }
-
-        .paper-meta-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-top: 12px;
-            font-weight: bold;
-        }
-
         .section-header {
             text-align: center;
             font-weight: bold;
@@ -156,8 +135,6 @@
             margin: 24px 0 16px 0;
             background: #eee;
             padding: 4px;
-            font-family: var(--font-main);
-            /* Modern font for headers */
         }
 
         .question-item {
@@ -167,16 +144,12 @@
             border-radius: 4px;
             transition: background 0.2s;
             display: block !important;
-            /* Critical fix: Override global flex style */
         }
 
         .question-item:hover {
             background: rgba(255, 215, 0, 0.1);
-            /* Subtle highlight */
-            cursor: text;
         }
 
-        /* Edit Actions on Hover */
         .q-actions {
             position: absolute;
             right: -30px;
@@ -194,18 +167,13 @@
             width: 24px;
             height: 24px;
             background: #333;
-            color: var(--adv-text);
+            color: #fff;
             border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             font-size: 12px;
-        }
-
-        .action-icon:hover {
-            background: var(--primary);
-            color: var(--adv-dark);
         }
 
         .mcq-options-grid {
@@ -216,12 +184,6 @@
             gap: 8px;
         }
 
-        [contenteditable]:focus {
-            outline: 2px solid var(--primary);
-            background: rgba(255, 215, 0, 0.05);
-        }
-
-        /* Layout Modal Styles */
         .layout-modal {
             position: fixed;
             bottom: 100px;
@@ -229,12 +191,11 @@
             transform: translateX(-50%) translateY(20px);
             background: rgba(25, 25, 25, 0.95);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 24px;
             border-radius: 24px;
-            width: 320px;
-            color: var(--adv-text);
+            width: 350px;
+            color: #fff;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
             opacity: 0;
             visibility: hidden;
@@ -248,46 +209,15 @@
             transform: translateX(-50%) translateY(0);
         }
 
-        .setting-group {
-            margin-bottom: 20px;
-        }
-
-        .setting-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .setting-group label {
-            display: block;
-            font-size: 11px;
-            font-weight: 700;
-            color: #888;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .setting-group select,
-        .setting-group input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--adv-text);
-            padding: 12px;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            outline: none;
-            transition: 0.2s;
-        }
-
-        .setting-group select:focus,
-        .setting-group input:focus {
-            border-color: var(--adv-text);
-            background: rgba(255, 255, 255, 0.1);
+        .layout-modal h3 { margin: 0 0 16px 0; font-size: 16px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .setting-group { margin-bottom: 12px; }
+        .setting-group label { display: block; font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+        .setting-group select, .setting-group input { 
+            width: 100%; padding: 8px; border-radius: 8px; background: #333; color: #fff; border: 1px solid #444; font-size: 13px;
         }
     </style>
     <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
-    <!-- PREMIUM ANIMATION STYLES -->
     <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
@@ -298,10 +228,9 @@
         <div class="fx-glow-2"></div>
     </div>
 
-    <!-- Top Nav (Minimal) -->
-    <div
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 60px; z-index: 50; display: flex; align-items: center; padding: 0 24px; pointer-events: none;">
-        <div style="pointer-events: auto; cursor: pointer; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 8px 16px; border-radius: 20px; color: var(--adv-text); font-weight: 500; display: flex; align-items: center; gap: 8px;"
+    <!-- Top Nav -->
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 60px; z-index: 50; display: flex; align-items: center; padding: 0 24px; pointer-events: none;">
+        <div style="pointer-events: auto; cursor: pointer; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 8px 16px; border-radius: 20px; color: #fff; font-weight: 500; display: flex; align-items: center; gap: 8px;"
             onclick="window.history.back()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -312,103 +241,14 @@
     </div>
 
     <div class="editor-container">
-        <!-- Canvas -->
         <div class="canvas-area">
             <div id="paper" class="paper-sheet" contenteditable="true">
-                <!-- Header -->
-                <div class="paper-header">
-                    <h1 class="paper-title">BEEPREPARE ACADEMY</h1>
-                    <h3 style="margin: 4px 0 0 0; font-size: 16px; font-weight: normal;">Mid-Term Assessment - 2024</h3>
-                    <div class="paper-meta-row">
-                        <span>Class: 10</span>
-                        <span>Subject: Mathematics</span>
-                        <span>Time: 3 Hours</span>
-                        <span>Max. Marks: 80</span>
-                    </div>
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 500px; color: #999; font-family: sans-serif;" contenteditable="false">
+                    <div style="width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+                    <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+                    <div style="font-size: 18px; font-weight: 600; color: #fff;">Assembling Examination Paper...</div>
+                    <div style="font-size: 13px; margin-top: 8px; opacity: 0.6;">Fetching architected content from database</div>
                 </div>
-
-                <!-- Instructions -->
-                <div style="font-size: 13px; font-style: italic; margin-bottom: 20px;">
-                    <strong>General Instructions:</strong><br>
-                    1. This question paper consists of 5 sections A, B, C, D, and E.<br>
-                    2. Section A has 20 MCQs carrying 1 mark each.<br>
-                    3. All questions are compulsory.
-                </div>
-
-                <!-- Section A -->
-                <div class="section-header">SECTION - A (MCQ)</div>
-
-                <!-- Q1 -->
-                <div class="question-item">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-weight: bold; margin-right: 8px;">1.</span>
-                        <span style="flex: 1;">If the HCF of 65 and 117 is expressible in the form 65m - 117, then the
-                            value of m is:</span>
-                        <span style="font-weight: bold;">[1]</span>
-                    </div>
-                    <div class="mcq-options-grid">
-                        <span>(a) 4</span>
-                        <span>(b) 2</span>
-                        <span>(c) 1</span>
-                        <span>(d) 3</span>
-                    </div>
-
-                    <div class="q-actions" contenteditable="false">
-                        <div class="action-icon" title="Replace Question">↻</div>
-                        <div class="action-icon" title="Delete">×</div>
-                    </div>
-                </div>
-
-                <!-- Q2 -->
-                <div class="question-item">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-weight: bold; margin-right: 8px;">2.</span>
-                        <span style="flex: 1;">The largest number which divides 70 and 125, leaving remainders 5 and 8
-                            respectively, is:</span>
-                        <span style="font-weight: bold;">[1]</span>
-                    </div>
-                    <div class="mcq-options-grid">
-                        <span>(a) 13</span>
-                        <span>(b) 65</span>
-                        <span>(c) 875</span>
-                        <span>(d) 1750</span>
-                    </div>
-                    <div class="q-actions" contenteditable="false">
-                        <div class="action-icon" title="Replace Question">↻</div>
-                        <div class="action-icon" title="Delete">×</div>
-                    </div>
-                </div>
-
-                <!-- Section B -->
-                <div class="section-header">SECTION - B (Short Answer)</div>
-
-                <!-- Q3 -->
-                <div class="question-item">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-weight: bold; margin-right: 8px;">21.</span>
-                        <span style="flex: 1;">Prove that 3 + 2√5 is irrational, given that √5 is irrational.</span>
-                        <span style="font-weight: bold;">[2]</span>
-                    </div>
-                    <div class="q-actions" contenteditable="false">
-                        <div class="action-icon" title="Replace Question">↻</div>
-                        <div class="action-icon" title="Delete">×</div>
-                    </div>
-                </div>
-
-                <!-- Q4 -->
-                <div class="question-item">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="font-weight: bold; margin-right: 8px;">22.</span>
-                        <span style="flex: 1;">Find the zeros of the quadratic polynomial 6x² - 3 - 7x and verify the
-                            relationship between the zeros and the coefficients.</span>
-                        <span style="font-weight: bold;">[2]</span>
-                    </div>
-                    <div class="q-actions" contenteditable="false">
-                        <div class="action-icon" title="Replace Question">↻</div>
-                        <div class="action-icon" title="Delete">×</div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
@@ -417,176 +257,133 @@
     <div class="floating-toolbar">
         <button class="tool-btn" title="Zoom Out" onclick="adjustZoom(-0.1)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                <line x1="8" y1="11" x2="14" y2="11"></line>
+                <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line>
             </svg>
         </button>
         <button class="tool-btn" title="Zoom In" onclick="adjustZoom(0.1)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                <line x1="11" y1="8" x2="11" y2="14"></line>
-                <line x1="8" y1="11" x2="14" y2="11"></line>
+                <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line>
             </svg>
         </button>
-
         <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.2);"></div>
-
         <button class="tool-btn" title="Layout Settings" onclick="toggleLayoutModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="9" y1="21" x2="9" y2="9"></line>
-            </svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
         </button>
-
-        <button class="tool-btn primary" onclick="downloadPDF()"
-            style="background: #fff; color: var(--adv-dark); margin-right: 8px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                style="margin-right: 8px;">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Download
-        </button>
-
-        <button class="tool-btn primary" onclick="window.print()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                style="margin-right: 8px;">
-                <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                <rect x="6" y="14" width="12" height="8"></rect>
-            </svg>
-            Print
-        </button>
+        <button class="tool-btn primary" onclick="downloadPDF()">Download</button>
+        <button class="tool-btn primary" onclick="window.print()">Print</button>
     </div>
 
     <!-- Layout Settings Modal -->
     <div id="layoutModal" class="layout-modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 16px;">Layout Settings</h3>
-                <span style="cursor: pointer; font-size: 20px;" onclick="toggleLayoutModal()">×</span>
-            </div>
-
+        <h3>Architectural Controls</h3>
+        
+        <div class="layout-grid">
             <div class="setting-group">
                 <label>Font Family</label>
                 <select id="fontFamilySelect" onchange="updatePaperStyle()">
                     <option value="'Times New Roman', serif">Times New Roman</option>
                     <option value="'Arial', sans-serif">Arial</option>
-                    <option value="'Georgia', serif">Georgia</option>
                     <option value="'Inter', sans-serif">Inter</option>
                 </select>
             </div>
-
             <div class="setting-group">
                 <label>Font Size</label>
                 <input type="range" id="fontSizeRange" min="10" max="18" value="14" oninput="updatePaperStyle()">
             </div>
-
+            
+            <div class="setting-group">
+                <label>Line Spacing</label>
+                <select id="lineHeightSelect" onchange="updatePaperStyle()">
+                    <option value="1.0">1.0 (Compact)</option>
+                    <option value="1.2">1.2 (Standard)</option>
+                    <option value="1.5">1.5 (Loose)</option>
+                </select>
+            </div>
             <div class="setting-group">
                 <label>Page Padding</label>
-                <input type="range" id="paddingRange" min="10" max="40" value="20" oninput="updatePaperStyle()">
+                <input type="range" id="paddingRange" min="5" max="40" value="20" oninput="updatePaperStyle()">
             </div>
+            
+            <div class="setting-group">
+                <label>Question Gap</label>
+                <input type="range" id="qGapRange" min="0" max="30" value="15" oninput="updatePaperStyle()">
+            </div>
+            <div class="setting-group">
+                <label>Section Gap</label>
+                <input type="range" id="sGapRange" min="5" max="50" value="25" oninput="updatePaperStyle()">
+            </div>
+        </div>
+
+        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444;">
+            <button onclick="toggleLayoutModal()" style="width: 100%; padding: 8px; border-radius: 8px; background: var(--primary); color: #000; border: none; font-weight: 700; cursor: pointer;">Done</button>
         </div>
     </div>
 
-
-
-    <!-- html2pdf Library -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module">
+        import { apiCall, guardTeacher, BP } from '../../assets/js/bee-core.js';
 
-    <script>
+        if (!guardTeacher()) window.location.href = '../../index.html';
+
         let currentZoom = 1;
         const paper = document.getElementById('paper');
         const modal = document.getElementById('layoutModal');
 
-        function adjustZoom(delta) {
+        window.adjustZoom = (delta) => {
             currentZoom += delta;
-            // Clamp zoom
-            if (currentZoom < 0.5) currentZoom = 0.5;
-            if (currentZoom > 2.0) currentZoom = 2.0;
-
+            currentZoom = Math.min(Math.max(currentZoom, 0.5), 2);
             paper.style.transform = `scale(${currentZoom})`;
+        };
 
-            // Adjust margin to handle scale correctly when zoomed out/in
-            // This ensures scrolling feels natural
-            if (currentZoom > 1) {
-                paper.style.marginBottom = `${(currentZoom - 1) * 300}mm`;
-                paper.style.marginTop = `${(currentZoom - 1) * 50}px`;
+        window.toggleLayoutModal = () => modal.classList.toggle('active');
+
+        window.updatePaperStyle = () => {
+            // Core Text Styles
+            paper.style.fontFamily = document.getElementById('fontFamilySelect').value;
+            paper.style.fontSize = `${document.getElementById('fontSizeRange').value}px`;
+            paper.style.lineHeight = document.getElementById('lineHeightSelect').value;
+            paper.style.padding = `${document.getElementById('paddingRange').value}mm`;
+
+            // Dynamic Question Spacing
+            const qGap = document.getElementById('qGapRange').value;
+            paper.querySelectorAll('.question-item').forEach(el => {
+                el.style.marginBottom = `${qGap}px`;
+            });
+
+            // Dynamic Section Spacing
+            const sGap = document.getElementById('sGapRange').value;
+            paper.querySelectorAll('.section-title, [style*="SECTION -"]').forEach(el => {
+                el.style.marginTop = `${sGap}px`;
+            });
+        };
+
+        window.downloadPDF = () => {
+            const opt = { margin: 10, filename: 'paper.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(paper).save();
+        };
+
+        async function initPaper() {
+            const html = localStorage.getItem('bp_paper_html');
+            if (html) {
+                paper.innerHTML = html;
+                setupActions();
             } else {
-                paper.style.marginBottom = '0';
-                paper.style.marginTop = '0';
+                Swal.fire({ icon: 'error', title: 'No Data', text: 'Please generate a paper first.' }).then(() => window.location.href = 'generate-paper.html');
             }
         }
 
-        function toggleLayoutModal() {
-            modal.classList.toggle('active');
-        }
-
-        function updatePaperStyle() {
-            const font = document.getElementById('fontFamilySelect').value;
-            const size = document.getElementById('fontSizeRange').value;
-            const padding = document.getElementById('paddingRange').value;
-
-            paper.style.fontFamily = font;
-            paper.style.fontSize = `${size}px`;
-            paper.style.padding = `${padding}mm`;
-        }
-
-        function downloadPDF() {
-            // Temporary reset transform to 1 for clean capture
-            const originalTransform = paper.style.transform;
-            const originalMargin = paper.style.margin;
-
-            paper.style.transform = 'none';
-            paper.style.margin = '0';
-
-            const opt = {
-                margin: 0,
-                filename: 'beeprepare-paper.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(paper).save().then(() => {
-                // Restore original state
-                paper.style.transform = originalTransform;
-                // We rely on css logic for margin, but forcing a re-render or reset is safer
-                adjustZoom(0);
+        function setupActions() {
+            paper.querySelectorAll('.action-icon').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    const qItem = btn.closest('.question-item');
+                    if (qItem) qItem.remove();
+                };
             });
         }
-    </script>
 
-    <!-- EXTREME UI SCRIPTS (Animations Only) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to Teacher Cards
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if(tiltElements.length > 0) {
-                try {
-                    VanillaTilt.init(tiltElements, {
-                        max: 8,
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.15,
-                        scale: 1.02
-                    });
-                } catch(e) {}
-            }
-
-            // Apply Staggered HUD Load-in
-            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            hudElements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
-        });
+        initPaper();
     </script>
 </body>
-
 </html>

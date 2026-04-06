@@ -7,147 +7,69 @@
     <title>Terminal Activation - BEEPREPARE</title>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="./assets/css/premium-student-ui.css">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-gold: #FFD700;
-            --accent-gold: #FFA500;
-            --deep-bg: #050505;
-            --card-glass: rgba(15, 15, 15, 0.8);
-            --border-gold: rgba(255, 215, 0, 0.3);
+            --primary: #FFD700;
+            --accent: #FFA500;
+            --bg-dark: #000000;
+            --surface: #121212;
+            --text-main: #FFFFFF;
+            --text-muted: #AAAAAA;
+            --border: rgba(255, 215, 0, 0.3);
         }
 
         body {
-            background-color: #FFFFFF !important;
-            color: #000000 !important;
-            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-dark) !important;
+            color: var(--text-main) !important;
+            font-family: 'Outfit', sans-serif;
             margin: 0 !important;
             padding: 0 !important;
-            overflow-x: hidden;
-            overflow-y: auto;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            width: 100vw !important;
-            max-width: none !important;
+            overflow-x: hidden;
         }
 
-        /* Background Orbs */
-        .background-animation {
+        .main-bg {
             position: fixed;
             inset: 0;
-            overflow: hidden;
+            background: url('assets/images/premium-bg.png') no-repeat center center;
+            background-size: cover;
             z-index: -1;
+            filter: brightness(0.4) grayscale(0.2);
         }
 
-        .glow-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.15;
-            animation: orbFloat 20s infinite alternate;
-        }
-
-        .orb-1 {
-            width: 600px;
-            height: 600px;
-            background: #FFD700;
-            top: -100px;
-            left: -100px;
-        }
-
-        .orb-2 {
-            width: 500px;
-            height: 500px;
-            background: #FFA500;
-            bottom: -100px;
-            right: -100px;
-            animation-duration: 25s;
-        }
-
-        @keyframes orbFloat {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(100px, 50px) scale(1.1); }
-        }
-
-        /* Cyber Grid (Light Theme) */
-        .cyber-grid {
-            position: absolute;
-            inset: -50%;
-            background-image:
-                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
-            animation: gridMove 20s linear infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes gridMove {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(50px) translateZ(-200px); }
-        }
-
-        /* Scanner Beam */
-        .scanner-beam {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
-            box-shadow: 0 0 20px var(--primary-gold);
-            z-index: 100;
-            opacity: 0.5;
-            pointer-events: none;
-            animation: scanVertical 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-
-        @keyframes scanVertical {
-            0% {
-                top: -5%;
-            }
-
-            100% {
-                top: 105%;
-            }
-        }
-
-        /* Activation Container */
         .activation-card {
             width: 90%;
-            max-width: 440px;
-            padding: 30px;
-            background: var(--card-glass);
+            max-width: 460px;
+            padding: 40px;
+            background: rgba(18, 18, 18, 0.85);
             backdrop-filter: blur(25px);
-            border: 1px solid var(--border-gold);
-            border-radius: 24px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 215, 0, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
             position: relative;
             z-index: 10;
-            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
             text-align: center;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .activation-card::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: -1px;
-            right: -1px;
-            bottom: -1px;
-            background: linear-gradient(135deg, transparent, var(--border-gold), transparent);
-            border-radius: 32px;
-            z-index: -1;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Header Section */
-        .card-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .card-header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 0;
+            background: linear-gradient(135deg, #fff, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -1px;
         }
 
         .status-badge {
@@ -156,192 +78,99 @@
             gap: 8px;
             padding: 6px 14px;
             background: rgba(255, 215, 0, 0.1);
-            border: 1px solid var(--border-gold);
+            border: 1px solid var(--border);
             border-radius: 20px;
             font-size: 10px;
             font-weight: 800;
-            letter-spacing: 2px;
-            color: var(--primary-gold);
+            color: var(--primary);
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .status-dot {
             width: 6px;
             height: 6px;
-            background: var(--primary-gold);
+            background: var(--primary);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-gold);
+            box-shadow: 0 0 10px var(--primary);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: .5;
-                transform: scale(1.5);
-            }
-        }
-
-        h1 {
-            font-size: 32px;
-            font-weight: 800;
-            margin: 0;
-            background: linear-gradient(to bottom, #fff, #aaa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            letter-spacing: -1px;
-        }
-
-        p.desc {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 13px;
-            margin-top: 8px;
-            line-height: 1.5;
-            max-width: 320px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Bee Mascot Wrapper */
-        .mascot-wrapper {
-            position: relative;
-            height: 100px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .mascot-glow {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, var(--primary-gold) 0%, transparent 70%);
-            opacity: 0.15;
-            filter: blur(20px);
-            animation: floatGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes floatGlow {
-
-            0%,
-            100% {
-                transform: scale(1) translateY(0);
-            }
-
-            50% {
-                transform: scale(1.2) translateY(-10px);
-            }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.5); }
         }
 
         .bee-flying {
-            width: 110px;
+            width: 100px;
             filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.5));
             animation: beeMove 3s ease-in-out infinite;
-            z-index: 2;
+            margin: 20px 0;
         }
 
         @keyframes beeMove {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(-2deg);
-            }
-
-            50% {
-                transform: translateY(-15px) rotate(2deg);
-            }
-        }
-
-        /* Inputs Section */
-        .cipher-label {
-            font-size: 10px;
-            font-weight: 700;
-            color: rgba(255, 255, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 2.5px;
-            display: block;
-            margin-bottom: 15px;
-            text-align: center;
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
         }
 
         .input-group {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 35px;
+            gap: 12px;
+            margin: 30px 0;
         }
 
         .prefix {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 900;
-            color: var(--primary-gold);
+            color: var(--primary);
             background: rgba(255, 215, 0, 0.1);
             width: 55px;
-            height: 48px;
+            height: 55px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            border: 1px solid var(--border-gold);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .spacer {
-            color: rgba(255, 255, 255, 0.15);
-            font-size: 20px;
-            font-weight: 300;
+            border-radius: 12px;
+            border: 1px solid var(--border);
         }
 
         .key-segment {
-            width: 55px;
-            height: 48px;
+            width: 75px;
+            height: 55px;
             background: rgba(0, 0, 0, 0.5) !important;
-            border: 1px solid var(--border-gold) !important;
-            border-radius: 10px !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 12px !important;
             color: #fff !important;
             text-align: center;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
             outline: none;
+            transition: 0.3s;
+            letter-spacing: 2px;
         }
 
         .key-segment:focus {
-            border-color: var(--primary-gold) !important;
-            background: rgba(255, 215, 0, 0.05) !important;
+            border-color: var(--primary) !important;
             box-shadow: 0 0 20px rgba(255, 215, 0, 0.2) !important;
             transform: translateY(-2px);
         }
 
-        /* Button Section */
         .action-button {
             width: 100%;
             height: 60px;
-            background: linear-gradient(135deg, var(--primary-gold), var(--accent-gold));
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             border: none;
-            border-radius: 16px;
+            border-radius: 18px;
             color: #000;
             font-size: 16px;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
-            position: relative;
-            overflow: hidden;
         }
 
         .action-button:hover {
@@ -349,67 +178,26 @@
             box-shadow: 0 20px 40px rgba(255, 215, 0, 0.4);
         }
 
-        .action-button:active {
-            transform: translateY(-2px);
-        }
-
-        .action-button:disabled {
-            filter: grayscale(1);
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        .action-button .shimmer {
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transform: skewX(-20deg);
-            animation: shimmerEffect 3s infinite;
-        }
-
-        @keyframes shimmerEffect {
-            to {
-                left: 200%;
-            }
-        }
-
         .abort-link {
-            display: inline-block;
-            text-align: center;
-            margin-top: 24px;
+            color: var(--text-muted);
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.3);
             text-decoration: none;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            margin-top: 25px;
+            display: inline-block;
             transition: 0.3s;
         }
 
         .abort-link:hover {
-            color: var(--primary-gold);
-            letter-spacing: 4px;
+            color: var(--primary);
         }
 
-        /* Success/Error States */
-        .card-error {
-            animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
-            border-color: rgba(255, 68, 68, 0.5) !important;
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translateX(-1px); }
-            20%, 80% { transform: translateX(2px); }
-            30%, 50%, 70% { transform: translateX(-4px); }
-            40%, 60% { transform: translateX(4px); }
-        }
-
+        /* Success Overlay */
         .success-overlay {
             position: fixed;
             inset: 0;
-            background: var(--deep-bg);
+            background: var(--bg-dark);
             z-index: 200;
             display: flex;
             align-items: center;
@@ -417,7 +205,7 @@
             flex-direction: column;
             opacity: 0;
             pointer-events: none;
-            transition: 0.8s ease;
+            transition: 0.5s ease;
         }
 
         .success-overlay.active {
@@ -426,158 +214,291 @@
         }
 
         .loading-ring {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 2px solid rgba(255, 215, 0, 0.1);
-            border-top-color: var(--primary-gold);
+            border: 3px solid rgba(255, 215, 0, 0.1);
+            border-top-color: var(--primary);
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 480px) {
+            .activation-card {
+                padding: 30px 15px;
+            }
+            .key-segment {
+                width: 60px;
+                height: 48px;
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+            .prefix {
+                width: 45px;
+                height: 48px;
+                font-size: 12px;
+            }
+            .input-group {
+                gap: 6px;
             }
         }
-
-        .success-text {
-            font-size: 12px;
-            letter-spacing: 4px;
-            color: var(--primary-gold);
-            text-transform: uppercase;
-        }
     </style>
-
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-        <div class="cyber-grid"></div>
-    </div>
-    <div class="scanner-beam"></div>
+    <div class="main-bg"></div>
 
-    <div class="activation-card hud-element" id="activationBox" style="opacity: 1 !important; visibility: visible !important;">
+    <div class="activation-card">
         <div class="card-header">
             <div class="status-badge">
                 <div class="status-dot"></div>
-                System Uplink: Active
+                System Uplink Active
             </div>
-            <h1>Terminal Activation</h1>
-            <p class="desc">Enter your 12-character license cluster to synchronize this node with the central hive.</p>
+            <h1>Activation</h1>
+            <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;">Enter your 12-character license key to sync node.</p>
         </div>
 
-        <div class="mascot-wrapper">
-            <div class="mascot-glow"></div>
-            <img id="bee-mascot" src="assets/custom-bee.png" alt="BEE Mascot" class="bee-flying">
-        </div>
+        <img src="assets/custom-bee.png" alt="BEE Mascot" class="bee-flying">
 
         <div class="activation-body">
-            <span class="cipher-label">Key Cipher Encryption</span>
-            <div class="input-group">
+            <div class="input-group" style="gap: 15px; justify-content: center;">
                 <div class="prefix">BEE</div>
-                <span class="spacer">/</span>
-                <input type="text" class="key-segment" maxlength="4" placeholder="••••" autocomplete="off">
-                <span class="spacer">/</span>
-                <input type="text" class="key-segment" maxlength="4" placeholder="••••" autocomplete="off">
-                <span class="spacer">/</span>
-                <input type="text" class="key-segment" maxlength="4" placeholder="••••" autocomplete="off">
+                <span style="color: var(--primary); font-weight: 900; font-size: 20px;">-</span>
+                <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••" style="width: 80px;">
+                <span style="color: var(--primary); font-weight: 900; font-size: 20px;">-</span>
+                <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••" style="width: 80px;">
+                <span style="color: var(--primary); font-weight: 900; font-size: 20px;">-</span>
+                <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••" style="width: 80px;">
             </div>
 
-            <button id="activateBtn" class="action-button" onclick="handleActivation()">
-                <div class="shimmer"></div>
-                <span>Authenticate Terminal</span>
+            <button id="activateBtn" class="action-button activate-btn" onclick="activateKey()">
+                Authenticate Terminal
             </button>
 
-            <div style="margin-top: 32px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
-                <a href="beginners/student/payment.html" class="purchase-link"
-                    style="color: var(--primary-gold); font-size: 13px; font-weight: 700; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; padding: 10px 20px; border: 1px dashed var(--border-gold); border-radius: 12px; transition: 0.3s; display: inline-block;">
-                    Where do I find a key? Purchase License for Lifetime !!
+            <div style="margin-top: 30px;">
+                <a href="beginners/student/payment.html" style="color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: none; text-transform: uppercase;">
+                    Get Lifetime License Key !!
                 </a>
-                <a href="index.html" class="abort-link" style="margin-top: 0;">Terminate Uplink</a>
+                <br>
+                <a href="javascript:void(0)" onclick="abortActivation()" class="abort-link">Terminate Uplink</a>
             </div>
         </div>
     </div>
 
     <div class="success-overlay" id="successOverlay">
         <div class="loading-ring"></div>
-        <div class="success-text" id="statusHeader">Synchronizing...</div>
+        <div style="color: var(--primary); letter-spacing: 2px; font-size: 12px; text-transform: uppercase;">Establishing Neural Link...</div>
     </div>
 
-    <!-- Terminal Logic -->
-    <script>
-        const inputs = document.querySelectorAll('.key-segment');
-        const card = document.getElementById('activationBox');
-        const mascot = document.getElementById('bee-mascot');
-        const btn = document.getElementById('activateBtn');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          getFreshToken, 
+          BP 
+        } from './assets/js/bee-core.js';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const userBoxes = document.querySelectorAll('.key-input');
+        const btn = document.querySelector('.activate-btn');
         const overlay = document.getElementById('successOverlay');
-        const statusHeader = document.getElementById('statusHeader');
 
-        // Initial Load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Static Initialization
-        });
-
-        // Input Management
-        inputs.forEach((input, index) => {
+        userBoxes.forEach((input, index) => {
             input.addEventListener('input', (e) => {
-                e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                if (e.target.value.length === 4 && index < inputs.length - 1) {
-                    inputs[index + 1].focus();
+                e.target.value = e.target.value.replace(/[^A-Za-z0-9]/g, '');
+                // Auto-tab to next box when current box reaches 4 chars
+                if (e.target.value.length === 4 && index < userBoxes.length - 1) {
+                    userBoxes[index + 1].focus();
                 }
-                resetVisuals();
             });
 
             input.addEventListener('keydown', (e) => {
+                // Return to previous box on backspace if current is empty
                 if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
-                    inputs[index - 1].focus();
+                    userBoxes[index - 1].focus();
                 }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text')
+                    .replace(/[^A-Za-z0-9]/g, '');
+                
+                // If it starts with BEE, remove it
+                let cleanPaste = paste.startsWith('BEE') ? paste.slice(3) : paste;
+                
+                // Distribute characters across the 3 boxes
+                for (let i = 0; i < 3; i++) {
+                    const chunk = cleanPaste.slice(i * 4, (i + 1) * 4);
+                    if (userBoxes[i]) userBoxes[i].value = chunk;
+                }
+                
+                // Focus the last filled or next empty box
+                const lastIdx = Math.min(Math.floor(cleanPaste.length / 4), userBoxes.length - 1);
+                userBoxes[lastIdx].focus();
             });
         });
 
-        function resetVisuals() {
-            card.classList.remove('card-error');
-            mascot.style.filter = '';
-        }
+        let isChecking = false;
 
-        function handleActivation() {
-            let isValid = true;
-            inputs.forEach(inp => { if (inp.value.length < 4) isValid = false; });
+        async function activateKey() {
+          // FIX 4: Prevent redundant activation
+          if (localStorage.getItem(BP.ACTIVATED) === 'true') {
+            window.location.href = 'beginners/role-select.html';
+            return;
+          }
 
-            if (!isValid) {
-                triggerError();
-                return;
+          if (isChecking) return;
+          
+          const values = Array.from(userBoxes).map(b => b.value.trim());
+          
+          if (values.some(v => v.length < 4)) {
+            // Shake animation
+            const group = document.querySelector('.input-group');
+            group.style.animation = 'none';
+            group.offsetHeight; /* trigger reflow */
+            group.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+            
+            Swal.fire({
+              icon: 'warning',
+              title: 'Incomplete Key',
+              text: 'Each segment must contain 4 characters',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+              background: '#1a1a2e',
+              color: '#ffffff'
+            });
+            return;
+          }
+
+          const fullKey = `BEE-${values[0]}-${values[1]}-${values[2]}`;
+
+          isChecking = true;
+          btn.disabled = true;
+          btn.innerText = 'Authenticating...';
+          overlay.classList.add('active');
+
+          try {
+            const result = await apiCall('/license/verify', 'POST', { licenseKey: fullKey });
+
+            if (result && result.success) {
+              localStorage.setItem(BP.ACTIVATED, 'true');
+              localStorage.setItem(BP.PLAN, result.data.planType);
+              localStorage.setItem(BP.SUBJECT_LIMIT, result.data.subjectLimit);
+
+              setTimeout(() => {
+                window.location.href = 'beginners/role-select.html';
+              }, 1500);
+
+            } else {
+              overlay.classList.remove('active');
+              
+              const code = result?.error?.code;
+              let msg = 'Invalid key. Please try again.';
+
+              if (code === 'KEY_NOT_FOUND') msg = 'License key not found.';
+              else if (code === 'ALREADY_USED') msg = 'This key has already been used.';
+              else if (code === 'KEY_EXPIRED') msg = 'This license key has expired.';
+              else if (code === 'INVALID_FORMAT') msg = 'Invalid key format.';
+
+              const group = document.querySelector('.input-group');
+              group.style.animation = 'none';
+              group.offsetHeight;
+              group.style.animation = 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both';
+
+              Swal.fire({
+                icon: 'error',
+                title: 'Activation Failed',
+                text: msg,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                background: '#1a1a2e',
+                color: '#ffffff'
+              });
             }
-
-            executeActivation();
-        }
-
-        function triggerError() {
-            card.classList.add('card-error');
-            mascot.style.filter = 'sepia(1) hue-rotate(-50deg) saturate(10) drop-shadow(0 0 20px #f00)';
-
-            // Haptic Feedback (Vibration)
-            if (window.navigator.vibrate) {
-                window.navigator.vibrate(200);
-            }
-        }
-
-        function executeActivation() {
-            btn.disabled = true;
-            btn.querySelector('span').innerText = 'Decrypting...';
-
+          } catch (err) {
+            overlay.classList.remove('active');
+            console.error('Activation error:', err);
+          } finally {
+            // Rate limit: 5s cooldown
             setTimeout(() => {
-                overlay.classList.add('active');
+              isChecking = false;
+              if (localStorage.getItem(BP.ACTIVATED) !== 'true') {
+                 btn.disabled = false;
+                 btn.innerText = 'Authenticate Terminal';
+              }
+            }, 5000);
+          }
+        }
 
-                setTimeout(() => {
-                    statusHeader.innerText = 'Neural Link Established';
-                    setTimeout(() => {
-                        window.location.href = 'beginners/role-select.html';
-                    }, 1000);
-                }, 1500);
-            }, 800);
+        async function abortActivation() {
+          // Only clear session
+          localStorage.removeItem(BP.TOKEN);
+          localStorage.removeItem('bp_pending_otp');
+          localStorage.removeItem('bp_otp_request_id');
+          localStorage.removeItem('bp_search_bank_id');
+          localStorage.removeItem('bp_current_bank_id');
+          localStorage.removeItem('bp_current_doubt_id');
+          localStorage.removeItem('bp_paper_html');
+          localStorage.removeItem('bp_session_id');
+          localStorage.removeItem('bp_paper_marks');
+          // DO NOT remove: bp_uid, bp_email, bp_name, bp_photo, bp_role, bp_activated, bp_plan
+
+          await signOut(auth);
+          window.location.href = 'index.html';
+        }
+
+        // Expose to window for onclick
+        window.activateKey = activateKey;
+        window.abortActivation = abortActivation;
+
+        // Advanced Re-login Guard: Skip this page if already activated
+        window.addEventListener('load', () => {
+          const uid = localStorage.getItem(BP.UID);
+          const activated = localStorage.getItem(BP.ACTIVATED);
+
+          if (uid && activated === 'true') {
+            const role = localStorage.getItem(BP.ROLE);
+            if (role === 'teacher') {
+              window.location.href = 'beginners/teacher/teacher-home.html';
+            } else if (role === 'student') {
+              window.location.href = 'beginners/student/student-home.html';
+            } else {
+              window.location.href = 'beginners/role-select.html';
+            }
+            // Stop page from loading
+            throw new Error('Already activated');
+          }
+          
+          if (!uid) {
+            window.location.href = 'index.html';
+          }
+        });
+
+        // Add shake animation if not present
+        if (!document.getElementById('shake-style')) {
+            const style = document.createElement('style');
+            style.id = 'shake-style';
+            style.innerHTML = `
+                @keyframes shake {
+                    10%, 90% { transform: translate3d(-1px, 0, 0); }
+                    20%, 80% { transform: translate3d(2px, 0, 0); }
+                    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+                    40%, 60% { transform: translate3d(4px, 0, 0); }
+                }
+            `;
+            document.head.appendChild(style);
         }
     </script>
 </body>

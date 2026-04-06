@@ -5,659 +5,690 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configure Paper - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Doubts Indicator */
-        .doubt-badge-nav {
-            position: absolute;
-            top: 2px;
-            right: 50%;
-            transform: translateX(20px);
-            background: #ff4d4d;
-            color: white;
-            border-radius: 50%;
-            width: 14px;
-            height: 14px;
-            font-size: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            border: 2px solid #141414;
-        }
-        /* Modern Reset & Base */
-        .app-container {
-            padding-bottom: 90px;
-        }
-
-        /* Section Dividers */
         .section-divider {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 24px 0 16px 0;
+            margin: 30px 0 15px 0;
         }
 
         .divider-line {
             height: 2px;
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(90deg, var(--border), transparent);
             border-radius: 2px;
         }
 
         .section-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 1px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
             text-transform: uppercase;
-        }
-
-        /* Context Grid Styles */
-        .context-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
         }
 
         .context-card {
-            background: rgba(30, 30, 30, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        .context-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .glass-select-clean {
-            background: transparent;
-            border: none;
-            color: var(--adv-text);
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            outline: none;
-            appearance: none;
-            cursor: pointer;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right center;
-            background-size: 16px;
-            padding-right: 24px;
-        }
-
-        .glass-select-clean option {
-            background: #111;
-        }
-
-        /* Total Marks Badge */
         .total-badge {
-            background: linear-gradient(135deg, var(--primary), #FFA500);
-            border-radius: 16px;
-            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 24px;
+            padding: 25px;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.15);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            animation: classic-pulse 2s infinite ease-in-out;
-        }
-
-        @keyframes classic-pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
-            }
-
-            50% {
-                transform: scale(1.03);
-                box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
-            }
-
-            100% {
-                transform: scale(1);
-                box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2);
-            }
-        }
-
-        /* Chapter List Styles */
-        .chapters-box {
-            background: rgba(20, 20, 20, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 20px;
+            color: #000;
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
         }
 
         .chapter-row {
             display: flex;
             align-items: center;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 15px;
             background: rgba(255, 255, 255, 0.03);
-            margin-bottom: 8px;
+            border-radius: 15px;
+            margin-bottom: 10px;
             border: 1px solid transparent;
             cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .chapter-row:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(255, 255, 255, 0.1);
+            transition: 0.3s;
         }
 
         .chapter-row.selected {
-            border-color: var(--adv-yellow);
+            border-color: var(--primary);
             background: rgba(255, 215, 0, 0.05);
         }
 
-        /* Blueprint Row Styles */
-        .bp-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .counter-control {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px;
-            border-radius: 8px;
-        }
-
-        .cnt-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border: none;
-            color: var(--adv-yellow);
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: 0.2s;
-        }
-
-        .cnt-btn:hover {
-            background: rgba(255, 215, 0, 0.1);
-        }
-
-        /* Action Button */
-        .primary-action-btn {
-            background: var(--primary);
-            color: var(--adv-dark);
-            width: 100%;
-            padding: 18px;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 16px;
-            border: none;
-            margin-top: 32px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: 0.2s;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
-        }
-
-        .primary-action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
-        }
-
-        .primary-action-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Visual Checkbox */
         .chk-visual {
             width: 20px;
             height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid var(--border);
             border-radius: 6px;
-            margin-right: 12px;
+            margin-right: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.2s;
         }
 
         .chapter-row.selected .chk-visual {
             background: var(--primary);
-            border-color: var(--adv-yellow);
-            color: var(--adv-dark);
+            border-color: var(--primary);
+            color: #000;
+        }
+
+        .primary-action-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            padding: 22px;
+            border-radius: 20px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            margin-top: 40px;
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
+            transition: 0.3s;
+        }
+
+        @media (min-width: 769px) {
+            .paper-layout {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+        }
+
+        /* COMPACT DESIGN SYSTEM - MATCHING ADD QUESTION */
+        .bp-card {
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(15, 15, 15, 0.4);
+            transition: 0.3s;
+        }
+
+        .bp-card:hover {
+            border-color: var(--primary);
+            background: rgba(15, 15, 15, 0.6);
+        }
+
+        .field-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .glass-select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFD700' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            transition: 0.3s;
+        }
+
+        .glass-select:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .difficulty-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .diff-btn {
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .diff-btn.active { 
+            border-color: var(--primary); 
+            color: #000; 
+            background: var(--primary); 
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .tag-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chip {
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .chip.active { background: rgba(255, 215, 0, 0.1); color: var(--primary); border-color: var(--primary); }
+
+        .counter-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .cnt-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .cnt-btn:hover { background: rgba(255, 215, 0, 0.1); }
+
+        .section-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media screen and (max-width: 768px) {
+            .paper-layout { padding-bottom: 50px; }
+            .counter-overlay { position: static; margin-bottom: 20px; justify-content: center; }
+        }
+
+        /* GENERATION ANIMATION OVERLAY */
+        .gen-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(25px);
+            z-index: 10000;
+        }
+
+        .gen-overlay.active { display: flex; }
+
+        .scanner-beam {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            box-shadow: 0 0 30px var(--primary);
+            animation: scannLoop 2s infinite ease-in-out;
+            z-index: 2;
+        }
+
+        @keyframes scannLoop { 0% { top: 0%; opacity: 0; } 50% { top: 50%; opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        .assembly-container {
+            position: relative;
+            width: 120px; height: 160px;
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .data-fill {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
+            background: linear-gradient(to top, var(--primary), var(--accent));
+            opacity: 0.4;
+            animation: fillPaperData 2.5s forwards ease-in-out;
+        }
+
+        @keyframes fillPaperData { 100% { height: 100%; } }
+
+        .gen-status {
+            font-size: 13px; font-weight: 900; color: var(--primary); letter-spacing: 4px;
+            text-transform: uppercase; text-align: center;
         }
     </style>
-    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
-    <!-- PREMIUM ANIMATION STYLES -->
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEEPREPARE</div>
+            <nav class="sidebar-nav">
+                <a href="teacher-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="question-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="generate-paper.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                    <span>Generate Paper</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="teacher-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content-wrapper">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Configure Paper</h2>
+                    <p style="color: var(--text-muted); font-size: 14px;">Define the architectural blueprint.</p>
+                </div>
+                <div class="profile-icon" onclick="window.location.href='teacher-profile.html'">T</div>
+            </header>
+
+            <div id="zero-state" style="display:none; text-align:center; padding: 80px 20px;">
+                <div style="font-size: 60px; margin-bottom: 20px;">📄</div>
+                <h3 style="font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 12px;">No Active Banks</h3>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px; line-height: 1.7;">You need to create a question bank before you can generate papers.<br>Select your subjects and classes in your profile to start.</p>
+                <button onclick="window.location.href='teacher-profile.html'" style="background: var(--primary); color: #000; border: none; padding: 16px 36px; border-radius: 16px; font-weight: 900; font-size: 14px; cursor: pointer; box-shadow: 0 10px 25px rgba(255,215,0,0.3);">Set Up Profile →</button>
+            </div>
+
+            <div id="paper-content" class="paper-layout">
+                <!-- Left: Configuration -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">1. Context & Scope</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 30px;">
+                        <div class="context-card adv-card">
+                            <div style="margin-right: 15px;">
+                                <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Grade</div>
+                                <select id="grade-select" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 10px; color: #fff; font-weight: 600;">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div>
+                                <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Subject</div>
+                                <select id="subject-select" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 10px; color: #fff; font-weight: 600;">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="total-badge">
+                            <div style="font-size: 28px; font-weight: 900; line-height: 1;" id="total-marks">0</div>
+                            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase;">Marks</div>
+                        </div>
+                    </div>
+
+                    <div class="section-divider">
+                        <span class="section-label">2. Select Chapters</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div id="chapters-list">
+                        <!-- Chapters loaded from Javascript hook -->
+                    </div>
+                </div>
+
+                <!-- Right: Blueprint -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">3. Structure Blueprint</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div id="blueprint-container">
+                        <!-- Blueprint cards injected by JS -->
+                    </div>
+
+                    <button class="primary-action-btn" onclick="startGeneration()">
+                        Generate Paper Architecture →
+                    </button>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 60px 0 20px 0; opacity: 0.6;">
+                <div style="height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3));"></div>
+                <div style="font-size: 11px; font-weight: 900; color: var(--primary); letter-spacing: 4px; text-transform: uppercase;">BS</div>
+                <div style="height: 1px; flex: 1; background: linear-gradient(270deg, transparent, rgba(255, 215, 0, 0.3));"></div>
+            </div>
+        </main>
     </div>
 
-    <div class="app-container">
-
-        <!-- Header -->
-        <div class="top-header"
-            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
-            <div class="header-title text-gold-glow"
-                style="color: var(--adv-yellow); font-weight: 700; font-size: 18px; letter-spacing: 1px;">BEEPREPARE
-            </div>
-            <div class="profile-icon"
-                style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; right: 0;">
-                T</div>
+    <!-- Generation Animation Overlay -->
+    <div class="gen-overlay" id="genOverlay">
+        <div class="scanner-beam"></div>
+        <div class="assembly-container">
+            <div class="data-fill"></div>
         </div>
-
-        <!-- Subheader -->
-        <div style="text-align: center; margin-bottom: 30px;">
-            <div style="font-size: 20px; font-weight: 700; color: var(--adv-text); margin-bottom: 4px;">Configure Paper
-            </div>
-            <p style="color: var(--text-muted); font-size: 13px;">Set your requirements to generate a paper</p>
-        </div>
-
-        <!-- Section 1: Context & Summary -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px;">
-            <div class="context-grid" style="margin: 0; display: block;">
-                <div class="context-card" style="flex-direction: row; gap: 16px; height: 100%;">
-                    <div style="flex: 1; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 16px;">
-                        <div class="context-label">CLASS</div>
-                        <select class="glass-select-clean">
-                            <option>Class 10</option>
-                            <option>Class 9</option>
-                            <option>Class 8</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <div class="context-label">SUBJECT</div>
-                        <select class="glass-select-clean">
-                            <option>Mathematical Sci</option>
-                            <option>Physics</option>
-                            <option>Chemistry</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="total-badge">
-                <div style="font-size: 36px; font-weight: 800; line-height: 1; color: var(--adv-dark);"
-                    id="total-marks">0</div>
-                <div
-                    style="font-size: 11px; font-weight: 700; color: rgba(0,0,0,0.6); text-transform: uppercase; margin-top: 4px;">
-                    Marks</div>
-            </div>
-        </div>
-
-        <!-- Section 2: Chapters -->
-        <div class="section-divider">
-            <span class="section-label">1. Select Chapters</span>
-            <div class="divider-line"></div>
-            <button onclick="toggleAll()"
-                style="background:none; border:none; color: var(--adv-yellow); font-size: 12px; font-weight: 600; cursor: pointer;">Select
-                All</button>
-        </div>
-
-        <div class="chapters-box">
-            <!-- Chapter 1 -->
-            <div class="chapter-row selected" onclick="toggleRow(this)">
-                <div class="chk-visual">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                </div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Real Numbers</div>
-                </div>
-                <div
-                    style="font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
-                    3 Qs</div>
-            </div>
-            <!-- Chapter 2 -->
-            <div class="chapter-row" onclick="toggleRow(this)">
-                <div class="chk-visual"></div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Polynomials</div>
-                </div>
-                <div
-                    style="font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
-                    5 Qs</div>
-            </div>
-            <!-- Chapter 3 -->
-            <div class="chapter-row" onclick="toggleRow(this)">
-                <div class="chk-visual"></div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Pair of Linear Eqs</div>
-                </div>
-                <div
-                    style="font-size: 11px; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">
-                    8 Qs</div>
-            </div>
-        </div>
-
-        <!-- Section 3: Blueprint -->
-        <div class="section-divider">
-            <span class="section-label">2. Blueprint</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
-            <!-- MCQ -->
-            <div class="bp-row">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">MCQ <span
-                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(1m)</span>
-                    </div>
-                </div>
-                <div class="counter-control">
-                    <button class="cnt-btn" onclick="update('mcq', -1)">−</button>
-                    <span id="cnt-mcq"
-                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
-                    <button class="cnt-btn" onclick="update('mcq', 1)">+</button>
-                </div>
-            </div>
-
-            <!-- VSA -->
-            <div class="bp-row">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">V. Short <span
-                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(1m)</span>
-                    </div>
-                </div>
-                <div class="counter-control">
-                    <button class="cnt-btn" onclick="update('vshort', -1)">−</button>
-                    <span id="cnt-vshort"
-                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
-                    <button class="cnt-btn" onclick="update('vshort', 1)">+</button>
-                </div>
-            </div>
-
-            <!-- Short -->
-            <div class="bp-row">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Short <span
-                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(2m)</span>
-                    </div>
-                </div>
-                <div class="counter-control">
-                    <button class="cnt-btn" onclick="update('short', -1)">−</button>
-                    <span id="cnt-short"
-                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
-                    <button class="cnt-btn" onclick="update('short', 1)">+</button>
-                </div>
-            </div>
-
-            <!-- Long -->
-            <div class="bp-row">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Long <span
-                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(4m)</span>
-                    </div>
-                </div>
-                <div class="counter-control">
-                    <button class="cnt-btn" onclick="update('long', -1)">−</button>
-                    <span id="cnt-long"
-                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
-                    <button class="cnt-btn" onclick="update('long', 1)">+</button>
-                </div>
-            </div>
-
-            <!-- Essay -->
-            <div class="bp-row">
-                <div>
-                    <div style="font-weight: 600; font-size: 14px; color: var(--adv-text);">Essay <span
-                            style="font-size: 11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">(6m)</span>
-                    </div>
-                </div>
-                <div class="counter-control">
-                    <button class="cnt-btn" onclick="update('essay', -1)">−</button>
-                    <span id="cnt-essay"
-                        style="width: 24px; text-align: center; color: var(--adv-text); font-weight: 600;">0</span>
-                    <button class="cnt-btn" onclick="update('essay', 1)">+</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Generate Button -->
-
-        <!-- Section 3: Layout Preference -->
-        <div class="section-divider">
-            <span class="section-label">3. Layout Preference</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="chapters-box" style="margin-bottom: 24px;">
-            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; padding: 0 4px;">
-                Map question types to paper sections.
-            </div>
-
-            <!-- Section A -->
-            <div
-                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: 700; color: var(--adv-yellow); font-size: 14px;">SECTION A</div>
-                <div style="position: relative; width: 180px;">
-                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
-                        <option value="none">None</option>
-                        <option value="mcq" selected>MCQ / Objective</option>
-                        <option value="vsa">Very Short Answer</option>
-                        <option value="sa">Short Answer</option>
-                        <option value="la">Long Answer</option>
-                        <option value="essay">Essay / Descriptive</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Section B -->
-            <div
-                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION B</div>
-                <div style="position: relative; width: 180px;">
-                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
-                        <option value="none">None</option>
-                        <option value="mcq">MCQ / Objective</option>
-                        <option value="vsa" selected>Very Short Answer</option>
-                        <option value="sa">Short Answer</option>
-                        <option value="la">Long Answer</option>
-                        <option value="essay">Essay / Descriptive</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Section C -->
-            <div
-                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION C</div>
-                <div style="position: relative; width: 180px;">
-                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
-                        <option value="none">None</option>
-                        <option value="mcq">MCQ / Objective</option>
-                        <option value="vsa">Very Short Answer</option>
-                        <option value="sa" selected>Short Answer</option>
-                        <option value="la">Long Answer</option>
-                        <option value="essay">Essay / Descriptive</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Section D -->
-            <div
-                style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION D</div>
-                <div style="position: relative; width: 180px;">
-                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
-                        <option value="none">None</option>
-                        <option value="mcq">MCQ / Objective</option>
-                        <option value="vsa">Very Short Answer</option>
-                        <option value="sa">Short Answer</option>
-                        <option value="la" selected>Long Answer</option>
-                        <option value="essay">Essay / Descriptive</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Section E -->
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px;">
-                <div style="font-weight: 700; color: var(--adv-text); font-size: 14px;">SECTION E</div>
-                <div style="position: relative; width: 180px;">
-                    <select class="glass-select-clean" style="font-size: 13px; padding-right: 20px;">
-                        <option value="none">None</option>
-                        <option value="mcq">MCQ / Objective</option>
-                        <option value="vsa">Very Short Answer</option>
-                        <option value="sa">Short Answer</option>
-                        <option value="la">Long Answer</option>
-                        <option value="essay" selected>Essay / Descriptive</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <button class="primary-action-btn" onclick="window.location.href='edit-paper.html'">
-            <span>GENERATE PAPER</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-        </button>
-
-        <!-- Bottom spacing for nav -->
-        <div style="height: 20px;"></div>
-
+        <div class="gen-status">Assembling Architectural Blueprint...</div>
     </div>
 
-    <!-- Bottom Nav -->
+    <!-- Mobile Nav -->
     <nav class="nav-bottom">
         <a href="teacher-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
         <a href="question-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
             <span>Bank</span>
         </a>
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="generate-paper.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>Generate</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+            <span>Paper</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+            <span>AI</span>
         </a>
         <a href="teacher-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
-        // Logic for Total Marks Calculation
-        const counts = { mcq: 0, vshort: 0, short: 0, long: 0, essay: 0 };
-        const marks = { mcq: 1, vshort: 1, short: 2, long: 4, essay: 6 };
+    <script type="module">
+        import {
+            apiCall,
+            getFreshToken,
+            guardTeacher,
+            getIndexPath,
+            BP,
+            API_BASE
+        } from '../../assets/js/bee-core.js';
 
-        function update(type, diff) {
-            counts[type] = Math.max(0, counts[type] + diff);
-            document.getElementById('cnt-' + type).innerText = counts[type];
+        import { getAuth, signOut }
+            from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+        // Run guard first
+        if (!guardTeacher()) {
+            window.location.href = getIndexPath();
+            throw new Error('Access denied');
+        }
+
+        let allBanks = [];
+        let selectedBankId = '';
+        let selectedSubject = '';
+
+        const blueprint = [
+            { id: 'mcq', type: 'MCQ', marks: 1, qty: 5 },
+            { id: 'veryShort', type: 'Very Short', marks: 1, qty: 4 },
+            { id: 'short', type: 'Short', marks: 2, qty: 3 },
+            { id: 'long', type: 'Long', marks: 4, qty: 2 },
+            { id: 'essay', type: 'Essay', marks: 8, qty: 1 }
+        ];
+
+        window.updateBlueprint = function(idx, key, val) {
+            blueprint[idx][key] = (key === 'marks') ? parseInt(val) : val;
+            renderBlueprint();
+        };
+
+        window.updateQty = function(idx, diff) {
+            blueprint[idx].qty = Math.max(0, blueprint[idx].qty + diff);
+            renderBlueprint();
+        };
+
+        function renderBlueprint() {
+            const container = document.getElementById('blueprint-container');
+            container.innerHTML = blueprint.map((sec, idx) => `
+                <div class="bp-card" data-section="${sec.id}">
+                    <div class="counter-overlay">
+                        <button class="cnt-btn" onclick="updateQty(${idx}, -1)">−</button>
+                        <span id="qty-${idx}" class="qty-value" style="min-width: 20px; text-align: center; font-weight: 950; color: var(--primary); font-size: 16px;">${sec.qty}</span>
+                        <button class="cnt-btn" onclick="updateQty(${idx}, 1)">+</button>
+                    </div>
+
+                    <div class="section-header">
+                        <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Type ${idx + 1}</div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Configuration Node</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label class="field-label">Complexity Type</label>
+                            <select class="glass-select" onchange="updateBlueprint(${idx}, 'type', this.value)">
+                                <option value="Very Short" ${sec.type === 'Very Short' ? 'selected' : ''}>Very Short</option>
+                                <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
+                                <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
+                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="field-label">Credit Value (Marks)</label>
+                            <select class="glass-select" onchange="updateBlueprint(${idx}, 'marks', this.value)">
+                                ${Array.from({length: 10}, (_, m) => `<option value="${m+1}" ${sec.marks == m+1 ? 'selected' : ''}>${m+1} Mark${m > 0 ? 's' : ''}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
             calcTotal();
         }
 
         function calcTotal() {
             let t = 0;
-            for (let k in counts) t += counts[k] * marks[k];
+            blueprint.forEach(s => t += s.qty * s.marks);
             document.getElementById('total-marks').innerText = t;
         }
 
-        // Logic for Visual Selection
-        function toggleRow(el) {
-            el.classList.toggle('selected');
-            // In a real app, update underlying checkbox logic here
-            // Update SVG visibility
-            const visual = el.querySelector('.chk-visual');
-            if (el.classList.contains('selected')) {
-                visual.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-            } else {
-                visual.innerHTML = '';
-            }
-        }
-
-        function toggleAll() {
-            const rows = document.querySelectorAll('.chapter-row');
-            // Check if all are selected to decide toggle direction
-            const allSelected = Array.from(rows).every(r => r.classList.contains('selected'));
-
-            rows.forEach(r => {
-                if (allSelected) {
-                    r.classList.remove('selected');
-                    r.querySelector('.chk-visual').innerHTML = '';
-                } else {
-                    r.classList.add('selected');
-                    r.querySelector('.chk-visual').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+        async function loadDashboard() {
+            const result = await apiCall('/teacher/dashboard');
+            if (result && result.success) {
+                allBanks = result.data.subjects;
+                
+                if (allBanks.length === 0) {
+                    document.getElementById('zero-state').style.display = 'block';
+                    document.getElementById('paper-content').style.display = 'none';
+                    return;
                 }
-            });
+                
+                document.getElementById('zero-state').style.display = 'none';
+                document.getElementById('paper-content').style.display = 'grid';
+                populateSelects();
+            }
         }
-    </script>
 
-    <!-- EXTREME UI SCRIPTS (Animations Only) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to Teacher Cards
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if (tiltElements.length > 0) {
-                try {
-                    VanillaTilt.init(tiltElements, {
-                        max: 8,
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.15,
-                        scale: 1.02
-                    });
-                } catch (e) { }
+        function populateSelects() {
+            const classSelect = document.getElementById('grade-select');
+            const subjectSelect = document.getElementById('subject-select');
+
+            // Unique classes
+            const classes = [...new Set(allBanks.map(b => b.class))].sort((a,b) => b-a);
+            classSelect.innerHTML = classes.map(c => `<option value="${c}">Class ${c}</option>`).join('');
+
+            updateSubjects();
+
+            classSelect.onchange = updateSubjects;
+            subjectSelect.onchange = () => {
+                const bank = allBanks.find(b => b.class == classSelect.value && b.subject == subjectSelect.value);
+                if (bank) {
+                    selectedBankId = bank.bankId;
+                    selectedSubject = bank.subject;
+                    loadChapters(bank.bankId);
+                }
+            };
+        }
+
+        function updateSubjects() {
+            const classSelect = document.getElementById('grade-select');
+            const subjectSelect = document.getElementById('subject-select');
+            const classVal = classSelect.value;
+            const subjects = allBanks.filter(b => b.class == classVal).map(b => b.subject);
+            subjectSelect.innerHTML = subjects.map(s => `<option value="${s}">${s}</option>`).join('');
+            
+            const bank = allBanks.find(b => b.class == classVal && b.subject == subjectSelect.value);
+            if (bank) {
+                selectedBankId = bank.bankId;
+                selectedSubject = bank.subject;
+                loadChapters(bank.bankId);
+            }
+        }
+
+        async function loadChapters(bankId) {
+            const list = document.getElementById('chapters-list');
+            list.innerHTML = '<div style="color: var(--text-muted); font-size: 12px; padding: 20px;">Loading Chapters...</div>';
+            
+            const result = await apiCall(`/teacher/chapters/${bankId}`);
+            if (result && result.success) {
+                if (!result.data.chapters || result.data.chapters.length === 0) {
+                    list.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; padding: 20px; text-align: center;">No chapters available in this bank.</div>';
+                    return;
+                }
+                list.innerHTML = result.data.chapters.map(chap => `
+                    <div class="chapter-row adv-card" data-chapter-id="${chap.chapterId}" data-chapter-name="${chap.chapterName}" onclick="toggleRow(this)">
+                        <div class="chk-visual"></div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 800; font-size: 14px;">${chap.chapterName}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">ID: ${chap.chapterId}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                 list.innerHTML = '<div style="color: #ff4d4d; font-size: 12px; padding: 20px;">Failed to load chapters.</div>';
+            }
+        }
+
+        window.toggleRow = function(el) {
+            el.classList.toggle('selected');
+            el.querySelector('.chk-visual').innerText = el.classList.contains('selected') ? '✓' : '';
+        };
+
+        function getCount(type) {
+            const el = document.querySelector(`[data-section="${type}"] .qty-value`);
+            return el ? parseInt(el.textContent) || 0 : 0;
+        }
+
+        window.startGeneration = async function() {
+            const selectedChapters = Array.from(
+                document.querySelectorAll('.chapter-row.selected')
+            ).map(r => r.dataset.chapterId);
+
+            if (!selectedChapters.length) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Select Chapters',
+                    text: 'Explore at least one unit first.',
+                    toast: true, position: 'top-end',
+                    showConfirmButton: false, timer: 2500,
+                    background: '#1a1a2e', color: '#fff'
+                });
+                return;
             }
 
-            // Apply Staggered HUD Load-in
-            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            hudElements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
+            const bpData = blueprint;
+
+            if (blueprint.reduce((acc, s) => acc + s.qty, 0) === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Empty Blueprint',
+                    text: 'Configure the section loads first.',
+                    toast: true, position: 'top-end',
+                    showConfirmButton: false, timer: 2500,
+                    background: '#1a1a2e', color: '#fff'
+                });
+                return;
+            }
+
+            document.getElementById('genOverlay').classList.add('active');
+
+            try {
+                const result = await apiCall('/teacher/generate-paper', 'POST', {
+                    bankId: selectedBankId,
+                    selectedChapters,
+                    blueprint: bpData,
+                    layout: {
+                        sectionA: blueprint[0].qty > 0 ? 'mcq' : null,
+                        sectionB: blueprint[1].qty > 0 ? 'veryShort' : null,
+                        sectionC: blueprint[2].qty > 0 ? 'short' : null,
+                        sectionD: blueprint[3].qty > 0 ? 'long' : null,
+                        sectionE: blueprint[4].qty > 0 ? 'essay' : null
+                    }
+                });
+
+                if (result && result.success) {
+                    localStorage.setItem('bp_paper_html', result.data.paperHtml);
+                    localStorage.setItem('bp_paper_id', result.data.paperId);
+                    localStorage.setItem('bp_paper_marks', result.data.totalMarks);
+                    localStorage.setItem('bp_paper_subject', selectedSubject);
+
+                    setTimeout(() => {
+                        window.location.href = 'edit-paper.html';
+                    }, 2500);
+                } else {
+                    document.getElementById('genOverlay').classList.remove('active');
+                    const code = result?.error?.code;
+                    if (code === 'NOT_ENOUGH_QUESTIONS') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Pool Depleted',
+                            text: `Insufficient ${result.error.details?.type || ''} questions in selected nodes. Expansion required.`,
+                            background: '#1a1a2e', color: '#fff',
+                            confirmButtonColor: '#FFD700'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Generation Fault',
+                            text: result?.message || 'The architectural node failed to respond.',
+                            background: '#1a1a2e', color: '#fff'
+                        });
+                    }
+                }
+            } catch (err) {
+                document.getElementById('genOverlay').classList.remove('active');
+                console.error('Generate paper error:', err);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBlueprint();
+            loadDashboard();
         });
     </script>
 </body>
-
 </html>

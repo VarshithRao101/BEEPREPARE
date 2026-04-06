@@ -4,56 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Question Bank - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <title>Bank Inventory - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
     <style>
-        /* Doubts Indicator */
-        .doubt-badge-nav {
-            position: absolute;
-            top: 2px;
-            right: 50%;
-            transform: translateX(20px);
-            background: #ff4d4d;
-            color: white;
-            border-radius: 50%;
-            width: 14px;
-            height: 14px;
-            font-size: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            border: 2px solid #141414;
-        }
-        /* Modern Reset & Base */
-        .app-container {
-            padding-bottom: 90px;
-        }
-
-        /* Section Dividers */
         .section-divider {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 24px 0 16px 0;
+            margin: 35px 0 15px 0;
         }
 
         .divider-line {
             height: 2px;
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(90deg, var(--border), transparent);
             border-radius: 2px;
         }
 
         .section-label {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 1px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        /* Selection Cards */
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -67,345 +43,388 @@
         }
 
         .select-card {
-            background: linear-gradient(145deg, rgba(30, 30, 30, 0.4), rgba(20, 20, 20, 0.6));
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: 0.3s;
             position: relative;
             overflow: hidden;
         }
 
         .select-card:hover {
+            background: rgba(255, 215, 0, 0.05);
             transform: translateY(-3px);
-            background: rgba(40, 40, 40, 0.8);
-            border-color: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
         }
 
         .select-card.active {
             background: rgba(255, 215, 0, 0.1);
-            border-color: var(--adv-yellow);
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.1);
         }
 
-        .select-card.active::before {
-            content: '';
+        .select-card.active::after {
+            content: 'âœ“';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: var(--primary);
+            top: 10px;
+            right: 10px;
+            color: var(--primary);
+            font-weight: 900;
+            font-size: 12px;
         }
 
         .card-icon {
-            width: 50px;
-            height: 50px;
-            margin: 0 auto 12px auto;
+            width: 45px;
+            height: 45px;
+            margin: 0 auto 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.9;
-            transition: 0.2s;
-        }
-
-        .select-card.active .card-icon {
-            opacity: 1;
-            transform: scale(1.05);
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--primary);
         }
 
         .card-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #ccc;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
         .select-card.active .card-title {
-            color: var(--adv-text);
+            color: #fff;
         }
 
-        /* Context Box styles */
         .context-box {
-            background: rgba(20, 20, 20, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 24px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 600;
+            padding: 30px;
+            margin-top: 30px;
         }
 
         .glass-field {
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px;
-            color: var(--adv-text);
+            padding: 18px;
+            color: #fff;
             font-size: 15px;
+            font-weight: 600;
             outline: none;
-            transition: 0.2s;
+            transition: 0.3s;
         }
 
         .glass-field:focus {
-            border-color: var(--adv-yellow);
-            background: rgba(0, 0, 0, 0.2);
-            box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.15);
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
         }
 
-        /* Action Button */
         .primary-action-btn {
-            background: var(--primary);
-            color: var(--adv-dark);
             width: 100%;
-            padding: 18px;
-            border-radius: 14px;
-            font-weight: 700;
-            font-size: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             border: none;
-            margin-top: 32px;
+            padding: 22px;
+            border-radius: 20px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: 0.2s;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+            margin-top: 40px;
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
+            transition: 0.3s;
         }
 
-        .primary-action-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
-        }
-
-        .primary-action-btn:active {
-            transform: scale(0.98);
+        @media (min-width: 769px) {
+            .bank-layout {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
         }
     </style>
-    <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
-    <!-- PREMIUM ANIMATION STYLES -->
-    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEEPREPARE</div>
+            <nav class="sidebar-nav">
+                <a href="teacher-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="question-bank.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="generate-paper.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                    <span>Generate Paper</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="teacher-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content-wrapper">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Bank Inventory</h2>
+                    <p style="color: var(--text-muted); font-size: 14px;">Manage your academic inventory.</p>
+                </div>
+                <div class="profile-icon" onclick="window.location.href='teacher-profile.html'">T</div>
+            </header>
+
+            <div class="bank-layout">
+                <!-- Selection Column -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">1. Select Bank</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div id="bank-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px;">
+                        <div style="padding: 20px; color: var(--text-muted); font-size: 13px; text-align: center; grid-column: 1/-1;">Loading your banks...</div>
+                    </div>
+                </div>
+
+                <!-- Context Column -->
+                <div>
+                    <div class="section-divider">
+                        <span class="section-label">2. Chapter & Details</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div class="context-box adv-card">
+                        <div style="margin-bottom: 25px;">
+                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase;">Chapter Selection</label>
+                            <select class="glass-field" id="chapter-select">
+                                <option value="">Select a bank first...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 11px; font-weight: 800; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase;">Specific Topic (Optional)</label>
+                            <input type="text" class="glass-field" id="topic-input" placeholder="e.g. Lens Formula">
+                        </div>
+                    </div>
+
+                    <button class="primary-action-btn" id="proceed-btn" onclick="window.proceedToAdd()">
+                        Proceed to Add Question &rarr;
+                    </button>
+
+                    <div class="section-divider" style="margin-top: 30px;">
+                        <span class="section-label">3. Chapter Inventory</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div id="chapter-inventory-list" class="adv-card" style="padding: 15px; background: rgba(255,255,255,0.02); min-height: 100px;">
+                        <div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">Select a bank to see chapters.</div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </main>
     </div>
 
-    <div class="app-container">
-
-        <!-- Top Header (Now Inside Container) -->
-        <div class="top-header"
-            style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 24px;">
-            <div class="header-title text-gold-glow"
-                style="color: var(--adv-yellow); font-weight: 700; font-size: 18px; letter-spacing: 1px;">BEEPREPARE
-            </div>
-            <div class="profile-icon"
-                style="background: white; color: black; font-weight: 700; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; right: 0;">
-                T</div>
-        </div>
-        <!-- Subheader -->
-        <div style="text-align: center; margin-bottom: 30px;">
-            <div style="font-size: 20px; font-weight: 700; color: var(--adv-text); margin-bottom: 4px;">Question Bank
-            </div>
-            <p style="color: var(--text-muted); font-size: 13px;">Manage and curate your questions</p>
-        </div>
-
-        <!-- Class Selection -->
-        <div class="section-divider">
-            <span class="section-label">1. Select Class</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="grid-3">
-            <div class="select-card" onclick="selectItem(this, 'class-group')">
-                <div class="card-icon">8</div>
-                <div class="card-title">Class 8</div>
-            </div>
-            <div class="select-card" onclick="selectItem(this, 'class-group')">
-                <div class="card-icon">9</div>
-                <div class="card-title">Class 9</div>
-            </div>
-            <div class="select-card active" onclick="selectItem(this, 'class-group')">
-                <div class="card-icon">10</div>
-                <div class="card-title">Class 10</div>
-            </div>
-        </div>
-
-        <!-- Subject Selection -->
-        <div class="section-divider">
-            <span class="section-label">2. Select Subject</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="grid-2">
-            <div class="select-card active" onclick="selectItem(this, 'subject-group')">
-                <div class="card-icon">
-                    <img src="../../assets/images/subjects/physics.svg" alt="Physics"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div class="card-title">Physics</div>
-            </div>
-            <div class="select-card" onclick="selectItem(this, 'subject-group')">
-                <div class="card-icon">
-                    <img src="../../assets/images/subjects/chemistry.svg" alt="Chemistry"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div class="card-title">Chemistry</div>
-            </div>
-            <div class="select-card" onclick="selectItem(this, 'subject-group')">
-                <div class="card-icon">
-                    <img src="../../assets/images/subjects/mathematics.svg" alt="Maths"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div class="card-title">Maths</div>
-            </div>
-            <div class="select-card" onclick="selectItem(this, 'subject-group')">
-                <div class="card-icon">
-                    <img src="../../assets/images/subjects/biology.svg" alt="Biology"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div class="card-title">Biology</div>
-            </div>
-            <div class="select-card" onclick="selectItem(this, 'subject-group')">
-                <div class="card-icon">
-                    <img src="../../assets/images/subjects/english.svg" alt="English"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div class="card-title">English</div>
-            </div>
-            <div class="select-card" onclick="selectItem(this, 'subject-group')">
-                <div class="card-icon">
-                    <img src="../../assets/images/subjects/social.svg" alt="Social"
-                        style="width: 100%; height: 100%; object-fit: contain;">
-                </div>
-                <div class="card-title">Social Studies</div>
-            </div>
-        </div>
-
-        <!-- Detailed Context -->
-        <div class="context-box">
-            <div class="input-group">
-                <label class="input-label">CHAPTER SELECTION</label>
-                <div style="position: relative;">
-                    <select class="glass-field" style="appearance: none; cursor: pointer;">
-                        <option>Light: Reflection & Refraction</option>
-                        <option>Electricity</option>
-                        <option>Magnetic Effects</option>
-                    </select>
-                    <div
-                        style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #888;">
-                        ▼</div>
-                </div>
-            </div>
-
-            <div class="input-group" style="margin-bottom: 0;">
-                <label class="input-label">SPECIFIC TOPIC (OPTIONAL)</label>
-                <input type="text" class="glass-field" placeholder="e.g. Lens Formula">
-            </div>
-        </div>
-
-        <!-- Main Action -->
-        <button class="primary-action-btn" onclick="window.location.href='add-question.html'">
-            <span>Proceed to Add Question</span>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-        </button>
-
-    </div>
-
+    <!-- Bottom Nav (Mobile) -->
     <nav class="nav-bottom">
         <a href="teacher-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             <span>Home</span>
         </a>
         <a href="question-bank.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg>
             <span>Bank</span>
         </a>
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="generate-paper.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-            </svg>
-            <span>Generate</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+            <span>Paper</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z"/></svg>
+            <span>AI</span>
         </a>
         <a href="teacher-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
-        function selectItem(el, group) {
-            // Find parent container to scope search
-            // For simple grid siblings
-            let siblings = el.parentElement.children;
-            for (let sib of siblings) {
-                if (sib.classList.contains('select-card')) {
-                    sib.classList.remove('active');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { apiCall, guardTeacher, BP } from '../../assets/js/bee-core.js';
+
+        let allBanks = [];
+        let selectedBankId = '';
+        let selectedSubject = '';
+        let selectedClass = '';
+
+        async function loadBanks() {
+            if (!guardTeacher()) return;
+
+            const profileIcon = document.querySelector('.profile-icon');
+            const name = localStorage.getItem(BP.NAME) || 'T';
+            if (profileIcon) profileIcon.textContent = name[0].toUpperCase();
+
+            const res = await apiCall('/teacher/dashboard');
+            if (!res || !res.success || !res.data.subjects.length) {
+                document.getElementById('bank-cards-grid').innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:40px 20px;">
+                        <div style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">No banks found. Set up your profile first.</div>
+                        <button onclick="window.location.href='teacher-profile.html'" style="background:var(--primary);color:#000;border:none;padding:12px 28px;border-radius:12px;font-weight:900;cursor:pointer;">Go to Profile →</button>
+                    </div>`;
+                return;
+            }
+
+            allBanks = res.data.subjects;
+            renderBankCards();
+
+            // Handle URL param: ?bankId=xxx
+            const params = new URLSearchParams(window.location.search);
+            const preBank = params.get('bankId');
+            if (preBank) {
+                const bank = allBanks.find(b => b.bankId === preBank);
+                if (bank) { selectBank(bank); return; }
+            }
+            // Auto-select first
+            selectBank(allBanks[0]);
+        }
+
+        function renderBankCards() {
+            const grid = document.getElementById('bank-cards-grid');
+            grid.innerHTML = '';
+            allBanks.forEach(bank => {
+                const card = document.createElement('div');
+                card.className = 'select-card adv-card';
+                card.id = 'bcard-' + bank.bankId;
+                card.onclick = () => selectBank(bank);
+                const subLower = bank.subject.toLowerCase();
+                card.innerHTML = `
+                    <div class="card-icon">
+                        <img src="../../assets/images/subjects/${subLower}.svg" style="width:28px;" onerror="this.style.display='none'">
+                    </div>
+                    <div class="card-title">${bank.subject}</div>
+                    <div style="font-size:10px;color:var(--primary);font-weight:700;margin-top:4px;">Class ${bank.class}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function selectBank(bank) {
+            selectedBankId = bank.bankId;
+            selectedSubject = bank.subject;
+            selectedClass = bank.class;
+
+            // Highlight active card
+            document.querySelectorAll('#bank-cards-grid .select-card').forEach(c => c.classList.remove('active'));
+            const activeCard = document.getElementById('bcard-' + bank.bankId);
+            if (activeCard) activeCard.classList.add('active');
+
+            // Load chapters
+            const chapterSelect = document.getElementById('chapter-select');
+            chapterSelect.innerHTML = '<option value="">Loading chapters...</option>';
+            const res = await apiCall(`/teacher/chapters/${selectedBankId}`);
+            if (res && res.success) {
+                chapterSelect.innerHTML = '<option value="">Select Chapter</option>';
+                res.data.chapters.forEach(chap => {
+                    const opt = document.createElement('option');
+                    opt.value = chap.chapterId;
+                    opt.textContent = chap.chapterName;
+                    chapterSelect.appendChild(opt);
+                });
+                if (!res.data.chapters.length) {
+                    chapterSelect.innerHTML = '<option value="">No chapters yet — add in Edit Profile</option>';
+                    document.getElementById('chapter-inventory-list').innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No chapters found.</div>';
+                } else {
+                    renderChapterInventory(res.data.chapters);
                 }
             }
-            el.classList.add('active');
-        }
-    </script>
 
-    <!-- EXTREME UI SCRIPTS (Animations Only) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply 3D Tilt to Teacher Cards
-            const tiltElements = document.querySelectorAll(".subject-card, .class-card, .timeline-card, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            if (tiltElements.length > 0) {
-                try {
-                    VanillaTilt.init(tiltElements, {
-                        max: 8,
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.15,
-                        scale: 1.02
+            // Save to localStorage for add-question.html
+            localStorage.setItem('bp_current_bank_id', selectedBankId);
+            localStorage.setItem('bp_current_bank_code', bank.bankCode);
+            localStorage.setItem('bp_current_subject', selectedSubject);
+            localStorage.setItem('bp_current_class', selectedClass);
+        }
+
+        function renderChapterInventory(chapters) {
+            const list = document.getElementById('chapter-inventory-list');
+            list.innerHTML = '';
+            
+            // Sort by order/name
+            chapters.sort((a,b) => a.order - b.order).forEach(chap => {
+                const item = document.createElement('div');
+                item.className = 'chapter-inventory-item';
+                item.style = 'display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);';
+                item.innerHTML = `
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 800; color: #fff;">${chap.chapterName}</div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600;">Contains ${chap.questionCount || 0} Questions</div>
+                    </div>
+                    <button onclick="window.deleteChapter('${chap.chapterId}', '${chap.chapterName}')" style="background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.2); color: #ff4444; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.2s;">Delete</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        window.deleteChapter = async (chapterId, name) => {
+            const confirm = await Swal.fire({
+                title: 'Delete Chapter?',
+                html: `Are you sure you want to delete <b>"${name}"</b>? <br><br> <span style="color: #ff4444; font-size: 11px; font-weight: 700; text-transform: uppercase;">⚠ PERMANENT DESTRUCTION ⚠</span><br><div style="font-size: 12px; color: #888; margin-top: 10px;">This will permanently wipe all questions and notes for this chapter from the database.</div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4444',
+                cancelButtonColor: '#333',
+                confirmButtonText: 'Yes, Delete Everything',
+                background: '#080808',
+                color: '#fff'
+            });
+
+            if (confirm.isConfirmed) {
+                const res = await apiCall(`/teacher/chapters/${selectedBankId}/${chapterId}`, 'DELETE');
+                if (res && res.success) {
+                    Swal.fire({ 
+                        icon: 'success', 
+                        title: 'Chapter Purged', 
+                        background: '#080808', color: '#fff', 
+                        timer: 1500, showConfirmButton: false,
+                        toast: true, position: 'top-end'
                     });
-                } catch (e) { }
+                    
+                    // Refresh the selected bank manually
+                    const resBank = await apiCall(`/teacher/dashboard`);
+                    if (resBank && resBank.success) {
+                        allBanks = resBank.data.subjects;
+                        const updatedBank = allBanks.find(b => b.bankId === selectedBankId);
+                        if (updatedBank) selectBank(updatedBank);
+                    }
+                }
+            }
+        };
+
+        window.proceedToAdd = function() {
+            const chapterSelect = document.getElementById('chapter-select');
+            const chapterId = chapterSelect.value;
+            const chapterName = chapterSelect.selectedOptions[0]?.text || '';
+
+            if (!selectedBankId || !chapterId) {
+                Swal.fire({ icon: 'warning', title: 'Selection Incomplete', text: 'Please select a bank and chapter.', background: '#111', color: '#fff' });
+                return;
             }
 
-            // Apply Staggered HUD Load-in
-            const hudElements = document.querySelectorAll(".subject-card, .class-card, .timeline-item, .req-card, .bank-card, .history-card, .profile-card, .stat-box, .file-item");
-            hudElements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.08}s`;
-            });
-        });
+            window.location.href = `add-question.html?bankId=${selectedBankId}&chapterId=${chapterId}&chapterName=${encodeURIComponent(chapterName)}&subject=${encodeURIComponent(selectedSubject)}&class=${selectedClass}`;
+        };
+
+        window.addEventListener('load', loadBanks);
     </script>
 </body>
 

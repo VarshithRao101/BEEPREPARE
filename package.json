@@ -1,0 +1,29 @@
+{
+  "name": "beeprepare-main",
+  "version": "1.0.0",
+  "description": "",
+  "main": "debug-buckets.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "concurrently \"cd beeprepare-backend && npm start\" \"npx serve -l 5500 .\"",
+    "dev": "concurrently \"cd beeprepare-backend && npm run dev\" \"npx serve -l 5500 .\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VarshithRao101/BEEPREPARE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/VarshithRao101/BEEPREPARE/issues"
+  },
+  "homepage": "https://github.com/VarshithRao101/BEEPREPARE#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

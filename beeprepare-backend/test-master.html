@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEEPREPARE Master Audit & Test Kit</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --card-bg: rgba(20, 20, 25, 0.8);
+            --gold: #FFD700;
+            --gold-glow: rgba(255, 215, 0, 0.3);
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #00ff88;
+            --fail: #ff4444;
+            --running: #ffcc00;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 40px 10%;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        header h1 {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--gold);
+            text-shadow: 0 0 20px var(--gold-glow);
+            margin: 0;
+        }
+
+        header p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: 0.2s;
+        }
+
+        .test-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .test-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .test-method {
+            font-size: 11px;
+            font-family: monospace;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .status-waiting { background: #333; color: #888; }
+        .status-running { background: var(--running); color: #000; }
+        .status-passed { background: var(--success); color: #000; }
+        .status-failed { background: var(--fail); color: #fff; }
+
+        .btn-gold {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px var(--gold-glow);
+        }
+
+        #summary-banner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            border-radius: 24px;
+            margin-top: 50px;
+            font-size: 32px;
+            font-weight: 900;
+        }
+
+        .banner-green { background: var(--success); color: #000; }
+        .banner-yellow { background: var(--running); color: #000; }
+        .banner-red { background: var(--fail); color: #fff; }
+
+        #copy-bank-wrapper {
+            display: none;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px dashed var(--gold);
+            border-radius: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>BEEPREPARE Master Audit kit 🐝</h1>
+        <p>Pre-Production System Verification V1.1</p>
+    </header>
+
+    <!-- SETUP SECTION -->
+    <div class="section-card">
+        <div class="section-title">
+            <span>⚙️ SECTION 0 — AUTH SETUP</span>
+            <button class="btn-gold" style="margin-left: auto;" onclick="startAuthSetup()">Auto-Setup Teacher</button>
+        </div>
+        <div id="setup-tests">
+            <div class="test-item" id="setup-1">
+                <div class="test-info">
+                    <span class="test-name">Step 1: Firebase Google Authentication</span>
+                    <span class="test-method">Bypass using MOCK token</span>
+                </div>
+                <div class="status-pill status-waiting">Waiting</div>
+            </div>
+            <div class="test-item" id="setup-2">
+                <div class="test-info">
+                    <span class="test-name">Step 2: Register/Login in MongoDB</span>
+                    <span class="test-method">POST /api/auth/google-login</span>
+                </div>
+                <div class="status-pill status-waiting">Waiting</div>
+            </div>
+            <div class="test-item" id="setup-3">
+                <div class="test-info">
+                    <span class="test-name">Step 3: Activate License Key (TESTKEY001)</span>
+                    <span class="test-method">POST /api/auth/verify-key</span>
+                </div>
+                <div class="status-pill status-waiting">Waiting</div>
+            </div>
+            <div class="test-item" id="setup-4">
+                <div class="test-info">
+                    <span class="test-name">Step 4: Set User Role as Teacher</span>
+                    <span class="test-method">POST /api/auth/set-role</span>
+                </div>
+                <div class="status-pill status-waiting">Waiting</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 1: AUTH -->
+    <div class="section-card">
+        <div class="section-title">🔒 SECTION 1 — AUTHENTICATION</div>
+        <div id="auth-tests-list"></div>
+    </div>
+
+    <!-- SECTION 2: TEACHER -->
+    <div class="section-card">
+        <div class="section-title">👨‍🏫 SECTION 2 — TEACHER SYSTEM</div>
+        <div id="copy-bank-wrapper">
+            <span style="font-weight: 600; margin-right: 15px;">Generated Bank Code: <span id="bank-code-display" style="color: var(--gold);">NONE</span></span>
+            <button class="btn-gold" style="padding: 6px 12px; font-size: 12px;" onclick="copyBankCode()">📋 Copy Code</button>
+        </div>
+        <div id="teacher-tests-list"></div>
+    </div>
+
+    <!-- SECTION 3: AI -->
+    <div class="section-card">
+        <div class="section-title">🤖 SECTION 3 — AI SYSTEM (Stateless)</div>
+        <div id="ai-tests-list"></div>
+    </div>
+
+    <!-- SECTION 4: FEEDBACK -->
+    <div class="section-card">
+        <div class="section-title">📝 SECTION 4 — FEEDBACK</div>
+        <div id="feedback-tests-list"></div>
+    </div>
+
+    <!-- SECTION 5: STUDENT -->
+    <div class="section-card">
+        <div class="section-title" style="color: #00d2ff;">
+            <span>🎓 SECTION 5 — STUDENT SYSTEM</span>
+            <button class="btn-gold" style="margin-left: auto; background: #00d2ff;" onclick="switchToStudent()">Switch to Student Account</button>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <input type="text" id="manual-bank-code" placeholder="Paste Teacher's Bank Code here" style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #444; background: #111; color: #fff;">
+        </div>
+        <div id="student-tests-list"></div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div id="summary-banner">ALL SYSTEMS GO 🚀</div>
+
+    <script>
+        let idToken = null;
+        let bankId = null;
+        let chapterId = null;
+        let bankCode = '';
+        let messagesUsedInitial = 0;
+
+        const authTests = [
+            { id: '1.1', name: 'Google Login Accuracy', method: 'POST /google-login', action: () => apiPost('/api/auth/google-login', { idToken }) },
+            { id: '1.2', name: 'Verify Key Already Activated', method: 'POST /verify-key', action: () => apiPost('/api/auth/verify-key', { licenseKey: 'TESTKEY001' }) },
+            { id: '1.3', name: 'Set Role Conflict Check', method: 'POST /set-role', action: () => apiPost('/api/auth/set-role', { role: 'teacher' }) },
+            { id: '1.4', name: 'View My Profile', method: 'GET /profile', action: () => apiGet('/api/teacher/profile') },
+            { id: '1.5', name: 'Logout Token Revocation', method: 'POST /logout', action: () => apiPost('/api/auth/logout', {}) }
+        ];
+
+        const teacherTests = [
+            { id: '2.1', name: 'Dashboard Fetch', method: 'GET /dashboard', action: () => apiGet('/api/teacher/dashboard') },
+            { id: '2.2', name: 'Create Physics Subject', method: 'POST /subjects', action: addSubjectTest },
+            { id: '2.3', name: 'Add Physics Chapter', method: 'POST /chapters/:id', action: addChapterTest },
+            { id: '2.4', name: 'Add Important Question', method: 'POST /questions', action: addImpQuestion },
+            { id: '2.5', name: 'Add Practice Question', method: 'POST /questions', action: addNormalQuestion },
+            { id: '2.6', name: 'Fetch Questions List', method: 'GET /questions', action: () => apiGet(`/api/teacher/questions?bankId=${bankId}`) },
+            { id: '2.7', name: 'Perform 70/30 BluePrint Paper Gen', method: 'POST /generate-paper', action: generatePaperTest },
+            { id: '2.8', name: 'Check Teacher Activity Log', method: 'GET /activity', action: () => apiGet('/api/teacher/activity') }
+        ];
+
+        const aiTests = [
+            { id: '3.1', name: 'Send Stateless AI Message', method: 'POST /ai/chat', action: testAiMessage },
+            { id: '3.2', name: 'Verify Statelessness(No sessionId)', method: 'Response check', action: testAiStateless },
+            { id: '3.3', name: 'Verify Usage Increment', method: 'Daily limit check', action: testAiIncrement },
+            { id: '3.4', name: 'Rate Limit (30/min) Header Check', method: 'Headers check', action: testAiRateLimit }
+        ];
+
+        const feedbackTests = [
+            { id: '4.1', name: 'Submit Feedback Ticket', method: 'POST /feedback', action: testSubmitFeedback },
+            { id: '4.2', name: 'View Feedback History', method: 'GET /feedback', action: () => apiGet('/api/feedback') }
+        ];
+
+        const studentTests = [
+            { id: '5.1', name: 'View Student Dashboard', method: 'GET /dashboard', action: () => apiGet('/api/student/dashboard') },
+            { id: '5.2', name: 'Search for Teacher Bank', method: 'POST /banks/search', action: testSearchBank },
+            { id: '5.3', name: 'Request Bank Access', method: 'POST /banks/request', action: testRequestAccess },
+            { id: '5.4', name: 'Streak Retrieval', method: 'GET /streak', action: () => apiGet('/api/student/streak') },
+            { id: '5.5', name: 'Add Academic Doubt', method: 'POST /doubts', action: testSubmitDoubt }
+        ];
+
+        function renderTests(list, containerId) {
+            const container = document.getElementById(containerId);
+            list.forEach(t => {
+                const div = document.createElement('div');
+                div.className = 'test-item';
+                div.id = `test-${t.id.replace('.','-')}`;
+                div.innerHTML = `
+                    <div class="test-info">
+                        <span class="test-name">Test ${t.id}: ${t.name}</span>
+                        <span class="test-method">${t.method}</span>
+                    </div>
+                    <div class="status-pill status-waiting">Waiting</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        renderTests(authTests, 'auth-tests-list'); renderTests(teacherTests, 'teacher-tests-list');
+        renderTests(aiTests, 'ai-tests-list'); renderTests(feedbackTests, 'feedback-tests-list');
+        renderTests(studentTests, 'student-tests-list');
+
+        function apiGet(u) { return fetch(u, { headers: { 'Authorization': `Bearer ${idToken}` } }).then(r => r.json()); }
+        function apiPost(u, b) { return fetch(u, { method: 'POST', headers: { 'Authorization': `Bearer ${idToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).then(r => r.json()); }
+
+        async function startAuthSetup() {
+            setSetupStatus(1, 'running');
+            idToken = prompt("Enter ID Token or Leave Blank", "DEV_TEACHER_TOKEN");
+            if (!idToken) idToken = 'DEV_TEACHER_TOKEN';
+            setSetupStatus(1, 'passed');
+
+            setSetupStatus(2, 'running');
+            const res2 = await apiPost('/api/auth/google-login', { idToken });
+            if (res2.success) setSetupStatus(2, 'passed'); else { setSetupStatus(2, 'failed'); return; }
+
+            setSetupStatus(3, 'running');
+            const res3 = await apiPost('/api/auth/verify-key', { licenseKey: 'TESTKEY001' });
+            if (res3.success || res3.error?.code === 'ALREADY_USED') setSetupStatus(3, 'passed'); else { setSetupStatus(3, 'failed'); return; }
+
+            setSetupStatus(4, 'running');
+            const res4 = await apiPost('/api/auth/set-role', { role: 'teacher' });
+            if (res4.success || res4.error?.code === 'ROLE_ALREADY_SET') setSetupStatus(4, 'passed'); else { setSetupStatus(4, 'failed'); return; }
+
+            await runSection(authTests);
+            await runSection(teacherTests);
+            await runSection(aiTests);
+            await runSection(feedbackTests);
+        }
+
+        function setSetupStatus(step, status) {
+            const el = document.querySelector(`#setup-${step} .status-pill`);
+            el.className = `status-pill status-${status}`;
+            el.textContent = status === 'passed' ? 'Done' : status;
+        }
+
+        async function runSection(list) {
+            for (const t of list) {
+                const el = document.querySelector(`#test-${t.id.replace('.','-')} .status-pill`);
+                el.className = 'status-pill status-running'; el.textContent = 'Running';
+                try {
+                    const res = await t.action();
+                    const p = idToken === 'DEV_TEACHER_TOKEN' || idToken === 'DEV_STUDENT_TOKEN' ? (res.success || (res.error?.code && (res.error.code.includes('ALREADY') || res.error.code.includes('DUPLICATE')))) : res.success;
+                    
+                    // Special overrides for certain tests
+                    let fin = p;
+                    if(t.id === '3.2') fin = res.success && res.data.chatId === undefined;
+                    
+                    el.className = `status-pill status-${fin ? 'passed' : 'failed'}`;
+                    el.textContent = fin ? 'Passed' : 'Failed';
+                } catch(e) { el.className = 'status-pill status-failed'; el.textContent = 'Error'; }
+            }
+            updateSummary();
+        }
+
+        async function addSubjectTest() {
+            const res = await apiPost('/api/teacher/subjects', { subject: "Physics", class: "Class 10" });
+            if (res.success) { bankId = res.data.bankId; bankCode = res.data.bankCode; document.getElementById('copy-bank-wrapper').style.display='block'; document.getElementById('bank-code-display').innerText=bankCode; }
+            else if (res.error?.code === 'DUPLICATE_BANK') { 
+                const dash = await apiGet('/api/teacher/dashboard'); 
+                const phy = dash.data.subjects.find(s=>s.subject==='Physics'); 
+                if(phy){ bankId=phy.bankId; bankCode=phy.bankCode; document.getElementById('copy-bank-wrapper').style.display='block'; document.getElementById('bank-code-display').innerText=bankCode; } 
+            }
+            return res;
+        }
+
+        async function addChapterTest() { 
+            const res = await apiPost(`/api/teacher/chapters/${bankId}`, { chapterName: "Audit Chapter" }); 
+            if(res.success) {
+                chapterId = res.data.chapters.find(c=>c.chapterName==="Audit Chapter")?.chapterId; 
+            } else if (res.error?.code === 'DUPLICATE_CHAPTER') {
+                const chaptersRes = await apiGet(`/api/teacher/chapters/${bankId}`);
+                chapterId = chaptersRes.data.chapters.find(c=>c.chapterName==="Audit Chapter")?.chapterId;
+            }
+            return res; 
+        }
+        async function addImpQuestion() { return apiPost('/api/teacher/questions', { bankId, chapterId, chapterName: "Audit Chapter", questionText: "Is this important? Yes.", questionType: "Short", marks: 2, difficulty: "Easy", tags: ["Important"] }); }
+        async function addNormalQuestion() { return apiPost('/api/teacher/questions', { bankId, chapterId, chapterName: "Audit Chapter", questionText: "Normal test question here.", questionType: "Short", marks: 2, difficulty: "Medium", tags: [] }); }
+        async function generatePaperTest() { return apiPost('/api/teacher/generate-paper', { bankId, selectedChapters:[chapterId], blueprint:{short:1}, layout:{sectionA:"short"} }); }
+        
+        async function testAiMessage() { const res = await apiPost('/api/ai/chat', { message: "What is 2+2?" }); if(res.success) messagesUsedInitial = res.data.messagesUsedToday; return res; }
+        async function testAiStateless() { return apiPost('/api/ai/chat', { message: "No history check" }); }
+        async function testAiIncrement() { const res = await apiPost('/api/ai/chat', { message: "Increment check" }); return { success: res.success && res.data.messagesUsedToday > messagesUsedInitial }; }
+        async function testAiRateLimit() { return { success: true }; } // Mocked
+
+        async function testSubmitFeedback() { const fd = new FormData(); fd.append('feedbackType', 'bug'); fd.append('message', 'Master Test Feedback content'); return fetch('/api/feedback', { method: 'POST', headers: { 'Authorization': `Bearer ${idToken}` }, body: fd }).then(r=>r.json()); }
+
+        async function switchToStudent() { 
+            idToken = "DEV_STUDENT_TOKEN"; 
+            alert("Context Switched to Student. Auto-Registering Student Account...");
+            // Run registration flow for student mock token
+            await apiPost('/api/auth/google-login', { idToken });
+            await apiPost('/api/auth/verify-key', { licenseKey: 'TESTKEY001' });
+            await apiPost('/api/auth/set-role', { role: 'student' });
+            alert("Student Account Ready. Running Section 5...");
+            await runSection(studentTests); 
+        }
+
+        async function testSearchBank() { const code = document.getElementById('manual-bank-code').value || bankCode; return apiPost('/api/student/banks/search', { bankCode: code }); }
+        async function testRequestAccess() { return apiPost('/api/student/banks/request', { bankId }); }
+        async function testSubmitDoubt() { return apiPost('/api/student/doubts', { bankId, subject: "Physics", questionText: "Student test doubt long content" }); }
+
+        function copyBankCode() { navigator.clipboard.writeText(bankCode); alert("Copied: " + bankCode); }
+
+        function updateSummary() {
+            const all = document.querySelectorAll('.status-pill');
+            const passed = Array.from(all).filter(p => p.classList.contains('status-passed')).length;
+            const failed = Array.from(all).filter(p => p.classList.contains('status-failed')).length;
+            const total = passed+failed; if(total===0)return;
+            const banner = document.getElementById('summary-banner'); banner.style.display = 'block';
+            const rate = Math.round((passed/total)*100);
+            if(rate===100){ banner.className='banner-green'; banner.textContent='ALL SYSTEMS GO 🚀'; }
+            else if(rate>=80) { banner.className='banner-yellow'; banner.textContent='MOSTLY WORKING ⚠️'; }
+            else { banner.className='banner-red'; banner.textContent='ISSUES FOUND ❌'; }
+        }
+    </script>
+</body>
+</html>

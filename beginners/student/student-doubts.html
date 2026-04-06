@@ -4,122 +4,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Doubts - BEEPREPARE</title>
-    <link rel="stylesheet" href="../../assets/css/style.css">
+    <title>Academic Queries - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .app-container {
-            padding-bottom: 100px;
-            padding-top: 20px;
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 30px 0 15px 0;
         }
 
-        /* Doubt Card */
+        .divider-line {
+            height: 2px;
+            flex: 1;
+            background: linear-gradient(90deg, var(--border), transparent);
+            border-radius: 2px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Doubt Card - Professional Style */
         .doubt-card {
-            background: linear-gradient(145deg, rgba(30,30,30,0.6), rgba(20,20,20,0.8));
-            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(25, 26, 28, 0.6);
+            border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 16px;
-            position: relative;
+            padding: 24px;
+            margin-bottom: 20px;
             cursor: pointer;
             transition: 0.3s;
+            position: relative;
+            overflow: hidden;
         }
 
         .doubt-card:hover {
+            background: rgba(25, 26, 28, 0.9);
+            border-color: var(--primary);
             transform: translateY(-4px);
-            border-color: rgba(255, 215, 0, 0.2);
-            background: rgba(40,40,40,0.8);
-        }
-
-        .doubt-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .subject-tag {
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: rgba(255, 215, 0, 0.1);
-            padding: 4px 10px;
-            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.1);
         }
 
         .status-badge {
             font-size: 10px;
-            font-weight: 700;
-            padding: 4px 10px;
+            font-weight: 800;
+            padding: 5px 12px;
             border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .status-pending {
-            background: rgba(255, 165, 0, 0.1);
-            color: #FFA500;
+        .status-pending { background: rgba(255, 165, 0, 0.1); color: #FFA500; border: 1px solid rgba(255, 165, 0, 0.2); }
+        .status-replied { background: rgba(76, 175, 80, 0.1); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.2); }
+        .status-resolved { background: rgba(255, 255, 255, 0.05); color: #888; border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        .unread-indicator {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary);
         }
 
-        .status-replied {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4CAF50;
-        }
-
-        .doubt-question {
-            font-size: 15px;
-            color: #fff;
-            line-height: 1.5;
-            margin-bottom: 12px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .doubt-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 11px;
-            color: #666;
-        }
-
+        /* Chat System */
         .chat-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
             z-index: 2000;
             display: none;
-            opacity: 0;
-            transition: 0.3s;
-            padding: 20px;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
 
-        .chat-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
+        .chat-overlay.active { display: flex; }
 
         .chat-window {
             width: 100%;
-            max-width: 500px;
-            height: 80vh;
-            background: #141414;
-            border-radius: 28px;
+            max-width: 600px;
+            height: 85vh;
+            background: #121214;
+            border: 1px solid var(--border);
+            border-radius: 30px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
         }
 
         .chat-header {
-            padding: 20px;
+            padding: 20px 30px;
             background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
@@ -127,39 +112,21 @@
             justify-content: space-between;
         }
 
-        .teacher-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .teacher-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-        }
-
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
         }
 
         .msg {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 16px;
+            max-width: 85%;
+            padding: 16px 20px;
+            border-radius: 20px;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
             position: relative;
         }
 
@@ -167,215 +134,532 @@
             align-self: flex-end;
             background: var(--primary);
             color: #000;
-            border-bottom-right-radius: 2px;
+            border-bottom-right-radius: 4px;
+            font-weight: 600;
         }
 
         .msg-teacher {
             align-self: flex-start;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
             color: #fff;
-            border-bottom-left-radius: 2px;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .msg-time {
-            font-size: 9px;
-            opacity: 0.6;
-            margin-top: 4px;
-            display: block;
+        .msg-img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        .chat-input {
-            padding: 16px 20px;
+        .msg-img:hover { opacity: 0.8; }
+
+        .chat-input-area {
+            padding: 20px 30px;
+            background: rgba(0,0,0,0.3);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
-            gap: 12px;
-            background: rgba(0,0,0,0.2);
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .chat-input input {
+        .input-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-box {
             flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 14px 20px;
             color: #fff;
             outline: none;
+            transition: 0.3s;
         }
 
+        .input-box:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.06); }
+
         .btn-send {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 50px;
+            height: 50px;
             background: var(--primary);
+            border-radius: 15px;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-send:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+
+        /* New Query Form */
+        .new-query-card {
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.05), transparent);
+            border: 1px dashed var(--primary);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .glass-select, .glass-textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            color: #fff;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .glass-textarea { min-height: 100px; resize: none; }
+
+        .upload-zone {
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .upload-zone:hover { border-color: var(--primary); background: rgba(255, 215, 0, 0.02); }
+
+        .preview-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary), #ffa000);
+            color: #000;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 15px;
+            font-weight: 900;
+            width: 100%;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
     </style>
-    <link rel="stylesheet" href="../../assets/css/student-theme.css">
 </head>
 
 <body>
-    <div class="background-animation">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-3"></div>
+    <div class="main-layout">
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEE COMMAND</div>
+            <nav class="sidebar-nav">
+                <a href="student-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Home Hub</span>
+                </a>
+                <a href="student-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <span>Bank Inventory</span>
+                </a>
+                <a href="student-generate.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    <span>Practice</span>
+                </a>
+                <a href="../ai-chat.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+                    <span>BEE AI Assistant</span>
+                </a>
+                <a href="student-profile.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content-wrapper">
+            <header style="display: flex; gap: 20px; align-items: center; margin-bottom: 40px;">
+                <button onclick="window.location.href='student-profile.html'" style="background: none; border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                <div>
+                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Academic Queries</h2>
+                    <p style="color: var(--text-muted); font-size: 14px;">Consult with your node mentors.</p>
+                </div>
+            </header>
+
+            <div class="new-query-card" id="newQueryForm">
+                <div class="section-divider" style="margin-top: 0; margin-bottom: 25px;">
+                    <span class="section-label">Deploy New Query</span>
+                    <div class="divider-line"></div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Target Subject Bank</label>
+                        <select id="bank-select" class="glass-select">
+                            <option value="">Select a Bank</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Upload Reference (Photo)</label>
+                        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
+                            <span id="upload-status" style="font-size: 12px; color: var(--text-muted);">Click to attach image</span>
+                            <img id="image-preview" class="preview-img">
+                            <input type="file" id="file-input" hidden accept="image/*" onchange="handleFileSelect(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Describe your doubt</label>
+                    <textarea id="doubt-text" class="glass-textarea" placeholder="Explain the concept or question you're struggling with..."></textarea>
+                </div>
+
+                <button class="submit-btn" id="submitBtn" onclick="submitDoubt()">Transmit Query to Teacher →</button>
+            </div>
+
+            <div class="section-divider">
+                <span class="section-label">Active Query Nodes</span>
+                <div class="divider-line"></div>
+            </div>
+
+            <div id="doubts-list">
+                <!-- Doubts loaded via JS -->
+                 <div style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px;">Initializing query node connection...</div>
+            </div>
+        </main>
     </div>
 
-    <div class="app-container">
-        <!-- Header -->
-        <div class="top-header" style="display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 32px;">
-            <div onclick="window.location.href='student-home.html'" style="position: absolute; left: 0; cursor: pointer; padding: 8px;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </div>
-            <div class="header-title text-gold-glow" style="color: var(--primary); font-weight: 800; font-size: 18px; letter-spacing: 1px;">MY DOUBTS</div>
-        </div>
-
-        <!-- Doubts List -->
-        <div id="doubts-list">
-            <div class="doubt-card" onclick="openChat('physics')">
-                <div class="doubt-header">
-                    <span class="subject-tag">Physics</span>
-                    <span class="status-badge status-replied">REPLIED</span>
-                </div>
-                <div class="doubt-question">I am having trouble understanding the concept of Electromagnetic Induction. How does the coil position affect the current?</div>
-                <div class="doubt-footer">
-                    <span>Mrs. Verma</span>
-                    <span>Replied 10m ago</span>
-                </div>
-            </div>
-
-            <div class="doubt-card" onclick="window.ActivityManager.showToast('Pending', 'Your teacher hasn\'t replied yet.', 'info')">
-                <div class="doubt-header">
-                    <span class="subject-tag">Maths</span>
-                    <span class="status-badge status-pending">PENDING</span>
-                </div>
-                <div class="doubt-question">In Ch 4, Q15, I used the quadratic formula but I'm getting an imaginary root. Is the question correct?</div>
-                <div class="doubt-footer">
-                    <span>Mr. Sharma</span>
-                    <span>Asked 2h ago</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Chat Overlay -->
     <div class="chat-overlay" id="chatOverlay">
         <div class="chat-window">
             <div class="chat-header">
-                <div class="teacher-info">
-                    <div class="teacher-avatar">PV</div>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div id="chat-teacher-avatar" style="width:40px; height:40px; background:var(--primary); color:#000; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900;">T</div>
                     <div>
-                        <div style="font-weight: 700; color: #fff; font-size: 15px;">Mrs. Verma</div>
-                        <div style="font-size: 11px; color: var(--primary);">Physics HOD</div>
+                        <div id="chat-teacher-name" style="color:#fff; font-weight:800; font-size:16px;">--</div>
+                        <div id="chat-subject" style="color:var(--primary); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px;">--</div>
                     </div>
                 </div>
-                <div onclick="closeChat()" style="cursor: pointer; padding: 8px; color: #666;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </div>
+                <button onclick="closeChat()" style="background:none; border:none; color:#666; cursor:pointer;"><svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
             </div>
 
-            <div class="messages-container" id="messages">
-                <div class="msg msg-student">
-                    I am having trouble understanding the concept of Electromagnetic Induction. How does the coil position affect the current?
-                    <span class="msg-time">10:45 AM</span>
-                </div>
-                <div class="msg msg-teacher">
-                    Great question! The rate of change of magnetic flux is maximum when the coil is perpendicular to the field. Check the Faraday's Law video in your bank for a visual.
-                    <span class="msg-time">10:55 AM</span>
-                </div>
+            <div class="messages-container" id="messages-list">
+                <!-- Messages -->
             </div>
 
-            <div class="chat-input">
-                <input type="text" placeholder="Type a follow-up..." id="msgInput">
-                <button class="btn-send" onclick="sendMsg()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
+            <div class="chat-input-area">
+                <div id="chat-upload-preview" style="display:none; position:relative; width: 60px;">
+                   <img id="chat-preview-img" style="width:60px; height:60px; border-radius:10px; object-fit:cover;">
+                   <button onclick="clearChatFile()" style="position:absolute; top:-5px; right:-5px; width:20px; height:20px; border-radius:50%; background:#ff4d4d; border:none; color:#fff; font-size:10px; cursor:pointer;">×</button>
+                </div>
+                <div class="input-row">
+                    <button class="btn-send" style="background:rgba(255,255,255,0.05); color:var(--text-muted);" onclick="document.getElementById('chat-file-input').click()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path><polyline points="16 5 21 5 21 10"></polyline><line x1="12" y1="12" x2="21" y2="3"></line></svg>
+                    </button>
+                    <input type="file" id="chat-file-input" hidden accept="image/*" onchange="handleChatFileSelect(this)">
+                    <input type="text" id="chat-input" class="input-box" placeholder="Type clarification...">
+                    <button class="btn-send" onclick="sendChatMessage()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Nav -->
+    <!-- Mobile Nav -->
     <nav class="nav-bottom">
         <a href="student-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
             <span>Home</span>
         </a>
-        <a href="student-generate.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-            <span>Test</span>
-        </a>
-        <!-- UNIFIED BEE AI NAV -->
-        <a href="../ai-chat.html" class="nav-item ai-nav">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.8 4.2a2 2 0 0 0 1 1L19 10l-4.2 1.8a2 2 0 0 0-1 1L12 17l-1.8-4.2a2 2 0 0 0-1-1L5 10l4.2-1.8a2 2 0 0 0 1-1L12 3z"></path>
-                <path d="M18 3l.6 1.4a1 1 0 0 0 .5.5L20.5 5.5l-1.4.6a1 1 0 0 0-.5.5L18 8l-.6-1.4a1 1 0 0 0-.5-.5L15.5 5.5l1.4-.6a1 1 0 0 0 .5-.5L18 3z"></path>
-                <path d="M6 16l.6 1.4a1 1 0 0 0 .5.5L8.5 18.5l-1.4.6a1 1 0 0 0-.5.5L6 21l-.6-1.4a1 1 0 0 0-.5-.5L3.5 18.5l1.4-.6a1 1 0 0 0 .5-.5L6 16z"></path>
-            </svg>
-            <span>BEE AI</span>
-        </a>
         <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
-            <span>Banks</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Bank</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+            <span>AI</span>
+        </a>
+        <a href="student-generate.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            <span>Practice</span>
         </a>
         <a href="student-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
             <span>Profile</span>
         </a>
     </nav>
 
-    <script>
-        function openChat(subject) {
-            document.getElementById('chatOverlay').classList.add('active');
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            onSnapshot, 
+            query, 
+            orderBy,
+            doc,
+            updateDoc
+        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { 
+          firebaseConfig, 
+          apiCall, 
+          guardStudent, 
+          BP 
+        } from '../../assets/js/bee-core.js';
+        import { uploadToCloudinary } from '../../assets/js/cloudinary-uploader.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentDoubtId = null;
+        let selectedFile = null;
+        let chatFile = null;
+        let banks = [];
+        let unsubscribeMessages = null;
+
+        // UI Helpers
+        window.handleFileSelect = (input) => {
+            if (input.files && input.files[0]) {
+                selectedFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById('image-preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('upload-status').textContent = 'Image attached';
+                };
+                reader.readAsDataURL(selectedFile);
+            }
+        };
+
+        window.handleChatFileSelect = (input) => {
+             if (input.files && input.files[0]) {
+                chatFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewArea = document.getElementById('chat-upload-preview');
+                    const img = document.getElementById('chat-preview-img');
+                    img.src = e.target.result;
+                    previewArea.style.display = 'block';
+                };
+                reader.readAsDataURL(chatFile);
+            }
+        };
+
+        window.clearChatFile = () => {
+            chatFile = null;
+            document.getElementById('chat-file-input').value = '';
+            document.getElementById('chat-upload-preview').style.display = 'none';
+        };
+
+        // Core Functions
+        async function loadBanks() {
+            const result = await apiCall('/student/banks');
+            if (result && result.success) {
+                // Show all banks that are active
+                banks = result.data.filter(b => b.status === 'active');
+                const select = document.getElementById('bank-select');
+                select.innerHTML = '<option value="">Select a Bank</option>' + 
+                    banks.map(b => `<option value="${b.bankId}">${b.subject} - Class ${b.class}</option>`).join('');
+            }
         }
 
-        function closeChat() {
-            document.getElementById('chatOverlay').classList.remove('active');
-        }
-
-        function sendMsg() {
-            const input = document.getElementById('msgInput');
-            const text = input.value.trim();
-            if(!text) return;
-
-            const container = document.getElementById('messages');
-            const div = document.createElement('div');
-            div.className = 'msg msg-student';
-            div.innerHTML = `${text}<span class="msg-time">Just Now</span>`;
-            container.appendChild(div);
+        async function loadDoubts() {
+            const result = await apiCall('/student/doubts');
+            const list = document.getElementById('doubts-list');
             
-            input.value = '';
-            container.scrollTop = container.scrollHeight;
+            if (result && result.success) {
+                if (result.data.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px;">No academic queries raised yet.</div>';
+                    return;
+                }
+
+                list.innerHTML = result.data.map(d => {
+                    const statusClass = d.status === 'replied' ? 'status-replied' : (d.status === 'resolved' ? 'status-resolved' : 'status-pending');
+                    return `
+                        <div class="doubt-card" onclick="openChat('${d.doubtId}', '${d.teacherName}', '${d.subject}')">
+                            ${d.unreadByStudent ? '<div class="unread-indicator"></div>' : ''}
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                                <span class="status-badge ${statusClass}">${d.status}</span>
+                                <span style="font-size:11px; color:var(--text-muted); font-weight:700;">${timeAgo(d.updatedAt)}</span>
+                            </div>
+                            <div style="color:#fff; font-weight:600; font-size:15px; margin-bottom:12px; line-height:1.5;">
+                                ${d.lastMessage || 'Open details to view thread.'}
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div style="width:24px; height:24px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900;">${d.subject.substring(0,2).toUpperCase()}</div>
+                                <span style="font-size:12px; font-weight:700; color:var(--text-muted);">${d.subject}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const elements = document.querySelectorAll(".doubt-card");
-            elements.forEach((el, index) => {
-                el.classList.add('hud-element');
-                el.style.animationDelay = `${index * 0.1}s`;
+        window.submitDoubt = async () => {
+            const bankId = document.getElementById('bank-select').value;
+            const text = document.getElementById('doubt-text').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!bankId) return Swal.fire({ icon: 'warning', title: 'Bank Missing', text: 'Please select a subject bank.', background: '#121214', color: '#fff' });
+            if (text.length < 10) return Swal.fire({ icon: 'warning', title: 'Text Too Short', text: 'Describe your doubt in at least 10 characters.', background: '#121214', color: '#fff' });
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'TRANSMITTING...';
+
+            try {
+                let imageUrl = null;
+                if (selectedFile) {
+                    const uploadResult = await uploadToCloudinary(selectedFile, localStorage.getItem(BP.UID));
+                    imageUrl = uploadResult.secure_url;
+                }
+
+                const result = await apiCall('/student/doubts', 'POST', {
+                    bankId,
+                    questionText: text,
+                    imageUrl
+                });
+
+                if (result && result.success) {
+                    Swal.fire({ icon: 'success', title: 'Query Deployed', text: 'Your mentor will be notified immediately.', background: '#121214', color: '#fff' });
+                    document.getElementById('doubt-text').value = '';
+                    document.getElementById('image-preview').style.display = 'none';
+                    document.getElementById('upload-status').textContent = 'Click to attach image';
+                    selectedFile = null;
+                    loadDoubts();
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Fault Detected', text: err.message, background: '#121214', color: '#fff' });
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Transmit Query to Teacher →';
+            }
+        };
+
+        window.openChat = async (id, teacherName, subject) => {
+            currentDoubtId = id;
+            document.getElementById('chatOverlay').classList.add('active');
+            document.getElementById('chat-teacher-name').textContent = teacherName || 'BEE Expert';
+            document.getElementById('chat-subject').textContent = subject;
+            document.getElementById('chat-teacher-avatar').textContent = (teacherName || 'BE').substring(0,2).toUpperCase();
+            
+            // Real-time Firestore Listener
+            const messagesRef = collection(db, 'doubts', id, 'messages');
+            const q = query(messagesRef, orderBy('timestamp', 'asc'));
+            
+            if (unsubscribeMessages) unsubscribeMessages();
+            
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('messages-list');
+                const messages = [];
+                snapshot.forEach((doc) => {
+                    messages.push(doc.data());
+                });
+                
+                list.innerHTML = messages.map(m => {
+                    const time = m.timestamp?.toDate ? m.timestamp.toDate() : (m.timestamp ? new Date(m.timestamp) : new Date());
+                    return `
+                        <div class="msg ${m.senderRole === 'student' ? 'msg-student' : 'msg-teacher'}">
+                            ${m.imageUrl ? `<img src="${m.imageUrl}" class="msg-img" onclick="window.open('${m.imageUrl}')">` : ''}
+                            <div>${m.content}</div>
+                            <span style="font-size:9px; opacity:0.6; margin-top:5px; display:block; text-align: ${m.senderRole === 'student' ? 'right' : 'left'}">
+                                ${time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+                list.scrollTop = list.scrollHeight;
             });
+
+            // Mark as read in backend
+            apiCall(`/student/doubts/${id}/read`, 'POST');
+            // Optimistic unread update in Firestore
+            try {
+                await updateDoc(doc(db, 'doubts', id), { unreadByStudent: false });
+            } catch (e) {
+                console.warn('Silent read update failed:', e.message);
+            }
+        };
+
+        window.sendChatMessage = async () => {
+            const input = document.getElementById('chat-input');
+            const content = input.value.trim();
+            if (!content && !chatFile) return;
+
+            const btn = event.currentTarget;
+            btn.disabled = true;
+
+            try {
+                let imageUrl = null;
+                if (chatFile) {
+                    const up = await uploadToCloudinary(chatFile, localStorage.getItem(BP.UID));
+                    imageUrl = up.secure_url;
+                }
+
+                // We still use the API to ensure backend logic (lastMessage, unreadByTeacher, notifications) runs
+                const result = await apiCall(`/student/doubts/${currentDoubtId}/messages`, 'POST', { content, imageUrl });
+                if (result && result.success) {
+                    input.value = '';
+                    clearChatFile();
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Transmission Error', text: err.message, background: '#121214', color: '#fff' });
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        window.closeChat = () => {
+            document.getElementById('chatOverlay').classList.remove('active');
+            currentDoubtId = null;
+            if (unsubscribeMessages) unsubscribeMessages();
+            loadDoubts();
+        };
+
+        function timeAgo(date) {
+            if (!date) return 'Recently';
+            const parsedDate = new Date(date);
+            if (isNaN(parsedDate.getTime())) return 'Recently';
+            const seconds = Math.floor((new Date() - parsedDate) / 1000);
+            if (seconds < 60) return 'Just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return minutes + 'm ago';
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return hours + 'h ago';
+            return Math.floor(hours / 24) + 'd ago';
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!guardStudent()) return;
+            loadBanks();
+            loadDoubts();
         });
     </script>
 </body>
+
 </html>

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BEEPREPARE AI - LUXE CONVERSATIONAL CHAT</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- Note: student-ui might exist, if not it safely ignores or uses fallback styles -->
     <link rel="stylesheet" href="../assets/css/premium-student-ui.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -19,13 +20,14 @@
         }
 
         body {
-            background-color: transparent !important;
+            background-color: #050505 !important;
             overflow: hidden;
             display: flex;
             height: 100vh;
             color: #fff;
             font-family: 'Outfit', sans-serif;
             letter-spacing: -0.2px;
+            margin: 0;
         }
 
         .app-layout {
@@ -400,8 +402,6 @@
 </head>
 
 <body>
-    <div class="background-animation"></div>
-
     <div class="app-layout">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
@@ -415,30 +415,62 @@
                     <span class="search-icon">🔍</span>
                     <input type="text" class="sidebar-search" placeholder="Search sessions...">
                 </div>
+
+                <!-- PULSE (Usage Limits) -->
+                <div class="usage-widget" style="margin-top: 10px; padding: 15px; background: rgba(255, 215, 0, 0.03); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; transition: 0.3s;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 10px; font-weight: 800; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 1px;">BEE Pulse Capacity</span>
+                        <span style="font-size: 11px; font-weight: 900; color: #fff;"><span class="messages-used">0</span>/<span class="daily-limit">30</span></span>
+                    </div>
+                    <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
+                        <div class="usage-ring" style="width: 0%; height: 100%; background: var(--gold-primary); box-shadow: 0 0 10px var(--gold-primary); transition: 0.5s;"></div>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 9px; color: rgba(255,255,255,0.3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <span class="remaining-count">30</span> PULSES REMAINING
+                    </div>
+                </div>
             </div>
             
             <div class="history-list">
-                <div class="history-item active">
-                    <div class="h-title">Thermodynamics Doubts</div>
-                    <div class="h-time">JUST NOW</div>
+                <div style="font-size: 9px; font-weight: 800; color: #444; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; padding-left: 5px;">Study Node History</div>
+                <div class="history-item active" onclick="createNewChat()">
+                    <div class="h-title">New Study Session</div>
+                    <div class="h-time">ACTIVE NOW</div>
                 </div>
-                <div class="history-item">
-                    <div class="h-title">Calculus Revision</div>
-                    <div class="h-time">2 HOURS AGO</div>
+            </div>
+
+            <!-- Architectural Context (Portable Syllabus) -->
+            <div style="padding: 20px; border-top: 1px solid var(--glass-border); background: rgba(255,255,255,0.01);">
+                <div style="font-size: 9px; font-weight: 800; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">Active Context</div>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size: 18px;">📚</span>
+                        <span style="font-size: 11px; font-weight: 700; color: #ddd;" id="context-subject">General Study</span>
+                    </div>
+                    <div style="font-size: 10px; color: #666; font-weight: 600; padding-left: 5px;">AI Context Aware Mode</div>
                 </div>
+            </div>
+
+            <!-- Node Connectivity Footer -->
+            <div style="padding: 15px 20px; background: #000; border-top: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="status-dot-green" id="conn-dot" style="width: 6px; height: 6px;"></div>
+                    <span style="font-size: 9px; font-weight: 800; color: #666; text-transform: uppercase; letter-spacing: 1px;" id="conn-status">LINKED</span>
+                </div>
+                <div style="font-size: 9px; font-weight: 900; color: var(--gold-primary);">V4.5.5</div>
             </div>
         </aside>
 
         <main class="chat-main">
             <header class="chat-header">
                 <div class="header-left">
-                    <button id="menu-trigger" onclick="toggleSidebar()" style="background:none; border:none; color:#fff; cursor:pointer;">
+                    <button class="menu-trigger" onclick="toggleSidebar()" style="background:none; border:none; color:#fff; cursor:pointer;">
                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                         </svg>
                     </button>
                     <div class="header-title-group">
-                        <h2>BEPREP AI 4.0 <span class="status-dot-green"></span></h2>
+                        <h2>BEPREP AI 4.5 <span class="status-dot-green"></span></h2>
                         <p>Intelligent Study Companion</p>
                     </div>
                 </div>
@@ -453,20 +485,20 @@
                     <h1 class="text-gold-glow">Solve Anything.</h1>
                     <div class="suggestion-grid">
                         <div class="suggest-card" onclick="autoFill('Solve this Physics problem')">
-                            <h3>Explain Physics</h3>
+                            <h3>Explain Science</h3>
                             <p>Deep logical breakthroughs for complex problems.</p>
                         </div>
                         <div class="suggest-card" onclick="autoFill('Generate sample papers')">
-                            <h3>Test Me</h3>
-                            <p>Instant custom exam-style practice.</p>
+                            <h3>Test Prep</h3>
+                            <p>Instant custom exam-style practice sessions.</p>
                         </div>
                         <div class="suggest-card" onclick="autoFill('Summarize my notes')">
-                            <h3>Note Summary</h3>
-                            <p>Get high-yield summaries in seconds.</p>
+                            <h3>Node Summary</h3>
+                            <p>Get high-yield summaries from your active banks.</p>
                         </div>
-                        <div class="suggest-card" onclick="autoFill('Mnemonics for chemistry')">
+                        <div class="suggest-card" onclick="autoFill('Mnemonics for biology')">
                             <h3>Memory Tricks</h3>
-                            <p>Learn fun ways to remember equations.</p>
+                            <p>Learn fun ways to remember complex systems.</p>
                         </div>
                     </div>
                 </div>
@@ -474,27 +506,12 @@
 
             <div class="input-bar-container">
                 <div class="quick-chips">
-                    <div class="q-chip" onclick="autoFill('Simplify this')">Simplify</div>
-                    <div class="q-chip" onclick="autoFill('Show Examples')">Show Examples</div>
-                    <div class="q-chip" onclick="autoFill('Exam Points')">Exam Points</div>
+                    <div class="q-chip" onclick="autoFill('Simplify this concept')">Simplify</div>
+                    <div class="q-chip" onclick="autoFill('Give me real examples')">Examples</div>
+                    <div class="q-chip" onclick="autoFill('Exam key points')">Exam Tips</div>
                 </div>
 
                 <div class="input-pill-modern">
-                    <div class="upload-popup" id="u-popup">
-                        <div class="upload-opt" onclick="closePopup()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                            Upload PDF
-                        </div>
-                        <div class="upload-opt" onclick="closePopup()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                            Upload Image
-                        </div>
-                        <div class="upload-opt" onclick="closePopup()">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            My Notes
-                        </div>
-                    </div>
-
                     <button class="btn-pill-action" onclick="toggleUpload()">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                     </button>
@@ -505,7 +522,7 @@
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
                     </button>
 
-                    <button class="btn-send-yellow" onclick="handleSend()">
+                    <button class="btn-send-yellow" id="sendBtn" onclick="handleSend()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                         </svg>
@@ -523,60 +540,156 @@
         <button onclick="hideVoice()" style="margin-top:60px; background:rgba(255,215,0,0.2); border:1px solid var(--gold-primary); color:#fff; padding:15px 40px; border-radius:15px; cursor:pointer; font-weight:800;">CLOSE</button>
     </div>
 
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { 
+            apiCall, 
+            getIndexPath, 
+            BP 
+        } from '../assets/js/bee-core.js';
+
         const stream = document.getElementById('stream');
         const input = document.getElementById('chat-input');
         const landing = document.getElementById('landing');
         const sidebar = document.getElementById('sidebar');
 
-        function resizeText() {
+        let messagesUsedToday = 0;
+        let dailyLimit = 30;
+
+        function guardAiPage() {
+            const uid = localStorage.getItem(BP.UID);
+            const activated = localStorage.getItem(BP.ACTIVATED);
+            const role = localStorage.getItem(BP.ROLE);
+
+            if (!uid || activated !== 'true' || !role) {
+                window.location.href = getIndexPath();
+                return false;
+            }
+            return true;
+        }
+
+        if (!guardAiPage()) throw new Error('denied');
+
+        window.resizeText = function() {
             input.style.height = '24px';
             input.style.height = Math.min(input.scrollHeight, 120) + 'px';
         }
 
-        function toggleSidebar() { sidebar.classList.toggle('mobile-active'); }
-        function toggleUpload() {
-            const p = document.getElementById('u-popup');
-            p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+        window.toggleSidebar = function() { sidebar.classList.toggle('mobile-active'); }
+        window.toggleUpload = function() { 
+            Swal.fire({
+                title: 'Context Loading',
+                text: 'PDF & Image context analysis is coming in V5.0',
+                icon: 'info',
+                background: '#0a0a1a', color: '#fff', confirmButtonColor: '#FFD700'
+            });
         }
-        function closePopup() { document.getElementById('u-popup').style.display = 'none'; }
         
-        function showVoice() { document.getElementById('voice-overlay').style.display = 'flex'; }
-        function hideVoice() { document.getElementById('voice-overlay').style.display = 'none'; }
+        window.showVoice = function() { document.getElementById('voice-overlay').style.display = 'flex'; }
+        window.hideVoice = function() { document.getElementById('voice-overlay').style.display = 'none'; }
 
-        function autoFill(txt) {
+        window.autoFill = function(txt) {
             input.value = txt;
-            handleSend();
+            window.handleSend();
         }
 
-        function handleSend() {
-            const val = input.value.trim();
-            if(!val) return;
+        window.handleSend = async function() {
+            const message = input.value.trim();
+            if (!message) return;
 
             landing.style.display = 'none';
-            addMessage('user', val);
+            input.disabled = true;
             input.value = '';
             input.style.height = '24px';
 
+            // Add user message to UI
+            addMessage('user', message);
+
+            // Show typing indicator
             const tId = showTyping();
 
-            setTimeout(() => {
+            try {
+                const result = await apiCall('/ai/chat', 'POST', { message });
+
                 removeTyping(tId);
-                const mockText = `I've analyzed your query about <strong>"${val}"</strong>. This is a crucial topic for your upcoming assessments.<br><br>Here is a high-yield summary of the concept...`;
-                addMessage('ai', mockText);
-            }, 1200);
+
+                if (result && result.success) {
+                    addMessage('ai', result.data.aiMessage);
+                    
+                    // Update limits
+                    messagesUsedToday = result.data.messagesUsedToday;
+                    dailyLimit = result.data.dailyLimit;
+                    updateLimitDisplay(messagesUsedToday, dailyLimit, result.data.remainingToday);
+
+                } else if (result?.error?.code === 'DAILY_LIMIT_REACHED') {
+                    handleLimitReached(message);
+                } else {
+                    addMessage('ai', 'BEE AI is temporarily unavailable. Please try again in a moment.');
+                }
+            } catch (err) {
+                removeTyping(tId);
+                addMessage('ai', 'Connection error. Please check your internet node.');
+                console.error('AI chat error:', err);
+            } finally {
+                input.disabled = (messagesUsedToday >= dailyLimit);
+                if (!input.disabled) input.focus();
+            }
+        }
+
+        function handleLimitReached(lastMessage) {
+            input.disabled = true;
+            input.placeholder = 'Daily limit reached — opens ChatGPT';
+            
+            const sendBtn = document.getElementById('sendBtn');
+            if (sendBtn) sendBtn.disabled = true;
+
+            Swal.fire({
+                icon: 'info',
+                title: 'Daily Limit Reached',
+                html: `<p>You've used all <b>${dailyLimit}</b> BEE AI messages for today.</p><p style="color:#aaa; font-size:13px;">Continue your study session on ChatGPT. Your question will be pre-filled.</p>`,
+                showCancelButton: true,
+                confirmButtonText: 'Continue on ChatGPT 🚀',
+                cancelButtonText: 'Try Tomorrow',
+                background: '#0a0a1a', color: '#fff', confirmButtonColor: '#FFD700'
+            }).then(r => {
+                if (r.isConfirmed && lastMessage) {
+                    const encoded = encodeURIComponent(lastMessage);
+                    window.open('https://chatgpt.com/?q=' + encoded, '_blank');
+                }
+            });
+        }
+
+        function updateLimitDisplay(used, limit, remaining) {
+            const usedEl = document.querySelector('.messages-used');
+            const remainEl = document.querySelector('.remaining-count');
+            const limitEl = document.querySelector('.daily-limit');
+            const ring = document.querySelector('.usage-ring');
+
+            if (usedEl) usedEl.textContent = used;
+            if (remainEl) remainEl.textContent = remaining;
+            if (limitEl) limitEl.textContent = limit;
+
+            if (ring) {
+                const percent = (used / limit) * 100;
+                ring.style.width = Math.min(100, percent) + '%';
+                
+                if (remaining <= 5) ring.style.background = '#ff4d4d';
+                else if (remaining <= 10) ring.style.background = '#ffa500';
+                else ring.style.background = 'var(--gold-primary)';
+            }
         }
 
         function addMessage(role, text) {
             const row = document.createElement('div');
             row.className = `message-row ${role}-msg`;
+            const name = role === 'user' ? (localStorage.getItem(BP.NAME)?.substring(0, 2).toUpperCase() || 'ST') : 'B';
             row.innerHTML = `
-                <div class="avatar-chat">${role === 'user' ? 'VR' : 'B'}</div>
+                <div class="avatar-chat">${name}</div>
                 <div class="bubble-chat">
                     ${text}
                     <div class="msg-actions" style="margin-top: 10px; opacity: 0.6; font-size: 11px; display: flex; gap: 15px;">
-                        <span class="action-tool" style="cursor:pointer;">📋 Copy</span>
-                        ${role === 'ai' ? '<span class="action-tool" style="cursor:pointer;">🔄 Retry</span>' : ''}
+                        <span class="action-tool" onclick="navigator.clipboard.writeText(this.parentElement.previousSibling.textContent.trim())">📋 Copy</span>
+                        ${role === 'ai' ? '<span class="action-tool" onclick="location.reload()">🔄 Clear</span>' : ''}
                     </div>
                 </div>
             `;
@@ -604,22 +717,37 @@
 
         function removeTyping(id) {
             const el = document.getElementById(id);
-            if(el) el.remove();
+            if (el) el.remove();
         }
 
-        function createNewChat() {
+        window.createNewChat = function() {
             stream.innerHTML = '';
             stream.appendChild(landing);
             landing.style.display = 'block';
-            if(window.innerWidth <= 768) sidebar.classList.remove('mobile-active');
+            if (window.innerWidth <= 768) sidebar.classList.remove('mobile-active');
         }
 
         input.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter' && !e.shiftKey) {
+            if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                handleSend();
+                window.handleSend();
             }
         });
+
+        async function loadInitialLimit() {
+            const role = localStorage.getItem(BP.ROLE);
+            const user = await apiCall(`/${role}/profile`);
+            if (user && user.success) {
+                messagesUsedToday = user.data.aiMessagesToday || 0;
+                updateLimitDisplay(messagesUsedToday, dailyLimit, dailyLimit - messagesUsedToday);
+                if (messagesUsedToday >= dailyLimit) {
+                    input.disabled = true;
+                    input.placeholder = 'Daily limit reached.';
+                }
+            }
+        }
+
+        window.addEventListener('load', loadInitialLimit);
     </script>
 </body>
 
