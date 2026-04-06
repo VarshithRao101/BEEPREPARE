@@ -1,11 +1,11 @@
 {
   "version": 2,
   "functions": {
-    "beeprepare-backend/server.js": {
+    "api/server.js": {
       "maxDuration": 25
     }
   },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/beeprepare-backend/server.js" }
+    { "source": "/api/(.*)", "destination": "/api/server.js" }
   ]
 }
