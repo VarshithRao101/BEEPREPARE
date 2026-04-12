@@ -268,14 +268,20 @@
 </head>
 <body>
     <div class="app-container">
-        <div class="header">
-            <button class="back-btn" onclick="window.history.back()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="19" y1="12" x2="5" y2="12"></line>
-                    <polyline points="12 19 5 12 12 5"></polyline>
-                </svg>
-            </button>
-            <h1>Share Feedback</h1>
+        <div class="header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button class="back-btn" onclick="window.history.back()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </button>
+                <h1>Share Feedback</h1>
+            </div>
+            <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+            </div>
         </div>
 
         <div class="feedback-card">
@@ -283,10 +289,10 @@
                 <label>Feedback Type</label>
                 <div class="select-wrapper">
                     <select id="feedbackType">
-                        <option value="bug">🐞 Report a Bug</option>
-                        <option value="feature">💡 Suggest a Feature</option>
+                        <option value="bug">🐛 Report a Bug</option>
+                        <option value="feature">✨ Suggest a Feature</option>
                         <option value="star" selected>⭐ Rate Experience</option>
-                        <option value="content">🧠 Content Issue</option>
+                        <option value="content">📚 Content Issue</option>
                     </select>
                 </div>
             </div>
@@ -438,6 +444,15 @@
 
         window.addEventListener('load', () => {
             if (!guardStudent()) return;
+
+            // Load streak
+            apiCall('/student/streak').then(res => {
+                if (res && res.success) {
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                    BP.initStreakFlame('streak-canvas');
+                }
+            });
         });
     </script>
 </body>

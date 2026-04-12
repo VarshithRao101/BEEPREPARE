@@ -228,11 +228,17 @@
         </aside>
 
         <main class="content-wrapper">
-            <header style="display: flex; gap: 20px; align-items: center; margin-bottom: 30px;">
-                <button onclick="window.location.href='student-home.html'" style="background: none; border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                <div>
-                  <h2 style="font-size: 24px; font-weight: 800; color: #fff;">Student Node</h2>
-                  <p style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Academic profile & credentials</p>
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <button onclick="window.location.href='student-home.html'" style="background: none; border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+                    <div>
+                      <h2 style="font-size: 24px; font-weight: 800; color: #fff;">Student Node</h2>
+                      <p style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Academic profile & credentials</p>
+                    </div>
+                </div>
+                <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                    <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                    <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
                 </div>
             </header>
 
@@ -302,6 +308,8 @@
                     </div>
 
                     <button onclick="handleLogout()" class="terminate-btn" style="padding: 16px; font-size: 12px; margin-top: 15px;">TERMINATE SESSION</button>
+                    
+                    <button onclick="handleWipeData()" class="terminate-btn" style="padding: 12px; font-size: 10px; margin-top: 10px; opacity: 0.6; border-style: dashed;">WIPE ALL DATA & RESET ACCOUNT</button>
                 </aside>
             </div>
         </main>
@@ -345,6 +353,11 @@
         const app = initializeApp(firebaseConfig);
 
         async function loadProfile() {
+            // Stats skeletons
+            document.getElementById('p-bankCount').innerHTML = '<div class="skeleton" style="height:24px; width:30px; margin:0 auto;"></div>';
+            document.getElementById('p-testCount').innerHTML = '<div class="skeleton" style="height:24px; width:30px; margin:0 auto;"></div>';
+            document.getElementById('p-queryCount').innerHTML = '<div class="skeleton" style="height:24px; width:30px; margin:0 auto;"></div>';
+
             // Show data from localStorage immediately (fast display)
             const localName = localStorage.getItem(BP.NAME) || 'BEE User';
             const localEmail = localStorage.getItem(BP.EMAIL) || '';
@@ -375,18 +388,34 @@
                 if (nameEl) nameEl.textContent = p.displayName;
                 if (emailEl) emailEl.textContent = p.email;
                 
+                // Update local cache for true real-time consistency
+                localStorage.setItem(BP.NAME, p.displayName);
+                localStorage.setItem(BP.EMAIL, p.email);
+                localStorage.setItem(BP.PLAN, p.planType || 'BASIC');
+
                 const planEl = document.querySelector('.plan-badge, .plan-tag, .tier-badge');
                 if (planEl) planEl.textContent = p.planType?.toUpperCase() || 'BASIC';
 
-                // Update stats numbers
-                const statEls = document.querySelectorAll('.stat-val, .stat-value, .stat-number');
-                if (statEls[0]) statEls[0].textContent = p.activeBanks?.length || 0;
-                if (statEls[1]) statEls[1].textContent = p.stats?.testsTaken || 0;
-                if (statEls[2]) statEls[2].textContent = p.stats?.totalQuestionsSolved || (p.stats?.testsTaken * 10) || 0;
+                // Update stats numbers using IDs for precision
+                const banksEl = document.getElementById('stat-banks');
+                const testsEl = document.getElementById('stat-tests');
+                const queriesEl = document.getElementById('stat-queries');
+
+                if (banksEl) banksEl.textContent = p.activeBanks?.length || 0;
+                if (testsEl) testsEl.textContent = p.stats?.testsTaken || 0;
+                if (queriesEl) queriesEl.textContent = p.stats?.queryCount || 0;
+
+                const idEl2 = document.getElementById('node-id-display');
+                if (idEl2) idEl2.textContent = `IDENTIFIER: ${p.googleUid?.substring(0, 10).toUpperCase() || '--'}`;
             }
 
             if (streakResult && streakResult.success) {
                 const s = streakResult.data;
+                
+                // Update header streak
+                const streakVal = document.getElementById('streak-val-header');
+                if (streakVal) streakVal.textContent = s.currentStreak || 0;
+                BP.initStreakFlame('streak-canvas');
 
                 // Map to existing streak elements if any, or use indicators
                 const currentEl = document.querySelector('.streak-current, .streak-value, [data-streak-current]');
@@ -439,6 +468,62 @@
                     text: msg,
                     background: '#0a0a1a', color: '#fff'
                 });
+            }
+        }
+
+        window.handleWipeData = async function() {
+            // Layer 1: Warning
+            const firstControl = await Swal.fire({
+                title: 'CRITICAL WARNING',
+                text: 'This will permanently ERASE all your banks, history, and practice logs. This is irreversible.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                confirmButtonText: 'I UNDERSTAND',
+                background: '#0a0a1a', color: '#fff'
+            });
+
+            if (!firstControl.isConfirmed) return;
+
+            // Layer 2: Confirmation Input
+            const { value: confirmInput } = await Swal.fire({
+                title: 'TOTAL DATA PURGE',
+                text: 'Type "CONFIRM" to permanently sanitize your data matrix.',
+                input: 'text',
+                inputPlaceholder: 'CONFIRM',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                confirmButtonText: 'EXECUTE PURGE',
+                background: '#0a0a1a', color: '#fff',
+                preConfirm: (val) => {
+                    if (val !== 'CONFIRM') {
+                        Swal.showValidationMessage('Security token mismatch. Enter correctly.');
+                    }
+                    return val;
+                }
+            });
+
+            if (confirmInput === 'CONFIRM') {
+                Swal.fire({
+                    title: 'Sanitizing Matrix...',
+                    text: 'Please wait while we purge intervention nodes.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                const res = await apiCall('/auth/wipe-data', 'POST');
+                if (res && res.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Matrix Purged',
+                        text: 'All traces of your scholar account have been erased.',
+                        background: '#0a0a1a', color: '#fff'
+                    });
+                    localStorage.clear();
+                    window.location.replace('../../index.html');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Purge Failed', text: res.message || 'Bridge error.', background: '#0a0a1a', color: '#fff' });
+                }
             }
         }
 

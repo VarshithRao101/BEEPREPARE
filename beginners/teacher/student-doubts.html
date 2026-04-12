@@ -4,439 +4,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Doubts - BEEPREPARE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <title>Resolution Hub - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/teacher-theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .section-divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 30px 0 15px 0;
+        :root {
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #FFD700;
+            --bg-deep: #08080a;
+            --sidebar-bg: #0c0c0f;
+            --hub-bg: #0e0e12;
+            --msg-in: rgba(255, 255, 255, 0.05);
+            --msg-out: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
         }
 
-        .divider-line {
-            height: 2px;
-            flex: 1;
-            background: linear-gradient(90deg, var(--border), transparent);
-            border-radius: 2px;
-        }
-
-        .section-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .search-container {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .search-input {
-            background: transparent;
-            border: none;
+        body {
+            overflow: hidden;
+            background: var(--bg-deep);
+            font-family: 'Outfit', sans-serif;
             color: #fff;
-            font-size: 14px;
-            font-weight: 600;
-            outline: none;
-            width: 100%;
+            margin: 0;
         }
 
-        .doubt-card {
+        .resolution-hub {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            height: 100vh;
+            width: 100vw;
+            transition: 0.3s;
+        }
+
+        /* ════════════════ 1. Scholar Logs Sidebar ════════════════ */
+        .logs-sidebar {
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        .sidebar-header {
             padding: 25px;
-            margin-bottom: 20px;
-            transition: 0.3s;
-        }
-
-        .student-header {
+            border-bottom: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            justify-content: space-between;
         }
 
-        .student-avatar {
-            width: 45px;
-            height: 45px;
+        .sidebar-header h2 { font-size: 18px; margin: 0; font-weight: 800; letter-spacing: 0.5px; }
+
+        .search-node {
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .search-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            border: 1px solid var(--border);
-        }
-
-        .question-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            border-left: 4px solid var(--primary);
-            margin-bottom: 20px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #ddd;
-        }
-
-        .reply-btn {
-            background: var(--primary);
-            border: none;
-            padding: 12px 25px;
-            border-radius: 12px;
-            color: #000;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.3s;
+            padding: 10px 15px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .reply-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2); }
+        .search-box input { background: none; border: none; color: #fff; font-size: 13px; outline: none; width: 100%; font-family: inherit; }
 
-        /* Chat Overlay */
-        .chat-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(15px);
-            z-index: 2000;
-            display: none;
+        .log-stream { flex: 1; overflow-y: auto; padding: 15px; }
+
+        .log-card {
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 15px;
+            border: 1.5px solid transparent;
+            position: relative;
         }
 
-        .chat-container {
-            background: #111;
-            width: 90%;
-            max-width: 450px;
-            height: 600px;
-            border-radius: 25px;
-            border: 1px solid var(--border);
+        .log-card:hover { background: rgba(255, 255, 255, 0.04); transform: translateY(-2px); }
+        .log-card.active { background: rgba(255, 215, 0, 0.05); border-color: rgba(255, 215, 0, 0.2); }
+
+        .student-avatar {
+            width: 48px; height: 48px; border-radius: 15px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: var(--primary); font-size: 16px;
+        }
+
+        .log-card.active .student-avatar { background: var(--primary); color: #000; }
+
+        .log-info { flex: 1; min-width: 0; }
+        .log-info h4 { margin: 0; font-size: 14px; color: #fff; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .log-info p { margin: 3px 0 0; font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+        .unread-indicator { width: 8px; height: 8px; background: #ff4d4d; border-radius: 50%; box-shadow: 0 0 10px #ff4d4d; position: absolute; top: 15px; right: 15px; }
+
+        /* ════════════════ 2. Active Interaction Hub ════════════════ */
+        .interaction-hub {
+            background: var(--hub-bg);
             display: flex;
             flex-direction: column;
+            position: relative;
             overflow: hidden;
         }
 
-        .chat-header {
+        .empty-hub {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 40px; opacity: 0.8;
+        }
+
+        .hub-icon {
+            width: 80px; height: 80px; border-radius: 24px;
+            background: rgba(255, 255, 255, 0.03); border: 1.5px solid rgba(255, 255, 255, 0.08);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 25px; color: var(--primary);
+        }
+
+        .hub-header {
+            padding: 15px 25px;
+            background: rgba(15, 15, 18, 0.8);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; gap: 15px;
+            z-index: 10;
+        }
+
+        .btn-return {
+            display: none; width: 40px; height: 40px; border-radius: 12px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            color: #fff; cursor: pointer; align-items: center; justify-content: center;
+        }
+
+        .scholar-anchor { display: flex; align-items: center; gap: 12px; }
+        .anchor-id { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; }
+
+        .chat-canvas { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 30px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            scroll-behavior: smooth;
+        }
+
+        .bubble {
+            max-width: 75%; padding: 12px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); position: relative;
+            animation: slideUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .bubble.student { align-self: flex-start; background: var(--msg-in); color: #fff; border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); }
+        .bubble.teacher { align-self: flex-end; background: var(--msg-out); color: #000; border-bottom-right-radius: 4px; font-weight: 600; }
+
+        .bubble-img {
+            max-width: 150px; border-radius: 12px; margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+            transition: 0.3s; display: block;
+        }
+        .bubble-img:hover { transform: scale(1.03); border-color: var(--primary); }
+
+        .response-console {
             padding: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: rgba(12, 12, 15, 0.98);
+            border-top: 1px solid var(--glass-border);
+            display: flex; gap: 12px; align-items: flex-end;
         }
 
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-
-        .msg { max-width: 85%; padding: 12px 18px; border-radius: 15px; font-size: 13px; line-height: 1.5; }
-        .msg-student { background: rgba(255, 255, 255, 0.05); align-self: flex-start; border-bottom-left-radius: 3px; }
-        .msg-teacher { background: var(--primary); color: #000; align-self: flex-end; border-bottom-right-radius: 3px; font-weight: 700; }
-
-        .chat-input-area { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
-        .chat-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 15px; padding: 12px 20px; color: #fff; outline: none; }
-        .send-btn { background: var(--primary); border: none; width: 45px; height: 45px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-        @media (min-width: 769px) {
-            .doubts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
+        .composer {
+            flex: 1; background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: 18px; padding: 12px 18px; color: #fff; outline: none;
+            min-height: 48px; max-height: 150px; resize: none; font-size: 14px;
+            transition: 0.3s; font-family: inherit;
         }
+
+        .btn-action { width: 48px; height: 48px; border-radius: 14px; border: none; background: var(--glass); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-action:hover { background: rgba(255, 255, 255, 0.08); }
+        .btn-action.prime { background: var(--primary); color: #000; }
+
+        .lightbox-portal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .lightbox-portal.active { display: flex; }
+        .lightbox-content { max-width: 90%; max-height: 85%; border-radius: 15px; }
+
+        @media (max-width: 768px) {
+            .resolution-hub { grid-template-columns: 100% 100%; width: 200%; }
+            .resolution-hub.chat-active { transform: translateX(-50%); }
+            .btn-return { display: flex; }
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
     </style>
 </head>
 
 <body>
-    <div class="main-layout">
-        <!-- Sidebar -->
-        <aside class="pc-sidebar">
-            <div class="sidebar-brand">BEEPREPARE</div>
-            <nav class="sidebar-nav">
-                <a href="teacher-home.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-                    <span>Dashboard</span>
-                </a>
-                <a href="question-bank.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
-                    <span>Bank Inventory</span>
-                </a>
-                <a href="generate-paper.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
-                    <span>Generate Paper</span>
-                </a>
-                <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
-                    <span>BEE AI Assistant</span>
-                </a>
-                <a href="teacher-profile.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-                    <span>My Profile</span>
-                </a>
-            </nav>
-        </aside>
-
-        <main class="content-wrapper">
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <div>
-                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Student Doubts</h2>
-                    <p style="color: var(--text-muted); font-size: 14px;">Resolution center for academic queries.</p>
+    <div class="resolution-hub" id="hub-container">
+        <!-- 1. Scholar Logs -->
+        <aside class="logs-sidebar">
+            <header class="sidebar-header">
+                <h2>Scholar Queries</h2>
+                <div class="btn-action" style="width: 36px; height: 36px;" onclick="window.location.href='teacher-home.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 </div>
-                <div class="profile-icon" onclick="window.location.href='teacher-profile.html'">T</div>
             </header>
-
-            <div class="search-container adv-card">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input type="text" class="search-input" placeholder="Search by student or chapter...">
+            
+            <div class="search-node">
+                <div class="search-box">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="log-filter" placeholder="Search scholars..." onkeyup="filterLogs()">
+                </div>
             </div>
 
-            <div class="doubts-grid">
-                <!-- Doubt 1 -->
-                <div class="doubt-card adv-card">
-                    <div class="student-header">
-                        <div class="student-avatar">VR</div>
-                        <div>
-                            <div style="font-weight: 800; font-size: 16px;">Varshith Rao</div>
-                            <div style="color: var(--primary); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Real Numbers</div>
-                        </div>
-                    </div>
-                    <div class="question-box">
-                        "I am confused about Rational vs Irrational numbers. How do we prove root 2 is irrational using the contradiction method?"
-                    </div>
-                    <button class="reply-btn" onclick="openChat('Varshith Rao', 'Real Numbers')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        REPLY TO DOUBT
-                    </button>
-                </div>
+            <div class="log-stream" id="log-list">
+                <div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">Syncing Hub...</div>
+            </div>
+        </aside>
 
-                <!-- Doubt 2 -->
-                <div class="doubt-card adv-card">
-                    <div class="student-header">
-                        <div class="student-avatar" style="background: rgba(77, 166, 255, 0.1); color: #4da6ff;">AK</div>
+        <!-- 2. Active Interaction Hub -->
+        <main class="interaction-hub">
+            <div class="empty-hub" id="empty-hub">
+                <div class="hub-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7z"></path></svg>
+                </div>
+                <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 12px;">Expert Bridge Secure</h3>
+                <p style="font-size: 13px; max-width: 250px; line-height: 1.6; opacity: 0.5; font-weight: 600;">Authenticate a scholar terminal from the sidebar to begin expert guidance.</p>
+            </div>
+
+            <div id="active-hub" style="display: none; flex-direction: column; height: 100%;">
+                <header class="hub-header">
+                    <button class="btn-return" onclick="document.getElementById('hub-container').classList.remove('chat-active')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div class="scholar-anchor">
+                        <div class="anchor-id" id="hub-student-initials">S</div>
                         <div>
-                            <div style="font-weight: 800; font-size: 16px;">Amit Kumar</div>
-                            <div style="color: #4da6ff; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Polynomials</div>
+                            <div id="hub-student-name" style="font-weight: 800; font-size: 16px;">Scholar Master</div>
+                            <div id="hub-context-text" style="color: var(--primary); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">Context Loading...</div>
                         </div>
                     </div>
-                    <div class="question-box">
-                        "Can you explain the relationship between zeroes and coefficients again? I keep getting mixed up with the signs."
-                    </div>
-                    <button class="reply-btn" style="background: #4da6ff;" onclick="openChat('Amit Kumar', 'Polynomials')">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        REPLY TO DOUBT
+                </header>
+
+                <div class="chat-canvas" id="msg-stream"></div>
+
+                <div class="interaction-console">
+                    <textarea id="hub-response" class="composer" placeholder="Provide expert clarity..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                    <button class="btn-action prime" id="hub-send-btn" onclick="sendExpertResponse()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="#000" stroke="none"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Bottom Nav (Mobile Only) -->
-    <nav class="nav-bottom">
-        <a href="teacher-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-            <span>Home</span>
-        </a>
-        <a href="question-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
-            <span>Bank</span>
-        </a>
-        <a href="generate-paper.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
-            <span>Paper</span>
-        </a>
-        <a href="../ai-chat.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
-            <span>AI</span>
-        </a>
-        <a href="teacher-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-            <span>Profile</span>
-        </a>
-    </nav>
-
-    <!-- Mini Chat Modal -->
-    <div class="chat-overlay" id="chatOverlay">
-        <div class="chat-container">
-            <div class="chat-header">
-                <div>
-                    <div style="font-weight: 800; font-size: 16px;" id="chatStudent">Student Name</div>
-                    <div style="color: var(--primary); font-size: 10px; font-weight: 800; text-transform: uppercase;" id="chatChapter">Chapter</div>
-                </div>
-                <button onclick="closeChat()" style="background: none; border: none; color: #888; font-size: 24px; cursor: pointer;">×</button>
-            </div>
-            <div class="chat-messages" id="chatMessages"></div>
-            <div class="chat-input-area">
-                <input type="text" class="chat-input" id="chatInput" placeholder="Type your expert reply...">
-                <button class="send-btn" onclick="sendMessage()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
-            </div>
-        </div>
+    <div class="lightbox-portal" id="lightbox" onclick="this.classList.remove('active')">
+        <img class="lightbox-content" id="lightbox-img">
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { 
-            getFirestore, 
-            collection, 
-            onSnapshot, 
-            query, 
-            orderBy,
-            doc,
-            updateDoc
-        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-        import {
-            apiCall,
-            getFreshToken,
-            guardTeacher,
-            getIndexPath,
-            BP,
-            API_BASE,
-            firebaseConfig
-        } from '../../assets/js/bee-core.js';
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, addDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { firebaseConfig, apiCall, guardTeacher, BP } from '../../assets/js/bee-core.js';
 
-        import { getAuth, signOut }
-            from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Run guard first
-        if (!guardTeacher()) {
-            window.location.href = getIndexPath();
-            throw new Error('Access denied');
-        }
+        let currentChatId = null;
+        let allLogs = [];
+        let unsubscribe = null;
 
-        let currentDoubtId = null;
-        let unsubscribeMessages = null;
-
-        async function loadDoubts() {
-            const grid = document.querySelector('.doubts-grid');
-            grid.innerHTML = '<div style="color: var(--text-muted); font-size: 14px; text-align: center; width: 100%; padding: 40px;">SCANNING DOUBT PULSE...</div>';
-
-            const result = await apiCall('/teacher/doubts');
-            if (result && result.success) {
-                renderDoubts(result.data.doubts);
-            } else {
-                grid.innerHTML = '<div style="color: var(--text-muted); font-size: 14px; text-align: center; width: 100%; padding: 40px;">No active doubts found in the neural grid.</div>';
+        const initHub = async () => {
+            if (!guardTeacher()) return;
+            try {
+                await fetchLogs();
+                renderSidebar();
+            } catch (e) {
+                console.error('Hub sync error:', e);
+                document.getElementById('log-list').innerHTML = `<div style="padding:20px; color:#ff4d4d; font-size:11px; font-weight:900; text-align:center;">SYNC DEFERRED.</div>`;
             }
-        }
+        };
 
-        function renderDoubts(doubts) {
-            const grid = document.querySelector('.doubts-grid');
-            if (doubts.length === 0) {
-                grid.innerHTML = '<div style="color: var(--text-muted); font-size: 14px; text-align: center; width: 100%; padding: 40px;">No active doubts found.</div>';
+        const fetchLogs = async () => {
+            const res = await apiCall('/teacher/doubts');
+            if (res && res.success) {
+                allLogs = res.data.chats || [];
+            }
+        };
+
+        function renderSidebar() {
+            const list = document.getElementById('log-list');
+            if (!list) return;
+            if (allLogs.length === 0) {
+                list.innerHTML = `<div style="padding:40px; text-align:center; color:rgba(255,255,255,0.2); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; line-height:1.6;">No active queries.<br><span style="color:var(--primary); font-size:10px;">Awaiting scholar interaction.</span></div>`;
                 return;
             }
-
-            grid.innerHTML = doubts.map(doubt => {
-                const avatar = (doubt.studentName || 'S').split(' ').map(n => n[0]).join('').toUpperCase();
+            list.innerHTML = allLogs.map(l => {
+                const isActive = currentChatId === l.chatId;
+                const initials = (l.studentName || 'S').substring(0, 2).toUpperCase();
                 return `
-                    <div class="doubt-card adv-card">
-                        ${doubt.unreadByTeacher ? '<div style="position:absolute; top:15px; right:15px; width:8px; height:8px; background:var(--primary); border-radius:50%; box-shadow:0 0 10px var(--primary);"></div>' : ''}
-                        <div class="student-header">
-                            <div class="student-avatar" style="background: ${doubt.avatarColor || 'rgba(255, 215, 0, 0.1)'}">${avatar}</div>
-                            <div>
-                                <div style="font-weight: 800; font-size: 16px;">${doubt.studentName}</div>
-                                <div style="color: var(--primary); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">${doubt.subject}</div>
+                    <div class="log-card ${isActive ? 'active' : ''}" onclick="openResolution('${l.chatId}', '${l.studentName}', '${l.subject}', '${l.class}')">
+                        <div class="student-avatar">${initials}</div>
+                        <div class="log-info">
+                            <h4>${l.studentName}</h4>
+                            <p>${l.subject} • ${l.class}</p>
+                            <div style="font-size: 11px; color: var(--text-muted); opacity:0.6; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight:500;">
+                                ${l.lastMessage || 'Awaiting input...'}
                             </div>
                         </div>
-                        <div class="question-box">
-                            "${doubt.lastMessage || 'No message content.'}"
-                        </div>
-                        <button class="reply-btn" onclick="window.openChat('${doubt.doubtId}', '${doubt.studentName}', '${doubt.subject}')">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                            REPLY TO DOUBT
-                        </button>
+                        ${l.unreadByTeacher ? '<div class="unread-indicator"></div>' : ''}
                     </div>
                 `;
             }).join('');
         }
 
-        window.openChat = async function(doubtId, name, chapter) {
-            currentDoubtId = doubtId;
-            document.getElementById('chatStudent').innerText = name;
-            document.getElementById('chatChapter').innerText = chapter;
-            document.getElementById('chatOverlay').style.display = 'flex';
-            
-            // Real-time Firestore Listener
-            const messagesRef = collection(db, 'doubts', doubtId, 'messages');
-            const q = query(messagesRef, orderBy('timestamp', 'asc'));
-            
-            if (unsubscribeMessages) unsubscribeMessages();
-            
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                const messagesArea = document.getElementById('chatMessages');
-                const messages = [];
-                snapshot.forEach((doc) => {
-                    messages.push(doc.data());
-                });
-                
-                messagesArea.innerHTML = messages.map(msg => {
-                    const time = msg.timestamp?.toDate ? msg.timestamp.toDate() : (msg.timestamp ? new Date(msg.timestamp) : new Date());
+        window.openResolution = (chatId, studentName, subject, className) => {
+            currentChatId = chatId;
+            renderSidebar();
+
+            document.getElementById('hub-container').classList.add('chat-active');
+            document.getElementById('empty-hub').style.display = 'none';
+            document.getElementById('active-hub').style.display = 'flex';
+            document.getElementById('hub-student-name').textContent = studentName;
+            document.getElementById('hub-context-text').textContent = `${subject} • ${className}`;
+            document.getElementById('hub-student-initials').textContent = (studentName || 'S').substring(0, 2).toUpperCase();
+
+            apiCall(`/teacher/doubts/${chatId}/read`, 'POST').catch(() => {});
+
+            if (unsubscribe) unsubscribe();
+            const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc'));
+            unsubscribe = onSnapshot(q, (snap) => {
+                const stream = document.getElementById('msg-stream');
+                stream.innerHTML = snap.docs.map(doc => {
+                    const m = doc.data();
+                    const side = m.senderRole === 'student' ? 'student' : 'teacher';
                     return `
-                        <div class="msg ${msg.senderRole === 'teacher' ? 'msg-teacher' : 'msg-student'}">
-                            ${msg.imageUrl ? `<img src="${msg.imageUrl}" style="max-width:100%; border-radius:10px; margin-bottom:8px; cursor:pointer;" onclick="window.open('${msg.imageUrl}')">` : ''}
-                            ${msg.content}
-                            <div style="font-size: 8px; opacity: 0.6; margin-top: 4px; text-align: right;">
-                                ${time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        <div class="bubble ${side}">
+                            ${m.imageUrl ? `<img src="${m.imageUrl}" class="bubble-img" onclick="showLightbox('${m.imageUrl}')">` : ''}
+                            <div style="word-break: break-word;">${m.content}</div>
+                            <div style="font-size: 9px; opacity: 0.3; margin-top: 8px; text-align: ${side === 'teacher' ? 'right' : 'left'}; font-weight:800;">
+                                ${m.timestamp?.toDate ? m.timestamp.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'SYNCING...'}
                             </div>
                         </div>
                     `;
                 }).join('');
-                messagesArea.scrollTop = messagesArea.scrollHeight;
+                setTimeout(() => stream.scrollTop = stream.scrollHeight, 100);
             });
-
-            // Mark as read in backend
-            apiCall(`/teacher/doubts/${doubtId}/read`, 'POST');
-            // Optimistic unread update in Firestore
-             try {
-                await updateDoc(doc(db, 'doubts', doubtId), { unreadByTeacher: false });
-            } catch (e) {
-                console.warn('Silent read update failed:', e.message);
-            }
         };
 
-        window.closeChat = function() {
-            document.getElementById('chatOverlay').style.display = 'none';
-            currentDoubtId = null;
-            if (unsubscribeMessages) unsubscribeMessages();
-            loadDoubts();
+        window.showLightbox = (url) => {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = url;
+            lb.classList.add('active');
         };
 
-        window.sendMessage = async function() {
-            const input = document.getElementById('chatInput');
-            const content = input.value.trim();
-            if(!content || !currentDoubtId) return;
+        window.sendExpertResponse = async () => {
+            const input = document.getElementById('hub-response');
+            const data = input.value.trim();
+            if (!data || !currentChatId) return;
 
-            const btn = event.currentTarget || document.querySelector('.send-btn');
+            const btn = document.getElementById('hub-send-btn');
             btn.disabled = true;
+            input.value = '';
+            input.style.height = 'auto';
 
-            const result = await apiCall(`/teacher/doubts/${currentDoubtId}/reply`, 'POST', { content });
-            if (result && result.success) {
-                input.value = '';
-            } else {
-                Swal.fire({ icon: 'error', title: 'SEND FAILED', text: result?.message || 'Transmission error.', background: '#111', color: '#fff' });
+            try {
+                const chatRef = doc(db, 'chats', currentChatId);
+                const msgRef = collection(chatRef, 'messages');
+
+                await addDoc(msgRef, {
+                    senderId: localStorage.getItem(BP.UID),
+                    senderRole: 'teacher',
+                    content: data,
+                    timestamp: serverTimestamp()
+                });
+
+                await updateDoc(chatRef, {
+                    lastMessage: data,
+                    lastMessageRole: 'teacher',
+                    unreadByStudent: true,
+                    unreadByTeacher: false,
+                    updatedAt: serverTimestamp()
+                });
+
+                await fetchLogs();
+                renderSidebar();
+            } catch (e) {
+                console.error(e);
+                Swal.fire({ icon: 'error', title: 'SYNCHRONIZATION ERROR', text: 'Packet delivery failed.', background: '#111114', color: '#fff' });
+            } finally {
+                btn.disabled = false;
             }
-            btn.disabled = false;
         };
 
-        // Handle Enter key
-        document.getElementById('chatInput').onkeypress = (e) => {
-            if (e.key === 'Enter') window.sendMessage();
+        window.filterLogs = () => {
+            const term = document.getElementById('log-filter').value.toLowerCase();
+            const cards = document.querySelectorAll('.log-card');
+            cards.forEach(c => {
+                const text = c.textContent.toLowerCase();
+                c.style.display = text.includes(term) ? 'flex' : 'none';
+            });
         };
 
-        document.addEventListener('DOMContentLoaded', loadDoubts);
+        document.getElementById('hub-response').addEventListener('keypress', e => { 
+            if(e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                sendExpertResponse(); 
+            } 
+        });
+
+        initHub();
     </script>
 </body>
 </html>

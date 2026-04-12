@@ -148,8 +148,14 @@
                 </div>
                 <div class="filter-group">
                     <label class="filter-label">Select Subject</label>
-                    <select class="glass-select" id="subject-dropdown" onchange="onSelectionChange()">
+                    <select class="glass-select" id="subject-dropdown" onchange="updateChaptersList()">
                         <option value="">Select Subject</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Select Chapter</label>
+                    <select class="glass-select" id="chapter-dropdown" onchange="onSelectionChange()">
+                        <option value="">Select Chapter</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -253,6 +259,7 @@
             const cls = document.getElementById('class-dropdown').value;
             const dropdown = document.getElementById('subject-dropdown');
             dropdown.innerHTML = '<option value="">Select Subject</option>';
+            document.getElementById('chapter-dropdown').innerHTML = '<option value="">Select Chapter</option>';
             
             const filtered = allBanks.filter(b => b.class == cls);
             filtered.forEach(b => {
@@ -260,9 +267,27 @@
             });
         };
 
+        window.updateChaptersList = () => {
+            const cls = document.getElementById('class-dropdown').value;
+            const sub = document.getElementById('subject-dropdown').value;
+            const dropdown = document.getElementById('chapter-dropdown');
+            dropdown.innerHTML = '<option value="">Select Chapter</option>';
+
+            if (!cls || !sub) return;
+
+            const bank = allBanks.find(b => b.class == cls && b.subject == sub);
+            if (bank && bank.chapters) {
+                bank.chapters.forEach(ch => {
+                    dropdown.innerHTML += `<option value="${ch.chapterId}">${ch.chapterName}</option>`;
+                });
+            }
+            onSelectionChange();
+        };
+
         window.onSelectionChange = async () => {
             const cls = document.getElementById('class-dropdown').value;
             const sub = document.getElementById('subject-dropdown').value;
+            const chapId = document.getElementById('chapter-dropdown').value;
             
             if (!cls || !sub) {
                 document.getElementById('sync-banner').classList.remove('active');
@@ -277,17 +302,20 @@
             document.getElementById('active-bank-code').textContent = bank.bankCode;
             document.getElementById('sync-banner').classList.add('active');
 
-            loadQuestions(bank.bankId);
+            loadQuestions(bank.bankId, chapId);
         };
 
-        async function loadQuestions(bankId) {
+        async function loadQuestions(bankId, chapterId = '') {
             const grid = document.getElementById('questions-grid');
             const loader = document.getElementById('questions-loader');
             
             grid.style.opacity = '0.3';
             loader.style.display = 'block';
 
-            const res = await apiCall(`/teacher/questions?bankId=${bankId}`);
+            let url = `/teacher/questions?bankId=${bankId}`;
+            if (chapterId) url += `&chapterId=${chapterId}`;
+
+            const res = await apiCall(url);
             loader.style.display = 'none';
             grid.style.opacity = '1';
 

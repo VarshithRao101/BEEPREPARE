@@ -338,7 +338,8 @@
               const code = result?.error?.code;
 
               if (code === 'ROLE_ALREADY_SET') {
-                const role = localStorage.getItem(BP.ROLE) || result.data.role;
+                const role = result.error?.details?.role || localStorage.getItem(BP.ROLE);
+                if (role) localStorage.setItem(BP.ROLE, role);
                 window.location.href = role === 'teacher' ? 'teacher/teacher-home.html' : 'student/student-home.html';
               } else if (code === 'NOT_ACTIVATED') {
                 // User somehow bypassed guard

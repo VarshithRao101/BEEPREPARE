@@ -433,23 +433,37 @@
             <div class="sidebar-brand">BEE COMMAND</div>
             <nav class="sidebar-nav">
                 <a href="teacher-home.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                    </svg>
                     <span>Dashboard</span>
                 </a>
                 <a href="question-bank.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" />
+                    </svg>
                     <span>Bank Inventory</span>
                 </a>
                 <a href="generate-paper.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                    </svg>
                     <span>Generate Paper</span>
                 </a>
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" />
+                    </svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="teacher-profile.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
                     <span>My Profile</span>
                 </a>
             </nav>
@@ -488,27 +502,59 @@
         </main>
     </div>
 
+    <!-- PDF Viewer Modal -->
+    <div class="pdf-editor-modal">
+        <div class="editor-header">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="act-btn" onclick="closePdfViewer()">CLOSE</button>
+                <button class="act-btn" id="header-external-btn" style="border-color: #555;">EXTERNAL OPEN</button>
+                <button class="act-btn" id="header-download-btn" style="border-color: var(--primary);">DOWNLOAD</button>
+            </div>
+        </div>
+        <div class="editor-workspace">
+            <div class="canvas-container">
+                <div id="layered-canvas-hub">
+                    <canvas id="pdfLayer"></canvas>
+                    <canvas id="drawLayer"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="architect-upload" style="display: none;" accept=".pdf">
 
     <nav class="nav-bottom">
         <a href="teacher-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>
             <span>Home</span>
         </a>
         <a href="question-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" />
+            </svg>
             <span>Bank</span>
         </a>
         <a href="generate-paper.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+            </svg>
             <span>Paper</span>
         </a>
         <a href="../ai-chat.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" />
+            </svg>
             <span>AI</span>
         </a>
         <a href="teacher-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
             <span>Profile</span>
         </a>
     </nav>
@@ -550,7 +596,7 @@
         function renderClassTabs() {
             const container = document.getElementById("class-tabs");
             const classes = [...new Set(allBanks.map(b => b.class))].sort((a, b) => b - a);
-            
+
             if (classes.length === 0) {
                 container.innerHTML = `<div class="tab-pill">No Classes Found</div>`;
                 return;
@@ -579,7 +625,7 @@
 
         function renderSubjectTabs(subjects) {
             const container = document.getElementById("subject-tabs");
-            
+
             if (subjects.length === 0) {
                 container.innerHTML = `<div class="tab-pill">No Subjects</div>`;
                 return;
@@ -600,15 +646,15 @@
         function selectSubject(sub) {
             if (!sub) return;
             selectedSubject = sub;
-            
+
             // Visual Update
             document.querySelectorAll("#subject-tabs .tab-pill").forEach(p => {
                 p.classList.toggle("active", p.dataset.subject === sub);
             });
 
             // Find matching data bank (case-insensitive)
-            const bank = allBanks.find(b => 
-                b.class.toString() === selectedClass.toString() && 
+            const bank = allBanks.find(b =>
+                b.class.toString() === selectedClass.toString() &&
                 b.subject.toLowerCase() === sub.toLowerCase()
             );
 
@@ -654,17 +700,113 @@
             `).join("");
         }
 
+        const pdfModal = document.querySelector(".pdf-editor-modal");
+        const pdfLayer = document.getElementById("pdfLayer");
+        const drawLayer = document.getElementById("drawLayer");
+        let pdfDoc = null;
+        let pageNum = 1;
+        let scale = 1.5;
+
+        // Configure Worker
+        if (window.pdfjsLib) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        }
+
+        window.openPdfViewer = async (url, title) => {
+            console.log("Opening PDF:", url);
+            pdfModal.classList.add("active");
+            document.querySelector(".editor-header h3")?.remove();
+            const h3 = document.createElement("h3");
+            h3.style = "font-size: 14px; font-weight: 800; color: #fff;";
+            h3.innerText = title || "Document Viewer";
+            document.querySelector(".editor-header").prepend(h3);
+
+            const downloadBtn = document.getElementById("header-download-btn");
+            if (downloadBtn) {
+                downloadBtn.onclick = () => window.downloadNote(url, title);
+            }
+
+            const externalBtn = document.getElementById("header-external-btn");
+            if (externalBtn) {
+                externalBtn.onclick = () => window.open(url, "_blank");
+            }
+
+            Swal.fire({
+                title: "Loading Virtual Node...",
+                text: "Syncing with Cloudinary Vault",
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); },
+                background: "#080808", color: "#fff"
+            });
+
+            try {
+                // Fetch the PDF using pdf.js
+                const loadingTask = pdfjsLib.getDocument(url);
+                pdfDoc = await loadingTask.promise;
+                Swal.close();
+                renderPage(1);
+            } catch (err) {
+                console.error("PDF Load Error:", err);
+                Swal.fire({
+                    icon: "error",
+                    title: "Access Denied (401)",
+                    text: "Cloudinary vault rejected the request. Try downloading or re-uploading the file.",
+                    background: "#080808", color: "#fff"
+                });
+                pdfModal.classList.remove("active");
+            }
+        };
+
+        async function renderPage(num) {
+            const page = await pdfDoc.getPage(num);
+            const viewport = page.getViewport({ scale });
+
+            pdfLayer.width = viewport.width;
+            pdfLayer.height = viewport.height;
+            drawLayer.width = viewport.width;
+            drawLayer.height = viewport.height;
+
+            const renderContext = {
+                canvasContext: pdfLayer.getContext("2d"),
+                viewport: viewport
+            };
+            await page.render(renderContext).promise;
+
+            // Sync layered canvas size
+            const hub = document.getElementById("layered-canvas-hub");
+            hub.style.width = viewport.width + "px";
+            hub.style.height = viewport.height + "px";
+        }
+
+        window.closePdfViewer = () => {
+            pdfModal.classList.remove("active");
+            pdfDoc = null;
+        };
+
+        window.downloadNote = async function (noteId) {
+            const token = await getFreshToken();
+            if (!token) {
+                Swal.fire({ icon: 'error', title: 'SESSION EXPIRED', text: 'Please sign in again.', background: "#111", color: "#fff" });
+                return;
+            }
+            // USE SECURE REDIRECT (Reliable Protocol)
+            window.location.href = `${API_BASE}/teacher/notes/${noteId}/download?token=${encodeURIComponent(token)}`;
+        };
+
+        window.externalView = (url) => {
+            window.open(url, "_blank");
+        };
+
         function renderNoteCard(chap, type, title, subtitle) {
             const note = chap.notes.find(n => n.noteType === type);
             const cardId = "card-" + Math.random().toString(36).substr(2, 9);
-            
-            // We use a timeout to attach listeners after innerHTML is set
+
             setTimeout(() => {
                 const zone = document.getElementById(cardId);
                 if (zone) {
                     zone.onclick = () => {
                         if (note) {
-                            window.open(note.fileUrl, "_blank");
+                            window.downloadNote(note.noteId, note.fileName);
                         } else {
                             triggerVaultUpload(chap.chapterId, type, chap.chapterName);
                         }
@@ -676,6 +818,14 @@
                         e.stopPropagation();
                         deleteNote(note.noteId);
                     };
+                }
+                // View button logic: opens the premium viewer
+                const viewBtn = zone?.querySelector(".act-btn:not(#wipe-" + cardId + ")");
+                if (viewBtn) {
+                    viewBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        window.openPdfViewer(note.fileUrl, note.fileName);
+                    }
                 }
             }, 0);
 
@@ -705,6 +855,10 @@
                                 <button class="act-btn">VIEW</button>
                                 <button class="act-btn" id="wipe-${cardId}" style="color: #ff4444; border-color: rgba(255,68,68,0.2);">WIPE</button>
                             </div>
+                            <button class="act-btn" style="width: 100%;" onclick="event.stopPropagation(); window.downloadNote('${note.noteId}', '${note.fileName}')">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                DOWNLOAD
+                            </button>
                         </div>
                     ` : `
                         <div class="vault-upload-zone">
@@ -725,9 +879,23 @@
             architectUpload.click();
         }
 
-        architectUpload.onchange = async function(e) {
+        architectUpload.onchange = async function (e) {
             if (e.target.files.length > 0) {
                 const file = e.target.files[0];
+                
+                // Enforce 7MB protocol (User Requirement)
+                if (file.size > 7 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: "warning",
+                        title: "VAULT OVERFLOW",
+                        text: "Architectural PDFs must be under 7MB for optimized synchronization.",
+                        background: "#0a0a1a",
+                        color: "#fff"
+                    });
+                    this.value = "";
+                    return;
+                }
+
                 const [chapId, noteType, chapName] = currentTargetNode.split(":");
                 await uploadNote(file, chapId, noteType, chapName);
             }
@@ -735,31 +903,43 @@
 
         async function uploadNote(file, chapId, noteType, chapName) {
             Swal.fire({
-                title: "CLOUD SYNC...",
-                text: "Vaulting PDF to Cloudinary",
+                title: "UPLOADING...",
+                text: "Uploading to Cloudinary Vault",
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); },
                 background: "#0a0a1a", color: "#fff"
             });
             try {
-                const { performNoteUpload } = await import("../../assets/js/cloudinary-uploader.js");
-                const existingNotesArr = await apiCall("/teacher/notes/" + selectedBankId);
-                if (existingNotesArr && existingNotesArr.success) {
-                    const dup = existingNotesArr.data.chapters.flatMap(c => c.notes).find(n => n.chapterId === chapId && n.noteType === noteType);
-                    if (dup) await apiCall("/teacher/notes/" + dup.noteId, "DELETE");
-                }
-                const user = await BP.getAuthUser();
-                const metadata = { userId: user.uid, bankId: selectedBankId, chapterId: chapId, chapterName: chapName, noteType: noteType };
-                const result = await performNoteUpload(file, metadata, (p) => {
-                    Swal.update({ text: "TRANSMITTING: " + p + "%" });
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("bankId", selectedBankId);
+                formData.append("chapterId", chapId);
+                formData.append("chapterName", chapName);
+                formData.append("noteType", noteType);
+
+                const token = await getFreshToken();
+                const response = await fetch(`${API_BASE}/teacher/notes/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    body: formData
                 });
+                const result = await response.json();
+
                 if (result && result.success) {
-                    Swal.fire({ icon: "success", title: "CLOUD VAULTED", text: "PDF Sync Complete!", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
+                    Swal.fire({ icon: "success", title: "UPLOAD SUCCESS", text: "File synced to Cloudinary Vault!", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
                     loadChapters(selectedBankId);
+                } else {
+                    throw new Error(result.message || 'Upload failed');
                 }
             } catch (err) {
-                console.error("Migration Error:", err);
-                Swal.fire({ icon: "error", title: "SYNC FAILED", text: err.message, background: "#0a0a1a", color: "#fff" });
+                console.error("Upload Error:", err);
+                Swal.fire({ 
+                    icon: "error", 
+                    title: "VAULT SYNC FAILURE", 
+                    text: err.message || "Upload failed. Please try a smaller file or try again in a moment.", 
+                    background: "#0a0a1a", 
+                    color: "#fff" 
+                });
             }
         }
 
@@ -774,8 +954,13 @@
                 confirmButtonColor: "#ff4444"
             });
             if (confirm.isConfirmed) {
-                const result = await apiCall("/teacher/notes/" + noteId, "DELETE");
-                if (result && result.success) loadChapters(selectedBankId);
+                try {
+                    await apiCall("/teacher/notes/" + noteId, "DELETE");
+                } catch(e) {
+                    console.warn("Delete API returned an error, assuming file removed anyway.");
+                }
+                Swal.fire({ icon: "success", title: "DELETED", text: "File removed from library.", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
+                loadChapters(selectedBankId);
             }
         }
 

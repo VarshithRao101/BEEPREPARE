@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEE Central Command</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --adv-yellow: #FFCF00; --bg-dark: #050505; }
+        body { background: var(--bg-dark); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        
+        .main-bg {
+            position: fixed; inset: 0;
+            background: url('/assets/images/premium-bg.png') no-repeat center center;
+            background-size: cover; z-index: -1; filter: brightness(0.25) blur(5px);
+        }
+
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 50px; padding: 20px; background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 207, 0, 0.2); backdrop-filter: blur(10px);
+            border-radius: 20px;
+        }
+        .header h1 { font-size: 20px; letter-spacing: 6px; text-transform: uppercase; font-weight: 900; color: var(--adv-yellow); margin: 0; display: flex; align-items: center; gap: 15px; }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            background: rgba(15, 15, 18, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+        }
+
+        .grid-item:hover { 
+            border-color: var(--adv-yellow); 
+            background: rgba(255, 207, 0, 0.05); 
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255, 207, 0, 0.1);
+        }
+
+        .grid-item.active { border-color: #ff4d4d; box-shadow: 0 0 30px rgba(255, 77, 77, 0.3); }
+        .grid-item svg { width: 32px; height: 32px; stroke: var(--adv-yellow); stroke-width: 1.5; transition: 0.3s; }
+        .grid-item:hover svg { stroke: #fff; filter: drop-shadow(0 0 8px var(--adv-yellow)); }
+        
+        .grid-item .label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #aaa; }
+        .grid-item.active .label { color: #ff4d4d; }
+
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #00E676; box-shadow: 0 0 10px #00E676; }
+        .status-dot.off { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+
+        @media (max-width: 480px) {
+            .control-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .grid-item { padding: 15px; border-radius: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-bg"></div>
+
+    <div class="header">
+        <h1>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
+            </svg>
+            Command Matrix
+        </h1>
+        <div style="font-size: 11px; color: #888; font-weight: 900; letter-spacing: 1px;">PROTOCOL_V1419 // ADMIN_ACTIVE</div>
+    </div>
+
+    <div class="control-grid">
+        <!-- MAINTENANCE BOX -->
+        <div id="maintenance-grid" class="grid-item" onclick="handleMaintenanceToggle()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"/>
+            </svg>
+            <div class="label">Maintenance</div>
+            <div id="m-status-dot" class="status-dot"></div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/>
+            </svg>
+            <div class="label">Analytics</div>
+        </div>
+
+        <!-- SECURITY -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <div class="label">Security</div>
+        </div>
+
+        <!-- USER MGMT -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <div class="label">Users</div>
+        </div>
+
+        <!-- CLOUD STORAGE -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+            </svg>
+            <div class="label">Storage</div>
+        </div>
+
+        <!-- API TERMINAL -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+            </svg>
+            <div class="label">API Portal</div>
+        </div>
+
+        <!-- SYSTEM SYNC -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            <div class="label">Sync Logic</div>
+        </div>
+
+        <!-- LOG HISTORY -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <div class="label">History</div>
+        </div>
+
+        <!-- FIREWALL -->
+        <div class="grid-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <div class="label">Vault</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { apiCall } from '/assets/js/bee-core.js';
+
+        if (localStorage.getItem('bp_admin_session') !== 'active_v1419') {
+            window.location.href = 'index.html';
+        }
+
+        let isMaintenance = false;
+
+        async function fetchStatus() {
+            const res = await apiCall('/system/maintenance', 'GET', null, false);
+            if (res && res.success) {
+                isMaintenance = res.data.isMaintenance;
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            const g = document.getElementById('maintenance-grid');
+            const d = document.getElementById('m-status-dot');
+            if (isMaintenance) {
+                g.classList.add('active');
+                d.classList.add('off');
+            } else {
+                g.classList.remove('active');
+                d.classList.remove('off');
+            }
+        }
+
+        window.handleMaintenanceToggle = async () => {
+            const { value: secretKey } = await Swal.fire({
+                title: 'Authorize Protocol Change',
+                input: 'password',
+                inputLabel: 'SECRET MASTER KEY REQUIRED',
+                inputAttributes: { maxlength: 4, autocapitalize: 'off', autocorrect: 'off' },
+                background: '#0a0a0a', color: '#fff', confirmButtonColor: '#FFCF00'
+            });
+
+            if (secretKey === '9059') {
+                const res = await apiCall('/admin/system/maintenance', 'POST', { status: !isMaintenance });
+                if (res && res.success) {
+                    isMaintenance = !isMaintenance;
+                    updateUI();
+                    Swal.fire({ icon: 'success', title: 'Protocol Updated', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+                }
+            } else if (secretKey) {
+                Swal.fire({ icon: 'error', title: 'Unauthorized Key', background: '#0a0a0a', color: '#fff' });
+            }
+        };
+
+        fetchStatus();
+    </script>
+</body>
+</html>

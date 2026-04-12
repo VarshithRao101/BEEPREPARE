@@ -273,9 +273,15 @@
             </svg>
             <span id="time-display">02:59:59</span>
         </div>
-        <button class="btn-finish" onclick="submitTest()">
-            Finish Test
-        </button>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+            </div>
+            <button class="btn-finish" onclick="submitTest()">
+                Finish Test
+            </button>
+        </div>
     </div>
 
     <div class="app-container" style="padding-top: 24px; max-width: 1200px; padding-bottom: 20px;">
@@ -427,7 +433,24 @@
 
         // Init
         renderQ();
+
+    <script type="module">
+        import { apiCall, BP, guardStudent } from '../../assets/js/bee-core.js';
+        
+        window.addEventListener('load', () => {
+            if (!guardStudent()) return;
+            
+            // Load streak
+            apiCall('/student/streak').then(res => {
+                if (res && res.success) {
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                    BP.initStreakFlame('streak-canvas');
+                }
+            });
+        });
     </script>
+
 
     <!-- EXTREME UI SCRIPTS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>

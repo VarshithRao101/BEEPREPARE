@@ -313,8 +313,7 @@
         <div class="loader-ring"></div>
         <div class="gen-text">Generating Your Practice Paper...</div>
     </div>
-    <div
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 70px; z-index: 50; display: flex; align-items: center; padding: 0 24px; pointer-events: none;">
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 70px; z-index: 50; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; pointer-events: none;">
         <div style="pointer-events: auto; cursor: pointer; background: rgba(20,20,20,0.8); backdrop-filter: blur(8px); padding: 10px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-weight: 600; display: flex; align-items: center; gap: 10px; transition: 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.2);"
             onclick="window.history.back()" onmouseover="this.style.transform='scale(1.05)'"
             onmouseout="this.style.transform='scale(1)'">
@@ -323,6 +322,10 @@
                 <polyline points="12 19 5 12 12 5"></polyline>
             </svg>
             BACK
+        </div>
+        <div id="streak-fire-container" style="pointer-events: auto; display: flex; align-items: center; gap: 8px; background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(8px); padding: 8px 15px; border-radius: 30px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+            <canvas id="streak-canvas" width="16" height="16" style="width: 20px; height: 20px; image-rendering: pixelated;"></canvas>
+            <span id="streak-val-header" style="font-weight: 950; color: #FF4500; font-size: 14px;">0</span>
         </div>
     </div>
 
@@ -551,6 +554,15 @@
         window.addEventListener('load', () => {
             if (!guardStudent()) return;
             loadPaper();
+
+            // Load streak
+            apiCall('/student/streak').then(res => {
+                if (res && res.success) {
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                    BP.initStreakFlame('streak-canvas');
+                }
+            });
         });
 
         // Expose functions for original UI buttons
@@ -617,6 +629,27 @@
                 }
             }).save().then(() => {
                 paper.style.transform = originalTransform;
+                // STREAK PULSE: Record activity
+                Swal.showLoading();
+                apiCall('/student/streak/pulse', 'POST').then(res => {
+                    Swal.close();
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Streak Pulsed! 🔥',
+                            text: `Consistency recorded. Current Streak: ${res.data.currentStreak} Days`,
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            background: '#0a0a1a',
+                            color: '#fff'
+                        });
+                    }
+                }).catch(err => {
+                    Swal.close();
+                    console.error('Streak pulse failed:', err);
+                });
             });
         }
     </script>

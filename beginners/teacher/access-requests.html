@@ -385,6 +385,7 @@
             <div class="tabs-row">
                 <div class="tab-pill active" onclick="window.switchTab('pending', this)">Pending Pulse</div>
                 <div class="tab-pill" onclick="window.switchTab('approved', this)">Authorized</div>
+                <div class="tab-pill" onclick="window.switchTab('active', this)">Active Pulse</div>
                 <div class="tab-pill" onclick="window.switchTab('rejected', this)">Denied</div>
             </div>
 
@@ -509,9 +510,14 @@
             approveAllBtn.style.display = (filterStatus === 'pending' && list.length > 1) ? 'flex' : 'none';
 
             list.forEach(req => {
+                // Extract subject/class from populated bank object or flat fields
+                const subject = req.subject || req.bank?.subject || '—';
+                const klass   = req.class  || req.bank?.class   || '';
+                const ts      = req.requestedAt || req.createdAt;
+
                 const initials = (req.studentName || 'S').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
                 const color = getAvatarColor(req.studentName);
-                const isNew = req.isNew || (req.createdAt && (Date.now() - new Date(req.createdAt).getTime()) < 3600000);
+                const isNew = ts && (Date.now() - new Date(ts).getTime()) < 3600000;
                 const card = document.createElement('div');
                 card.className = 'request-card';
                 card.id = `req-${req.requestId}`;
@@ -530,9 +536,9 @@
                         <div>
                             <div style="font-weight: 900; font-size: 18px; letter-spacing: -0.5px;">${req.studentName || 'Unknown'}</div>
                             <div style="color: var(--primary); font-size: 12px; font-weight: 800; text-transform: uppercase; margin-top: 3px;">
-                                ${req.subject || '—'} • Grade ${(req.class || '').replace('Class ', '')}
+                                ${subject} • Grade ${klass.replace('Class ', '')}
                             </div>
-                            <div class="student-meta">${req.createdAt ? new Date(req.createdAt).toLocaleString() : ''}</div>
+                            <div class="student-meta">${ts ? new Date(ts).toLocaleString() : ''}</div>
                         </div>
                     </div>
 
@@ -548,8 +554,16 @@
                             </button>
                         </div>
                     ` : `
-                        <div class="status-badge status-${req.status}">
-                            ${req.status.toUpperCase()} — ${req.updatedAt ? new Date(req.updatedAt).toLocaleDateString() : ''}
+                        <div>
+                            <div class="status-badge status-${req.status}">
+                                ${req.status.toUpperCase()} — ${req.approvedAt || req.rejectedAt ? new Date(req.approvedAt || req.rejectedAt).toLocaleDateString() : ''}
+                            </div>
+                            ${req.status === 'approved' ? `
+                            <div style="margin-top:12px;">
+                                <button class="btn btn-approve" style="width:100%; font-size:11px; padding:10px;" onclick="window.regenerateOTP('${req.requestId}')">
+                                    🔄 Regenerate OTP
+                                </button>
+                            </div>` : ''}
                         </div>
                     `}
 
@@ -557,7 +571,7 @@
                         <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase;">TRNT Protocol Key</div>
                         <div class="protocol-key" id="otp-${req.requestId}">---- ----</div>
                         <button class="copy-key-btn" onclick="window.copyCode('${req.requestId}')">Copy Sync Key</button>
-                        <div style="font-size: 10px; color: #444; margin-top: 10px;">Share this code with the student to grant access.</div>
+                        <div style="font-size: 10px; color: #444; margin-top: 10px;">Share this code with the student to grant access. Valid for 24 hrs.</div>
                     </div>
                 `;
 
@@ -571,17 +585,42 @@
 
             const result = await apiCall(`/teacher/requests/${requestId}/approve`, 'POST');
             if (result?.success) {
-                document.getElementById(`otp-${requestId}`).innerText = result.data.otp || '----';
+                // Backend returns plainOTP — display it in the code reveal box
+                const otpToShow = result.data?.plainOTP || result.data?.otp || '----';
+                document.getElementById(`otp-${requestId}`).innerText = otpToShow;
                 const actions = document.getElementById(`actions-${requestId}`);
                 const codeEl = document.getElementById(`code-${requestId}`);
                 if (actions) actions.style.display = 'none';
                 if (codeEl) codeEl.style.display = 'block';
                 if (loader) loader.style.display = 'none';
-                Swal.fire({ icon: 'success', title: 'Node Authorized', text: 'TRNT Protocol Key generated successfully.', timer: 2000, showConfirmButton: false, background: '#080808', color: '#fff' });
+                Swal.fire({
+                    icon: 'success',
+                    title: '🔑 OTP Generated!',
+                    html: `<div style="font-family:monospace;font-size:32px;font-weight:900;color:#FFD700;letter-spacing:8px;margin:12px 0;">${otpToShow}</div><div style="font-size:13px;color:#aaa;">Share this 4-digit code with the student.<br>It is shown only once.</div>`,
+                    background: '#080808',
+                    color: '#fff',
+                    confirmButtonText: 'Got it!',
+                    confirmButtonColor: '#FFD700'
+                });
             } else {
                 if (loader) loader.style.display = 'none';
                 Swal.fire({ icon: 'error', title: 'Auth Error', text: result?.message || 'Transmission failed.', background: '#080808', color: '#fff' });
             }
+        };
+
+        window.regenerateOTP = async function(requestId) {
+            const confirmed = await Swal.fire({
+                title: 'Regenerate OTP?',
+                text: 'A new OTP will be generated and the old one will stop working.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: 'var(--primary)',
+                cancelButtonColor: '#333',
+                confirmButtonText: 'Yes, Regenerate',
+                background: '#080808', color: '#fff'
+            });
+            if (!confirmed.isConfirmed) return;
+            await window.approveRequest(requestId);
         };
 
         window.rejectRequest = async function(requestId) {

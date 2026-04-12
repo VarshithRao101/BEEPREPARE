@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEE Command Center - Maintenance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/student-theme.css">
+    <style>
+        body { background: #050505; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .admin-card { 
+            width: 90%; max-width: 500px; padding: 40px; text-align: center;
+            border: 1px solid rgba(255, 207, 0, 0.2); background: rgba(15, 15, 18, 0.8);
+            border-radius: 40px; backdrop-filter: blur(20px);
+        }
+        .status-light {
+            width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px;
+            box-shadow: 0 0 10px currentColor;
+        }
+        .toggle-btn {
+            width: 100%; padding: 16px; border-radius: 16px; font-weight: 900;
+            cursor: pointer; transition: 0.3s; margin-top: 30px; text-transform: uppercase; letter-spacing: 2px;
+        }
+        .btn-on { background: #ff4d4d; color: #fff; border: none; }
+        .btn-off { background: #00E676; color: #000; border: none; }
+    </style>
+</head>
+<body>
+    <div class="admin-card">
+        <div style="font-size: 40px; margin-bottom: 20px;">🛡️</div>
+        <h1 style="color: #fff; font-size: 28px; font-weight: 900; margin-bottom: 10px;">BEE Matrix Protocol</h1>
+        <p id="status-text" style="color: var(--adv-muted); font-size: 14px; font-weight: 600;">
+            <span class="status-light" style="color: #888;"></span> Initializing connection...
+        </p>
+
+        <div id="controls" style="display: none;">
+            <button id="toggle-btn" class="toggle-btn" onclick="toggleMaintenance()"></button>
+            <p style="margin-top: 20px; font-size: 11px; color: var(--adv-muted); font-weight: 700;">
+                Activating this protocol will block all student and teacher page access.
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="module">
+        import { apiCall, guardAdmin, BP } from '../assets/js/bee-core.js';
+
+        let currentStatus = false;
+
+        async function init() {
+            if (!guardAdmin()) return;
+            // Self-made guard (assuming only certain UIDs can access this or check role)
+            // For now, allow all teachers to see, but backend will block non-admins
+            const status = await apiCall('/system/maintenance', 'GET', null, false);
+            if (status && status.success) {
+                currentStatus = status.data.isMaintenance;
+                render();
+                document.getElementById('controls').style.display = 'block';
+            }
+        }
+
+        function render() {
+            const btn = document.getElementById('toggle-btn');
+            const st = document.getElementById('status-text');
+            
+            if (currentStatus) {
+                st.innerHTML = '<span class="status-light" style="color: #ff4d4d;"></span> PROTOCOL ACTIVE (SYSTEM DOWN)';
+                btn.innerText = 'Deactivate Protocol';
+                btn.className = 'toggle-btn btn-off';
+            } else {
+                st.innerHTML = '<span class="status-light" style="color: #00E676;"></span> SYSTEM OPERATIONAL';
+                btn.innerText = 'Activate Maintenance';
+                btn.className = 'toggle-btn btn-on';
+            }
+        }
+
+        window.toggleMaintenance = async () => {
+            const confirm = await Swal.fire({
+                title: 'Authorize Protocol?',
+                text: currentStatus ? 'System will resume normal operations.' : 'This will LOCK THE ENTIRE MATRIX for all users.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: currentStatus ? '#00E676' : '#ff4d4d',
+                confirmButtonText: 'CONFIRM'
+            });
+
+            if (confirm.isConfirmed) {
+                const res = await apiCall('/admin/system/maintenance', 'POST', { status: !currentStatus });
+                if (res && res.success) {
+                    currentStatus = !currentStatus;
+                    render();
+                    Swal.fire({ icon: 'success', title: 'Protocol Updated', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Authorization Failed', text: res.message || 'Admin credentials required.' });
+                }
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>

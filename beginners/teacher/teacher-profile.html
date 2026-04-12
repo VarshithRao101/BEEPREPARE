@@ -695,7 +695,10 @@
                     <h2 style="font-size: 28px; font-weight: 800; color: #fff;">My Profile</h2>
                     <p style="color: var(--text-muted); font-size: 14px;">Manage your node credentials.</p>
                 </div>
-                <div class="profile-icon">T</div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+
+                    <div class="profile-icon">T</div>
+                </div>
             </header>
 
             <div class="profile-layout">
@@ -812,6 +815,7 @@
                     </div>
 
                     <button class="logout-btn" onclick="openLogoutModal()" style="margin-top: 20px;">Terminate Session</button>
+                    <button class="logout-btn" onclick="handleWipeData()" style="margin-top: 10px; opacity: 0.5; border-style: dashed; padding: 12px; font-size: 12px;">Wipe All Data & Reset Account</button>
                 </div>
             </div>
         </main>
@@ -951,7 +955,7 @@
             </div>
             <h3 class="modal-title" style="color:#fff; margin-bottom: 12px;">Capacity Limit Reached</h3>
             <div style="background: rgba(255, 215, 0, 0.05); padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,215,0,0.1); text-align: left;">
-                <p style="font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Ecosystem Restriction</p>
+                <p style="font-size: 11px; color: #888; margin-bottom: 6px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Storage Restriction</p>
                 <p style="font-size: 13px; color: #ddd; line-height: 1.5;">You are on the <b>Free Tier</b>. To unlock an additional subject slot, a unique Redeem Key is required.</p>
             </div>
             
@@ -976,7 +980,7 @@
                 <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
                 <line x1="12" y1="2" x2="12" y2="12"></line>
             </svg></div>
-        <div class="disconnect-text">SECURELY DISCONNECTING NODE</div>
+        <div class="disconnect-text">SECURELY DISCONNECTING SESSION</div>
         <div class="loader-track">
             <div class="loader-fill"></div>
         </div>
@@ -1010,6 +1014,8 @@
             const res = await apiCall('/teacher/profile');
             if (res && res.success) {
                 appState = { ...appState, ...res.data };
+
+                localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 0);
                 updateUI();
             }
         }
@@ -1083,7 +1089,7 @@
         let activeChapters = {};
 
         window.openEditProfile = () => {
-            const currentPlanLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 2;
+            const currentPlanLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 0;
             document.getElementById('subject-count-limit').innerText = currentPlanLimit;
             document.getElementById('edit-display-name').value = appState.name || '';
             appState.isPremium = (currentPlanLimit > 2);
@@ -1148,20 +1154,15 @@
         window.toggleSubject = (sub) => {
             appState.subjects = appState.subjects || [];
             if (appState.subjects.includes(sub)) {
+                // Warning for removal (destructive action)
                 Swal.fire({
-                    title: `Remove "${sub}" Subject?`,
-                    html: `<div style="text-align:left; background: rgba(255,77,77,0.08); border: 1px solid rgba(255,77,77,0.3); border-radius: 12px; padding: 14px; margin-top: 8px;">
-                        <div style="font-size: 11px; font-weight: 900; color: #ff4d4d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">⚠ PERMANENT DATA DESTRUCTION</div>
-                        <p style="font-size: 13px; color: #ddd; line-height: 1.6; margin: 0;">All <b>${sub}</b> banks, questions, notes and student access records will be <b>permanently deleted from the database</b>.<br><br>This <b>cannot be undone.</b></p>
-                    </div>`,
+                    title: `Remove "${sub}"?`,
+                    text: 'Warning: Removing a subject will permanently delete its bank and all associated questions/notes.',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#333',
-                    confirmButtonText: 'Yes, delete permanently',
-                    cancelButtonText: 'Keep Subject',
-                    background: '#111',
-                    color: '#fff'
+                    confirmButtonColor: '#ff4d4d',
+                    confirmButtonText: 'Yes, Delete Permanently',
+                    background: '#111', color: '#fff'
                 }).then((result) => {
                     if (result.isConfirmed) {
                         appState.subjects = appState.subjects.filter(s => s !== sub);
@@ -1169,8 +1170,9 @@
                     }
                 });
             } else {
-                const currentPlanLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 2;
-                if (appState.subjects.length >= currentPlanLimit) {
+                const currentLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 2;
+                if (appState.subjects.length >= currentLimit) {
+                    // Trigger paywall IMMEDIATELY when exceeding limit
                     window.showPaywall();
                     return;
                 }
@@ -1204,17 +1206,40 @@
             setTimeout(() => overlay.style.display = 'none', 300);
         };
 
-        window.verifyUnlock = () => {
+        window.verifyUnlock = async () => {
             const key = document.getElementById('unlock-key').value.trim();
-            if (key.length >= 8) {
-                // Simulate Premium unlock in UI before backend processes payment gateway
-                appState.isPremium = true;
-                localStorage.setItem(BP.SUBJECT_LIMIT, '10'); // Give 10 temporarily for mock
-                document.getElementById('subject-count-limit').innerText = '10';
-                Swal.fire({ icon: 'success', title: 'Premium Unlocked!', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#1a1a2e', color: '#fff' });
-                closeUnlock();
-            } else {
-                Swal.fire({ icon: 'error', title: 'Invalid Key', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#1a1a2e', color: '#fff' });
+            if (!key) {
+                Swal.fire({ icon: 'warning', title: 'Enter Key', text: 'Please enter a redeem code.', background: '#111', color: '#fff' });
+                return;
+            }
+
+            Swal.fire({ title: 'Verifying Matrix...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), background: '#111', color: '#fff' });
+
+            try {
+                const res = await apiCall('/redeem/code', 'POST', { code: key });
+                if (res && res.success) {
+                    // Update state and localStorage
+                    const newLimit = (parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 0) + res.value;
+                    localStorage.setItem(BP.SUBJECT_LIMIT, newLimit.toString());
+                    document.getElementById('subject-count-limit').innerText = newLimit;
+                    
+                    await Swal.fire({ 
+                        icon: 'success', 
+                        title: 'Slot Unlocked!', 
+                        text: res.message,
+                        background: '#111', color: '#fff' 
+                    });
+                    
+                    document.getElementById('unlock-key').value = '';
+                    closeUnlock();
+                    
+                    // Refresh data
+                    await initProfile();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Invalid Key', text: res.message || 'Key failed to activate.', background: '#111', color: '#fff' });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Network Error', background: '#111', color: '#fff' });
             }
         };
 
@@ -1415,6 +1440,62 @@
             });
         };
 
+        window.handleWipeData = async function() {
+            // Layer 1: Warning
+            const firstControl = await Swal.fire({
+                title: 'CRITICAL WARNING',
+                text: 'This will permanently ERASE all your banks, questions, and uploaded notes. This is irreversible.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                confirmButtonText: 'I UNDERSTAND',
+                background: '#0a0a1a', color: '#fff'
+            });
+
+            if (!firstControl.isConfirmed) return;
+
+            // Layer 2: Confirmation Input
+            const { value: confirmInput } = await Swal.fire({
+                title: 'DELETE ALL DATA',
+                text: 'Type "CONFIRM" to permanently delete your account data.',
+                input: 'text',
+                inputPlaceholder: 'CONFIRM',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                confirmButtonText: 'DELETE EVERYTHING',
+                background: '#0a0a1a', color: '#fff',
+                preConfirm: (val) => {
+                    if (val !== 'CONFIRM') {
+                        Swal.showValidationMessage('Security token mismatch. Enter correctly.');
+                    }
+                    return val;
+                }
+            });
+
+            if (confirmInput === 'CONFIRM') {
+                Swal.fire({
+                    title: 'Deleting Data...',
+                    text: 'Please wait while we reset your account.',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+
+                const res = await apiCall('/auth/wipe-data', 'POST');
+                if (res && res.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Matrix Purged',
+                        text: 'All your data has been permanently erased.',
+                        background: '#0a0a1a', color: '#fff'
+                    });
+                    localStorage.clear();
+                    window.location.replace('../../index.html');
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Purge Failed', text: res.message || 'Bridge error.', background: '#0a0a1a', color: '#fff' });
+                }
+            }
+        }
+
         window.saveAndClose = async () => {
             const btn = document.getElementById('save-profile-btn');
             btn.innerText = 'Saving...';
@@ -1449,7 +1530,7 @@
                     Swal.fire({
                         icon: 'success',
                         title: 'Profile Updated',
-                        text: 'Your subjects and chapters have been synchronized.',
+                        text: 'Your subjects and chapters have been updated.',
                         showConfirmButton: true,
                         confirmButtonText: 'Great!',
                         confirmButtonColor: '#ffc107',

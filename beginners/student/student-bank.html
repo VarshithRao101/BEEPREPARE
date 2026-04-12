@@ -247,7 +247,13 @@
                     <button id="back-btn" onclick="showBankList()" style="background: none; border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; color: #fff; cursor: pointer; display: none; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
                     <h2 style="font-size: 28px; font-weight: 800; color:#fff;" id="page-title">Bank Inventory</h2>
                 </div>
-                <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                        <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                        <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+                    </div>
+                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                </div>
             </header>
 
             <!-- Inventory Layout (Banks List) -->
@@ -334,6 +340,7 @@
         const auth = getAuth(app);
 
         async function loadMyBanks() {
+            BP.showSkeleton('joined-banks-list', 'card', 3);
             const result = await apiCall('/student/banks');
             if (result && result.success) {
                 renderBankCards(result.data);
@@ -361,7 +368,11 @@
                 if (bank.status === 'pending') {
                     statusColor = '#FFB300';
                     statusBg = 'rgba(255,179,0,0.1)';
-                    statusLabel = 'Pending Approval';
+                    statusLabel = 'Awaiting Teacher';
+                } else if (bank.status === 'approved') {
+                    statusColor = '#FFD700';
+                    statusBg = 'rgba(255,215,0,0.2)';
+                    statusLabel = 'Authorization Ready';
                 } else if (bank.status === 'rejected') {
                     statusColor = '#FF5252';
                     statusBg = 'rgba(255,82,82,0.1)';
@@ -381,12 +392,19 @@
                         <span class="status-pill" style="background:${statusBg}; color:${statusColor};">${statusLabel}</span>
                         <span style="font-size: 10px; font-weight: 800; color: var(--text-muted);">${bank.totalQuestions || 0} Qs</span>
                     </div>
+                    ${bank.status === 'approved' ? `
+                    <button class="unlock-btn" style="width:100%; margin-top:15px; padding:12px; background:var(--primary); border:none; border-radius:12px; color:#000; font-weight:900; font-size:11px; cursor:pointer; text-transform:uppercase; letter-spacing:1px;">
+                        Unlock Hub &rarr;
+                    </button>` : ''}
                 `;
 
                 card.onclick = () => {
                     if (bank.status === 'active') {
                         localStorage.setItem('bp_current_bank_id', bank.bankId);
                         openBank(bank.subject + ' Matrix');
+                    } else if (bank.status === 'approved') {
+                        localStorage.setItem('bp_otp_request_id', bank.requestId);
+                        window.location.href = 'student-bank-auth.html';
                     } else if (bank.status === 'pending') {
                         Swal.fire({
                             icon: 'info',
@@ -609,7 +627,9 @@
                                 <div style="font-size:10px; color: var(--text-muted);">${note.fileType?.toUpperCase() || 'DOCUMENT'} • RESOURCE</div>
                             </div>
                             <div style="display:flex; gap:10px;">
-                                <button class="dl-btn" onclick="window.open('${note.signedUrl}', '_blank')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                <button class="dl-btn" onclick="window.downloadNote('${note.signedUrl}')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
                             </div>
                         </div>
                     `).join('');
@@ -632,6 +652,16 @@
             }
         }
 
+        window.downloadNote = async (url) => {
+            window.open(url, '_blank');
+            const res = await apiCall('/student/streak/activity', 'POST');
+            if (res && res.success) {
+                const streakVal = document.getElementById('streak-val-header');
+                if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                BP.initStreakFlame('streak-canvas');
+            }
+        };
+
         window.showBankList = function() {
             document.getElementById('bank-list-view').style.display = 'block';
             document.getElementById('bank-detail-view').style.display = 'none';
@@ -639,10 +669,22 @@
             document.getElementById('page-title').innerText = 'Bank Inventory';
         }
 
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             if (!guardStudent()) return;
+            
+            // Set profile icon
+            const name = localStorage.getItem(BP.NAME) || 'ST';
+            document.querySelector('.profile-icon').textContent = name[0].toUpperCase() + (name.split(' ')[1]?.[0] || name[1] || '').toUpperCase();
+
             loadMyBanks();
             
+            // Load streak
+            const streakRes = await apiCall('/student/streak');
+            if (streakRes && streakRes.success) {
+                document.getElementById('streak-val-header').textContent = streakRes.data.currentStreak || 0;
+                BP.initStreakFlame('streak-canvas');
+            }
+
             // Override search button click
             document.querySelector('.search-btn').onclick = searchBank;
         });

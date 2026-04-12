@@ -233,9 +233,15 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
 
-        <div class="header-area">
-            <span class="subtitle">Secure Synchronization Hub</span>
-            <h1 class="title-glow">Authorization Node</h1>
+        <div class="header-area" style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <span class="subtitle">Subject Access Hub</span>
+                <h1 class="title-glow">Bank Authorization</h1>
+            </div>
+            <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default; margin-bottom: 5px;" title="Learning Streak">
+                <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+            </div>
         </div>
 
         <div class="scroll-area" id="requests-list">
@@ -243,8 +249,8 @@
         </div>
 
         <div id="zero-state" style="display: none; text-align: center; padding: 60px 0;">
-            <div style="font-size: 50px; margin-bottom: 20px; filter: grayscale(1);">📡</div>
-            <h3 style="color: #fff; font-size: 20px; margin-bottom: 8px;">no requests</h3>
+            <div style="font-size: 50px; margin-bottom: 20px; filter: grayscale(1);">🛡️</div>
+            <h3 style="color: #fff; font-size: 20px; margin-bottom: 8px;">No Pending Requests</h3>
             <p style="color: var(--text-muted); font-size: 14px;">Connect with an academic hub in the Bank Inventory to begin synchronization.</p>
         </div>
     </div>
@@ -267,7 +273,7 @@
             const list = document.getElementById('requests-list');
             const zeroState = document.getElementById('zero-state');
             
-            list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 800; letter-spacing: 1px;">REquests loadings...</div>';
+            list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px; font-weight: 800; letter-spacing: 1px;">Requests Loading...</div>';
 
             try {
                 const result = await apiCall('/student/banks');
@@ -301,8 +307,8 @@
                                     </div>
                                     <div class="hub-info">
                                         <span class="status-pill" style="background: ${statusBg}; color: ${statusColor};">${statusLabel}</span>
-                                        <h3>${req.subject} Hub</h3>
-                                        <p>Node Mentor: ${req.teacherName || 'Professor'} • ${timeAgo(req.requestedAt)}</p>
+                                        <h3>${req.subject} Bank</h3>
+                                        <p>Teacher: ${req.teacherName || 'BEE Mentor'} • ${timeAgo(req.requestedAt)}</p>
                                     </div>
                                 </div>
 
@@ -374,6 +380,15 @@
         window.addEventListener('load', () => {
             if (!guardStudent()) return;
             loadRequests();
+            
+            // Unify Streak Sync
+            apiCall('/student/streak').then(res => {
+                if (res && res.success) {
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                    BP.initStreakFlame('streak-canvas');
+                }
+            });
         });
     </script>
 </body>

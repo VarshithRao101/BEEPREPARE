@@ -145,7 +145,7 @@ export function createUploader(containerId, options = {}) {
                         ${state.isUploading ? 'UPLOADING TO VAULT...' : 'ARCHIVE NEW PDF'}
                     </h3>
                     <p style="margin: 0 0 25px 0; color: #666; font-size: 12px; font-weight: 600;">
-                        Secure Cloud Storage Hub. Max 10MB per protocol.
+                        Secure Cloud Storage Hub. Max 7MB per protocol.
                     </p>
 
                     <input type="file" id="file-input" accept="application/pdf" style="display:none;">
@@ -214,6 +214,12 @@ export function createUploader(containerId, options = {}) {
     async function handleSelection(file) {
         if (file.type !== 'application/pdf') {
             state.error = 'Invalid protocol. Only PDF files are accepted.';
+            render();
+            return;
+        }
+
+        if (file.size > 7 * 1024 * 1024) {
+            state.error = 'Vault Overflow: PDF must be under 7MB.';
             render();
             return;
         }

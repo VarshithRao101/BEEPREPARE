@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEE Command Authorization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --adv-yellow: #FFCF00; --bg-dark: #000; }
+        body { background: var(--bg-dark); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        
+        .main-bg {
+            position: fixed; inset: 0;
+            background: url('/assets/images/premium-bg.png') no-repeat center center;
+            background-size: cover; z-index: -1; filter: brightness(0.3);
+        }
+
+        .login-card { 
+            width: 90%; max-width: 400px; padding: 50px 40px; background: rgba(18, 18, 18, 0.85); 
+            border-radius: 40px; text-align: center; backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 207, 0, 0.2); box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .logo-hexa {
+            width: 70px; height: 70px; margin: 0 auto 30px;
+            background: rgba(255, 207, 0, 0.1); border: 2px solid var(--adv-yellow);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 207, 0, 0.2);
+        }
+
+        .title { font-size: 26px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 35px; background: linear-gradient(180deg, #fff, var(--adv-yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        input { 
+            width: 100%; padding: 20px; margin-bottom: 18px; background: rgba(30, 31, 33, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 16px; color: #fff; font-family: inherit; font-size: 15px; box-sizing: border-box; transition: 0.3s;
+        }
+        input:focus { border-color: var(--adv-yellow); outline: none; background: rgba(40, 41, 44, 1); box-shadow: 0 0 15px rgba(255, 207, 0, 0.2); }
+        
+        .login-btn { 
+            width: 100%; padding: 18px; background: var(--adv-yellow); border: none; border-radius: 16px;
+            font-weight: 900; cursor: pointer; color: #000; text-transform: uppercase; letter-spacing: 2px;
+            transition: 0.3s; box-shadow: 0 10px 30px rgba(255, 207, 0, 0.2);
+        }
+        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 207, 0, 0.4); filter: brightness(1.1); }
+    </style>
+</head>
+<body>
+    <div class="main-bg"></div>
+    <div class="login-card">
+        <div class="logo-hexa">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFCF00" stroke-width="2.5">
+                <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
+                <circle cx="12" cy="12" r="3" fill="#FFCF00"></circle>
+            </svg>
+        </div>
+        <div class="title">BEE Command Hub</div>
+        <input type="text" id="username" placeholder="VGMG IDENTITY">
+        <input type="password" id="password" placeholder="SECURITY PROTOCOL">
+        <button class="login-btn" onclick="verifyAuth()">ACCESS MATRIX</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function verifyAuth() {
+            const u = document.getElementById('username').value.toLowerCase();
+            const p = document.getElementById('password').value;
+            if (u === 'vgmg1419' && p === 'VGm@30072509679059') {
+                localStorage.setItem('bp_admin_session', 'active_v1419');
+                window.location.href = 'dashboard.html';
+            } else {
+                Swal.fire({
+                    icon: 'error', title: 'Unauthorized', text: 'Protocol Mismatch Recognized.',
+                    background: '#121212', color: '#fff', confirmButtonColor: '#FFCF00'
+                });
+            }
+        }
+    </script>
+</body>
+</html>

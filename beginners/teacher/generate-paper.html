@@ -325,9 +325,12 @@
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
                     <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Configure Paper</h2>
-                    <p style="color: var(--text-muted); font-size: 14px;">Define the architectural blueprint.</p>
+                    <p style="color: var(--text-muted); font-size: 14px;">Define the paper blueprint.</p>
                 </div>
-                <div class="profile-icon" onclick="window.location.href='teacher-profile.html'">T</div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+
+                    <div class="profile-icon" onclick="window.location.href='teacher-profile.html'">T</div>
+                </div>
             </header>
 
             <div id="zero-state" style="display:none; text-align:center; padding: 80px 20px;">
@@ -377,7 +380,7 @@
                 <!-- Right: Blueprint -->
                 <div>
                     <div class="section-divider">
-                        <span class="section-label">3. Structure Blueprint</span>
+                        <span class="section-label">3. Structure Format</span>
                         <div class="divider-line"></div>
                     </div>
 
@@ -386,7 +389,7 @@
                     </div>
 
                     <button class="primary-action-btn" onclick="startGeneration()">
-                        Generate Paper Architecture →
+                        Generate Paper →
                     </button>
                 </div>
             </div>
@@ -405,7 +408,7 @@
         <div class="assembly-container">
             <div class="data-fill"></div>
         </div>
-        <div class="gen-status">Assembling Architectural Blueprint...</div>
+        <div class="gen-status">Assembling Paper Format...</div>
     </div>
 
     <!-- Mobile Nav -->
@@ -520,6 +523,7 @@
             const result = await apiCall('/teacher/dashboard');
             if (result && result.success) {
                 allBanks = result.data.subjects;
+
                 
                 if (allBanks.length === 0) {
                     document.getElementById('zero-state').style.display = 'block';

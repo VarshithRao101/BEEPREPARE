@@ -6,15 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BEEPREPARE AI - LUXE CONVERSATIONAL CHAT</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-    <!-- Note: student-ui might exist, if not it safely ignores or uses fallback styles -->
     <link rel="stylesheet" href="../assets/css/premium-student-ui.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="../assets/js/marked.min.js"></script>
     <style>
         :root {
             --sidebar-width: 280px;
             --obsidian: #080808;
             --gold-primary: #FFD700;
-            --gold-soft: rgba(255, 215, 0, 0.95); /* For the AI bubble background */
+            --gold-soft: rgba(255, 215, 0, 0.95); 
             --glass-border: rgba(255, 255, 255, 0.1);
             --sidebar-text: #ffffff;
         }
@@ -37,7 +37,7 @@
             position: relative;
         }
 
-        /* --- 4. LUXE SIDEBAR --- */
+        /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--obsidian);
@@ -79,19 +79,6 @@
             box-shadow: 0 10px 40px rgba(255, 215, 0, 0.5);
         }
 
-        .search-container { position: relative; }
-        .sidebar-search {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px 12px 12px 40px;
-            color: #fff;
-            font-size: 13px;
-            outline: none;
-        }
-        .search-icon { position: absolute; left: 14px; top: 12px; opacity: 0.4; }
-
         .history-list { flex: 1; overflow-y: auto; padding: 15px; }
         .history-item {
             padding: 15px;
@@ -101,25 +88,49 @@
             margin-bottom: 8px;
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid transparent;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* SIDEBAR TEXT INTO WHITE (Requested) */
+        .history-item:hover { background: rgba(255, 255, 255, 0.05); }
+
         .h-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             margin-bottom: 4px;
-            color: var(--sidebar-text); /* Sharp White */
+            color: var(--sidebar-text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .h-time {
             font-size: 10px;
             color: rgba(255, 255, 255, 0.4);
-            font-weight: 700;
-            text-transform: uppercase;
+            font-weight: 600;
         }
 
         .history-item.active {
             background: rgba(255, 215, 0, 0.08);
             border-color: rgba(255, 215, 0, 0.3);
+        }
+
+        .delete-session-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 77, 77, 0.6);
+            transition: 0.2s;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .delete-session-btn:hover { 
+            color: #ff4d4d;
+            background: rgba(255, 77, 77, 0.1);
+            border-radius: 6px;
         }
 
         /* --- CHAT MAIN --- */
@@ -142,7 +153,6 @@
             z-index: 100;
         }
 
-        /* TOP STATUS BAR */
         .header-left { display: flex; align-items: center; gap: 20px; }
         .header-title-group h2 {
             font-size: 18px;
@@ -156,8 +166,6 @@
         .status-dot-green { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 10px #00ff88; animation: pulse-green 2s infinite; }
         @keyframes pulse-green { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        .header-title-group p { font-size: 11px; color: rgba(255,255,255,0.5); margin: 2px 0 0; font-weight: 600; }
-
         /* --- MESSAGES STREAM --- */
         .messages-container {
             flex: 1;
@@ -165,235 +173,237 @@
             padding: 40px 15% 160px;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 40px;
+            scroll-behavior: smooth;
         }
 
-        /* LUXE MESSAGE DESIGN */
         .message-row {
             display: flex;
             gap: 20px;
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
-            animation: luxeEntry 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: luxeEntry 0.4s cubic-bezier(0.175, 0.885, 0.32, 1);
             position: relative;
         }
-        @keyframes luxeEntry { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes luxeEntry { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .message-row.user-msg { flex-direction: row-reverse; }
 
         .avatar-chat {
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
             flex-shrink: 0;
+            font-size: 14px;
         }
 
-        .message-row.ai-msg .avatar-chat { background: var(--gold-primary); color: #000; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+        .message-row.ai-msg .avatar-chat { background: var(--gold-primary); color: #000; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
         .message-row.user-msg .avatar-chat { background: #222; color: #fff; border: 1px solid var(--glass-border); }
 
         .bubble-chat {
             padding: 20px 24px;
-            border-radius: 24px;
+            border-radius: 20px;
             font-size: 15px;
-            line-height: 1.7;
-            max-width: 80%;
+            line-height: 1.6;
+            max-width: 85%;
             position: relative;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            word-wrap: break-word;
         }
 
-        /* AI MESSAGE: WHITE TEXT INTO BLACK (Requested) */
+        /* AI MESSAGE: MATTE OBSIDIAN + GOLD ACCENT */
         .message-row.ai-msg .bubble-chat {
-            background: var(--gold-soft); 
-            color: #000000; /* PURE BLACK TEXT */
-            font-weight: 500;
-            border-top-left-radius: 6px;
-        }
-
-        /* USER MESSAGE: DEEP GLASS */
-        .message-row.user-msg .bubble-chat {
-            background: rgba(30, 30, 30, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
+            background: #0d0d0d; 
             color: #fff;
-            border-top-right-radius: 6px;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-top-left-radius: 4px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .message-row.ai-msg .bubble-chat strong { color: var(--gold-primary); }
+
+        /* USER MESSAGE: DEEP BLACK */
+        .message-row.user-msg .bubble-chat {
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
+            border-top-right-radius: 4px;
         }
 
-        /* --- 8. MESSAGE ACTIONS (Visible & High-Contrast) --- */
+        /* Markdown Styles Inside Bubbles */
+        .bubble-chat p { margin: 0 0 1em 0; }
+        .bubble-chat p:last-child { margin-bottom: 0; }
+        .bubble-chat strong { font-weight: 800; }
+        .bubble-chat code { 
+            background: rgba(0,0,0,0.1); 
+            padding: 2px 5px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            font-size: 0.9em;
+        }
+        .user-msg .bubble-chat code { background: rgba(255,255,255,0.1); }
+        .bubble-chat pre {
+            background: rgba(0,0,0,0.1);
+            padding: 15px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .bubble-chat ul, .bubble-chat ol { padding-left: 20px; margin: 10px 0; }
+
         .msg-actions { 
             position: absolute; 
-            bottom: -32px; 
-            display: flex; /* Always visible */
+            bottom: -30px; 
+            display: flex;
             gap: 15px; 
             padding: 2px 10px; 
+            opacity: 0;
+            transition: 0.3s;
         }
+        .message-row:hover .msg-actions { opacity: 1; }
 
         .action-tool { 
-            background: rgba(0, 0, 0, 0.4); /* Dark background (Requested) */
+            background: rgba(0, 0, 0, 0.5);
             padding: 4px 10px;
-            border-radius: 8px;
-            color: #ffffff; /* Sharp White text */
+            border-radius: 6px;
+            color: #fff;
             cursor: pointer; 
-            transition: 0.2s; 
-            font-size: 11px; 
+            font-size: 10px; 
             font-weight: 700;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .action-tool:hover { 
-            color: var(--gold-primary); 
-            background: #000;
-        }
-
-        /* --- EMPTY LANDING (Step 10 Refined) --- */
+        /* --- EMPTY LANDING --- */
         .empty-landing { 
             text-align: center; 
-            margin-top: 5vh; 
+            margin: auto;
             animation: fadeIn 0.8s ease; 
-            background: rgba(255, 215, 0, 0.1); /* Subtle light gold mist */
-            padding: 24px 30px;
-            border-radius: 30px;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            padding: 40px;
+            border-radius: 40px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0) 100%);
+            border: 1px solid rgba(255,215,0,0.1);
+            max-width: 600px;
         }
 
         .empty-landing h1 { 
-            font-size: 36px; 
+            font-size: 42px; 
             font-weight: 900; 
-            margin-bottom: 20px; 
-            color: #111; /* DARK TEXT (Requested) */
-            letter-spacing: -1px;
+            margin-bottom: 25px; 
+            background: linear-gradient(to right, #fff, var(--gold-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .suggestion-grid { 
             display: grid; 
             grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            max-width: 650px; 
-            margin: 0 auto; 
+            gap: 15px; 
         }
 
         .suggest-card {
-            background: rgba(255, 255, 255, 0.3); /* Lighter card */
-            border: 1px solid rgba(0, 0, 0, 0.2); /* DARK OUTLINE (Requested) */
-            padding: 16px 20px;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 20px;
             cursor: pointer;
             transition: 0.3s;
             text-align: left;
         }
 
         .suggest-card:hover { 
-            background: var(--gold-primary); 
-            border-color: #000; 
-            transform: translateY(-3px); 
+            background: rgba(255, 215, 0, 0.1); 
+            border-color: var(--gold-primary); 
+            transform: translateY(-5px); 
         }
 
-        .suggest-card h3 { 
-            font-size: 14px; 
-            color: #000; /* Darker heading */
-            margin-bottom: 4px; 
-            font-weight: 700; 
-        }
+        .suggest-card h3 { font-size: 14px; color: var(--gold-primary); margin-bottom: 5px; font-weight: 800; }
+        .suggest-card p { font-size: 12px; color: rgba(255,255,255,0.5); margin: 0; line-height: 1.4; }
 
-        .suggest-card p { 
-            font-size: 12px; 
-            color: rgba(0, 0, 0, 0.6); /* Darker secondary text */
-            margin: 0; 
-            line-height: 1.3;
-        }
-
-        /* --- ULTIMATE INPUT --- */
+        /* --- INPUT AREA --- */
         .input-bar-container { 
             position: absolute; 
             bottom: 0; 
             left: 0; 
             right: 0; 
-            padding: 10px 18% 15px; /* DRASTICALLY reduced bottom/top padding to drag it downwards */
-            background: transparent;
+            padding: 20px 18% 40px; 
+            background: linear-gradient(to top, #050505 60%, transparent);
             z-index: 1000; 
         }
         .input-pill-modern {
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(30px);
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(40px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 6px 12px;
+            border-radius: 28px;
+            padding: 8px 15px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-        }
-        .chat-textarea::-webkit-scrollbar {
-            display: none;
+            gap: 15px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
         }
         .chat-textarea { 
             flex: 1; 
             background: transparent; 
             border: none; 
             color: #fff; 
-            padding: 4px 6px; 
-            margin: 4px 0;
+            padding: 10px 0; 
             font-size: 15px; 
             outline: none; 
             resize: none; 
             height: 24px;
-            min-height: 24px;
-            max-height: 120px; 
+            max-height: 150px; 
             font-family: inherit; 
-            box-sizing: border-box;
             line-height: 1.5;
-            scrollbar-width: none; /* Firefox */
         }
+        .btn-send { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 50%; 
+            background: var(--gold-primary); 
+            color: #000; 
+            border: none; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: 0.3s ease;
+        }
+        .btn-send:hover { transform: scale(1.05) rotate(-10deg); box-shadow: 0 0 25px rgba(255,215,0,0.4); }
+        .btn-send:disabled { background: #333; color: #666; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .btn-pill-action { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: none; color: #fff; cursor: pointer; transition: 0.2s; }
-        .btn-pill-action:hover { background: rgba(255,215,0,0.1); color: var(--gold-primary); }
-
-        .btn-send-yellow { width: 44px; height: 44px; border-radius: 50%; background: var(--gold-primary); color: #000; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255,215,0,0.3); transition: 0.3s; }
-        .btn-send-yellow:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(255,215,0,0.5); }
-
-        /* QUICK CHIPS (GREY - Requested) */
-        .quick-chips { display: flex; gap: 10px; margin-bottom: 8px; justify-content: center; }
+        .quick-chips { display: flex; gap: 10px; margin-bottom: 12px; justify-content: center; flex-wrap: wrap; }
         .q-chip { 
-            background: rgba(50, 50, 50, 0.85); /* Solid Grey */
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            padding: 8px 18px; 
-            border-radius: 25px; 
-            font-size: 12px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid var(--glass-border); 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 11px; 
             font-weight: 700; 
-            color: #fff; 
+            color: rgba(255,255,255,0.7); 
             cursor: pointer; 
             transition: 0.2s; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .q-chip:hover { border-color: var(--gold-primary); background: #000; }
+        .q-chip:hover { border-color: var(--gold-primary); color: #fff; background: rgba(255,215,0,0.1); }
 
-        /* VOICE & UPLOAD */
-        .voice-mode-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .waveform { display: flex; gap: 6px; height: 60px; }
-        .wave-bar { width: 6px; height: 20px; background: var(--gold-primary); border-radius: 3px; animation: waveGrow 1.5s infinite; }
-        @keyframes waveGrow { 0%, 100% { height: 20px; } 50% { height: 60px; } }
+        /* TYPING ANIMATION */
+        .typing-bubble { display: flex; gap: 4px; padding: 10px 0; align-items: center; }
+        .t-dot { width: 6px; height: 6px; background: #000; border-radius: 50%; animation: t-jump 0.6s infinite alternate; }
+        .t-dot:nth-child(2) { animation-delay: 0.2s; }
+        .t-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes t-jump { to { transform: translateY(-4px); opacity: 0.5; } }
 
-        .upload-popup { position: absolute; bottom: calc(100% + 20px); left: 15px; background: rgba(15, 15, 15, 0.95); border: 1px solid var(--glass-border); border-radius: 16px; padding: 10px; min-width: 180px; display: none; flex-direction: column; z-index: 1001; }
-        .upload-opt { padding: 12px 15px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px; color: #ffffff !important; }
-        .upload-opt:hover { background: rgba(255, 215, 0, 0.1); color: var(--gold-primary) !important; }
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
 
-        /* TYPING */
-        .typing-bubble { display: flex; gap: 5px; padding: 14px 20px; }
-        .t-dot { width: 7px; height: 7px; background: #000; border-radius: 50%; animation: t-jump 0.8s infinite alternate; opacity: 0.6; }
-        .t-dot:nth-child(2) { animation-delay: 0.2s; } .t-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes t-jump { to { transform: translateY(-5px); opacity: 1; } }
-
-        /* MOBILE OVERRIDES */
+        @media (max-width: 1024px) { .messages-container { padding: 40px 10% 160px; } }
         @media (max-width: 768px) {
-            .sidebar { position: absolute; left: -280px; }
+            .sidebar { position: absolute; left: -280px; height: 100%; }
             .sidebar.mobile-active { left: 0; box-shadow: 20px 0 100px #000; }
             .messages-container { padding: 30px 20px 160px; }
             .input-bar-container { padding: 20px 15px 30px; }
@@ -405,100 +415,76 @@
     <div class="app-layout">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <button class="new-chat-btn" onclick="createNewChat()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5">
+                <button class="new-chat-btn" onclick="startNewSession()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                         <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    Start New Study
+                    New Study Session
                 </button>
-                <div class="search-container">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" class="sidebar-search" placeholder="Search sessions...">
-                </div>
 
-                <!-- PULSE (Usage Limits) -->
-                <div class="usage-widget" style="margin-top: 10px; padding: 15px; background: rgba(255, 215, 0, 0.03); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px; transition: 0.3s;">
+                <!-- LIMIT WIDGET -->
+                <div class="usage-widget" style="margin-top: 10px; padding: 15px; background: rgba(255, 215, 0, 0.03); border: 1px solid rgba(255, 215, 0, 0.1); border-radius: 12px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 10px; font-weight: 800; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 1px;">BEE Pulse Capacity</span>
-                        <span style="font-size: 11px; font-weight: 900; color: #fff;"><span class="messages-used">0</span>/<span class="daily-limit">30</span></span>
+                        <span style="font-size: 10px; font-weight: 800; color: var(--gold-primary); text-transform: uppercase;">Daily Pulses</span>
+                        <span style="font-size: 11px; font-weight: 900;"><span id="used-count">0</span>/<span id="total-limit">30</span></span>
                     </div>
                     <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
-                        <div class="usage-ring" style="width: 0%; height: 100%; background: var(--gold-primary); box-shadow: 0 0 10px var(--gold-primary); transition: 0.5s;"></div>
-                    </div>
-                    <div style="margin-top: 8px; font-size: 9px; color: rgba(255,255,255,0.3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <span class="remaining-count">30</span> PULSES REMAINING
+                        <div id="usage-bar" style="width: 0%; height: 100%; background: var(--gold-primary); transition: 0.5s;"></div>
                     </div>
                 </div>
             </div>
             
-            <div class="history-list">
-                <div style="font-size: 9px; font-weight: 800; color: #444; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; padding-left: 5px;">Study Node History</div>
-                <div class="history-item active" onclick="createNewChat()">
-                    <div class="h-title">New Study Session</div>
-                    <div class="h-time">ACTIVE NOW</div>
-                </div>
+            <div class="history-list" id="sessions-list">
+                <!-- Sessions will be loaded here -->
             </div>
 
-            <!-- Architectural Context (Portable Syllabus) -->
-            <div style="padding: 20px; border-top: 1px solid var(--glass-border); background: rgba(255,255,255,0.01);">
-                <div style="font-size: 9px; font-weight: 800; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">Active Context</div>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                        <span style="font-size: 18px;">📚</span>
-                        <span style="font-size: 11px; font-weight: 700; color: #ddd;" id="context-subject">General Study</span>
-                    </div>
-                    <div style="font-size: 10px; color: #666; font-weight: 600; padding-left: 5px;">AI Context Aware Mode</div>
-                </div>
-            </div>
-
-            <!-- Node Connectivity Footer -->
-            <div style="padding: 15px 20px; background: #000; border-top: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between;">
+            <div style="padding: 20px; border-top: 1px solid var(--glass-border); background: rgba(0,0,0,0.2);">
+                <div style="font-size: 9px; font-weight: 800; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px;">Core Status</div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <div class="status-dot-green" id="conn-dot" style="width: 6px; height: 6px;"></div>
-                    <span style="font-size: 9px; font-weight: 800; color: #666; text-transform: uppercase; letter-spacing: 1px;" id="conn-status">LINKED</span>
+                    <div class="status-dot-green" style="width: 6px; height: 6px;"></div>
+                    <span style="font-size: 10px; font-weight: 700; color: #666;">BEE ENCRYPTION ACTIVE</span>
                 </div>
-                <div style="font-size: 9px; font-weight: 900; color: var(--gold-primary);">V4.5.5</div>
             </div>
         </aside>
 
         <main class="chat-main">
             <header class="chat-header">
                 <div class="header-left">
-                    <button class="menu-trigger" onclick="toggleSidebar()" style="background:none; border:none; color:#fff; cursor:pointer;">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <button onclick="toggleSidebar()" style="background:none; border:none; color:#fff; cursor:pointer;" class="mobile-only">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
                         </svg>
                     </button>
                     <div class="header-title-group">
-                        <h2>BEPREP AI 4.5 <span class="status-dot-green"></span></h2>
-                        <p>Intelligent Study Companion</p>
+                        <h2>BEE AI <span id="current-session-name" style="color:#fff; font-weight:400; font-size:14px; margin-left:10px; opacity:0.6;"></span></h2>
+                        <p>Advanced Academic Intelligence</p>
                     </div>
                 </div>
                 
-                <button class="btn-pill-action" onclick="window.history.back()">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <button class="btn-send" style="background: rgba(255,255,255,0.05); color: #fff; width: 40px; height: 40px;" onclick="window.history.back()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </button>
             </header>
 
-            <div class="messages-container" id="stream">
-                <div class="empty-landing" id="landing">
-                    <h1 class="text-gold-glow">Solve Anything.</h1>
+            <div class="messages-container" id="chat-stream">
+                <div class="empty-landing" id="landing-ui">
+                    <h1>Ready to Solve.</h1>
                     <div class="suggestion-grid">
-                        <div class="suggest-card" onclick="autoFill('Solve this Physics problem')">
-                            <h3>Explain Science</h3>
-                            <p>Deep logical breakthroughs for complex problems.</p>
+                        <div class="suggest-card" onclick="autoFill('Help me understand the law of thermodynamics')">
+                            <h3>Concept Deep Dive</h3>
+                            <p>Get logic-based explanations for any scientific theory.</p>
                         </div>
-                        <div class="suggest-card" onclick="autoFill('Generate sample papers')">
-                            <h3>Test Prep</h3>
-                            <p>Instant custom exam-style practice sessions.</p>
+                        <div class="suggest-card" onclick="autoFill('Give me 5 hard math problems on trigonometry')">
+                            <h3>Practice Mode</h3>
+                            <p>Generate high-yield questions for exam preparation.</p>
                         </div>
-                        <div class="suggest-card" onclick="autoFill('Summarize my notes')">
-                            <h3>Node Summary</h3>
-                            <p>Get high-yield summaries from your active banks.</p>
+                        <div class="suggest-card" onclick="autoFill('Mnemonics for the periodic table elements')">
+                            <h3>Memory Boost</h3>
+                            <p>Learn creative ways to memorize complex lists.</p>
                         </div>
-                        <div class="suggest-card" onclick="autoFill('Mnemonics for biology')">
-                            <h3>Memory Tricks</h3>
-                            <p>Learn fun ways to remember complex systems.</p>
+                        <div class="suggest-card" onclick="autoFill('Summarize the importance of French Revolution')">
+                            <h3>Quick Summary</h3>
+                            <p>Get clear, structured notes for any chapter.</p>
                         </div>
                     </div>
                 </div>
@@ -506,23 +492,16 @@
 
             <div class="input-bar-container">
                 <div class="quick-chips">
-                    <div class="q-chip" onclick="autoFill('Simplify this concept')">Simplify</div>
-                    <div class="q-chip" onclick="autoFill('Give me real examples')">Examples</div>
-                    <div class="q-chip" onclick="autoFill('Exam key points')">Exam Tips</div>
+                    <div class="q-chip" onclick="autoFill('Simplify this')">Simplify</div>
+                    <div class="q-chip" onclick="autoFill('Show examples')">Examples</div>
+                    <div class="q-chip" onclick="autoFill('Exam tips')">Exam Tips</div>
+                    <div class="q-chip" onclick="autoFill('Step-by-step')">Step-by-step</div>
                 </div>
 
                 <div class="input-pill-modern">
-                    <button class="btn-pill-action" onclick="toggleUpload()">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    </button>
+                    <textarea id="chat-input" class="chat-textarea" placeholder="Ask BEE AI anything..." rows="1" oninput="autoResize(this)"></textarea>
 
-                    <textarea id="chat-input" class="chat-textarea" placeholder="Ask anything to BEPREP AI..." rows="1" oninput="resizeText()"></textarea>
-
-                    <button class="btn-pill-action" onclick="showVoice()">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
-                    </button>
-
-                    <button class="btn-send-yellow" id="sendBtn" onclick="handleSend()">
+                    <button class="btn-send" id="send-btn" onclick="handleSend()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                             <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                         </svg>
@@ -532,222 +511,277 @@
         </main>
     </div>
 
-    <div class="voice-mode-overlay" id="voice-overlay">
-        <h2 style="color:var(--gold-primary); font-size: 32px;">Listening...</h2>
-        <div class="waveform">
-            <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-        </div>
-        <button onclick="hideVoice()" style="margin-top:60px; background:rgba(255,215,0,0.2); border:1px solid var(--gold-primary); color:#fff; padding:15px 40px; border-radius:15px; cursor:pointer; font-weight:800;">CLOSE</button>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../assets/js/sweetalert2.all.min.js"></script>
     <script type="module">
-        import { 
-            apiCall, 
-            getIndexPath, 
-            BP 
-        } from '../assets/js/bee-core.js';
+        import { apiCall, BP, getIndexPath } from '../assets/js/bee-core.js';
 
-        const stream = document.getElementById('stream');
+        const stream = document.getElementById('chat-stream');
         const input = document.getElementById('chat-input');
-        const landing = document.getElementById('landing');
-        const sidebar = document.getElementById('sidebar');
+        const landing = document.getElementById('landing-ui');
+        const sessionList = document.getElementById('sessions-list');
+        const sendBtn = document.getElementById('send-btn');
 
-        let messagesUsedToday = 0;
-        let dailyLimit = 30;
+        let activeSessionId = null;
+        let isTyping = false;
 
-        function guardAiPage() {
+        // Initialize marked options
+        marked.setOptions({
+            breaks: true,
+            gfm: true
+        });
+
+        async function init() {
             const uid = localStorage.getItem(BP.UID);
-            const activated = localStorage.getItem(BP.ACTIVATED);
+            if (!uid) { window.location.href = getIndexPath(); return; }
+
+            await loadSessions();
+            await updateLimits();
+        }
+
+        async function updateLimits() {
             const role = localStorage.getItem(BP.ROLE);
-
-            if (!uid || activated !== 'true' || !role) {
-                window.location.href = getIndexPath();
-                return false;
+            const res = await apiCall(`/${role}/profile`);
+            if (res?.success) {
+                const used = res.data.aiMessagesToday || 0;
+                const limit = 30;
+                document.getElementById('used-count').textContent = used;
+                document.getElementById('usage-bar').style.width = (used / limit * 100) + '%';
+                if (used >= limit) {
+                    input.disabled = true;
+                    input.placeholder = "Daily limit reached.";
+                    sendBtn.disabled = true;
+                }
             }
-            return true;
         }
 
-        if (!guardAiPage()) throw new Error('denied');
-
-        window.resizeText = function() {
-            input.style.height = '24px';
-            input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+        async function loadSessions() {
+            const res = await apiCall('/ai/sessions');
+            if (res?.success) {
+                renderSessions(res.data);
+            }
         }
 
-        window.toggleSidebar = function() { sidebar.classList.toggle('mobile-active'); }
-        window.toggleUpload = function() { 
-            Swal.fire({
-                title: 'Context Loading',
-                text: 'PDF & Image context analysis is coming in V5.0',
-                icon: 'info',
-                background: '#0a0a1a', color: '#fff', confirmButtonColor: '#FFD700'
+        function renderSessions(sessions) {
+            sessionList.innerHTML = '<div style="font-size: 9px; font-weight: 800; color: #444; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; padding-left: 5px;">Study History Nodes</div>';
+            
+            if (sessions.length === 0) {
+                sessionList.innerHTML += '<div style="padding:20px; text-align:center; color:#444; font-size:12px;">No history nodes found.</div>';
+                return;
+            }
+
+            sessions.forEach(s => {
+                const item = document.createElement('div');
+                item.className = `history-item ${activeSessionId === s._id ? 'active' : ''}`;
+                item.onclick = () => window.switchSession(s._id, s.title);
+                
+                const date = new Date(s.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' });
+                
+                item.innerHTML = `
+                    <div class="h-title">${s.title}</div>
+                    <div class="h-time">${date} • ${s.messageCount} Pulses</div>
+                    <div class="delete-session-btn" onclick="event.stopPropagation(); deleteSession('${s._id}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </div>
+                `;
+                sessionList.appendChild(item);
             });
         }
-        
-        window.showVoice = function() { document.getElementById('voice-overlay').style.display = 'flex'; }
-        window.hideVoice = function() { document.getElementById('voice-overlay').style.display = 'none'; }
 
-        window.autoFill = function(txt) {
-            input.value = txt;
+        window.startNewSession = () => {
+            activeSessionId = null;
+            stream.innerHTML = '';
+            stream.appendChild(landing);
+            landing.style.display = 'block';
+            document.getElementById('current-session-name').textContent = '';
+            document.querySelectorAll('.history-item').forEach(i => i.classList.remove('active'));
+            input.focus();
+        };
+
+        window.switchSession = async (id, title) => {
+            if (isTyping) return;
+            activeSessionId = id;
+            document.getElementById('current-session-name').textContent = '— ' + title;
+            landing.style.display = 'none';
+            stream.innerHTML = '<div style="text-align:center; padding:50px; opacity:0.3;">Loading Knowledge Nodes...</div>';
+            
+            const res = await apiCall(`/ai/sessions/${id}`);
+            if (res?.success) {
+                stream.innerHTML = '';
+                res.data.forEach(msg => {
+                    addMessageUI(msg.role === 'user' ? 'user' : 'ai', msg.content);
+                });
+                scrollToBottom();
+            }
+            loadSessions(); // Refresh active state
+        };
+
+        window.deleteSession = async (id) => {
+            const confirmed = await Swal.fire({
+                title: 'Purge Context?',
+                text: 'This individual memory node will be permanently erased.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: '#333',
+                background: '#0a0a0a', color: '#fff'
+            });
+
+            if (confirmed.isConfirmed) {
+                const res = await apiCall(`/ai/sessions/${id}`, 'DELETE');
+                if (res?.success) {
+                    if (activeSessionId === id) window.startNewSession();
+                    loadSessions();
+                }
+            }
+        };
+
+        window.autoResize = (el) => {
+            el.style.height = '24px';
+            el.style.height = Math.min(el.scrollHeight, 150) + 'px';
+        };
+
+        window.toggleSidebar = () => {
+            document.getElementById('sidebar').classList.toggle('mobile-active');
+        };
+
+        window.autoFill = (text) => {
+            input.value = text;
             window.handleSend();
-        }
+        };
 
-        window.handleSend = async function() {
-            const message = input.value.trim();
-            if (!message) return;
+        window.handleSend = async () => {
+            const msg = input.value.trim();
+            if (!msg || isTyping) return;
 
             landing.style.display = 'none';
-            input.disabled = true;
+            addMessageUI('user', msg);
             input.value = '';
             input.style.height = '24px';
-
-            // Add user message to UI
-            addMessage('user', message);
-
-            // Show typing indicator
-            const tId = showTyping();
+            
+            isTyping = true;
+            const typingId = showTypingIndicator();
 
             try {
-                const result = await apiCall('/ai/chat', 'POST', { message });
+                const res = await apiCall('/ai/chat', 'POST', {
+                    message: msg,
+                    sessionId: activeSessionId
+                });
 
-                removeTyping(tId);
+                removeTypingIndicator(typingId);
 
-                if (result && result.success) {
-                    addMessage('ai', result.data.aiMessage);
-                    
-                    // Update limits
-                    messagesUsedToday = result.data.messagesUsedToday;
-                    dailyLimit = result.data.dailyLimit;
-                    updateLimitDisplay(messagesUsedToday, dailyLimit, result.data.remainingToday);
-
-                } else if (result?.error?.code === 'DAILY_LIMIT_REACHED') {
-                    handleLimitReached(message);
+                if (res?.success) {
+                    activeSessionId = res.data.sessionId;
+                    await typeMessage(res.data.aiMessage);
+                    await updateLimits();
+                    loadSessions();
+                } else if (res?.error?.code === 'DAILY_LIMIT_REACHED') {
+                    addMessageUI('ai', "You've reached your daily AI limit. Please try again tomorrow or upgrade to premium!");
                 } else {
-                    addMessage('ai', 'BEE AI is temporarily unavailable. Please try again in a moment.');
+                    addMessageUI('ai', "I encountered a synchronization error. Please try again.");
                 }
             } catch (err) {
-                removeTyping(tId);
-                addMessage('ai', 'Connection error. Please check your internet node.');
-                console.error('AI chat error:', err);
+                removeTypingIndicator(typingId);
+                addMessageUI('ai', "Connection lost. Re-establishing link...");
             } finally {
-                input.disabled = (messagesUsedToday >= dailyLimit);
-                if (!input.disabled) input.focus();
+                isTyping = false;
             }
-        }
+        };
 
-        function handleLimitReached(lastMessage) {
-            input.disabled = true;
-            input.placeholder = 'Daily limit reached — opens ChatGPT';
-            
-            const sendBtn = document.getElementById('sendBtn');
-            if (sendBtn) sendBtn.disabled = true;
-
-            Swal.fire({
-                icon: 'info',
-                title: 'Daily Limit Reached',
-                html: `<p>You've used all <b>${dailyLimit}</b> BEE AI messages for today.</p><p style="color:#aaa; font-size:13px;">Continue your study session on ChatGPT. Your question will be pre-filled.</p>`,
-                showCancelButton: true,
-                confirmButtonText: 'Continue on ChatGPT 🚀',
-                cancelButtonText: 'Try Tomorrow',
-                background: '#0a0a1a', color: '#fff', confirmButtonColor: '#FFD700'
-            }).then(r => {
-                if (r.isConfirmed && lastMessage) {
-                    const encoded = encodeURIComponent(lastMessage);
-                    window.open('https://chatgpt.com/?q=' + encoded, '_blank');
-                }
-            });
-        }
-
-        function updateLimitDisplay(used, limit, remaining) {
-            const usedEl = document.querySelector('.messages-used');
-            const remainEl = document.querySelector('.remaining-count');
-            const limitEl = document.querySelector('.daily-limit');
-            const ring = document.querySelector('.usage-ring');
-
-            if (usedEl) usedEl.textContent = used;
-            if (remainEl) remainEl.textContent = remaining;
-            if (limitEl) limitEl.textContent = limit;
-
-            if (ring) {
-                const percent = (used / limit) * 100;
-                ring.style.width = Math.min(100, percent) + '%';
-                
-                if (remaining <= 5) ring.style.background = '#ff4d4d';
-                else if (remaining <= 10) ring.style.background = '#ffa500';
-                else ring.style.background = 'var(--gold-primary)';
-            }
-        }
-
-        function addMessage(role, text) {
+        function addMessageUI(role, text, animate = false) {
             const row = document.createElement('div');
             row.className = `message-row ${role}-msg`;
-            const name = role === 'user' ? (localStorage.getItem(BP.NAME)?.substring(0, 2).toUpperCase() || 'ST') : 'B';
+            
+            const icon = role === 'user' ? 
+                `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>` : 
+                `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>`;
+            
             row.innerHTML = `
-                <div class="avatar-chat">${name}</div>
-                <div class="bubble-chat">
-                    ${text}
-                    <div class="msg-actions" style="margin-top: 10px; opacity: 0.6; font-size: 11px; display: flex; gap: 15px;">
-                        <span class="action-tool" onclick="navigator.clipboard.writeText(this.parentElement.previousSibling.textContent.trim())">📋 Copy</span>
-                        ${role === 'ai' ? '<span class="action-tool" onclick="location.reload()">🔄 Clear</span>' : ''}
-                    </div>
+                <div class="avatar-chat">${icon}</div>
+                <div class="bubble-chat">${marked.parse(text)}</div>
+                <div class="msg-actions">
+                    <span class="action-tool" onclick="copyText(this)">📋 Copy Content</span>
                 </div>
             `;
             stream.appendChild(row);
-            stream.scrollTo({ top: stream.scrollHeight, behavior: 'smooth' });
+            scrollToBottom();
         }
 
-        function showTyping() {
-            const id = 't-' + Date.now();
+        async function typeMessage(text) {
+            const row = document.createElement('div');
+            row.className = 'message-row ai-msg';
+            row.innerHTML = `
+                <div class="avatar-chat">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                </div>
+                <div class="bubble-chat"></div>
+            `;
+            stream.appendChild(row);
+            const bubble = row.querySelector('.bubble-chat');
+            
+            // For a "premium" feel, we render markdown but simulate word-by-word reveal
+            // Real streaming would be better via SSE, but simulated is okay for now
+            const words = text.split(' ');
+            let currentText = '';
+            
+            for (let i = 0; i < words.length; i++) {
+                currentText += words[i] + ' ';
+                bubble.innerHTML = marked.parse(currentText);
+                scrollToBottom();
+                await new Promise(r => setTimeout(r, 20 + Math.random() * 20)); // Organic typing speed
+            }
+            
+            // Final render to ensure correctness
+            bubble.innerHTML = marked.parse(text);
+            row.innerHTML += `
+                <div class="msg-actions">
+                    <span class="action-tool" onclick="copyText(this)">📋 Copy</span>
+                </div>
+            `;
+            scrollToBottom();
+        }
+
+        function showTypingIndicator() {
+            const id = 'typing-' + Date.now();
             const row = document.createElement('div');
             row.className = 'message-row ai-msg';
             row.id = id;
             row.innerHTML = `
                 <div class="avatar-chat">B</div>
-                <div class="bubble-chat" style="padding: 15px 25px;">
+                <div class="bubble-chat" style="padding:15px 25px;">
                     <div class="typing-bubble">
                         <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
                     </div>
                 </div>
             `;
             stream.appendChild(row);
-            stream.scrollTop = stream.scrollHeight;
+            scrollToBottom();
             return id;
         }
 
-        function removeTyping(id) {
+        function removeTypingIndicator(id) {
             const el = document.getElementById(id);
             if (el) el.remove();
         }
 
-        window.createNewChat = function() {
-            stream.innerHTML = '';
-            stream.appendChild(landing);
-            landing.style.display = 'block';
-            if (window.innerWidth <= 768) sidebar.classList.remove('mobile-active');
+        function scrollToBottom() {
+            stream.scrollTop = stream.scrollHeight;
         }
+
+        window.copyText = (el) => {
+            const text = el.closest('.message-row').querySelector('.bubble-chat').innerText;
+            navigator.clipboard.writeText(text);
+            el.textContent = '✅ Copied';
+            setTimeout(() => el.textContent = '📋 Copy', 2000);
+        };
 
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                window.handleSend();
+                handleSend();
             }
         });
 
-        async function loadInitialLimit() {
-            const role = localStorage.getItem(BP.ROLE);
-            const user = await apiCall(`/${role}/profile`);
-            if (user && user.success) {
-                messagesUsedToday = user.data.aiMessagesToday || 0;
-                updateLimitDisplay(messagesUsedToday, dailyLimit, dailyLimit - messagesUsedToday);
-                if (messagesUsedToday >= dailyLimit) {
-                    input.disabled = true;
-                    input.placeholder = 'Daily limit reached.';
-                }
-            }
-        }
-
-        window.addEventListener('load', loadInitialLimit);
+        window.addEventListener('load', init);
     </script>
 </body>
 

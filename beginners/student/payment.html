@@ -309,7 +309,13 @@
             style="background: #000 !important; border: 1px solid var(--primary) !important; box-shadow: 0 0 50px rgba(0,0,0,1) !important;">
             <div class="header"
                 style="border-bottom: 1px solid rgba(255,215,0,0.1); padding-bottom: 24px; margin-bottom: 24px;">
-                <div class="close-btn" onclick="window.history.back()">✕ Cancel Payment</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div class="close-btn" style="margin-bottom: 0;" onclick="window.history.back()">✕ Cancel Payment</div>
+                    <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                        <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                        <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+                    </div>
+                </div>
                 <h1 class="title">Secure Activation</h1>
                 <p class="subtitle" style="color: #aaa;">Complete payment to receive your unique system cluster key.</p>
             </div>
@@ -415,6 +421,18 @@
 
         function returnToTerminal() {
             window.location.href = '../../activation.html';
+        }
+        // Load streak
+        const token = localStorage.getItem('bp_token');
+        if (token) {
+            fetch('/api/student/streak', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(r => r.json())
+            .then(res => {
+                if (res && res.success) {
+                    document.getElementById('streak-val-header').textContent = res.data.currentStreak || 0;
+                    // Note: payment.html doesn't have bee-core.js loaded yet.
+                }
+            });
         }
     </script>
 </body>

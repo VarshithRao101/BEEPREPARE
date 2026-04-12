@@ -693,7 +693,105 @@ textarea:focus {
     border-radius: 16px !important;
     font-size: 16px !important;
     margin-top: 48px !important;
-    letter-spacing: 1.5px !important;}
+    letter-spacing: 1.5px;
+}
+
+/* ------------------------------------------- */
+/* SKELETON LOADERS & MAINTENANCE PROTOCOLS   */
+/* ------------------------------------------- */
+
+/* Skeleton Pulse Animation */
+@keyframes skeleton-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #1a1a1e 25%, #2a2a2e 50%, #1a1a1e 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite linear;
+    border-radius: 12px;
+    border: none !important;
+}
+
+.skeleton-text { height: 16px; margin-bottom: 10px; width: 80%; }
+.skeleton-title { height: 24px; margin-bottom: 15px; width: 60%; }
+.skeleton-circle { border-radius: 50%; width: 50px; height: 50px; }
+.skeleton-rect { height: 150px; width: 100%; }
+
+/* Maintenance Overlay */
+.maintenance-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #050505;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    font-family: 'Outfit', sans-serif;
+}
+
+.maintenance-orb {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 207, 0, 0.1) 0%, transparent 70%);
+    filter: blur(80px);
+    z-index: -1;
+    animation: pulseMaintenance 4s infinite alternate;
+}
+
+@keyframes pulseMaintenance {
+    from { transform: scale(0.8); opacity: 0.5; }
+    to { transform: scale(1.2); opacity: 1; }
+}
+
+.maintenance-content {
+    max-width: 500px;
+    animation: fadeInUpAdv 0.6s ease-out;
+}
+
+.maintenance-icon {
+    font-size: 60px;
+    margin-bottom: 30px;
+    filter: drop-shadow(0 0 20px var(--adv-yellow));
+}
+
+.maintenance-title {
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff, var(--adv-yellow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+}
+
+.maintenance-msg {
+    font-size: 16px;
+    color: var(--adv-muted);
+    line-height: 1.6;
+    margin-bottom: 40px;
+}
+
+.maintenance-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    background: rgba(255, 207, 0, 0.1);
+    border: 1px solid var(--adv-border);
+    border-radius: 30px;
+    color: var(--adv-yellow);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 2px;
+}
 
 /* ------------------------------------------- */
 /* COMMAND CENTER SHELL ARCHITECTURE           */
@@ -837,3 +935,97 @@ textarea:focus {
 @media (min-width: 992px) {
     .nav-bottom { display: none; }
 }
+
+/* ------------------------------------------- */
+/* DAILY QUOTE SYSTEM COMPONENTS               */
+/* ------------------------------------------- */
+.quote-card-dynamic {
+    background: linear-gradient(145deg, rgba(30, 31, 33, 0.95), rgba(15, 16, 18, 0.98)) !important;
+    border: 1px solid rgba(255, 207, 0, 0.15) !important;
+    border-left: 4px solid var(--adv-yellow) !important;
+    padding: 24px !important;
+    border-radius: 24px !important;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+    margin-bottom: 30px !important;
+    animation: fadeInUpAdv 0.8s ease-out both;
+}
+
+.quote-card-dynamic:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    border-color: rgba(255, 207, 0, 0.4) !important;
+    box-shadow: 0 20px 60px rgba(255, 207, 0, 0.1) !important;
+}
+
+.quote-card-dynamic::before {
+    content: '“';
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-size: 80px;
+    color: var(--adv-yellow);
+    opacity: 0.1;
+    font-family: serif;
+}
+
+.quote-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--adv-yellow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+}
+
+.quote-text-main {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.6;
+    color: #fff;
+    margin-bottom: 16px;
+    font-style: italic;
+    font-family: 'Outfit', sans-serif;
+}
+
+.quote-author {
+    font-size: 13px;
+    color: var(--adv-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.quote-author::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--adv-yellow);
+    opacity: 0.5;
+}
+
+.quote-footer-msg {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.05);
+    font-size: 11px;
+    color: var(--adv-yellow);
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.quote-icon-spark {
+    animation: sparkPulse 2s infinite ease-in-out;
+}
+
+@keyframes sparkPulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 5px var(--adv-yellow)); }
+}

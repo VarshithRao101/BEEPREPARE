@@ -129,23 +129,23 @@
             <div class="sidebar-brand">BEE COMMAND</div>
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link active">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     <span>Home Hub</span>
                 </a>
-                <a href="student-bank.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <a href="student-banks.html" class="sidebar-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M8 7h6"></path><path d="M8 11h8"></path></svg>
                     <span>Bank Inventory</span>
                 </a>
-                <a href="student-generate.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                <a href="student-practice.html" class="sidebar-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     <span>Practice</span>
                 </a>
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 13.14L2 8.27L8.91 7.26L12 1Z" /></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="student-profile.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     <span>My Profile</span>
                 </a>
             </nav>
@@ -159,7 +159,17 @@
                     <h2 class="welcome-title">Hello, Scholar</h2>
                     <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your learning environment is fully synchronized.</p>
                 </div>
-                <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                    <!-- Plain Quote Display (Beside Streak) -->
+                    <div id="quote-plain-container" style="display: none; text-align: right; border-right: 2px solid var(--adv-yellow); padding-right: 20px; max-width: 350px;">
+                        <div id="quote-text-plain" style="font-size: 15px; font-weight: 600; font-style: italic; color: #fff; line-height: 1.4; margin-bottom: 4px;"></div>
+                        <div id="quote-author-plain" style="font-size: 11px; color: var(--adv-yellow); font-weight: 900; letter-spacing: 2px; text-transform: uppercase;"></div>
+                    </div>
+
+                    <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2);" title="Learning Streak">
+                        <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                        <span id="streak-val-header" class="flame-count" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+                    </div>
                     <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
                 </div>
             </header>
@@ -241,11 +251,12 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { 
-          firebaseConfig, 
-          apiCall, 
-          guardStudent, 
-          BP 
-        } from '../../assets/js/bee-core.js';
+            firebaseConfig,
+            apiCall, 
+            getFreshToken, 
+            guardStudent, 
+            BP 
+        } from '/assets/js/bee-core.js';
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -268,6 +279,11 @@
         async function loadDashboard() {
             if (!guardStudent()) return;
 
+            // Show skeletons immediately
+            BP.showSkeleton('subject-container', 'card', 4);
+            const logWrapper = document.getElementById('activity-log-wrapper');
+            if(logWrapper) BP.showSkeleton('activity-log-wrapper', 'list', 5);
+
             // Show name immediately
             const welcomeTitle = document.querySelector('.welcome-title');
             const studentName = localStorage.getItem(BP.NAME) || 'Scholar';
@@ -283,16 +299,31 @@
             if (result && result.success) {
                 const d = result.data;
 
-                // Streak — find existing streak element or use profile area
-                const streakEl = document.querySelector('.streak-count, .streak-badge span, [data-streak], .flame-count');
-                if (streakEl) {
-                    streakEl.textContent = d.streak?.current || 0;
-                } else {
-                    // Map to header sub-text if no specific streak element found
-                    const subHeader = document.querySelector('header p');
-                    if (subHeader && d.streak?.current > 0) {
-                        subHeader.textContent = `🔥 ${d.streak.current} Day Streak • Active Session Synchronized`;
+                // Show daily quote in header (Plain)
+                if (d.dailyQuote) {
+                    const qContainer = document.getElementById('quote-plain-container');
+                    const qText = document.getElementById('quote-text-plain');
+                    const qAuthor = document.getElementById('quote-author-plain');
+                    if (qContainer && qText) {
+                        qText.innerText = `"${d.dailyQuote.text}"`;
+                        // Override author to "Be Prepare" if unknown or requested
+                        qAuthor.innerText = (d.dailyQuote.author && d.dailyQuote.author !== 'Unknown') 
+                            ? d.dailyQuote.author 
+                            : 'Be Prepare';
+                        qContainer.style.display = 'block';
                     }
+                }
+
+                // Streak Update
+                const streakVal = document.getElementById('streak-val-header');
+                if (streakVal) streakVal.textContent = d.streak?.current || 0;
+                BP.initStreakFlame('streak-canvas');
+
+                const subHeader = document.querySelector('header p');
+                if (subHeader) {
+                    subHeader.textContent = d.streak?.current > 0 
+                        ? `🔥 ${d.streak.current} Day Streak • Active Session Sync`
+                        : `Start your daily streak today!`;
                 }
 
 
@@ -343,7 +374,7 @@
                             </div>
                             <div style="flex: 1;">
                                 <div style="font-size: 14px; font-weight: 800; color: #fff;">${log.title}</div>
-                                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">${log.description} • ${timeAgo(log.timestamp)}</div>
+                                <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-top: 4px;">${log.description} • ${timeAgo(log.createdAt)}</div>
                             </div>
                         `;
                         logWrapper.appendChild(item);
@@ -368,9 +399,9 @@
 
         async function loadRecentDoubts() {
             const result = await apiCall('/student/doubts');
-            if (!result || !result.success) return;
+            if (!result || !result.success || !result.data.chats) return;
 
-            const doubts = result.data.slice(0, 3);
+            const doubts = result.data.chats.slice(0, 3);
             const container = document.querySelector('.recent-doubts');
             if (!container) return;
 
@@ -400,7 +431,11 @@
             });
         }
 
-        window.addEventListener('load', loadDashboard);
+        window.addEventListener('load', () => {
+             loadDashboard();
+        });
+
+
     </script>
 </body>
 

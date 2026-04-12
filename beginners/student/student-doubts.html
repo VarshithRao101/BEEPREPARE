@@ -4,662 +4,541 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Academic Queries - BEEPREPARE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <title>Academic Lab - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .section-divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 30px 0 15px 0;
+        :root {
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --primary: #FFD700;
+            --bg-deep: #08080a;
+            --sidebar-bg: #0c0c0f;
+            --hub-bg: #0e0e12;
+            --msg-in: rgba(255, 255, 255, 0.05);
+            --msg-out: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
         }
 
-        .divider-line {
-            height: 2px;
-            flex: 1;
-            background: linear-gradient(90deg, var(--border), transparent);
-            border-radius: 2px;
-        }
-
-        .section-label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--primary);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        /* Doubt Card - Professional Style */
-        .doubt-card {
-            background: rgba(25, 26, 28, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-            position: relative;
+        body {
             overflow: hidden;
+            background: var(--bg-deep);
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            margin: 0;
         }
 
-        .doubt-card:hover {
-            background: rgba(25, 26, 28, 0.9);
-            border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.1);
+        .academic-lab {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            height: 100vh;
+            width: 100vw;
+            transition: 0.3s;
         }
 
-        .status-badge {
-            font-size: 10px;
-            font-weight: 800;
-            padding: 5px 12px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .status-pending { background: rgba(255, 165, 0, 0.1); color: #FFA500; border: 1px solid rgba(255, 165, 0, 0.2); }
-        .status-replied { background: rgba(76, 175, 80, 0.1); color: #4CAF50; border: 1px solid rgba(76, 175, 80, 0.2); }
-        .status-resolved { background: rgba(255, 255, 255, 0.05); color: #888; border: 1px solid rgba(255, 255, 255, 0.1); }
-
-        .unread-indicator {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            width: 10px;
-            height: 10px;
-            background: var(--primary);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--primary);
-        }
-
-        /* Chat System */
-        .chat-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(20px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .chat-overlay.active { display: flex; }
-
-        .chat-window {
-            width: 100%;
-            max-width: 600px;
-            height: 85vh;
-            background: #121214;
-            border: 1px solid var(--border);
-            border-radius: 30px;
+        /* ════════════════ 1. Bank Access Sidebar ════════════════ */
+        .bank-sidebar {
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--glass-border);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.8);
+            z-index: 100;
         }
 
-        .chat-header {
-            padding: 20px 30px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .sidebar-header {
+            padding: 25px;
+            border-bottom: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .sidebar-header h2 { font-size: 18px; margin: 0; font-weight: 800; letter-spacing: 0.5px; color: #fff; }
+
+        .search-node {
+            padding: 15px 25px;
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        .msg {
-            max-width: 85%;
-            padding: 16px 20px;
+        .search-box {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box input { background: none; border: none; color: #fff; font-size: 13px; outline: none; width: 100%; font-family: inherit; }
+
+        .bank-stream { flex: 1; overflow-y: auto; padding: 15px; }
+
+        .bank-card {
+            padding: 15px;
             border-radius: 20px;
-            font-size: 14px;
-            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid transparent;
             position: relative;
         }
 
-        .msg-student {
-            align-self: flex-end;
-            background: var(--primary);
-            color: #000;
-            border-bottom-right-radius: 4px;
-            font-weight: 600;
+        .bank-card:hover { transform: scale(1.02); background: rgba(255, 255, 255, 0.04); }
+        .bank-card.active { background: rgba(255, 215, 0, 0.05); border-color: rgba(255, 215, 0, 0.2); }
+
+        .bank-logo {
+            width: 48px; height: 48px; border-radius: 15px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: var(--primary); font-size: 16px; flex-shrink: 0;
         }
 
-        .msg-teacher {
-            align-self: flex-start;
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            border-bottom-left-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .bank-card.active .bank-logo { background: var(--primary); color: #000; }
 
-        .msg-img {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        .bank-info { flex: 1; min-width: 0; }
+        .bank-info h4 { margin: 0; font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+        .bank-info p { margin: 3px 0 0; font-size: 11px; color: var(--text-muted); font-weight: 500; }
 
-        .msg-img:hover { opacity: 0.8; }
+        .unread-badge { width: 8px; height: 8px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); position: absolute; top: 15px; right: 15px; }
 
-        .chat-input-area {
-            padding: 20px 30px;
-            background: rgba(0,0,0,0.3);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        /* ════════════════ 2. Interaction Hub ════════════════ */
+        .interaction-hub {
+            background: var(--hub-bg);
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .input-row {
-            display: flex;
-            gap: 15px;
-            align-items: center;
+        .empty-hub {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 40px;
         }
 
-        .input-box {
-            flex: 1;
+        .placeholder-icon {
+            width: 80px; height: 80px; border-radius: 24px;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 15px;
-            padding: 14px 20px;
-            color: #fff;
-            outline: none;
-            transition: 0.3s;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 25px; color: var(--primary);
         }
 
-        .input-box:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.06); }
-
-        .btn-send {
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
-            border-radius: 15px;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.3s;
+        .hub-header {
+            padding: 15px 25px;
+            background: rgba(15, 15, 18, 0.8);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; align-items: center; gap: 15px;
+            z-index: 10;
         }
 
-        .btn-send:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
-
-        /* New Query Form */
-        .new-query-card {
-            background: linear-gradient(145deg, rgba(255, 215, 0, 0.05), transparent);
-            border: 1px dashed var(--primary);
-            border-radius: 24px;
-            padding: 30px;
-            margin-bottom: 40px;
+        .btn-back {
+            display: none; width: 40px; height: 40px; border-radius: 12px;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            color: #fff; cursor: pointer; align-items: center; justify-content: center;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        .mentor-node { display: flex; align-items: center; gap: 12px; }
+        .mentor-id { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; }
+
+        .chat-line { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 30px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            scroll-behavior: smooth;
         }
 
-        .form-label {
-            display: block;
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
+        .bubble {
+            max-width: 75%; padding: 12px 18px; border-radius: 20px; font-size: 14px; line-height: 1.5;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); position: relative;
+            animation: messageScale 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
         }
 
-        .glass-select, .glass-textarea {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px;
-            color: #fff;
-            font-family: inherit;
-            outline: none;
+        @keyframes messageScale { from { opacity: 0; transform: translateY(10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .bubble.student { 
+            align-self: flex-end; 
+            background: #FFD700; 
+            color: #000; 
+            border-bottom-right-radius: 4px; 
+            font-weight: 700; 
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+        .bubble.teacher { 
+            align-self: flex-start; 
+            background: #1a1a24; 
+            color: #fff; 
+            border-bottom-left-radius: 4px; 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            font-weight: 500;
         }
 
-        .glass-textarea { min-height: 100px; resize: none; }
+        .bubble-img-node {
+            width: 240px; height: 160px; border-radius: 12px; margin-top: 8px;
+            border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+            object-fit: cover; transition: 0.3s; display: block;
+        }
+        .bubble-img-node:hover { transform: scale(1.03); border-color: var(--primary); }
 
-        .upload-zone {
-            border: 1px dashed rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
+        .interaction-console {
             padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(12, 12, 15, 0.98);
+            border-top: 1px solid var(--glass-border);
+            display: flex; gap: 12px; align-items: flex-end;
         }
 
-        .upload-zone:hover { border-color: var(--primary); background: rgba(255, 215, 0, 0.02); }
-
-        .preview-img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-top: 10px;
-            display: none;
+        .composer {
+            flex: 1; background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: 18px; padding: 12px 18px; color: #fff; outline: none;
+            min-height: 48px; max-height: 150px; resize: none; font-size: 14px;
+            transition: 0.3s; font-family: inherit;
         }
 
-        .submit-btn {
-            background: linear-gradient(135deg, var(--primary), #ffa000);
-            color: #000;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 15px;
-            font-weight: 900;
-            width: 100%;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .btn-tool { width: 48px; height: 48px; border-radius: 14px; border: none; background: var(--glass); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-tool:hover { background: rgba(255, 255, 255, 0.08); }
+        .btn-tool.prime { background: var(--primary); color: #000; }
+
+        .lightbox-portal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.95); z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px); opacity: 0; transition: 0.3s;
         }
+        .lightbox-portal.active { display: flex; opacity: 1; }
+        .lightbox-content { max-width: 90%; max-height: 85%; border-radius: 15px; }
+
+        /* Mobile Slide Navigation — BEE COMMAND Protocol */
+        @media (max-width: 850px) {
+            .academic-lab { 
+                grid-template-columns: 100vw 100vw; 
+                width: 200vw; 
+                transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            }
+            .academic-lab.chat-open { transform: translateX(-100vw); }
+            
+            .bank-sidebar { width: 100vw; height: 100vh; }
+            .interaction-hub { width: 100vw; height: 100vh; }
+
+            .btn-back { display: flex; }
+            .hub-header { padding: 12px 15px; }
+            .chat-line { padding: 15px; }
+            .interaction-console { padding: 12px; }
+            .composer { font-size: 16px; min-height: 40px; } /* Prevent iOS zoom */
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
     </style>
 </head>
 
 <body>
-    <div class="main-layout">
-        <aside class="pc-sidebar">
-            <div class="sidebar-brand">BEE COMMAND</div>
-            <nav class="sidebar-nav">
-                <a href="student-home.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-                    <span>Home Hub</span>
-                </a>
-                <a href="student-bank.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    <span>Bank Inventory</span>
-                </a>
-                <a href="student-generate.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                    <span>Practice</span>
-                </a>
-                <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
-                    <span>BEE AI Assistant</span>
-                </a>
-                <a href="student-profile.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-                    <span>My Profile</span>
-                </a>
-            </nav>
-        </aside>
-
-        <main class="content-wrapper">
-            <header style="display: flex; gap: 20px; align-items: center; margin-bottom: 40px;">
-                <button onclick="window.location.href='student-profile.html'" style="background: none; border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                <div>
-                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Academic Queries</h2>
-                    <p style="color: var(--text-muted); font-size: 14px;">Consult with your node mentors.</p>
+    <div class="academic-lab" id="lab-container">
+        <!-- 1. Sidebar -->
+        <aside class="bank-sidebar">
+            <header class="sidebar-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <h2>Laboratory Logs</h2>
+                <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                    <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                    <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+                </div>
+                </div>
+                <div class="btn-tool" style="width: 36px; height: 36px;" onclick="window.location.href='student-home.html'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 </div>
             </header>
-
-            <div class="new-query-card" id="newQueryForm">
-                <div class="section-divider" style="margin-top: 0; margin-bottom: 25px;">
-                    <span class="section-label">Deploy New Query</span>
-                    <div class="divider-line"></div>
+            
+            <div class="search-node">
+                <div class="search-box">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="bank-filter" placeholder="Search laboratories..." onkeyup="filterBanks()">
                 </div>
+            </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="form-group">
-                        <label class="form-label">Target Subject Bank</label>
-                        <select id="bank-select" class="glass-select">
-                            <option value="">Select a Bank</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Upload Reference (Photo)</label>
-                        <div class="upload-zone" onclick="document.getElementById('file-input').click()">
-                            <span id="upload-status" style="font-size: 12px; color: var(--text-muted);">Click to attach image</span>
-                            <img id="image-preview" class="preview-img">
-                            <input type="file" id="file-input" hidden accept="image/*" onchange="handleFileSelect(this)">
+            <div class="bank-stream" id="bank-list">
+                <div style="padding: 40px; text-align: center; color: var(--text-muted); font-size: 12px; letter-spacing: 1px; font-weight: 700; text-transform: uppercase;">Initializing Synchronicity...</div>
+            </div>
+        </aside>
+
+        <!-- 2. Hub -->
+        <main class="interaction-hub">
+            <div class="empty-hub" id="empty-hub">
+                <div class="placeholder-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <h3 style="font-size: 22px; color: #fff; font-weight: 800; margin-bottom: 12px;">Resolution Secure</h3>
+                <p style="font-size: 13px; max-width: 280px; line-height: 1.6; opacity: 0.5; font-weight: 500;">Select an active academic repository node to commence real-time expert resolution.</p>
+            </div>
+
+            <div id="active-hub" style="display: none; flex-direction: column; height: 100%;">
+                <header class="hub-header">
+                    <button class="btn-back" onclick="document.getElementById('lab-container').classList.remove('chat-open')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <div class="mentor-node">
+                        <div class="mentor-id" id="hub-mentor-initials">BM</div>
+                        <div>
+                            <div id="hub-subject-name" style="font-weight: 800; font-size: 16px;">Subject Name</div>
+                            <div id="hub-mentor-name" style="color: var(--primary); font-size: 10px; text-transform: uppercase; font-weight: 800; margin-top: 2px;">BEE Mentor</div>
                         </div>
                     </div>
+                </header>
+
+                <div class="chat-line" id="chat-stream"></div>
+
+                <div class="upload-preview" id="hub-upload-cont" style="display:none; position:absolute; bottom:80px; left:20px; background:#111; padding:10px; border-radius:12px; border:1.5px solid var(--primary); z-index:100; box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+                    <img id="hub-preview-img" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                    <button onclick="clearPendingFile()" style="position: absolute; top: -10px; right: -10px; width: 24px; height: 24px; border-radius: 50%; background: #ff4d4d; border: 2px solid #111; color: #fff; font-weight: 900; cursor: pointer; display:flex; align-items:center; justify-content:center;">×</button>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Describe your doubt</label>
-                    <textarea id="doubt-text" class="glass-textarea" placeholder="Explain the concept or question you're struggling with..."></textarea>
+                <div class="interaction-console">
+                    <button class="btn-tool" onclick="document.getElementById('hub-file').click()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                    </button>
+                    <input type="file" id="hub-file" hidden accept="image/*" onchange="previewFile(this)">
+                    <textarea id="hub-input" class="composer" placeholder="Consulting mentor..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                    <button class="btn-tool prime" id="hub-send-btn" onclick="transmitMessage()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    </button>
                 </div>
-
-                <button class="submit-btn" id="submitBtn" onclick="submitDoubt()">Transmit Query to Teacher →</button>
-            </div>
-
-            <div class="section-divider">
-                <span class="section-label">Active Query Nodes</span>
-                <div class="divider-line"></div>
-            </div>
-
-            <div id="doubts-list">
-                <!-- Doubts loaded via JS -->
-                 <div style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px;">Initializing query node connection...</div>
             </div>
         </main>
     </div>
 
-    <!-- Chat Overlay -->
-    <div class="chat-overlay" id="chatOverlay">
-        <div class="chat-window">
-            <div class="chat-header">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <div id="chat-teacher-avatar" style="width:40px; height:40px; background:var(--primary); color:#000; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900;">T</div>
-                    <div>
-                        <div id="chat-teacher-name" style="color:#fff; font-weight:800; font-size:16px;">--</div>
-                        <div id="chat-subject" style="color:var(--primary); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px;">--</div>
-                    </div>
-                </div>
-                <button onclick="closeChat()" style="background:none; border:none; color:#666; cursor:pointer;"><svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg></button>
-            </div>
-
-            <div class="messages-container" id="messages-list">
-                <!-- Messages -->
-            </div>
-
-            <div class="chat-input-area">
-                <div id="chat-upload-preview" style="display:none; position:relative; width: 60px;">
-                   <img id="chat-preview-img" style="width:60px; height:60px; border-radius:10px; object-fit:cover;">
-                   <button onclick="clearChatFile()" style="position:absolute; top:-5px; right:-5px; width:20px; height:20px; border-radius:50%; background:#ff4d4d; border:none; color:#fff; font-size:10px; cursor:pointer;">×</button>
-                </div>
-                <div class="input-row">
-                    <button class="btn-send" style="background:rgba(255,255,255,0.05); color:var(--text-muted);" onclick="document.getElementById('chat-file-input').click()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path><polyline points="16 5 21 5 21 10"></polyline><line x1="12" y1="12" x2="21" y2="3"></line></svg>
-                    </button>
-                    <input type="file" id="chat-file-input" hidden accept="image/*" onchange="handleChatFileSelect(this)">
-                    <input type="text" id="chat-input" class="input-box" placeholder="Type clarification...">
-                    <button class="btn-send" onclick="sendChatMessage()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
+    <div class="lightbox-portal" id="lightbox" onclick="this.classList.remove('active')">
+        <img class="lightbox-content" id="lightbox-img">
     </div>
-
-    <!-- Mobile Nav -->
-    <nav class="nav-bottom">
-        <a href="student-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-            <span>Home</span>
-        </a>
-        <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-            <span>Bank</span>
-        </a>
-        <a href="../ai-chat.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
-            <span>AI</span>
-        </a>
-        <a href="student-generate.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-            <span>Practice</span>
-        </a>
-        <a href="student-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-            <span>Profile</span>
-        </a>
-    </nav>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { 
-            getFirestore, 
-            collection, 
-            onSnapshot, 
-            query, 
-            orderBy,
-            doc,
-            updateDoc
-        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
-        import { 
-          firebaseConfig, 
-          apiCall, 
-          guardStudent, 
-          BP 
-        } from '../../assets/js/bee-core.js';
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+        import { firebaseConfig, apiCall, guardStudent, BP } from '../../assets/js/bee-core.js';
         import { uploadToCloudinary } from '../../assets/js/cloudinary-uploader.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let currentDoubtId = null;
-        let selectedFile = null;
-        let chatFile = null;
-        let banks = [];
-        let unsubscribeMessages = null;
+        let currentBankId = null;
+        let currentChatId = null;
+        let allChats = [];
+        let unsubscribe = null;
+        let pendingFile = null;
 
-        // UI Helpers
-        window.handleFileSelect = (input) => {
-            if (input.files && input.files[0]) {
-                selectedFile = input.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const preview = document.getElementById('image-preview');
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    document.getElementById('upload-status').textContent = 'Image attached';
-                };
-                reader.readAsDataURL(selectedFile);
-            }
-        };
+        const initLab = async () => {
+            if (!guardStudent()) return;
 
-        window.handleChatFileSelect = (input) => {
-             if (input.files && input.files[0]) {
-                chatFile = input.files[0];
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const previewArea = document.getElementById('chat-upload-preview');
-                    const img = document.getElementById('chat-preview-img');
-                    img.src = e.target.result;
-                    previewArea.style.display = 'block';
-                };
-                reader.readAsDataURL(chatFile);
-            }
-        };
-
-        window.clearChatFile = () => {
-            chatFile = null;
-            document.getElementById('chat-file-input').value = '';
-            document.getElementById('chat-upload-preview').style.display = 'none';
-        };
-
-        // Core Functions
-        async function loadBanks() {
-            const result = await apiCall('/student/banks');
-            if (result && result.success) {
-                // Show all banks that are active
-                banks = result.data.filter(b => b.status === 'active');
-                const select = document.getElementById('bank-select');
-                select.innerHTML = '<option value="">Select a Bank</option>' + 
-                    banks.map(b => `<option value="${b.bankId}">${b.subject} - Class ${b.class}</option>`).join('');
-            }
-        }
-
-        async function loadDoubts() {
-            const result = await apiCall('/student/doubts');
-            const list = document.getElementById('doubts-list');
-            
-            if (result && result.success) {
-                if (result.data.length === 0) {
-                    list.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 40px; font-size: 14px;">No academic queries raised yet.</div>';
-                    return;
+            // Load streak
+            apiCall('/student/streak').then(res => {
+                if (res && res.success) {
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                    BP.initStreakFlame('streak-canvas');
                 }
-
-                list.innerHTML = result.data.map(d => {
-                    const statusClass = d.status === 'replied' ? 'status-replied' : (d.status === 'resolved' ? 'status-resolved' : 'status-pending');
-                    return `
-                        <div class="doubt-card" onclick="openChat('${d.doubtId}', '${d.teacherName}', '${d.subject}')">
-                            ${d.unreadByStudent ? '<div class="unread-indicator"></div>' : ''}
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
-                                <span class="status-badge ${statusClass}">${d.status}</span>
-                                <span style="font-size:11px; color:var(--text-muted); font-weight:700;">${timeAgo(d.updatedAt)}</span>
-                            </div>
-                            <div style="color:#fff; font-weight:600; font-size:15px; margin-bottom:12px; line-height:1.5;">
-                                ${d.lastMessage || 'Open details to view thread.'}
-                            </div>
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <div style="width:24px; height:24px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:900;">${d.subject.substring(0,2).toUpperCase()}</div>
-                                <span style="font-size:12px; font-weight:700; color:var(--text-muted);">${d.subject}</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        window.submitDoubt = async () => {
-            const bankId = document.getElementById('bank-select').value;
-            const text = document.getElementById('doubt-text').value.trim();
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (!bankId) return Swal.fire({ icon: 'warning', title: 'Bank Missing', text: 'Please select a subject bank.', background: '#121214', color: '#fff' });
-            if (text.length < 10) return Swal.fire({ icon: 'warning', title: 'Text Too Short', text: 'Describe your doubt in at least 10 characters.', background: '#121214', color: '#fff' });
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'TRANSMITTING...';
-
-            try {
-                let imageUrl = null;
-                if (selectedFile) {
-                    const uploadResult = await uploadToCloudinary(selectedFile, localStorage.getItem(BP.UID));
-                    imageUrl = uploadResult.secure_url;
-                }
-
-                const result = await apiCall('/student/doubts', 'POST', {
-                    bankId,
-                    questionText: text,
-                    imageUrl
-                });
-
-                if (result && result.success) {
-                    Swal.fire({ icon: 'success', title: 'Query Deployed', text: 'Your mentor will be notified immediately.', background: '#121214', color: '#fff' });
-                    document.getElementById('doubt-text').value = '';
-                    document.getElementById('image-preview').style.display = 'none';
-                    document.getElementById('upload-status').textContent = 'Click to attach image';
-                    selectedFile = null;
-                    loadDoubts();
-                }
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'Fault Detected', text: err.message, background: '#121214', color: '#fff' });
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Transmit Query to Teacher →';
-            }
-        };
-
-        window.openChat = async (id, teacherName, subject) => {
-            currentDoubtId = id;
-            document.getElementById('chatOverlay').classList.add('active');
-            document.getElementById('chat-teacher-name').textContent = teacherName || 'BEE Expert';
-            document.getElementById('chat-subject').textContent = subject;
-            document.getElementById('chat-teacher-avatar').textContent = (teacherName || 'BE').substring(0,2).toUpperCase();
-            
-            // Real-time Firestore Listener
-            const messagesRef = collection(db, 'doubts', id, 'messages');
-            const q = query(messagesRef, orderBy('timestamp', 'asc'));
-            
-            if (unsubscribeMessages) unsubscribeMessages();
-            
-            unsubscribeMessages = onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('messages-list');
-                const messages = [];
-                snapshot.forEach((doc) => {
-                    messages.push(doc.data());
-                });
-                
-                list.innerHTML = messages.map(m => {
-                    const time = m.timestamp?.toDate ? m.timestamp.toDate() : (m.timestamp ? new Date(m.timestamp) : new Date());
-                    return `
-                        <div class="msg ${m.senderRole === 'student' ? 'msg-student' : 'msg-teacher'}">
-                            ${m.imageUrl ? `<img src="${m.imageUrl}" class="msg-img" onclick="window.open('${m.imageUrl}')">` : ''}
-                            <div>${m.content}</div>
-                            <span style="font-size:9px; opacity:0.6; margin-top:5px; display:block; text-align: ${m.senderRole === 'student' ? 'right' : 'left'}">
-                                ${time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
-                            </span>
-                        </div>
-                    `;
-                }).join('');
-                list.scrollTop = list.scrollHeight;
             });
 
-            // Mark as read in backend
-            apiCall(`/student/doubts/${id}/read`, 'POST');
-            // Optimistic unread update in Firestore
             try {
-                await updateDoc(doc(db, 'doubts', id), { unreadByStudent: false });
+                await refreshChats();
+                renderSidebar();
             } catch (e) {
-                console.warn('Silent read update failed:', e.message);
+                console.error('Core lab sync failure:', e);
+                document.getElementById('bank-list').innerHTML = `<div style="padding:20px; color:#ff4d4d; font-size:12px; text-align:center; font-weight:800;">VAULT ACCESS DEFERRED.</div>`;
             }
         };
 
-        window.sendChatMessage = async () => {
-            const input = document.getElementById('chat-input');
-            const content = input.value.trim();
-            if (!content && !chatFile) return;
-
-            const btn = event.currentTarget;
-            btn.disabled = true;
-
-            try {
-                let imageUrl = null;
-                if (chatFile) {
-                    const up = await uploadToCloudinary(chatFile, localStorage.getItem(BP.UID));
-                    imageUrl = up.secure_url;
-                }
-
-                // We still use the API to ensure backend logic (lastMessage, unreadByTeacher, notifications) runs
-                const result = await apiCall(`/student/doubts/${currentDoubtId}/messages`, 'POST', { content, imageUrl });
-                if (result && result.success) {
-                    input.value = '';
-                    clearChatFile();
-                }
-            } catch (err) {
-                Swal.fire({ icon: 'error', title: 'Transmission Error', text: err.message, background: '#121214', color: '#fff' });
-            } finally {
-                btn.disabled = false;
+        const refreshChats = async () => {
+            const res = await apiCall('/student/doubts');
+            if (res && res.success) {
+                allChats = res.data.chats || [];
+            } else {
+                allChats = [];
             }
         };
 
-        window.closeChat = () => {
-            document.getElementById('chatOverlay').classList.remove('active');
-            currentDoubtId = null;
-            if (unsubscribeMessages) unsubscribeMessages();
-            loadDoubts();
-        };
+        function renderSidebar() {
+            const list = document.getElementById('bank-list');
+            if (!list) return;
+            if (allChats.length === 0) {
+                list.innerHTML = `<div style="padding:40px; text-align:center; color:var(--text-muted); font-size:11px; font-weight:700; text-transform:uppercase; line-height:1.6;">No approved repositories found.<br><span style="color:var(--primary); font-size:10px;">Join banks to activate lab logs.</span></div>`;
+                return;
+            }
+            list.innerHTML = allChats.map(c => {
+                const isActive = currentBankId === c.bankId;
+                const initials = (c.subject || 'S').substring(0, 2).toUpperCase();
+                
+                let statusLabel = '';
+                let statusColor = '';
+                if (c.status === 'approved') { statusLabel = 'VERIFICATION'; statusColor = '#FFD700'; }
+                else if (c.status === 'pending') { statusLabel = 'PENDING'; statusColor = '#888'; }
+                else if (c.status === 'rejected') { statusLabel = 'REJECTED'; statusColor = '#ff4d4d'; }
 
-        function timeAgo(date) {
-            if (!date) return 'Recently';
-            const parsedDate = new Date(date);
-            if (isNaN(parsedDate.getTime())) return 'Recently';
-            const seconds = Math.floor((new Date() - parsedDate) / 1000);
-            if (seconds < 60) return 'Just now';
-            const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return minutes + 'm ago';
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return hours + 'h ago';
-            return Math.floor(hours / 24) + 'd ago';
+                return `
+                    <div class="bank-card ${isActive ? 'active' : ''} ${c.status !== 'active' ? 'locked-node' : ''}" 
+                         onclick="openChat('${c.bankId}', '${c.chatId}', '${c.subject}', '${c.teacherName}', '${c.status}')"
+                         style="${c.status !== 'active' ? 'opacity: 0.7;' : ''}">
+                        <div class="bank-logo">${initials}</div>
+                        <div class="bank-info">
+                            <h4 style="display:flex; justify-content:space-between; align-items:center; gap:5px;">
+                                <span style="overflow:hidden; text-overflow:ellipsis;">${c.subject}</span>
+                                ${statusLabel ? `<span style="font-size:7px; color:${statusColor}; border:1px solid ${statusColor}; padding:1px 3px; border-radius:3px; flex-shrink:0;">${statusLabel}</span>` : ''}
+                            </h4>
+                            <p>${c.teacherName}</p>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity:0.8; font-weight:600;">
+                                ${c.lastMessage || ''}
+                            </div>
+                        </div>
+                        ${c.unreadByStudent ? '<div class="unread-badge"></div>' : ''}
+                    </div>
+                `;
+            }).join('');
         }
 
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!guardStudent()) return;
-            loadBanks();
-            loadDoubts();
+        window.showLightbox = (url) => {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = url;
+            lb.classList.add('active');
+        };
+
+        window.openChat = (bankId, chatId, subject, mentor, status) => {
+            if (status && status !== 'active') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Node Dormant',
+                    text: status === 'approved' ? 'Please verify your OTP in the Bank Inventory to activate this channel.' : 'Waiting for teacher authorization.',
+                    background: '#0a0a1a',
+                    color: '#fff'
+                });
+                return;
+            }
+            currentBankId = bankId;
+            currentChatId = chatId;
+            renderSidebar();
+
+            document.getElementById('lab-container').classList.add('chat-open');
+            document.getElementById('empty-hub').style.display = 'none';
+            document.getElementById('active-hub').style.display = 'flex';
+            document.getElementById('hub-subject-name').textContent = subject;
+            document.getElementById('hub-mentor-name').textContent = mentor;
+            document.getElementById('hub-mentor-initials').textContent = (mentor || 'B').substring(0, 2).toUpperCase();
+
+            apiCall(`/student/doubts/${chatId}/messages`, 'GET');
+
+            if (unsubscribe) unsubscribe();
+            const q = query(collection(db, 'chats', chatId, 'messages'), orderBy('timestamp', 'asc'));
+            unsubscribe = onSnapshot(q, (snap) => {
+                const stream = document.getElementById('chat-stream');
+                if (!stream) return;
+                stream.innerHTML = snap.docs.map(doc => {
+                    const m = doc.data();
+                    const side = m.senderRole === 'student' ? 'student' : 'teacher';
+                    return `
+                        <div class="bubble ${side}">
+                            ${m.imageUrl ? `<img src="${m.imageUrl}" class="bubble-img-node" onclick="event.stopPropagation(); showLightbox('${m.imageUrl}')">` : ''}
+                            <div style="word-break: break-word;">${m.content}</div>
+                            <div style="font-size: 9px; opacity: 0.3; margin-top: 8px; text-align: ${side === 'student' ? 'right' : 'left'}; font-weight:800;">
+                                ${m.timestamp?.toDate ? m.timestamp.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : 'SYNCING...'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                setTimeout(() => { stream.scrollTop = stream.scrollHeight; }, 100);
+            });
+        };
+
+        window.previewFile = (input) => {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                if (file.size > 1024 * 1024) {
+                    Swal.fire({ icon: 'warning', title: 'File Too Large', text: 'Expert Lab images must be under 1MB for optimized synchronization.', background: '#0a0a1a', color: '#fff' });
+                    input.value = '';
+                    return;
+                }
+                pendingFile = file;
+                const r = new FileReader();
+                r.onload = (e) => {
+                    document.getElementById('hub-preview-img').src = e.target.result;
+                    document.getElementById('hub-upload-cont').style.display = 'block';
+                };
+                r.readAsDataURL(pendingFile);
+            }
+        };
+
+        window.clearPendingFile = () => {
+            pendingFile = null;
+            document.getElementById('hub-file').value = '';
+            document.getElementById('hub-upload-cont').style.display = 'none';
+        };
+
+        window.transmitMessage = async () => {
+            const input = document.getElementById('hub-input');
+            const data = input.value.trim();
+            if (!data && !pendingFile) return;
+
+            const btn = document.getElementById('hub-send-btn');
+            const oldText = data;
+            input.value = '';
+            input.style.height = 'auto';
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+
+            try {
+                let url = null;
+                if (pendingFile) {
+                    const up = await uploadToCloudinary(pendingFile, localStorage.getItem(BP.UID));
+                    url = up.secure_url;
+                    clearPendingFile();
+                }
+
+                const res = await apiCall('/student/doubts', 'POST', { 
+                    bankId: currentBankId, 
+                    questionText: oldText, 
+                    imageUrl: url 
+                });
+
+                if (res && res.success) {
+                    await refreshChats();
+                    renderSidebar();
+                }
+            } catch (e) {
+                console.error(e);
+                input.value = oldText;
+                Swal.fire({ icon: 'error', title: 'UPSTREAM ERROR', text: 'Chat sequence failed. Input restored.', background: '#111114', color: '#fff' });
+            } finally {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                setTimeout(() => {
+                    const stream = document.getElementById('chat-stream');
+                    if (stream) stream.scrollTop = stream.scrollHeight;
+                }, 200);
+            }
+        };
+
+        window.filterBanks = () => {
+            const term = document.getElementById('bank-filter').value.toLowerCase();
+            const cards = document.querySelectorAll('.bank-card');
+            cards.forEach(c => {
+                const text = c.textContent.toLowerCase();
+                c.style.display = text.includes(term) ? 'flex' : 'none';
+            });
+        };
+
+        document.getElementById('hub-input').addEventListener('keypress', e => { 
+            if(e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                transmitMessage(); 
+            } 
         });
+
+        initLab();
     </script>
 </body>
-
 </html>

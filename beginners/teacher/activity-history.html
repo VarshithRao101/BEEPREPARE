@@ -103,7 +103,11 @@
                     <h2 style="font-size: 32px; font-weight: 800; color: #fff;">Activity History</h2>
                     <p style="color: var(--text-muted); font-size: 15px;">System-wide interaction logs.</p>
                 </div>
-                <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+                <div style="display: flex; gap: 20px; align-items: center;">
+
+                    <div class="profile-icon" onclick="window.location.href='teacher-profile.html'" style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 900; cursor: pointer;">T</div>
+                    <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+                </div>
             </header>
 
             <div id="activity-container" style="max-width: 800px;">
@@ -149,6 +153,14 @@
         async function loadActivity() {
             const container = document.getElementById('activity-container');
             container.innerHTML = '<div style="padding: 50px; text-align: center;"><div class="loading-ring" style="margin: 0 auto; width: 40px; height: 40px; border-top-color: var(--primary);"></div></div>';
+
+            // Sync Header Stats
+            const dashRes = await apiCall('/teacher/dashboard');
+            if (dashRes && dashRes.success) {
+
+                const name = localStorage.getItem(BP.NAME) || 'T';
+                document.querySelector('.profile-icon').textContent = name[0].toUpperCase();
+            }
 
             const result = await apiCall('/teacher/activity');
             

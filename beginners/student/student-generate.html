@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configure Practice - BEEPREPARE</title>
+    <title>Setup Practice Paper - BEEPREPARE</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <style>
@@ -142,23 +142,32 @@
 
         .glass-select {
             width: 100%;
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(20, 20, 20, 0.8);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px 20px;
+            border-radius: 14px;
+            padding: 16px 20px;
             color: #fff;
             font-size: 14px;
+            font-weight: 700;
             outline: none;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFD700' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFD700' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 15px center;
-            transition: 0.3s;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .glass-select:hover {
+            border-color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
+            transform: translateY(-1px);
         }
 
         .glass-select:focus {
             border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
         }
 
         .counter-overlay {
@@ -286,10 +295,16 @@
         <main class="content-wrapper">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
-                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Practice Architecture</h2>
-                    <p style="color: var(--text-muted); font-size: 14px;">Define your practice blueprint.</p>
+                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Practice Paper</h2>
+                    <p style="color: var(--text-muted); font-size: 14px;">Configure your practice paper structure.</p>
                 </div>
-                <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                        <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                        <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+                    </div>
+                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                </div>
             </header>
 
             <div class="paper-layout">
@@ -305,7 +320,7 @@
                             <div style="margin-right: 15px; grid-column: 1 / -1;">
                                 <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Target Bank</div>
                                 <select id="bank-select" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: #fff; font-weight: 600; outline: none;">
-                                    <option value="">Loading Banks...</option>
+                                    <option value="">Select Target Bank</option>
                                 </select>
                             </div>
                         </div>
@@ -316,7 +331,7 @@
                     </div>
 
                     <div class="section-divider">
-                        <span class="section-label">2. Focus Nodes (Chapters)</span>
+                        <span class="section-label">2. Select Chapters</span>
                         <div class="divider-line"></div>
                     </div>
                     <div id="chapters-list">
@@ -327,7 +342,7 @@
                 <!-- Right: Blueprint -->
                 <div>
                     <div class="section-divider">
-                        <span class="section-label">3. Structure Blueprint</span>
+                        <span class="section-label">3. Paper Structure</span>
                         <div class="divider-line"></div>
                     </div>
 
@@ -336,7 +351,7 @@
                     </div>
 
                     <button class="primary-action-btn" onclick="startGeneration()">
-                        Generate Paper Architecture →
+                        Generate Practice Paper →
                     </button>
                 </div>
             </div>
@@ -355,7 +370,7 @@
         <div class="assembly-container">
             <div class="data-fill"></div>
         </div>
-        <div class="gen-status">Assembling Architectural Blueprint...</div>
+        <div class="gen-status">Preparing Practice Paper...</div>
     </div>
 
     <!-- Bottom Nav -->
@@ -431,6 +446,15 @@
         let selectedChapters = [];
 
         async function loadBanks() {
+            // Load streak
+            apiCall('/student/streak').then(res => {
+                if (res && res.success) {
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                    BP.initStreakFlame('streak-canvas');
+                }
+            });
+
             const result = await apiCall('/student/banks');
             const bankSelect = document.getElementById('bank-select');
             bankSelect.innerHTML = '<option value="">Select a Bank</option>';
@@ -474,13 +498,13 @@
         function renderChapters() {
             const list = document.getElementById('chapters-list');
             list.innerHTML = availableChapters.map(chap => {
-                const isSelected = selectedChapters.includes(chap._id);
+                const isSelected = selectedChapters.includes(chap.chapterId);
                 return `
-                    <div class="chapter-row adv-card ${isSelected ? 'selected' : ''}" onclick="window.toggleChapter('${chap._id}')">
+                    <div class="chapter-row adv-card ${isSelected ? 'selected' : ''}" onclick="window.toggleChapter('${chap.chapterId}')">
                         <div class="chk-visual">${isSelected ? '✓' : ''}</div>
                         <div style="flex: 1;">
                             <div style="font-weight: 800; font-size: 14px;">${chap.chapterName}</div>
-                            <div style="font-size: 11px; color: var(--text-muted);">${chap.questionCount} Available Node${chap.questionCount === 1 ? '' : 's'}</div>
+                            <div style="font-size: 11px; color: var(--text-muted);">${chap.questionCount} Questions Available</div>
                         </div>
                     </div>
                 `;
@@ -507,8 +531,8 @@
                     </div>
 
                     <div class="section-header">
-                        <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Type ${idx + 1}</div>
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Configuration Node</div>
+                        <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Category ${idx + 1}</div>
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Question Configuration</div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -555,8 +579,8 @@
             const bankId = bankSelect.value;
             const selectedSubject = bankSelect.options[bankSelect.selectedIndex]?.text.split(' - ')[0];
 
-            if (!bankId) return Swal.fire({ icon: 'warning', title: 'Scope Missing', text: 'Select a target syllabus node first.', background: '#0a0a1a', color: '#fff' });
-            if (selectedChapters.length === 0) return Swal.fire({ icon: 'warning', title: 'Focus Nodes Missing', text: 'Select at least one chapter to focus.', background: '#0a0a1a', color: '#fff' });
+            if (!bankId) return Swal.fire({ icon: 'warning', title: 'Bank Missing', text: 'Select a target subject bank first.', background: '#0a0a1a', color: '#fff' });
+            if (selectedChapters.length === 0) return Swal.fire({ icon: 'warning', title: 'Chapters Missing', text: 'Select at least one chapter to include.', background: '#0a0a1a', color: '#fff' });
 
             document.getElementById('genOverlay').classList.add('active');
 

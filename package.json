@@ -7,8 +7,6 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "concurrently \"cd api && npm start\" \"npx serve -l 5500 .\"",
-    "dev": "concurrently \"cd api && npm run dev\" \"npx serve -l 5500 .\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
