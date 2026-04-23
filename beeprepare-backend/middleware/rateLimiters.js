@@ -1,30 +1,129 @@
 const rateLimit = require('express-rate-limit');
+const slowDown = require('express-slow-down');
 
-// Brute-force protection for Login
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 mins
-  max: 50, // 50 attempts (Relaxed from 5 for better UX)
+// Store for tracking attempts
+const attemptStore = new Map();
+
+// Clean store every hour
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, data] of attemptStore.entries()) {
+    if (now - data.firstAttempt > 60 * 60 * 1000) {
+      attemptStore.delete(key);
+    }
+  }
+}, 60 * 60 * 1000);
+
+// Global limiter
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
   message: {
     success: false,
-    message: 'Too many login attempts from this IP. Please try again after 15 minutes.',
-    error: { code: 'BRUTE_FORCE_LOGIN' }
+    message: 'Too many requests.',
+    error: { code: 'RATE_LIMITED' }
   },
-  standardHeaders: true,
-  legacyHeaders: false
+  skip: (req) => req.bypassRateLimit === true
 });
 
-// Strict protection for License/Redeem key verification (Step 1)
-const verificationLimiter = rateLimit({
-  windowMs: 10 * 1000, // 10 seconds
-  max: 10,              // 10 attempts (Relaxed from 3)
-  // Removed custom keyGenerator to fix ERL_KEY_GEN_IPV6 warning
+// Auth limiter (strict)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: {
     success: false,
-    message: 'System Busy. Please wait 10 seconds between verification attempts.',
-    error: { code: 'CLIENT_RATE_LIMIT' }
+    message: 'Too many auth attempts.',
+    error: { code: 'AUTH_RATE_LIMITED' }
   },
-  standardHeaders: true,
-  legacyHeaders: false
+  skipSuccessfulRequests: true,
+  skip: (req) => req.bypassRateLimit === true
 });
 
-module.exports = { loginLimiter, verificationLimiter };
+// Activation limiter
+const activationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  keyGenerator: (req) => req.ip + '_activation',
+  validate: { keyGeneratorIpFallback: false },
+  message: {
+    success: false,
+    message: 'Too many activation attempts.',
+    error: { code: 'ACTIVATION_RATE_LIMITED' }
+  },
+  skip: (req) => req.bypassRateLimit === true
+});
+
+// AI limiter (per user)
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => req.user?.googleUid || req.ip,
+  validate: { keyGeneratorIpFallback: false },
+  message: {
+    success: false,
+    message: 'Too many AI requests.',
+    error: { code: 'AI_RATE_LIMITED' }
+  },
+  skip: (req) => req.bypassRateLimit === true
+});
+
+// OTP limiter (very strict)
+const otpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  keyGenerator: (req) => (req.user?.googleUid || req.ip) + '_otp',
+  validate: { keyGeneratorIpFallback: false },
+  message: {
+    success: false,
+    message: 'Too many OTP attempts.',
+    error: { code: 'OTP_RATE_LIMITED' }
+  },
+  skip: (req) => req.bypassRateLimit === true
+});
+
+// Payment submission limiter
+const paymentLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 3,
+  keyGenerator: (req) => req.body?.email || req.ip,
+  validate: { keyGeneratorIpFallback: false },
+  message: {
+    success: false,
+    message: 'Too many payment submissions.',
+    error: { code: 'PAYMENT_RATE_LIMITED' }
+  },
+  skip: (req) => req.bypassRateLimit === true
+});
+
+// Upload limiter
+const uploadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 20,
+  keyGenerator: (req) => req.user?.googleUid || req.ip,
+  validate: { keyGeneratorIpFallback: false },
+  message: {
+    success: false,
+    message: 'Upload limit reached.',
+    error: { code: 'UPLOAD_RATE_LIMITED' }
+  },
+  skip: (req) => req.bypassRateLimit === true
+});
+
+// Slow down repeated requests
+const speedLimiter = slowDown({
+  windowMs: 15 * 60 * 1000,
+  delayAfter: 50,
+  delayMs: () => 500,
+  skip: (req) => req.bypassRateLimit === true
+});
+
+module.exports = {
+  globalLimiter,
+  authLimiter,
+  activationLimiter,
+  aiLimiter,
+  otpLimiter,
+  paymentLimiter,
+  uploadLimiter,
+  speedLimiter
+};

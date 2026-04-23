@@ -640,9 +640,37 @@
         }
 
         /* Fix SweetAlert Z-Index issue to appear above custom modals (z-index: 2500+) */
-        .swal2-container {
-            z-index: 99999 !important;
-        }
+    /* BEE-SIGNAL Notification Dots */
+    .signal-dot {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 10px;
+        height: 10px;
+        background: #ff4444;
+        border-radius: 50%;
+        border: 2px solid #050505;
+        box-shadow: 0 0 12px rgba(255, 68, 68, 0.6);
+        z-index: 20;
+        pointer-events: none;
+        display: none; 
+        animation: beacon 2s infinite;
+    }
+
+    @keyframes beacon {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.8; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .has-signal {
+        position: relative !important;
+    }
+
+    /* FIX: SweetAlert MUST be above the 2500 z-index modal */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -653,37 +681,24 @@
             <div class="sidebar-brand">BEEPREPARE</div>
             <nav class="sidebar-nav">
                 <a href="teacher-home.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
                     <span>Dashboard</span>
                 </a>
                 <a href="question-bank.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" />
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
                     <span>Bank Inventory</span>
                 </a>
                 <a href="generate-paper.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
                     <span>Generate Paper</span>
                 </a>
+
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" />
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="teacher-profile.html" class="sidebar-link active">
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path
-                            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                    </svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
                     <span>My Profile</span>
                 </a>
             </nav>
@@ -697,18 +712,24 @@
                 </div>
                 <div style="display: flex; gap: 20px; align-items: center;">
 
-                    <div class="profile-icon">T</div>
+                    <div class="profile-icon has-signal">T
+                        <div id="profile-signal" class="signal-dot"></div>
+                    </div>
                 </div>
             </header>
 
             <div class="profile-layout">
                 <div>
-                    <div class="profile-card adv-card">
-                        <div onclick="window.location.href='payment.html'"
-                            style="position: absolute; top: 20px; right: 20px; background: var(--primary); color: #000; padding: 5px 12px; border-radius: 10px; font-size: 10px; font-weight: 900; cursor: pointer;">
-                            PRO PLAN</div>
+                        <div class="profile-card adv-card">
+                            <div id="plan-badge" 
+                                style="position: absolute; top: 20px; right: 20px; padding: 5px 12px; border-radius: 10px; font-size: 10px; font-weight: 900; cursor: pointer;">
+                                LOADING...</div>
                         <div class="profile-avatar">VR</div>
                         <div class="profile-name">Varshith Rao</div>
+                        <div style="font-size: 11px; font-weight: 800; color: var(--primary); letter-spacing: 2px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; cursor: pointer;" onclick="copyBeeId()">
+                            <span id="bee-id-display">BEE-NODE-XXXXXX</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                        </div>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;"
                             id="subject-pills-container">
                             <!-- Populated by JS -->
@@ -747,7 +768,7 @@
                         <span style="color: var(--primary);">→</span>
                     </div>
 
-                    <div class="menu-item adv-card" onclick="window.location.href='access-requests.html'" style="margin-top: 10px;">
+                    <div class="menu-item adv-card has-signal" onclick="window.location.href='access-requests.html'" style="margin-top: 10px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -758,6 +779,7 @@
                             <span style="font-weight: 700;">Access Requests</span>
                         </div>
                         <span style="color: var(--primary);" id="requests-badge">→</span>
+                        <div id="card-request-signal" class="signal-dot"></div>
                     </div>
 
                     <!-- Teaching Tools -->
@@ -765,7 +787,7 @@
                         <div class="divider-line"></div>
                     </div>
 
-                    <div class="menu-item adv-card" onclick="window.location.href='student-doubts.html'">
+                    <div class="menu-item adv-card has-signal" onclick="window.location.href='student-doubts.html'">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -773,6 +795,7 @@
                             <span style="font-weight: 700;">Student Doubts</span>
                         </div>
                         <span style="color: var(--primary);" id="doubts-badge">→</span>
+                        <div id="card-doubt-signal" class="signal-dot"></div>
                     </div>
 
                     <div class="menu-item adv-card" onclick="window.location.href='teacher-notes.html'" style="margin-top: 10px;">
@@ -788,8 +811,29 @@
                         <span style="color: var(--primary);">→</span>
                     </div>
 
+                    <div class="menu-item adv-card" onclick="window.location.href='study-circles.html'" style="margin-top: 10px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span style="font-weight: 700;">Study Circles</span>
+                        </div>
+                        <span style="color: var(--primary);">→</span>
+                    </div>
+                    
+                    <div class="menu-item adv-card" onclick="window.location.href='teacher-feedback.html'" style="margin-top: 10px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                <path d="M9 10h6M9 14h3"/>
+                            </svg>
+                            <span style="font-weight: 700;">Support & Feedback</span>
+                        </div>
+                        <span style="color: var(--primary);">→</span>
+                    </div>
+
                     <!-- Account Preferences -->
-                    <div class="section-divider" style="margin-top: 24px;"><span class="section-label">Account Preferences</span>
+                    <div class="section-divider" style="margin-top: 24px;"><span class="section-label" id="pref-sect-label">Account Preferences</span>
                         <div class="divider-line"></div>
                     </div>
                     <div class="menu-item adv-card" onclick="openEditProfile()">
@@ -986,6 +1030,29 @@
         </div>
     </div>
 
+    <nav class="nav-bottom">
+        <a href="teacher-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+            <span>Home</span>
+        </a>
+        <a href="question-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
+            <span>Bank</span>
+        </a>
+        <a href="generate-paper.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+            <span>Paper</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+            <span>AI</span>
+        </a>
+        <a href="teacher-profile.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+            <span>Profile</span>
+        </a>
+    </nav>
+
     <script type="module">
         import {
             apiCall,
@@ -997,7 +1064,7 @@
         import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
         // Guard
-        if (!guardTeacher()) {
+        if (!(await guardTeacher())) {
             window.location.href = getIndexPath();
         }
 
@@ -1005,6 +1072,7 @@
             name: localStorage.getItem(BP.NAME) || 'Teacher',
             subjects: [],
             classes: [],
+            ownBanks: [],
             stats: { classes: 0, papers: 0, questions: 0 }
         };
 
@@ -1014,10 +1082,19 @@
             const res = await apiCall('/teacher/profile');
             if (res && res.success) {
                 appState = { ...appState, ...res.data };
-
-                localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 0);
-                updateUI();
+                localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 1);
+                
+                // Fetch real bank combinations for dropdown accuracy
+                const dash = await apiCall('/teacher/dashboard');
+                if(dash && dash.success) {
+                    appState.ownBanks = dash.data.subjects;
+                }
             }
+
+            // Sync BEE-SIGNAL dots
+            BP.syncTeacherSignals();
+
+            updateUI();
         }
 
         function updateUI() {
@@ -1025,10 +1102,40 @@
             const initials = (appState.displayName || appState.name).split(' ').map(n => n[0]).join('').toUpperCase();
             document.querySelector('.profile-avatar').innerText = initials;
             document.querySelector('.profile-icon').innerText = initials[0] || 'T';
+            
+            // Plan Badge Logic
+            const badge = document.getElementById('plan-badge');
+            if (badge) {
+                if (appState.planType === 'active') {
+                   badge.innerText = 'ACTIVE ✓';
+                   badge.style.background = 'var(--primary)';
+                   badge.style.color = '#000';
+                   badge.onclick = () => window.location.href='payment.html?type=extra_slot';
+                } else {
+                   badge.innerText = 'FREE';
+                   badge.style.background = '#333';
+                   badge.style.color = '#888';
+                   badge.innerHTML = 'FREE <span style="display:block; font-size:8px; margin-top:2px; color:var(--primary);">↑ ACTIVATE</span>';
+                   badge.onclick = () => window.location.href='payment.html?type=activation';
+                }
+            }
+
+            if(appState.beeId) {
+                document.getElementById('bee-id-display').innerText = appState.beeId;
+                sessionStorage.setItem('temp_bee_id', appState.beeId);
+            }
+
+            // Name Change Lock Logic
+            const prefSectLabel = document.getElementById('pref-sect-label');
+            if (prefSectLabel) {
+                prefSectLabel.innerHTML = appState.nameChanged 
+                    ? 'Account Preferences <span style="color:var(--primary); font-size:14px;" title="Action Locked">🔒</span>' 
+                    : 'Account Preferences';
+            }
 
             document.getElementById('stat-classes').innerText = appState.classes?.length || 0;
-            document.getElementById('stat-papers').innerText = appState.subjects?.length || 0; // This is now 'Subjects' in the UI
-            document.getElementById('stat-questions').innerText = appState.stats?.totalQuestions || 0;
+            document.getElementById('stat-papers').innerText = appState.subjects?.length || 0; 
+            document.getElementById('stat-questions').innerText = appState.totalQuestions || appState.stats?.totalQuestions || 0;
 
             const container = document.getElementById('subject-pills-container');
             if (container) {
@@ -1040,6 +1147,21 @@
                 `).join('');
             }
         }
+
+        window.copyBeeId = () => {
+            const id = document.getElementById('bee-id-display').innerText;
+            navigator.clipboard.writeText(id);
+            Swal.fire({
+                icon: 'success',
+                title: 'BEE ID Copied',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                background: '#111',
+                color: '#fff'
+            });
+        };
 
         window.openLogoutModal = () => {
             logoutModal.style.display = 'flex';
@@ -1092,7 +1214,17 @@
             const currentPlanLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 0;
             document.getElementById('subject-count-limit').innerText = currentPlanLimit;
             document.getElementById('edit-display-name').value = appState.name || '';
-            appState.isPremium = (currentPlanLimit > 2);
+            
+            // Name Change Lock UI
+            const nameInput = document.getElementById('edit-display-name');
+            if (appState.nameChanged) {
+                nameInput.disabled = true;
+                nameInput.style.opacity = '0.5';
+                nameInput.style.cursor = 'not-allowed';
+                nameInput.title = "Identity locked — can only be changed once.";
+            }
+
+            appState.isActiveUser = (appState.planType === 'active');
             activeChapters = appState.chapters || {};
 
             editModal.style.display = 'flex';
@@ -1154,14 +1286,21 @@
         window.toggleSubject = (sub) => {
             appState.subjects = appState.subjects || [];
             if (appState.subjects.includes(sub)) {
-                // Warning for removal (destructive action)
+                // CATASTROPHIC WARNING for removal (destructive action)
                 Swal.fire({
-                    title: `Remove "${sub}"?`,
-                    text: 'Warning: Removing a subject will permanently delete its bank and all associated questions/notes.',
+                    title: `⚠ PERMANENT DESTRUCTION ⚠`,
+                    html: `
+                        <div style="text-align: left; background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.3); border-radius: 12px; padding: 15px; margin-top: 10px;">
+                            <p style="color: #ff4d4d; font-weight: 900; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Security Alert</p>
+                            <p style="font-size: 14px; line-height: 1.6; color: #eee;">Removing <b>${sub}</b> will permanently ERASE all associated data banks, question papers, and uploaded notes from the mainframe.</p>
+                            <p style="font-size: 14px; margin-top: 10px; color: #ffb3b3; font-weight: 700;">THIS ACTION IS IRREVERSIBLE.</p>
+                        </div>
+                    `,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#ff4d4d',
-                    confirmButtonText: 'Yes, Delete Permanently',
+                    confirmButtonText: 'Yes, Purge Data',
+                    cancelButtonText: 'Abort Mission',
                     background: '#111', color: '#fff'
                 }).then((result) => {
                     if (result.isConfirmed) {
@@ -1170,12 +1309,15 @@
                     }
                 });
             } else {
-                const currentLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 2;
+                // STRICT REVENUE PROTECTION: Check limit from local state (synced with DB)
+                const currentLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 1;
+                
                 if (appState.subjects.length >= currentLimit) {
                     // Trigger paywall IMMEDIATELY when exceeding limit
                     window.showPaywall();
                     return;
                 }
+                
                 appState.subjects.push(sub);
                 renderSubjects();
             }
@@ -1222,7 +1364,6 @@
                     const newLimit = (parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 0) + res.value;
                     localStorage.setItem(BP.SUBJECT_LIMIT, newLimit.toString());
                     document.getElementById('subject-count-limit').innerText = newLimit;
-                    
                     await Swal.fire({ 
                         icon: 'success', 
                         title: 'Slot Unlocked!', 
@@ -1248,25 +1389,22 @@
             const select = document.getElementById('chapter-context-select');
             select.innerHTML = '';
 
-            const clsList = appState.classes || [];
-            const subList = appState.subjects || [];
-
-            if (clsList.length === 0 || subList.length === 0) {
+            const banks = appState.ownBanks || [];
+            
+            if (banks.length === 0) {
                 const opt = document.createElement('option');
-                opt.text = 'Select Class/Subject first';
+                opt.text = 'No Active Banks Found';
                 select.add(opt);
-                window.loadChapters();
                 return;
             }
-
-            clsList.forEach(cls => {
-                subList.forEach(sub => {
-                    const key = cls + '-' + sub;
-                    const opt = document.createElement('option');
-                    opt.value = key;
-                    opt.text = cls + ' ' + sub;
-                    select.add(opt);
-                });
+            
+            banks.forEach(b => {
+                const valClass = b.class.startsWith('Class') ? b.class : 'Class ' + b.class;
+                const key = valClass + '-' + b.subject;
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.text = valClass + ' ' + b.subject;
+                select.add(opt);
             });
 
             // Ensure we handle the empty selection better

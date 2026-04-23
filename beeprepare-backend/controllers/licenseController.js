@@ -1,159 +1,107 @@
+const LicenseKey = require('../models/LicenseKey');
 const User = require('../models/User');
+const ActivityLog = require('../models/ActivityLog');
 const { success, error } = require('../utils/responseHelper');
-const { db } = require('../config/firebase');
 
-/**
- * POST /api/license/verify
- * FIX 2: Activation loop fix with Firestore/MongoDB syncing
- */
 const verifyKey = async (req, res) => {
-  const { licenseKey } = req.body;
-
-  if (!licenseKey) {
-    return error(res, 'License key required', 'MISSING_KEY', 400);
-  }
-
-  const keyTrimmed = licenseKey.trim().toUpperCase();
-  let keyRef = db.collection('activation_keys').doc(keyTrimmed);
-
-  let keyData = null;
-
-  // Step 0: Try to find document by field 'key' if direct doc lookup fails
   try {
-    let keyDoc = await keyRef.get();
-    
-    if (!keyDoc.exists) {
-      // Fallback: Query by field 'key'
-      const querySnapshot = await db.collection('activation_keys')
-        .where('key', '==', keyTrimmed)
-        .limit(1)
-        .get();
+    const { licenseKey } = req.body;
 
-      if (querySnapshot.empty) {
-        return error(res, 'License key not found. Please check and try again.', 'KEY_NOT_FOUND', 404);
-      }
-      
-      keyRef = querySnapshot.docs[0].ref;
+    if (!licenseKey) {
+      return error(res,
+        'License key required',
+        'MISSING_KEY', 400);
     }
-  } catch (err) {
-    console.error('Initial key check failed:', err);
-  }
 
-  // Step 1: Firestore atomic transaction
-  try {
-    const result = await db.runTransaction(async (transaction) => {
-      const keyDoc = await transaction.get(keyRef);
+    const keyTrimmed = licenseKey.trim();
 
-      if (!keyDoc.exists) {
-        return {
-          errorCode: 'KEY_NOT_FOUND',
-          message: 'License key not found'
-        };
-      }
-
-      const data = keyDoc.data();
-
-      // Ensure data has the key (useful if we found it by doc ID)
-      if (!data.key) data.key = keyTrimmed;
-
-      if (data.isUsed) {
-        // Check if this same user already used this key (re-login case)
-        if (data.usedBy === req.user.googleUid) {
-          // Same user ΓÇö just re-activate them in MongoDB, dont error
-          return {
-            reactivate: true,
-            keyData: data
-          };
-        }
-        return {
-          errorCode: 'ALREADY_USED',
-          message: 'Key already used'
-        };
-      }
-
-      const now = new Date();
-      if (data.expiresAt && data.expiresAt.toDate() < now) {
-        return {
-          errorCode: 'KEY_EXPIRED',
-          message: 'Key has expired'
-        };
-      }
-
-      // Mark as used
-      transaction.update(keyRef, {
-        isUsed: true,
-        usedBy: req.user.googleUid,
-        usedAt: now
-      });
-
-      return { keyData: data };
-    });
-
-    if (result.errorCode) {
-      const statusMap = {
-        KEY_NOT_FOUND: 404,
-        ALREADY_USED: 409,
-        KEY_EXPIRED: 410
-      };
-      return error(
-        res,
-        result.message,
-        result.errorCode,
-        statusMap[result.errorCode] || 400
+    // Atomic claim — prevents race conditions
+    const key = await LicenseKey
+      .findOneAndUpdate(
+        {
+          key: keyTrimmed,
+          type: 'activation',
+          isUsed: false
+        },
+        {
+          isUsed: true,
+          usedBy: req.user.googleUid,
+          usedAt: new Date()
+        },
+        { new: true }
       );
+
+    if (!key) {
+      // Check why it failed
+      const exists = await LicenseKey
+        .findOne({ key: keyTrimmed });
+
+      if (!exists) {
+        return error(res,
+          'License key not found.',
+          'KEY_NOT_FOUND', 404);
+      }
+
+      // Same user trying again?
+      if (exists.usedBy ===
+          req.user.googleUid) {
+        // Self-heal
+        await User.updateOne(
+          { googleUid: req.user.googleUid },
+          {
+            isActivated: true,
+            licenseKey: keyTrimmed,
+            planType: 'active',
+            subjectLimit: 1
+          }
+        );
+        return success(res,
+          'Already activated', {
+          subjectLimit: 1,
+          planType: 'active',
+          redirectTo: 'role-select'
+        });
+      }
+
+      return error(res,
+        'Key already used.',
+        'ALREADY_USED', 409);
     }
 
-    keyData = result.keyData;
-
-  } catch (firestoreErr) {
-    console.error('Firestore error during activation:', firestoreErr);
-    return error(res,
-      'Activation failed. Please try again.',
-      'FIRESTORE_ERROR', 500
-    );
-  }
-
-  // Step 2: MongoDB update
-  // If this fails we need to rollback Firestore
-  try {
+    // Success — activate user
     await User.updateOne(
       { googleUid: req.user.googleUid },
       {
         isActivated: true,
         licenseKey: keyTrimmed,
-        planType: keyData.plan || 'basic',
-        subjectLimit: keyData.subjectLimit || 3,
-        licenseActivatedAt: new Date(),
-        licenseExpiresAt: keyData.expiresAt ? keyData.expiresAt.toDate() : null
+        planType: 'active',
+        subjectLimit: 1,
+        licenseActivatedAt: new Date()
       }
     );
+    
+    await ActivityLog.create({
+      userId: req.user.googleUid,
+      type: 'key_activated',
+      title: 'Key Activated',
+      description: `License key ${keyTrimmed} activated successfully.`,
+      ip: req.ip,
+      color: '#FFD700'
+    });
 
-    return success(res, 'License activated successfully', {
-      planType: keyData.plan || 'basic',
-      subjectLimit: keyData.subjectLimit || 3,
+    return success(res,
+      'Account activated!', {
+      subjectLimit: 1,
+      planType: 'active',
       redirectTo: 'role-select'
     });
 
-  } catch (mongoErr) {
-    // CRITICAL: MongoDB failed but Firestore already marked key as used.
-    // Roll back Firestore so user can try again!
-    console.error('CRITICAL: MongoDB update failed, rolling back Firestore key...', mongoErr);
-
-    try {
-      await keyRef.update({
-        isUsed: false,
-        usedBy: null,
-        usedAt: null
-      });
-      console.log('Firestore rollback success');
-    } catch (rollbackErr) {
-      console.error('Rollback failed! Key might be burned. Manual intervention needed.', rollbackErr);
-    }
-
+  } catch (err) {
+    console.error('verifyKey error:',
+      err.message);
     return error(res,
-      'Activation failed. Key has been released. Please try again.',
-      'ACTIVATION_FAILED', 500
-    );
+      'Activation failed. Try again.',
+      'SERVER_ERROR', 500);
   }
 };
 

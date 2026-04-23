@@ -324,7 +324,7 @@
     <script type="module">
         import { apiCall, guardTeacher, BP } from '../../assets/js/bee-core.js';
 
-        if (!guardTeacher()) window.location.href = '../../index.html';
+        if (!(await guardTeacher())) window.location.href = '../../index.html';
 
         let currentZoom = 1;
         const paper = document.getElementById('paper');

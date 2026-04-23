@@ -148,7 +148,7 @@
             BP
         } from '../../assets/js/bee-core.js';
 
-        if (!guardTeacher()) throw new Error('denied');
+        if (!(await guardTeacher())) throw new Error('denied');
 
         async function loadActivity() {
             const container = document.getElementById('activity-container');

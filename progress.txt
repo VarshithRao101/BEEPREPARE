@@ -1,6 +1,0 @@
-COMPLETED:
-- Backend: Stateful sessions
-- Backend: History persistence
-- Frontend: UI Overhaul
-- Bugfix: API Key
-- Bugfix: Delete persistence

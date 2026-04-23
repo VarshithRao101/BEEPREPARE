@@ -14,14 +14,13 @@ cloudinary.config({
 const generatePdfUrl = (public_id, asAttachment = false, resourceType = 'raw', format = null) => {
   const options = {
     resource_type: resourceType,
+    type: 'upload', // Explicitly specify the delivery type
     sign_url: true,
     secure: true
   };
   
-  // For 'image' resources, we must specify the format (extension) in the URL
-  // to ensure Cloudinary validates the signed URL correctly.
   if (resourceType === 'image') {
-    options.format = format || 'pdf'; // Default to pdf if not specified for backward compatibility
+    options.format = format || 'pdf'; 
   }
   
   if (asAttachment) {

@@ -1,10 +1,36 @@
 const { db } = require('../config/firebase');
 const User = require('../models/User');
+const { AppSettings } = require('../models/AppSettings');
 const FirestoreTracker = require('../utils/firestoreTracker');
 
 // REGEX: Strict validation as per Step 3
 const ACTIVATION_REGEX = /^BEE-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$/;
 const REDEEM_REGEX = /^BEE[A-Za-z0-9]{6}$/;
+
+const trackFirestoreRead = async () => {
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    const dateDoc = await AppSettings.findOne({ key: 'firestore_reads_date' });
+
+    if (!dateDoc || dateDoc.value !== today) {
+      // New day - reset counter
+      await AppSettings.findOneAndUpdate(
+        { key: 'firestore_reads_date' },
+        { value: today }, { upsert: true });
+      await AppSettings.findOneAndUpdate(
+        { key: 'firestore_reads_today' },
+        { value: 0 }, { upsert: true });
+    } else {
+      // Increment counter
+      await AppSettings.findOneAndUpdate(
+        { key: 'firestore_reads_today' },
+        { $inc: { value: 1 } },
+        { upsert: true });
+    }
+  } catch (err) {
+    // Don't fail if tracking fails
+  }
+};
 
 const validateActivationKey = async (userId, key) => {
   // 1. Format Check (Strict Regex)
@@ -18,6 +44,7 @@ const validateActivationKey = async (userId, key) => {
   
   tracker.trackRead('activation_keys', keyUpper);
   const keyRef = db.collection('activation_keys').doc(keyUpper);
+  await trackFirestoreRead(); // Track in MongoDB
   const keyDoc = await keyRef.get();
 
   if (!keyDoc.exists) {
@@ -52,6 +79,7 @@ const validateRedeemKey = async (userId, key) => {
   // 2. Transaction
   return await db.runTransaction(async (transaction) => {
     tracker.trackRead('redeem_keys', keyUpper);
+    await trackFirestoreRead(); // Track in MongoDB
     const keyDoc = await transaction.get(keyRef);
 
     if (!keyDoc.exists) return { error: 'KEY_NOT_FOUND', message: 'Redeem key not found' };

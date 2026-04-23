@@ -1,192 +1,325 @@
-require('express-async-errors'); // Automatic async error handling
-require('dotenv').config(); // BEEPREPARE Server Environment Config
+require('dotenv').config();
 const validateEnv = require('./config/validateEnv');
-validateEnv(); // Ensure all 12+ env keys are present
+validateEnv();
 
 const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
-const hpp = require('hpp');
-const path = require('path');
-const connectDB = require('./config/db');
-require('./config/firebase');
-// Removed unused mongoSanitize/hpp for express v4 compatibility
-const logger = require('./utils/logger'); // 1. Centralized Logger
-const advancedSecurity = require('./middleware/advancedSecurity'); // 2. Request Tracking & XSS
-const { checkRevokedToken } = require('./middleware/tokenRevocation'); // 3. Blacklist System
-const { loginLimiter } = require('./middleware/rateLimiters'); // 4. Brute-Force Protection
-
 const app = express();
+const cors = require('cors');
+const path = require('path');
+const crypto = require('crypto');
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
 
-// Connect to MongoDB
+const {
+  securityHeaders,
+  requestTracker,
+  sanitizeInput,
+  blockSuspiciousRequests,
+  sanitizeResponse
+} = require('./middleware/security');
+
+const {
+  globalLimiter,
+  authLimiter,
+  activationLimiter,
+  aiLimiter,
+  otpLimiter,
+  paymentLimiter,
+  uploadLimiter,
+  speedLimiter
+} = require('./middleware/rateLimiters');
+
+const { connectDB } = require('./config/db');
+require('./config/firebase');
+const logger = require('./utils/logger');
+
+// === SYSTEM CONFIG ===
+app.set('trust proxy', 1); // Trust the first proxy (Vercel, Render, Nginx etc.) for IP tracking
+
+// Connect DBs
 connectDB();
 
-// === CORS — MUST BE FIRST ===
-const allowedOrigins = [
+// === SECURITY HEADERS FIRST ===
+app.use(securityHeaders);
+
+// Manual Security Guard (Just in case)
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
+// === REQUEST TRACKING ===
+app.use(requestTracker);
+
+// === CORS — LOCKED DOWN ===
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || [
   'http://localhost:5500',
   'http://127.0.0.1:5500',
   'http://localhost:5000',
-  'http://127.0.0.1:5000',
-  'http://localhost:3000',
-  'null'
+  'http://127.0.0.1:5000'
 ];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Force allow in development or if origin matches
-    if (!origin || process.env.NODE_ENV === 'development' || allowedOrigins.includes(origin)) {
+    // Allow no-origin (mobile apps, curl) in development only
+    if (!origin) {
+      if (process.env.NODE_ENV === 'development') {
+        return callback(null, true);
+      }
+      return callback(new Error('Origin required'), false);
+    }
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+    console.warn('[CORS BLOCKED]', origin);
+    return callback(new Error('Not allowed by CORS'), false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id']
 }));
 
-app.use((req, res, next) => {
-  res.setHeader(
-    'Cross-Origin-Opener-Policy', 'unsafe-none'
-  );
-  res.setHeader(
-    'Cross-Origin-Embedder-Policy', 'unsafe-none'
-  );
+// === REQUEST PARSING WITH LIMITS ===
+app.use(express.json({
+  limit: '10mb',
+  strict: true
+}));
+app.use(express.urlencoded({
+  extended: true,
+  limit: '10mb'
+}));
+
+// === SECURITY MIDDLEWARE CHAIN ===
+app.use(mongoSanitize({
+  replaceWith: '_',
+  onSanitize: ({ req, key }) => {
+    console.warn(
+      `[NOSQL INJECTION] Blocked key: ${key}`,
+      { ip: req.ip, url: req.originalUrl }
+    );
+  }
+}));
+
+app.use(hpp());
+app.use(sanitizeInput);
+app.use(blockSuspiciousRequests);
+app.use(sanitizeResponse);
+
+
+// === RATE LIMITING ===
+app.use(globalLimiter);
+app.use(speedLimiter);
+
+// === ROLLING ADMIN GATEWAY ===
+const getRollingSecret = (offset = 0) => {
+  const secret = process.env.ADMIN_ENTRY_SECRET || 'BEE_DEFAULT_MASTER_SECRET';
+  const window = Math.floor(Date.now() / (5 * 60 * 1000)) + offset;
+  return crypto.createHmac('sha256', secret)
+    .update(window.toString())
+    .digest('hex')
+    .substring(0, 8);
+};
+
+app.get('/gatekeeper', (req, res) => {
+  const key = req.query.key;
+  if (!key || key !== process.env.ADMIN_GATE_KEY) {
+    return res.status(403).send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Access Denied | BEEPREPARE</title>
+          <style>
+              body { margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+              .bg { position: fixed; inset: 0; background: #080808; z-index: -1; }
+              .card { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(20px); padding: 50px; border-radius: 40px; border: 1px solid rgba(255, 215, 0, 0.2); text-align: center; box-shadow: 0 50px 100px rgba(0,0,0,0.8); }
+              h1 { color: #FFD700; font-size: 42px; margin: 0 0 10px; }
+              p { color: #888; font-size: 18px; margin: 0; }
+          </style>
+      </head>
+      <body>
+          <div class="bg"></div>
+          <div class="card">
+              <h1>🚫 Access Denied</h1>
+              <p>Matrix Node Entry Requires Authorized Key.</p>
+          </div>
+      </body>
+      </html>
+    `);
+  }
+  const currentCode = getRollingSecret(0);
+  res.redirect(`/gate/${currentCode}/index.html`);
+});
+
+app.use('/assets', express.static(path.join(__dirname, '../assets')));
+app.use('/gate/:code', (req, res, next) => {
+  const code = req.params.code;
+  const current = getRollingSecret(0);
+  const previous = getRollingSecret(-1);
+  if (code === current || code === previous) {
+    return next();
+  }
+  res.status(404).send('<h1>🔍 Node Not Found</h1><p>Expired or invalid path.</p>');
+}, express.static(path.join(__dirname, `../${process.env.ADMIN_FOLDER_NAME || 'matrix-core-v1419'}`)));
+
+// === MAINTENANCE MODE CHECK ===
+app.use(async (req, res, next) => {
+  if (req.path.startsWith('/api/admin') ||
+      req.path.startsWith('/api/payment') ||
+      req.path === '/health') {
+    return next();
+  }
+  try {
+    const AppSettings = require('./models/AppSettings');
+    const setting = await AppSettings.findOne({ key: 'maintenance_mode' }).lean();
+    if (setting?.value === true) {
+      return res.status(503).json({
+        success: false,
+        message: 'Under maintenance.',
+        code: 'MAINTENANCE_MODE',
+        maintenance: true
+      });
+    }
+  } catch (err) {
+    // Don't block if settings fail
+  }
   next();
 });
 
-// === REQUEST TRACKING & LOGGING ===
-app.use(advancedSecurity); // Adds UUIDs and logs every request
-
-// === SECURITY HEADERS ===
-app.use(helmet({
-  crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: false,
-  contentSecurityPolicy: false
-}));
-
-// === DATA SANITIZATION ===
-app.use(mongoSanitize()); // Against NoSQL query injection
-app.use(xss());           // Against XSS
-app.use(hpp());           // Against HTTP Parameter Pollution
-
-// === COMPRESSION ===
-app.use(compression());
-
-// === REQUEST SIZE LIMITS ===
-app.use(express.json({ limit: process.env.MAX_REQUEST_SIZE || '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: process.env.MAX_REQUEST_SIZE || '10mb' }));
-
-// === GLOBAL RATE LIMITER ===
-const globalLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 500, // 500 requests per minute (Relaxed from 100 for better scalability)
-  message: { 
-    success: false, 
-    message: 'Too many requests. Please slow down.',
-    error: { code: 'RATE_LIMITED' }
-  }
-});
-app.use(globalLimiter);
-
-// === TOKEN BLACKLIST CHECK ===
-app.use(checkRevokedToken);
-
-// === ROUTES ===
+// === ROUTES WITH SPECIFIC LIMITERS ===
 const requireAuth = require('./middleware/requireAuth');
 
-// Production Main Routes
-app.use('/api/auth',     loginLimiter, require('./routes/auth')); 
-app.use('/api/license',  requireAuth,  require('./routes/license'));
-app.use('/api/redeem',   requireAuth,  require('./routes/redeem'));
-app.use('/api/teacher',  requireAuth,  require('./routes/teacher'));
-app.use('/api/student',  requireAuth,  require('./routes/student'));
-app.use('/api/admin',    requireAuth,  require('./routes/admin'));
-app.use('/api/quotes',   requireAuth,  require('./routes/quotes'));
-app.use('/api/system',   require('./routes/system'));
-const aiLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 100, // 100 per minute (Relaxed from 20)
-  message: {
-    success: false,
-    message: 'Too many AI requests.',
-    error: {
-      code: 'AI_RATE_LIMIT',
-      details: 'Max 100 AI requests per minute.'
-    }
-  },
-  standardHeaders: true,
-  legacyHeaders: false
+// Auth routes (with strict limiting)
+app.use('/api/auth', authLimiter, require('./routes/auth'));
+
+// License (with activation limit)
+app.use('/api/license', requireAuth, activationLimiter, require('./routes/license'));
+
+// Redeem
+app.use('/api/redeem', requireAuth, require('./routes/redeem'));
+
+// Teacher routes
+app.use('/api/teacher', requireAuth, require('./routes/teacher'));
+
+// Student routes
+app.use('/api/student', requireAuth, require('./routes/student'));
+
+// AI (with AI-specific limiting)
+app.use('/api/ai', requireAuth, aiLimiter, require('./routes/ai'));
+
+// Feedback
+app.use('/api/feedback', requireAuth, require('./routes/feedback'));
+
+// Circles
+app.use('/api/circles', requireAuth, require('./routes/circles'));
+
+// Payment (public with payment limiter)
+app.use('/api/payment', paymentLimiter, require('./routes/payment'));
+
+// Admin (protected by rolling gateway)
+app.use('/api/admin', require('./routes/admin'));
+
+// Other routes
+app.use('/api/quotes', requireAuth, require('./routes/quotes'));
+app.use('/api/system', require('./routes/system'));
+
+// === PUBLIC HEALTH CHECK ===
+app.get('/health', (req, res) => {
+  res.json({
+    success: true,
+    status: 'operational',
+    timestamp: new Date().toISOString()
+  });
 });
 
-// Mount AI limiter BEFORE the route
-app.use('/api/ai', aiLimiter);
-app.use('/api/ai', requireAuth, require('./routes/ai')); 
-app.use('/api/feedback', requireAuth,  require('./routes/feedback'));
-
-// ISOLATED Test & Debug Routes (Development Only)
-app.use('/api/dev',      require('./routes/dev'));
-
-// === HEALTH & MONITORING ===
-app.get('/health', (req, res) => {
-  const status = {
-    success: true,
-    status: 'healthy',
-    uptime: Math.floor(process.uptime()),
-    memoryUsage: process.memoryUsage(),
-    timestamp: new Date().toISOString(),
-    requestId: req.id
-  };
-  res.status(200).json(status);
+// === ANNOUNCEMENTS (public) ===
+app.get('/api/announcements/active', async (req, res) => {
+  try {
+    const Announcement = require('./models/Announcement');
+    const announcement = await Announcement.findOne({
+      isActive: true,
+      $or: [
+        { expiresAt: null },
+        { expiresAt: { $gt: new Date() } }
+      ]
+    })
+    .select('text target createdAt')
+    .lean();
+    res.json({
+      success: true,
+      data: { announcement }
+    });
+  } catch (err) {
+    res.json({
+      success: true,
+      data: { announcement: null }
+    });
+  }
 });
 
 // === 404 HANDLER ===
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: `Route ${req.method} ${req.originalUrl} not found`,
+    message: 'Route not found.',
     error: { code: 'NOT_FOUND' }
   });
 });
 
 // === GLOBAL ERROR HANDLER ===
 app.use((err, req, res, next) => {
-  if (err.message === 'Not allowed by CORS') {
-    return res.status(403).json({ success: false, message: 'CORS Blocked', error: { code: 'CORS_INVALID' }});
-  }
-  
-  // Log every error with Request ID!
-  logger.error(err.message, { 
-    requestId: req.id, 
+  logger.error(err.message, {
+    requestId: req.id,
     path: req.originalUrl,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
+    ip: req.ip,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 
-  const message = process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error';
-  
-  // Ensure CORS headers on errors!
-  const reqOrigin = req.headers.origin;
-  if (allowedOrigins.includes(reqOrigin)) {
-    res.header('Access-Control-Allow-Origin', reqOrigin);
-    res.header('Access-Control-Allow-Credentials', 'true');
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied.',
+      error: { code: 'CORS_BLOCKED' }
+    });
   }
+
+  const message = process.env.NODE_ENV === 'development'
+    ? err.message
+    : 'Something went wrong.';
 
   res.status(err.status || 500).json({
     success: false,
     message,
-    error: { code: err.code || 'SERVER_ERROR', requestId: req.id }
+    error: {
+      code: err.code || 'SERVER_ERROR',
+      requestId: req.id
+    }
   });
 });
 
-// === START SERVER OR EXPORT FOR VERCEL ===
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    logger.info(`🚀 BEEPREPARE Server running on port ${PORT} [${process.env.NODE_ENV}]`);
-  });
-}
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, () => {
+  logger.info(`BEEPREPARE running on port ${PORT}`);
+});
 
-module.exports = app;
+process.on('SIGTERM', () => {
+  server.close(() => process.exit(0));
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('Unhandled Rejection:', {
+    message: reason?.message || reason,
+    stack: reason?.stack
+  });
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  logger.error('Uncaught Exception:', {
+    message: err.message,
+    stack: err.stack
+  });
+  process.exit(1);
+});

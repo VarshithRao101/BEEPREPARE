@@ -1,4 +1,5 @@
-const { Schema, model } = require('mongoose');
+const { Schema } = require('mongoose');
+const { getMainConn } = require('../config/db');
 
 const accessRequestSchema = new Schema({
   studentId:     { type: String, required: true },
@@ -18,4 +19,14 @@ const accessRequestSchema = new Schema({
 accessRequestSchema.index({ bankId: 1, studentId: 1 }, { unique: true });
 accessRequestSchema.index({ teacherId: 1, status: 1 });
 
-module.exports = model('AccessRequest', accessRequestSchema);
+let _AccessRequest = null;
+module.exports = new Proxy(function() {}, {
+  get(_, prop) {
+    if (!_AccessRequest) _AccessRequest = getMainConn().model('AccessRequest', accessRequestSchema);
+    return _AccessRequest[prop];
+  },
+  construct(_, args) {
+    if (!_AccessRequest) _AccessRequest = getMainConn().model('AccessRequest', accessRequestSchema);
+    return new _AccessRequest(...args);
+  }
+});

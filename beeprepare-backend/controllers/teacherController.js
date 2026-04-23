@@ -108,7 +108,7 @@ const getDashboard = async (req, res) => {
         totalQuestions: totalQuestionsSum,
         activeStudents: user.activeStudents || 0,
         subjectsUsed: uniqueUsed.length,
-        subjectLimit: user.subjectLimit || 2,
+        subjectLimit: user.subjectLimit || 1,
         planType: user.planType
       },
       userSubjects: user.subjects || [],
@@ -132,10 +132,15 @@ const getProfile = async (req, res) => {
     const teacherId = req.user.googleUid;
     const user = req.user;
 
-    const notesSnapshot = await db.collection('notes')
-      .where('teacherId', '==', teacherId)
-      .get();
-    const totalNotes = notesSnapshot.size;
+    let totalNotes = 0;
+    try {
+      const notesSnapshot = await db.collection('notes')
+        .where('teacherId', '==', teacherId)
+        .get();
+      totalNotes = notesSnapshot.size;
+    } catch (e) {
+      console.warn('Firestore read failed in getProfile (likely quota):', e.message);
+    }
 
     const [banks, totalQuestions, papersGenerated] = await Promise.all([
       Bank.find({ teacherId }).lean(),
@@ -172,6 +177,8 @@ const getProfile = async (req, res) => {
       photoUrl: user.photoUrl,
       phone: user.phone,
       role: user.role,
+      beeId: user.beeId,
+      nameChanged: user.nameChanged,
       planType: user.planType,
       subjectLimit: user.subjectLimit,
       isActivated: user.isActivated,
@@ -204,13 +211,18 @@ const updateProfile = async (req, res) => {
   try {
     const { displayName, phone, subjects, classes, chapters } = req.body;
     const teacherId = req.user.googleUid;
+    const user = req.user;
     const updates = {};
 
-    if (displayName !== undefined) {
+    if (displayName !== undefined && displayName.trim() !== user.displayName) {
+      if (user.nameChanged) {
+        return error(res, 'Name can only be changed once. Action locked.', 'NAME_LOCKED', 403);
+      }
       if (typeof displayName !== 'string' || displayName.trim().length < 2) {
         return error(res, 'Display name must be at least 2 characters', 'INVALID_NAME', 400);
       }
       updates.displayName = displayName.trim();
+      updates.nameChanged = true;
     }
 
     if (phone !== undefined) {
@@ -221,8 +233,8 @@ const updateProfile = async (req, res) => {
       if (!Array.isArray(subjects)) {
         return error(res, 'Subjects must be an array', 'INVALID_SUBJECTS', 400);
       }
-      if (subjects.length > (req.user.subjectLimit || 2)) {
-        return error(res, `Subject limit exceeded. Maximum ${req.user.subjectLimit || 2} subjects allowed.`, 'LIMIT_EXCEEDED', 400);
+      if (subjects.length > (req.user.subjectLimit || 1)) {
+        return error(res, `Subject limit reached (${req.user.subjectLimit || 1}). ✨ Activate your account to manage more subjects and expand your academic reach!`, 'LIMIT_EXCEEDED', 403);
       }
       const validSubjects = ['Physics', 'Chemistry', 'Mathematics', 'Maths', 'Biology', 'English', 'Telugu', 'Hindi', 'Social', 'Social Studies', 'Science', 'EVS', 'Computer', 'History', 'Geography'];
       if (!subjects.every(s => validSubjects.includes(s))) {
@@ -273,7 +285,7 @@ const updateProfile = async (req, res) => {
         notes.forEach(note => { if (note.fileUrl) deleteFromStorage(note.fileUrl); });
         
         return Promise.all([
-          Question.deleteMany({ bankId: bank._id }),
+          Question.deleteMany({ bankId: String(bank._id) }), // String — cross-DB safe
           Note.deleteMany({ bankId: bank._id }),
           AccessRequest.deleteMany({ bankId: bank._id }),
           Bank.findByIdAndDelete(bank._id),
@@ -376,8 +388,8 @@ const addSubject = async (req, res) => {
       const existingBanks = await Bank.find({ teacherId });
       const uniqueUsed = [...new Set(existingBanks.map(b => b.subject))];
       
-      if (!uniqueUsed.includes(subject) && uniqueUsed.length >= (req.user.subjectLimit || 2)) {
-        return error(res, `Subject limit reached (${req.user.subjectLimit || 2}). Upgrade your plan or update your selected subjects in profile.`, 'SUBJECT_LIMIT_REACHED', 403);
+      if (!uniqueUsed.includes(subject) && uniqueUsed.length >= (req.user.subjectLimit || 1)) {
+        return error(res, `Subject limit reached (${req.user.subjectLimit || 1}). ✨ Activate your account to create more subject banks and connect with more students!`, 'LIMIT_EXCEEDED', 403);
       }
     }
 
@@ -452,7 +464,7 @@ const deleteSubject = async (req, res) => {
 
     // Delete all related MongoDB documents in parallel
     await Promise.all([
-      Question.deleteMany({ bankId }),
+      Question.deleteMany({ bankId: String(bankId) }), // String — cross-DB safe
       Note.deleteMany({ bankId }),
       AccessRequest.deleteMany({ bankId })
     ]);
@@ -585,7 +597,7 @@ const deleteChapter = async (req, res) => {
     notes.forEach(note => { if (note.fileUrl) deleteFromStorage(note.fileUrl); });
 
     await Promise.all([
-      Question.deleteMany({ bankId, chapterId }),
+      Question.deleteMany({ bankId: String(bankId), chapterId }), // String — cross-DB safe
       Note.deleteMany({ bankId, chapterId })
     ]);
 
@@ -632,7 +644,7 @@ const getQuestions = async (req, res) => {
     if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
     if (bank.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
 
-    const filter = { bankId };
+    const filter = { bankId: String(bankId) }; // String — cross-DB safe (questions on Cluster 2)
     if (chapterId) filter.chapterId = chapterId;
     if (type) filter.questionType = type;
     if (difficulty) filter.difficulty = difficulty;
@@ -724,8 +736,14 @@ const addQuestion = async (req, res) => {
     const tagsArr = Array.isArray(tags) ? tags : [];
     const isImportant = tagsArr.some(t => importantTags.includes(t));
 
-    // Create optimized question (Saving KB)
+    // Create optimized question — includes full hierarchy for Cluster 2 schema
     const question = await Question.create({
+      // ── Hierarchy (new fields for Cluster 2 schema) ───────────────────────
+      teacherId,
+      class: bank.class,
+      subject: bank.subject,
+      chapterName: chapter.chapterName,
+      // ── Question content ──────────────────────────────────────────────────
       questionText,
       questionType,
       marks: marksInt,
@@ -736,7 +754,7 @@ const addQuestion = async (req, res) => {
       tags: tagsArr,
       chapterId,
       createdBy: teacherId,
-      bankId
+      bankId: String(bankId) // Store as String — cross-DB safe
     });
 
     // Increment counts atomically
@@ -827,7 +845,7 @@ const generatePaper = async (req, res) => {
 
     // Step 2: Query all questions from selected chapters
     const allQuestions = await Question.find({
-      bankId,
+      bankId: String(bankId), // String — cross-DB safe (questions on Cluster 2)
       chapterId: { $in: selectedChapters }
     });
 
@@ -1101,6 +1119,11 @@ const uploadNote = async (req, res) => {
     const bank = await Bank.findById(bankId);
     if (!bank) return error(res, 'Target bank node not found.', 'BANK_NOT_FOUND', 404);
 
+    // SECURITY SEAL: Verify ownership (IDOR check)
+    if (bank.teacherId !== teacherId) {
+      return error(res, 'Access denied. You do not own this syllabus node.', 'FORBIDDEN', 403);
+    }
+
     const existingNote = await Note.findOne({ bankId, chapterId, noteType });
     if (existingNote) {
       await deleteFromStorage(existingNote.public_id || existingNote.fileUrl);
@@ -1193,6 +1216,9 @@ const getRequests = async (req, res) => {
     if (status) filter.status = status;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // Warm up Bank model for population
+    const _b = Bank.modelName;
 
     const [requests, total] = await Promise.all([
       AccessRequest.find(filter)
@@ -1215,10 +1241,13 @@ const getRequests = async (req, res) => {
         requestId: r._id,
         studentId: r.studentId,
         studentName: r.studentName,
+        subject: r.bankId?.subject || 'Unknown',
+        class: r.bankId?.class || 'N/A',
         bank: r.bankId,
         status: r.status,
         otpAttempts: r.otpAttempts,
         requestedAt: r.requestedAt,
+        updatedAt: r.updatedAt,
         approvedAt: r.approvedAt,
         rejectedAt: r.rejectedAt
       })),
@@ -1356,39 +1385,58 @@ const approveAllRequests = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getDoubts = async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status } = req.query;
     const teacherId = req.user.googleUid;
 
-    let colRef = db.collection('doubts').where('teacherId', '==', teacherId);
-    if (status) colRef = colRef.where('status', '==', status);
+    let query = { teacherId };
+    if (status) query.status = status;
 
-    const doubtsSnapshot = await colRef.orderBy('updatedAt', 'desc').get();
+    const doubts = await Doubt.find(query).sort({ updatedAt: -1 }).lean();
 
-    const doubts = doubtsSnapshot.docs.map(doc => {
-      const d = doc.data();
-      return {
-        doubtId: doc.id,
+    return success(res, 'Doubts fetched', {
+      doubts: doubts.map(d => ({
+        doubtId: d._id,
         studentId: d.studentId,
         studentName: d.studentName,
         subject: d.subject,
         status: d.status,
         unreadByTeacher: d.unreadByTeacher,
-        lastMessage: d.lastMessage || '',
-        lastReplyAt: d.lastReplyAt?.toDate ? d.lastReplyAt.toDate() : d.lastReplyAt,
-        createdAt: d.createdAt?.toDate ? d.createdAt.toDate() : d.createdAt,
-        updatedAt: d.updatedAt?.toDate ? d.updatedAt.toDate() : d.updatedAt
-      };
-    });
-
-    return success(res, 'Doubts fetched', {
-      doubts,
-      total: doubts.length,
-      page: 1,
-      totalPages: 1
+        lastMessage: d.messages?.[d.messages.length - 1]?.content || '',
+        lastReplyAt: d.lastReplyAt,
+        createdAt: d.createdAt,
+        updatedAt: d.updatedAt
+      }))
     });
   } catch (err) {
     console.error('getDoubts error:', err);
     return error(res, 'Failed to fetch doubts', 'SERVER_ERROR', 500);
+  }
+};
+
+const getDoubtMessages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const teacherId = req.user.googleUid;
+
+    const doubt = await Doubt.findById(id);
+    if (!doubt) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
+    if (doubt.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+
+    // Mark as read by teacher
+    if (doubt.unreadByTeacher) {
+      doubt.unreadByTeacher = false;
+      await doubt.save();
+    }
+
+    return success(res, 'Messages fetched', {
+      doubtId: id,
+      subject: doubt.subject,
+      status: doubt.status,
+      messages: doubt.messages
+    });
+  } catch (err) {
+    console.error('getDoubtMessages error:', err);
+    return error(res, 'Failed to fetch messages', 'SERVER_ERROR', 500);
   }
 };
 
@@ -1398,51 +1446,62 @@ const getDoubts = async (req, res) => {
 const replyToDoubt = async (req, res) => {
   try {
     const { id } = req.params;
-    const { content } = req.body;
+    let { content, imageUrl, status } = req.body;
     const teacherId = req.user.googleUid;
 
-    if (!content || !content.trim()) {
-      return error(res, 'Reply content cannot be empty', 'EMPTY_CONTENT', 400);
+    if ((!content || !content.trim()) && !imageUrl) {
+      return error(res, 'Reply content or image is required', 'EMPTY_CONTENT', 400);
     }
 
-    const doubtDoc = await db.collection('doubts').doc(id).get();
-    if (!doubtDoc.exists) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
-    
-    const doubtData = doubtDoc.data();
-    if (doubtData.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+    const doubt = await Doubt.findById(id);
+    if (!doubt) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
+    if (doubt.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+
+    // Process Base64 image to Cloudinary if needed
+    let finalImageUrl = imageUrl || null;
+    if (imageUrl && imageUrl.startsWith('data:image')) {
+      try {
+        const uploadRes = await cloudinary.uploader.upload(imageUrl, {
+          folder: `doubts/teacher_${teacherId}`,
+          resource_type: 'auto'
+        });
+        finalImageUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary upload failure:', uploadErr);
+        return error(res, 'Failed to process image attachment', 'UPLOAD_ERROR', 500);
+      }
+    }
 
     const now = new Date();
     const message = {
       messageId: uuidv4(),
       senderId: teacherId,
       senderRole: 'teacher',
-      content: content.trim(),
+      content: content?.trim() || '[Image Attached]',
+      imageUrl: finalImageUrl,
       timestamp: now
     };
 
-    await db.collection('doubts').doc(id).collection('messages').add(message);
-    await db.collection('doubts').doc(id).update({
-      lastMessage: content.trim(),
-      lastMessageRole: 'teacher',
-      status: 'replied',
-      unreadByStudent: true,
-      unreadByTeacher: false,
-      lastReplyAt: now,
-      updatedAt: now
-    });
+    doubt.messages.push(message);
+    doubt.status = status || 'replied';
+    doubt.unreadByStudent = true;
+    doubt.unreadByTeacher = false;
+    doubt.lastReplyAt = now;
+    
+    await doubt.save();
 
     await logActivity(
       teacherId,
       'doubt_replied',
       'Doubt Replied',
-      `Replied to doubt from ${doubtData.studentName || doubtData.studentId}`,
+      `Replied to doubt from ${doubt.studentName || doubt.studentId}`,
       '#FF9800'
     );
 
     return success(res, 'Reply sent successfully', {
       doubtId: id,
       message,
-      status: 'replied'
+      status: doubt.status
     });
   } catch (err) {
     console.error('replyToDoubt error:', err);
@@ -1468,24 +1527,32 @@ const getActivity = async (req, res) => {
   }
 };
 
+const https = require('https');
+
 const downloadNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const { stream } = req.query;
     const teacherId = req.user.googleUid;
 
     const note = await Note.findById(id);
     if (!note) return error(res, 'Vault node not found.', 'NOT_FOUND', 404);
-    if (note.teacherId !== teacherId) return error(res, 'Access denied to this vault node.', 'FORBIDDEN', 403);
+    if (note.teacherId !== teacherId) return error(res, 'Access denied.', 'FORBIDDEN', 403);
 
-    // Generate a Cloudinary URL with sign_url and attachment flag
+    // Generate the signed URL (internal)
     const downloadUrl = generatePdfUrl(note.public_id, true, note.resource_type || 'raw', note.format);
     
-    // Redirect ensuring Cloudinary handles the download stream
-    return res.redirect(downloadUrl);
+    // Stream the file directly to the client (Bypasses 401 browser issues)
+    https.get(downloadUrl, (cloudinaryRes) => {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${note.fileName || 'note.pdf'}"`);
+      cloudinaryRes.pipe(res);
+    }).on('error', (err) => {
+      throw err;
+    });
+
   } catch (err) {
     console.error('Vault download fault:', err);
-    return error(res, `Vault synchronization failed: ${err.message || 'Unknown fault'}`, 'SERVER_ERROR', 500);
+    return error(res, `Vault synchronization failed: ${err.message}`, 'SERVER_ERROR', 500);
   }
 };
 
@@ -1512,6 +1579,7 @@ module.exports = {
   rejectRequest,
   approveAllRequests,
   getDoubts,
+  getDoubtMessages,
   replyToDoubt,
   getActivity
 };

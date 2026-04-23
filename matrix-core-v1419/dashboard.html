@@ -3,71 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEE Central Command</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <title>BEE Command Control Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --adv-yellow: #FFCF00; --bg-dark: #050505; }
-        body { background: var(--bg-dark); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; min-height: 100vh; padding: 20px; box-sizing: border-box; }
+        :root { 
+            --gold: #FFD700; 
+            --bg-dark: #000; 
+            --card-bg: rgba(18, 18, 22, 0.85); 
+            --gold-glow: rgba(255, 215, 0, 0.2); 
+            --border: rgba(255, 215, 0, 0.2);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background: var(--bg-dark); 
+            color: #fff; 
+            font-family: 'Outfit', sans-serif; 
+            min-height: 100vh; 
+            padding: 30px; 
+            overflow-x: hidden;
+        }
         
         .main-bg {
             position: fixed; inset: 0;
-            background: url('/assets/images/premium-bg.png') no-repeat center center;
-            background-size: cover; z-index: -1; filter: brightness(0.25) blur(5px);
+            background: url('/assets/images/abstract-bg.png') no-repeat center center;
+            background-size: cover; z-index: -1; filter: brightness(0.75);
         }
 
         .header { 
             display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 50px; padding: 20px; background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid rgba(255, 207, 0, 0.2); backdrop-filter: blur(10px);
-            border-radius: 20px;
+            margin-bottom: 50px; padding: 25px 40px; background: var(--card-bg);
+            border: 1px solid var(--border); backdrop-filter: blur(25px);
+            border-radius: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.6);
         }
-        .header h1 { font-size: 20px; letter-spacing: 6px; text-transform: uppercase; font-weight: 900; color: var(--adv-yellow); margin: 0; display: flex; align-items: center; gap: 15px; }
+        .header h1 { font-size: 24px; font-weight: 900; color: var(--gold); margin: 0; display: flex; align-items: center; gap: 15px; letter-spacing: -0.5px; }
+
+        .logo-mini {
+            width: 40px; height: 40px; border: 2px solid var(--gold);
+            border-radius: 12px; display: flex; align-items: center; 
+            justify-content: center; background: rgba(255,215,0,0.05);
+            box-shadow: 0 0 20px rgba(255,215,0,0.1);
+        }
 
         .control-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 20px;
-            max-width: 1000px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        .grid-item {
-            aspect-ratio: 1;
-            background: rgba(15, 15, 18, 0.7);
+        .card {
+            background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-align: center;
-            padding: 20px;
-            backdrop-filter: blur(15px);
+            border-radius: 32px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            transition: 0.3s;
         }
+        .card:hover { border-color: rgba(255, 207, 0, 0.3); box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
 
-        .grid-item:hover { 
-            border-color: var(--adv-yellow); 
-            background: rgba(255, 207, 0, 0.05); 
-            transform: translateY(-8px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255, 207, 0, 0.1);
+        .card-title { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--adv-yellow); margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .card-title svg { width: 18px; height: 18px; stroke-width: 2.5; }
+
+        .status-table { width: 100%; border-collapse: collapse; }
+        .status-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .status-label { color: #888; font-size: 14px; }
+        .status-value { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot-green { background: #00E676; box-shadow: 0 0 10px #00E676; }
+        .dot-red { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+
+        /* Maintenance Toggle */
+        .m-toggle-wrap { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 207, 0, 0.1); margin-top: 20px; }
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #222; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #ff4d4d; }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        textarea, input[type="text"] {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1.5px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 18px; color: #fff; font-family: inherit; font-size: 14px;
+            box-sizing: border-box; margin-top: 15px; outline: none; transition: 0.3s;
         }
+        textarea:focus, input[type="text"]:focus { border-color: var(--adv-yellow); background: rgba(0,0,0,0.6); }
 
-        .grid-item.active { border-color: #ff4d4d; box-shadow: 0 0 30px rgba(255, 77, 77, 0.3); }
-        .grid-item svg { width: 32px; height: 32px; stroke: var(--adv-yellow); stroke-width: 1.5; transition: 0.3s; }
-        .grid-item:hover svg { stroke: #fff; filter: drop-shadow(0 0 8px var(--adv-yellow)); }
-        
-        .grid-item .label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #aaa; }
-        .grid-item.active .label { color: #ff4d4d; }
+        .btn {
+            width: 100%; padding: 16px; margin-top: 15px; border-radius: 16px; border: none;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-gold { background: var(--adv-yellow); color: #000; }
+        .btn-gold:hover { filter: brightness(0.75); transform: translateY(-2px); }
+        .btn-danger { background: #ff4d4d; color: #fff; }
+        .btn-danger:hover { filter: brightness(0.75); transform: translateY(-2px); }
 
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: #00E676; box-shadow: 0 0 10px #00E676; }
-        .status-dot.off { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d; }
+        .full-admin-link {
+            display: block; margin-top: 40px; text-align: center; color: #555; text-decoration: none;
+            font-weight: 900; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .full-admin-link:hover { color: var(--adv-yellow); border-spacing: 5px; }
 
-        @media (max-width: 480px) {
-            .control-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-            .grid-item { padding: 15px; border-radius: 20px; }
+        @media (max-width: 900px) {
+            .control-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -76,141 +117,195 @@
 
     <div class="header">
         <h1>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
-            </svg>
-            Command Matrix
+            <div class="logo-mini">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2.5">
+                    <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
+                    <circle cx="12" cy="12" r="2" fill="#FFD700"></circle>
+                </svg>
+            </div>
+            <span style="color: #FFD700;">BEE</span><span style="color: #e0e0e0;">PREPARE</span> Command Hub
         </h1>
-        <div style="font-size: 11px; color: #888; font-weight: 900; letter-spacing: 1px;">PROTOCOL_V1419 // ADMIN_ACTIVE</div>
+        <div style="font-size: 11px; color: var(--gold); font-weight: 900; letter-spacing: 2px;">V1419_STABLE // SECURED</div>
     </div>
 
     <div class="control-grid">
-        <!-- MAINTENANCE BOX -->
-        <div id="maintenance-grid" class="grid-item" onclick="handleMaintenanceToggle()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"/>
-            </svg>
-            <div class="label">Maintenance</div>
-            <div id="m-status-dot" class="status-dot"></div>
+        <!-- SYSTEM STATUS -->
+        <div class="card">
+            <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                System Integrity
+            </div>
+            <div class="status-table">
+                <div class="status-row">
+                    <span class="status-label">BEE CORE (MongoDB)</span>
+                    <span class="status-value"><span id="db-dot" class="dot dot-green"></span> <span id="db-text">Syncing...</span></span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">FIREBASE ENGINE</span>
+                    <span class="status-value"><span id="fb-dot" class="dot dot-green"></span> <span id="fb-text">Syncing...</span></span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">GEMINI AI UNIT</span>
+                    <span class="status-value"><span id="ai-dot" class="dot dot-green"></span> <span id="ai-text">Active</span></span>
+                </div>
+                <div class="status-row">
+                    <span class="status-label">ACTIVE TERMINALS</span>
+                    <span class="status-value" id="user-count">0 Pulse</span>
+                </div>
+            </div>
+            <button class="btn btn-gold" id="refreshBtn" style="margin-top: 30px; background: rgba(255,255,255,0.05); color: #fff; border: 1.5px solid rgba(255,255,255,0.1);">REFRESH DIAGNOSTICS</button>
         </div>
 
-        <!-- ANALYTICS -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M21.21 15.89A10 10 0 1 1 8 2.83M22 12A10 10 0 0 0 12 2v10z"/>
-            </svg>
-            <div class="label">Analytics</div>
+        <!-- MAINTENANCE -->
+        <div class="card">
+            <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Protocol Restriction
+            </div>
+            <div class="m-toggle-wrap">
+                <span style="font-weight: 800; font-size: 14px;" id="m-label">MAINTENANCE_OFF</span>
+                <label class="switch">
+                    <input type="checkbox" id="maint-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <textarea id="maint-msg" placeholder="RECONSTRUCTION MESSAGE..."></textarea>
+            <button class="btn btn-gold" id="updateMaintBtn">UPDATE PROTOCOL MESSAGE</button>
         </div>
 
-        <!-- SECURITY -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-            <div class="label">Security</div>
+        <!-- QUICK BLOCK -->
+        <div class="card">
+            <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Instant Blacklist
+            </div>
+            <p style="font-size: 12px; color: #666; margin: 0 0 15px;">IMMEDIATE ACCESS VOID FOR TARGET IDENTITY.</p>
+            <input type="text" id="blacklist-email" placeholder="IDENTITY EMAIL (GOOGLE ID)...">
+            <button class="btn btn-danger" id="blockBtn">COMMIT HARD BLOCK</button>
         </div>
 
-        <!-- USER MGMT -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            <div class="label">Users</div>
-        </div>
-
-        <!-- CLOUD STORAGE -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-            </svg>
-            <div class="label">Storage</div>
-        </div>
-
-        <!-- API TERMINAL -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
-            </svg>
-            <div class="label">API Portal</div>
-        </div>
-
-        <!-- SYSTEM SYNC -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-            </svg>
-            <div class="label">Sync Logic</div>
-        </div>
-
-        <!-- LOG HISTORY -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-            <div class="label">History</div>
-        </div>
-
-        <!-- FIREWALL -->
-        <div class="grid-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-            <div class="label">Vault</div>
+        <!-- ANNOUNCEMENT -->
+        <div class="card">
+            <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                System Broadcaster
+            </div>
+            <p style="font-size: 12px; color: #666; margin: 0 0 15px;">GLOBAL PUSH TO ALL ACTIVE NODES.</p>
+            <textarea id="ann-msg" placeholder="ANNOUNCEMENT PAYLOAD..." style="height: 100px;"></textarea>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <button class="btn btn-gold" id="pushAnnBtn">PUSH ALL</button>
+                <button class="btn btn-danger" id="clearAnnBtn" style="background: transparent; border: 1.5px solid #ff4d4d;">VOID ALL</button>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <a href="../beginners/admin/" class="full-admin-link">Access Full Hive Control Dashboard ➔</a>
+
     <script type="module">
-        import { apiCall } from '/assets/js/bee-core.js';
+        import { adminApi, showToast, showCodeModal } from './matrix-core.js';
 
-        if (localStorage.getItem('bp_admin_session') !== 'active_v1419') {
-            window.location.href = 'index.html';
-        }
-
-        let isMaintenance = false;
-
-        async function fetchStatus() {
-            const res = await apiCall('/system/maintenance', 'GET', null, false);
-            if (res && res.success) {
-                isMaintenance = res.data.isMaintenance;
-                updateUI();
+        async function init() {
+            const stats = await adminApi('/overview');
+            if (stats && stats.success) {
+                document.getElementById('db-text').innerText = stats.data.systemHealth.mongodb === 'connected' ? 'SECURED' : 'VOID';
+                document.getElementById('db-dot').className = stats.data.systemHealth.mongodb === 'connected' ? 'dot dot-green' : 'dot dot-red';
+                document.getElementById('fb-text').innerText = stats.data.systemHealth.firebase === 'connected' ? 'SYNCED' : 'VOID';
+                document.getElementById('fb-dot').className = stats.data.systemHealth.firebase === 'connected' ? 'dot dot-green' : 'dot dot-red';
+                document.getElementById('user-count').innerText = stats.data.activeNodes + ' Nodes';
+                
+                document.getElementById('maint-toggle').checked = stats.data.maintenanceMode;
+                document.getElementById('m-label').innerText = stats.data.maintenanceMode ? 'MAINTENANCE_ACTIVE' : 'MAINTENANCE_OFF';
+                document.getElementById('m-label').style.color = stats.data.maintenanceMode ? '#ff4d4d' : '#00E676';
             }
         }
 
-        function updateUI() {
-            const g = document.getElementById('maintenance-grid');
-            const d = document.getElementById('m-status-dot');
-            if (isMaintenance) {
-                g.classList.add('active');
-                d.classList.add('off');
-            } else {
-                g.classList.remove('active');
-                d.classList.remove('off');
-            }
-        }
+        const toggleMaint = async (enabled) => {
+            const code = await showCodeModal('Confirm Protocol Change', `Enter MASTER CODE to turn maintenance ${enabled ? 'ON' : 'OFF'}.`);
+            if (!code) { document.getElementById('maint-toggle').checked = !enabled; return; }
 
-        window.handleMaintenanceToggle = async () => {
-            const { value: secretKey } = await Swal.fire({
-                title: 'Authorize Protocol Change',
-                input: 'password',
-                inputLabel: 'SECRET MASTER KEY REQUIRED',
-                inputAttributes: { maxlength: 4, autocapitalize: 'off', autocorrect: 'off' },
-                background: '#0a0a0a', color: '#fff', confirmButtonColor: '#FFCF00'
+            const res = await adminApi('/settings/maintenance', 'POST', { 
+                enabled: enabled, 
+                actionCode: code 
             });
 
-            if (secretKey === '9059') {
-                const res = await apiCall('/admin/system/maintenance', 'POST', { status: !isMaintenance });
-                if (res && res.success) {
-                    isMaintenance = !isMaintenance;
-                    updateUI();
-                    Swal.fire({ icon: 'success', title: 'Protocol Updated', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
-                }
-            } else if (secretKey) {
-                Swal.fire({ icon: 'error', title: 'Unauthorized Key', background: '#0a0a0a', color: '#fff' });
+            if (res && res.success) {
+                showToast(`System ${enabled ? 'restricted' : 'restored'}`, 'success');
+                init();
+            } else {
+                document.getElementById('maint-toggle').checked = !enabled;
+                showToast(res?.message || 'Authorization failed', 'error');
             }
         };
 
-        fetchStatus();
+        const updateMaintMessage = async () => {
+            const msg = document.getElementById('maint-msg').value;
+            if(!msg) return;
+            
+            const code = await showCodeModal('Commit Message Payload', 'Enter admin code to refresh maintenance downtime text.');
+            if(code) {
+                const res = await adminApi('/settings/maintenance', 'POST', { 
+                    message: msg, 
+                    actionCode: code,
+                    enabled: document.getElementById('maint-toggle').checked 
+                });
+                if(res && res.success) showToast('Payload deployed', 'success');
+            }
+        };
+
+        const instantBlock = async () => {
+            const email = document.getElementById('blacklist-email').value;
+            if(!email) return;
+
+            const code = await showCodeModal('COMMIT HARD VOID?', 'This identity will be purged from the BEE core.', true);
+            if(code) {
+                const res = await adminApi('/blacklist', 'POST', { email, actionCode: code });
+                if(res && res.success) {
+                    showToast('Identity purged', 'success');
+                    document.getElementById('blacklist-email').value = '';
+                } else {
+                    showToast(res?.message || 'Purge failed', 'error');
+                }
+            }
+        };
+
+        const pushAnnouncement = async () => {
+            const message = document.getElementById('ann-msg').value;
+            if(!message) return;
+
+            const res = await adminApi('/settings/announcement', 'POST', { text: message, target: 'all' });
+            if(res && res.success) {
+                showToast('Broadcast live', 'success');
+                document.getElementById('ann-msg').value = '';
+            }
+        };
+
+        const clearAnnouncements = async () => {
+            const code = await showCodeModal('STOP BROADCAST', 'Clear all global notifications?', false);
+            if(code) {
+                const res = await adminApi('/settings/announcement', 'DELETE', { actionCode: code });
+                if(res && res.success) showToast('Broadcast terminal cleared', 'info');
+            }
+        };
+
+        // Attach Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const refreshBtn = document.getElementById('refreshBtn');
+            const maintToggle = document.getElementById('maint-toggle');
+            const updateMaintBtn = document.getElementById('updateMaintBtn');
+            const blockBtn = document.getElementById('blockBtn');
+            const pushAnnBtn = document.getElementById('pushAnnBtn');
+            const clearAnnBtn = document.getElementById('clearAnnBtn');
+
+            if (refreshBtn) refreshBtn.addEventListener('click', () => location.reload());
+            if (maintToggle) maintToggle.addEventListener('change', (e) => toggleMaint(e.target.checked));
+            if (updateMaintBtn) updateMaintBtn.addEventListener('click', updateMaintMessage);
+            if (blockBtn) blockBtn.addEventListener('click', instantBlock);
+            if (pushAnnBtn) pushAnnBtn.addEventListener('click', pushAnnouncement);
+            if (clearAnnBtn) clearAnnBtn.addEventListener('click', clearAnnouncements);
+        });
+
+        init();
     </script>
+
 </body>
 </html>

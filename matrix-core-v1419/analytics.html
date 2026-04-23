@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics | BEEPREPARE Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: rgba(18, 18, 18, 0.9);
+            --gold: #FFD700;
+            --gold-dim: rgba(255,215,0,0.15);
+            --success: #4CAF50;
+            --danger: #ff4444;
+            --warning: #FFA500;
+            --text: #ffffff;
+            --muted: #888888;
+            --border: rgba(255, 215, 0, 0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { 
+            background: transparent; 
+            color: var(--text); 
+            padding-top: 90px;
+            background: url('/assets/images/abstract-bg.png') no-repeat center center fixed;
+            background-size: cover;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: -1;
+        }
+
+        .glass { background: var(--surface); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 20px; padding: 30px; }
+        
+        header {
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: rgba(10,10,10,0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 24px; z-index: 1000;
+            justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .back-btn { cursor: pointer; font-size: 20px; color: var(--gold); text-decoration: none; font-weight: 900; }
+        .header-title { font-weight: 900; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .admin-id { font-size: 12px; color: var(--gold); font-weight: 700; text-transform: uppercase; }
+        .logout-btn { background: var(--gold); color: #000; border: none; padding: 8px 16px; border-radius: 8px; font-size: 11px; font-weight: 900; cursor: pointer; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        
+        .section-title {
+            font-size: 14px; font-weight: 900; color: var(--gold); margin-bottom: 30px;
+            text-transform: uppercase; letter-spacing: 2px; text-align: center;
+        }
+
+        .meter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px; }
+        
+        .meter-card { position: relative; }
+        .meter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .meter-label { font-size: 13px; font-weight: 800; color: #fff; }
+        .meter-value { font-size: 11px; font-weight: 700; color: var(--muted); }
+        
+        .progress-container {
+            height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden;
+            position: relative; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .progress-bar {
+            height: 100%; width: 0%; background: var(--success);
+            transition: width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1);
+            border-radius: 6px;
+        }
+        
+        .meter-footer { margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .percentage { font-size: 18px; font-weight: 900; color: var(--gold); }
+        .limit-info { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        .alert-box {
+            margin-top: 20px; padding: 12px; border-radius: 8px; font-size: 12px; font-weight: 700;
+            display: none; text-align: center;
+        }
+        .alert-orange { background: rgba(255,165,0,0.1); border: 1px solid var(--warning); color: var(--warning); }
+        .alert-red { background: rgba(255,68,68,0.1); border: 1px solid var(--danger); color: var(--danger); animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .meter-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">←</a>
+            <span class="header-title">Resource Analytics</span>
+        </div>
+        <div class="header-right">
+            <span class="admin-id" id="adminIdDisplay">Admin ID</span>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h3 class="section-title">Free Tier Resource Monitors</h3>
+        
+        <div class="meter-grid">
+            <!-- MongoDB Main -->
+            <div class="glass meter-card">
+                <div class="meter-header">
+                    <span class="meter-label">MongoDB Cluster 1 (Questions)</span>
+                    <span class="meter-value" id="val-qdb">0 / 512 MB</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="bar-qdb"></div>
+                </div>
+                <div class="meter-footer">
+                    <span class="percentage" id="perc-qdb">0%</span>
+                    <span class="limit-info">Limit: 512MB (Free Shared)</span>
+                </div>
+                <div class="alert-box" id="alert-qdb"></div>
+            </div>
+
+            <!-- MongoDB App State -->
+            <div class="glass meter-card">
+                <div class="meter-header">
+                    <span class="meter-label">MongoDB Cluster 2 (Main DB)</span>
+                    <span class="meter-value" id="val-mdb">0 / 512 MB</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="bar-mdb"></div>
+                </div>
+                <div class="meter-footer">
+                    <span class="percentage" id="perc-mdb">0%</span>
+                    <span class="limit-info">Limit: 512MB (Free Shared)</span>
+                </div>
+                <div class="alert-box" id="alert-mdb"></div>
+            </div>
+
+            <!-- Firestore Reads -->
+            <div class="glass meter-card">
+                <div class="meter-header">
+                    <span class="meter-label">Firebase Firestore Reads</span>
+                    <span class="meter-value" id="val-firestore">0 / 50,000 Reads</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="bar-firestore"></div>
+                </div>
+                <div class="meter-footer">
+                    <span class="percentage" id="perc-firestore">0%</span>
+                    <span class="limit-info">Limit: 50,000 / Day (Reset 00:00 UTC)</span>
+                </div>
+                <div class="alert-box" id="alert-firestore"></div>
+            </div>
+
+            <!-- Cloudinary Storage -->
+            <div class="glass meter-card">
+                <div class="meter-header">
+                    <span class="meter-label">Cloudinary Assets</span>
+                    <span class="meter-value">Tracking Manually</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: 5%; background: var(--success);"></div>
+                </div>
+                <div class="meter-footer">
+                    <span class="percentage">SAFE</span>
+                    <span class="limit-info">Limit: 25GB Storage / 25GB BW</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass" style="text-align: center; margin-top: 30px;">
+            <p style="font-size: 13px; color: var(--muted); font-weight: 600;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 5px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="8"></line></svg>
+                Stats update every 5 minutes. Real-time changes may reflect later.
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { adminApi, showToast, showCodeModal } from './matrix-core.js';
+
+        async function fetchStats() {
+            try {
+                const data = await adminApi('/storage-stats');
+                
+                if (data && data.success) {
+                    const s = data.data;
+                    updateMeter('mdb', s.mainDb.usedMB, 512);
+                    updateMeter('qdb', s.questionsDb.usedMB, 512);
+                    
+                    const setsData = await adminApi('/settings');
+                    if (setsData && setsData.success) {
+                        const readsToday = setsData.data.find(s => s.key === 'firestore_reads_today')?.value || 0;
+                        updateMeter('firestore', readsToday, 50000);
+                    }
+                }
+            } catch (err) {
+                console.error('Stats fetch error:', err);
+            }
+        }
+
+        function updateMeter(id, used, limit) {
+            const perc = ((used / limit) * 100).toFixed(1);
+            const bar = document.getElementById(`bar-${id}`);
+            const textVal = document.getElementById(`val-${id}`);
+            const textPerc = document.getElementById(`perc-${id}`);
+            const alert = document.getElementById(`alert-${id}`);
+
+            bar.style.width = `${perc}%`;
+            textVal.textContent = `${used.toLocaleString()} / ${limit.toLocaleString()} ${id === 'firestore' ? 'Reads' : 'MB'}`;
+            textPerc.textContent = `${perc}%`;
+
+            // Color logic
+            if (perc > 90) {
+                bar.style.background = 'var(--danger)';
+                alert.className = 'alert-box alert-red';
+                alert.textContent = 'CRITICAL: Approaching hard limit!';
+                alert.style.display = 'block';
+            } else if (perc > 70) {
+                bar.style.background = 'var(--warning)';
+                alert.className = 'alert-box alert-orange';
+                alert.textContent = 'WARNING: High usage detected.';
+                alert.style.display = 'block';
+            } else {
+                bar.style.background = 'var(--success)';
+                alert.style.display = 'none';
+            }
+        }
+
+        fetchStats();
+        setInterval(fetchStats, 60000);
+    </script>
+</body>
+</html>

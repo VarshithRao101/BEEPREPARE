@@ -206,7 +206,7 @@
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-                    <span>Home Hub</span>
+                    <span>Dashboard</span>
                 </a>
                 <a href="student-bank.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -248,7 +248,11 @@
                     <div class="profile-hub adv-card" style="padding: 30px;">
                         <div class="profile-avatar-node">--</div>
                         <div class="profile-name">Loading...</div>
-                        <p style="color: var(--text-muted); font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-top: 5px;" id="node-id-display">IDENTIFIER: --</p>
+                        <div id="plan-badge-container" style="margin-bottom: 10px;"></div>
+                        <p style="color: var(--primary); font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" id="node-id-display" onclick="copyBeeId()">
+                            <span id="bee-id-val">BEE-NODE-XXXXXX</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                        </p>
                         
                         <div class="stats-grid" style="margin-top: 25px;">
                             <div class="stat-item">
@@ -289,6 +293,30 @@
                             <span style="font-weight: 700; color: #fff; font-size: 13px;">Activation Requests</span>
                         </div>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity: 0.3;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+
+                    <div class="menu-item adv-card" onclick="window.location.href='study-circles.html'">
+                        <div style="display: flex; align-items: center;">
+                            <div class="menu-icon-box" style="width: 36px; height: 36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
+                            <span style="font-weight: 700; color: #fff; font-size: 13px;">Study Circles</span>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity: 0.3;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+
+                    <div class="section-divider">
+                        <span class="section-label" id="identity-sect-label">Primary Identity</span>
+                        <div class="divider-line"></div>
+                    </div>
+
+                    <div class="adv-card" style="padding: 24px; background: rgba(255, 215, 0, 0.02); border: 1px solid var(--border);">
+                        <p style="color: #ff4d4d; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            CRITICAL: Name Updates propagate to all nodes & teachers
+                        </p>
+                        <div style="position: relative; margin-bottom: 12px;">
+                            <input type="text" id="edit-name-input" class="redeem-input" style="margin-bottom: 0; text-align: left; padding: 12px 15px; font-size: 15px; letter-spacing: 0.5px; border-radius: 10px;" placeholder="Full Name">
+                        </div>
+                        <button onclick="handleUpdateName()" id="save-name-btn" class="auth-btn" style="padding: 12px; font-size: 11px;">Update Protocol Identity</button>
                     </div>
 
                     <div class="menu-item adv-card" onclick="window.location.href='student-doubts.html'">
@@ -352,29 +380,61 @@
 
         const app = initializeApp(firebaseConfig);
 
+        window.handleUpdateName = async function() {
+            const input = document.getElementById('edit-name-input');
+            const newName = input?.value?.trim();
+
+            if (!newName || newName.length < 2) {
+                return Swal.fire({ icon: 'warning', title: 'Invalid Name', text: 'Identity string must be at least 2 characters.', background: '#0a0a1a', color: '#fff' });
+            }
+
+            const btn = document.getElementById('save-name-btn');
+            btn.disabled = true;
+            btn.textContent = 'SYNCING...';
+
+            try {
+                const res = await apiCall('/student/profile', 'PUT', { displayName: newName });
+                if (res && res.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Identity Synchronized',
+                        text: 'Your new name has been propagated across all academic nodes.',
+                        background: '#0a0a1a', color: '#fff',
+                        confirmButtonColor: '#FFD700'
+                    });
+                    localStorage.setItem(BP.NAME, newName);
+                    loadProfile();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Update Failed', text: res.message || 'Transmission error.', background: '#0a0a1a', color: '#fff' });
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Update Protocol Identity';
+            }
+        }
+
         async function loadProfile() {
             // Stats skeletons
-            document.getElementById('p-bankCount').innerHTML = '<div class="skeleton" style="height:24px; width:30px; margin:0 auto;"></div>';
-            document.getElementById('p-testCount').innerHTML = '<div class="skeleton" style="height:24px; width:30px; margin:0 auto;"></div>';
-            document.getElementById('p-queryCount').innerHTML = '<div class="skeleton" style="height:24px; width:30px; margin:0 auto;"></div>';
+            const statsIds = ['stat-banks', 'stat-tests', 'stat-queries'];
+            statsIds.forEach(id => {
+               const el = document.getElementById(id);
+               if (el) el.innerHTML = '<div class="skeleton" style="height:24px; width:30px; margin:0 auto;"></div>';
+            });
 
             // Show data from localStorage immediately (fast display)
-            const localName = localStorage.getItem(BP.NAME) || 'BEE User';
-            const localEmail = localStorage.getItem(BP.EMAIL) || '';
-            const localPlan = localStorage.getItem(BP.PLAN) || 'BASIC';
-            const localUid = localStorage.getItem(BP.UID) || 'BEE-NODE';
+            const localName = localStorage.getItem(BP.NAME) || 'Scholar Node';
+            const localUid = localStorage.getItem(BP.UID) || 'BEE-NODE-XX';
 
-            const nameEl = document.querySelector('.profile-name, .node-name, #profileName');
+            const nameEl = document.querySelector('.profile-name');
             if (nameEl) nameEl.textContent = localName;
             
-            const avatarEl = document.querySelector('.profile-avatar-node, .profile-icon, .user-avatar');
+            const avatarEl = document.querySelector('.profile-avatar-node');
             if (avatarEl) avatarEl.textContent = localName.substring(0, 2).toUpperCase();
 
-            const emailEl = document.querySelector('.profile-email, .node-email, #profileEmail');
-            if (emailEl) emailEl.textContent = localEmail;
-
-            const idEl = document.querySelector('p[style*="IDENTIFIER"], .node-id-display');
-            if (idEl) idEl.textContent = `NODE ID: ${localUid.substring(0, 8).toUpperCase()}`;
+            const idEl = document.getElementById('node-id-display');
+            if (idEl) idEl.textContent = `IDENTIFIER: ${localUid.substring(0, 10).toUpperCase()}`;
 
             // Load profile and streak from backend simultaneously
             const [profileResult, streakResult] = await Promise.all([
@@ -386,17 +446,26 @@
                 const p = profileResult.data;
 
                 if (nameEl) nameEl.textContent = p.displayName;
-                if (emailEl) emailEl.textContent = p.email;
                 
                 // Update local cache for true real-time consistency
                 localStorage.setItem(BP.NAME, p.displayName);
                 localStorage.setItem(BP.EMAIL, p.email);
-                localStorage.setItem(BP.PLAN, p.planType || 'BASIC');
+                localStorage.setItem(BP.PLAN, p.planType || 'free');
 
-                const planEl = document.querySelector('.plan-badge, .plan-tag, .tier-badge');
-                if (planEl) planEl.textContent = p.planType?.toUpperCase() || 'BASIC';
+                const badgeCont = document.getElementById('plan-badge-container');
+                if (badgeCont) {
+                    if (p.planType === 'active') {
+                        badgeCont.innerHTML = `<span style="background: var(--primary); color: #000; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 900; letter-spacing: 1px;">ACTIVE ✓</span>`;
+                    } else {
+                        badgeCont.innerHTML = `
+                            <span style="background: #333; color: #888; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 900; letter-spacing: 1px;">FREE</span>
+                            <div style="margin-top: 8px;">
+                                <a href="../../activation.html" style="color: var(--primary); font-size: 10px; font-weight: 800; text-decoration: none; text-transform: uppercase;">↑ Activate Account</a>
+                            </div>
+                        `;
+                    }
+                }
 
-                // Update stats numbers using IDs for precision
                 const banksEl = document.getElementById('stat-banks');
                 const testsEl = document.getElementById('stat-tests');
                 const queriesEl = document.getElementById('stat-queries');
@@ -405,8 +474,32 @@
                 if (testsEl) testsEl.textContent = p.stats?.testsTaken || 0;
                 if (queriesEl) queriesEl.textContent = p.stats?.queryCount || 0;
 
-                const idEl2 = document.getElementById('node-id-display');
-                if (idEl2) idEl2.textContent = `IDENTIFIER: ${p.googleUid?.substring(0, 10).toUpperCase() || '--'}`;
+                if (idEl) {
+                    const bval = document.getElementById('bee-id-val');
+                    if(bval) bval.textContent = p.beeId || 'BEE-NODE-ERROR';
+                }
+
+                // Name Change Lock Logic
+                const identityLabel = document.getElementById('identity-sect-label');
+                const editInput = document.getElementById('edit-name-input');
+                const saveBtn = document.getElementById('save-name-btn');
+
+                if (p.nameChanged) {
+                    if (identityLabel) identityLabel.innerHTML = 'Primary Identity <span style="color:var(--primary); font-size:14px;" title="Action Locked">🔒</span>';
+                    if (editInput) {
+                        editInput.disabled = true;
+                        editInput.style.opacity = '0.5';
+                        editInput.style.cursor = 'not-allowed';
+                    }
+                    if (saveBtn) {
+                        saveBtn.disabled = true;
+                        saveBtn.style.opacity = '0.5';
+                        saveBtn.style.cursor = 'not-allowed';
+                        saveBtn.textContent = 'IDENTITY LOCKED';
+                    }
+                } else if (editInput) {
+                    editInput.value = p.displayName;
+                }
             }
 
             if (streakResult && streakResult.success) {
@@ -416,18 +509,24 @@
                 const streakVal = document.getElementById('streak-val-header');
                 if (streakVal) streakVal.textContent = s.currentStreak || 0;
                 BP.initStreakFlame('streak-canvas');
-
-                // Map to existing streak elements if any, or use indicators
-                const currentEl = document.querySelector('.streak-current, .streak-value, [data-streak-current]');
-                if (currentEl) currentEl.textContent = s.currentStreak || 0;
-
-                const bestEl = document.querySelector('.streak-best, [data-streak-best]');
-                if (bestEl) bestEl.textContent = s.bestStreak || 0;
-
-                const daysEl = document.querySelector('.streak-days, [data-active-days]');
-                if (daysEl) daysEl.textContent = s.totalActiveDays || 0;
             }
         }
+
+        window.copyBeeId = () => {
+            const bval = document.getElementById('bee-id-val');
+            if(!bval) return;
+            navigator.clipboard.writeText(bval.textContent);
+            Swal.fire({
+                icon: 'success',
+                title: 'BEE ID Copied',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                background: '#0a0a1a',
+                color: '#fff'
+            });
+        };
 
         window.executeRedemption = async function() {
             const codeInput = document.querySelector('#redeem-input, .redeem-input, input[placeholder*="redeem"]');
@@ -565,7 +664,7 @@
         }
 
         window.addEventListener('load', () => {
-            if (!guardStudent()) return;
+            if (!(await guardStudent())) return;
             loadProfile();
         });
     </script>

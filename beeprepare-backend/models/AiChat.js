@@ -1,4 +1,5 @@
-const { Schema, model } = require('mongoose');
+const { Schema } = require('mongoose');
+const { getMainConn } = require('../config/db');
 
 const aiChatSchema = new Schema({
   userId:   { type: String, required: true },
@@ -15,4 +16,14 @@ const aiChatSchema = new Schema({
 
 aiChatSchema.index({ userId: 1, lastMessageAt: -1 });
 
-module.exports = model('AiChat', aiChatSchema);
+let _AiChat = null;
+module.exports = new Proxy(function() {}, {
+  get(_, prop) {
+    if (!_AiChat) _AiChat = getMainConn().model('AiChat', aiChatSchema);
+    return _AiChat[prop];
+  },
+  construct(_, args) {
+    if (!_AiChat) _AiChat = getMainConn().model('AiChat', aiChatSchema);
+    return new _AiChat(...args);
+  }
+});

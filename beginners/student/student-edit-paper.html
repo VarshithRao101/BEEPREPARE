@@ -238,7 +238,7 @@
     <script type="module">
         import { guardStudent, apiCall, BP } from '../../assets/js/bee-core.js';
 
-        if (!guardStudent()) window.location.href = '../../index.html';
+        if (!(await guardStudent())) window.location.href = '../../index.html';
 
         let currentZoom = 1;
         const paper = document.getElementById('paper');

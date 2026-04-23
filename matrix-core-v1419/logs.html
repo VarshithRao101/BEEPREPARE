@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Logs | BEEPREPARE Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a1a; --surface: #111128; --surface2: #1a1a3a;
+            --gold: #FFD700; --gold-dim: rgba(255,215,0,0.15);
+            --success: #4CAF50; --danger: #ff4444; --warning: #FFA500;
+            --text: #ffffff; --muted: #888888;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: transparent; color: var(--text); padding-top: 90px; }
+
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 24px; }
+        
+        header {
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: var(--surface); border-bottom: 1px solid var(--gold-dim);
+            display: flex; align-items: center; padding: 0 24px; z-index: 1000;
+            justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .back-btn { cursor: pointer; font-size: 20px; color: var(--gold); text-decoration: none; }
+        .header-title { font-weight: 900; color: var(--gold); }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .admin-id { font-size: 12px; color: var(--muted); }
+        .logout-btn { background: var(--surface2); color: var(--danger); border: 1px solid #333; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; height: calc(100vh - 120px); display: flex; flex-direction: column; }
+        
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
+        .filter-group { display: flex; gap: 10px; }
+        .log-btn { padding: 8px 16px; background: var(--surface2); border: 1px solid #333; color: var(--text); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .log-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+        
+        .log-viewer {
+            flex: 1; background: #000; border: 1px solid #333; border-radius: 12px;
+            padding: 20px; overflow-y: auto; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 1.5;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+        }
+        .log-line { margin-bottom: 4px; white-space: pre-wrap; }
+        .level-ERROR { color: var(--danger); }
+        .level-WARN { color: var(--warning); }
+        .level-INFO { color: #64B5F6; }
+        .level-TIME { color: #888; margin-right: 10px; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">←</a>
+            <span class="header-title">System Logs</span>
+        </div>
+        <div class="header-right">
+            <span class="admin-id" id="adminIdDisplay">Admin ID</span>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <div class="filter-group">
+                <button class="log-btn active" onclick="filterLogs('all', this)">All Logs</button>
+                <button class="log-btn" onclick="filterLogs('error', this)">Errors</button>
+                <button class="log-btn" onclick="filterLogs('warn', this)">Warnings</button>
+            </div>
+            <div class="filter-group">
+                <button class="log-btn" style="background:#222;" onclick="fetchLogs()">Refresh Logs</button>
+                <button class="log-btn" style="background:var(--danger); border:none; color:#fff;" onclick="clearLogs()">Purge All Logs</button>
+                <button class="log-btn" style="background:var(--success); border:none; color:#000;" onclick="exportLogs()">Download .txt</button>
+            </div>
+        </div>
+
+        <div class="log-viewer" id="logViewer">
+            <div style="color:#555; text-align:center; margin-top:100px;">Connecting to system log stream...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { adminApi, showToast, showCodeModal } from './matrix-core.js';
+
+        let currentFilter = 'all';
+
+        async function fetchLogs() {
+            const url = `/logs?limit=200&level=${currentFilter}`;
+            const res = await adminApi(url);
+            if (res && res.success) {
+                renderLogs(res.data);
+            }
+        }
+
+        function renderLogs(lines) {
+            const viewer = document.getElementById('logViewer');
+            if (lines.length === 0) {
+                viewer.innerHTML = '<div style="color:#555; text-align:center; margin-top:100px;">Log terminal is empty.</div>';
+                return;
+            }
+            
+            viewer.innerHTML = lines.map(line => {
+                let level = 'INFO';
+                if (line.includes('error') || line.includes('ERROR')) level = 'ERROR';
+                if (line.includes('warn') || line.includes('WARN')) level = 'WARN';
+                
+                // Try to extract time [2026-04-16T...]
+                const timeMatch = line.match(/\[(.*?)\]/);
+                const time = timeMatch ? timeMatch[0] : '';
+                const rest = line.replace(time, '').trim();
+                
+                return `<div class="log-line"><span class="level-TIME">${time}</span><span class="level-${level}">${level}</span> ${rest}</div>`;
+            }).join('');
+            
+            viewer.scrollTop = viewer.scrollHeight;
+        }
+
+        window.filterLogs = (f, el) => {
+            document.querySelectorAll('.filter-group .log-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            currentFilter = f;
+            fetchLogs();
+        };
+
+        window.clearLogs = async () => {
+            const code = await showCodeModal("Clear System Logs", "THIS DELETES ALL LOG HISTORY. Enter CODE_CLEAR_LOGS.", true);
+            if (code) {
+                const res = await adminApi('/logs', 'DELETE', { actionCode: code });
+                if (res && res.success) { showToast("Logs cleared", "success"); fetchLogs(); }
+            }
+        };
+
+        window.exportLogs = () => {
+            const content = document.getElementById('logViewer').innerText;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `beeprepare_logs_${new Date().getTime()}.txt`;
+            a.click();
+        };
+
+        fetchLogs();
+    </script>
+
+</body>
+</html>

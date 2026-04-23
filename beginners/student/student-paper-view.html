@@ -552,7 +552,7 @@
         }
 
         window.addEventListener('load', () => {
-            if (!guardStudent()) return;
+            if (!(await guardStudent())) return;
             loadPaper();
 
             // Load streak

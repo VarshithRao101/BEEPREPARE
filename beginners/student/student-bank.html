@@ -155,6 +155,161 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            /* Premium Notes Architecture (Synced from Notebook Hub) */
+            --primary-glow: rgba(255, 215, 0, 0.15);
+            --card-bg: rgba(15, 15, 15, 0.7);
+        }
+
+        .chapter-node {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chapter-title-row {
+            font-size: 18px;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            letter-spacing: -0.5px;
+        }
+
+        .chapter-indicator {
+            width: 5px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+            margin-right: 12px;
+        }
+
+        .notebook-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .notebook-card {
+            background: rgba(25, 25, 25, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: relative;
+        }
+
+        .notebook-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            background: rgba(255, 215, 0, 0.02);
+        }
+
+        .card-type {
+            font-size: 9px;
+            font-weight: 950;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .note-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .note-icon-box {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 215, 0, 0.08);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            transition: 0.3s;
+        }
+
+        .notebook-card:hover .note-icon-box {
+            background: var(--primary);
+            color: #000;
+            transform: scale(1.05) rotate(3deg);
+        }
+
+        /* Documentation & Action */
+        .document-item {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+
+        .doc-actions {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .act-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px;
+            color: #ddd;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .act-btn:hover {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .empty-zone {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border: 1px dashed rgba(255,255,255,0.05);
+            border-radius: 14px;
+            text-align: center;
+            color: rgba(255,255,255,0.2);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .material-item {
@@ -220,7 +375,7 @@
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-                    <span>Home Hub</span>
+                    <span>Dashboard</span>
                 </a>
                 <a href="student-bank.html" class="sidebar-link active">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -610,46 +765,83 @@
                 const container = document.getElementById('chapter-nodes-container');
                 container.innerHTML = '';
                 
-                const allNotes = notesResult?.success ? notesResult.data.chapters : [];
+                const allNotesGrouped = notesResult?.success ? notesResult.data.chapters : [];
 
                 result.data.chapters.forEach(chap => {
-                    const chapterNotes = allNotes.find(n => n.chapterId === chap.chapterId)?.notes || [];
+                    const chapterData = allNotesGrouped.find(n => n.chapterId === chap.chapterId);
+                    const chapterNotes = chapterData?.notes || [];
+                    
                     const node = document.createElement('div');
                     node.className = 'chapter-node';
-                    
-                    let notesHtml = chapterNotes.map(note => `
-                        <div class="material-item">
-                            <div style="width: 40px; height: 40px; background: rgba(255,215,0,0.05); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight: 700; color:#fff; font-size:14px;">${note.fileName}</div>
-                                <div style="font-size:10px; color: var(--text-muted);">${note.fileType?.toUpperCase() || 'DOCUMENT'} • RESOURCE</div>
-                            </div>
-                            <div style="display:flex; gap:10px;">
-                                <button class="dl-btn" onclick="window.downloadNote('${note.signedUrl}')">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                </button>
-                            </div>
-                        </div>
-                    `).join('');
 
-                    if (chapterNotes.length === 0) {
-                        notesHtml = '<div style="font-size:12px; color:var(--text-muted); opacity:0.5; padding: 10px 0;">No resources shared yet for this node.</div>';
-                    }
+                    // Group notes by type (Complete vs Flash)
+                    const completeNotes = chapterNotes.filter(n => n.noteType === 'complete');
+                    const flashNotes = chapterNotes.filter(n => n.noteType === 'flash');
 
                     node.innerHTML = `
-                        <div class="chapter-node-header">
-                            <span style="font-weight: 800; color: #fff;">${chap.chapterName}</span>
-                            <span style="font-size: 10px; font-weight: 800; color: var(--primary);">${chapterNotes.length} RESOURCES</span>
+                        <div class="chapter-title-row">
+                            <div style="display:flex; align-items:center;">
+                                <div class="chapter-indicator"></div>
+                                <span>${chap.chapterName}</span>
+                            </div>
+                            <span style="font-size: 10px; font-weight: 900; color: var(--primary); opacity:0.6;">${chapterNotes.length} RESOURCES</span>
                         </div>
-                        <div style="padding: 20px; display: flex; flex-direction: column; gap: 12px;">
-                            ${notesHtml}
+                        <div class="notebook-grid">
+                            ${renderNoteNode(completeNotes, 'complete', 'Master Blueprint', 'DETAILED NOTES')}
+                            ${renderNoteNode(flashNotes, 'flash', 'Short Memo', 'QUICK REVISION')}
                         </div>
                     `;
                     container.appendChild(node);
                 });
             }
+        }
+
+        function renderNoteNode(notes, type, title, subtitle) {
+            const icon = type === 'complete' 
+                ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`
+                : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
+            
+            const label = type === 'complete' ? 'COMPREHENSIVE NODE' : 'FLASH NODE';
+
+            if (notes.length === 0) {
+                return `
+                    <div class="notebook-card" style="opacity: 0.5;">
+                        <div class="card-type">${label}</div>
+                        <div class="note-header">
+                            <div class="note-icon-box">${icon}</div>
+                            <div>
+                                <div style="font-weight: 800; color: #fff; font-size: 14px;">${title}</div>
+                                <div style="font-size: 9px; color: var(--primary); font-weight: 800; opacity: 0.7;">NO DATA SYNCED</div>
+                            </div>
+                        </div>
+                        <div class="empty-zone">WAITING FOR REPOSITORY PULSE...</div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="notebook-card">
+                    <div class="card-type">${label}</div>
+                    <div class="note-header">
+                        <div class="note-icon-box">${icon}</div>
+                        <div>
+                            <div style="font-weight: 800; color: #fff; font-size: 14px;">${title}</div>
+                            <div style="font-size: 9px; color: var(--primary); font-weight: 800; opacity: 0.7;">${subtitle}</div>
+                        </div>
+                    </div>
+                    ${notes.map(note => `
+                        <div class="document-item">
+                            <div style="font-weight: 700; color: #fff; font-size: 12px; margin-bottom:5px;">${note.fileName}</div>
+                            <div class="doc-actions">
+                                <button class="act-btn" onclick="window.downloadNote('${note.fileUrl}', '${note.fileName}')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    SYNC & VIEW
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
         window.downloadNote = async (url) => {
@@ -670,13 +862,22 @@
         }
 
         window.addEventListener('load', async () => {
-            if (!guardStudent()) return;
+            if (!(await guardStudent())) return;
             
-            // Set profile icon
-            const name = localStorage.getItem(BP.NAME) || 'ST';
-            document.querySelector('.profile-icon').textContent = name[0].toUpperCase() + (name.split(' ')[1]?.[0] || name[1] || '').toUpperCase();
+            // Set profile icon & refresh from API
+            const cachedName = localStorage.getItem(BP.NAME) || 'Student';
+            const initials = (name) => name[0].toUpperCase() + (name.split(' ')[1]?.[0] || name[1] || '').toUpperCase();
+            document.querySelector('.profile-icon').textContent = initials(cachedName);
+
+            apiCall('/student/profile').then(res => {
+                if (res.success) {
+                    document.querySelector('.profile-icon').textContent = initials(res.data.displayName);
+                    localStorage.setItem(BP.NAME, res.data.displayName);
+                }
+            });
 
             loadMyBanks();
+            setInterval(loadMyBanks, 10000); // 10s auto-sync
             
             // Load streak
             const streakRes = await apiCall('/student/streak');

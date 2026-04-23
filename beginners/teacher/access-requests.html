@@ -328,28 +328,29 @@
 
 <body>
     <div class="main-layout">
-        <!-- PC Sidebar -->
+        <!-- Sidebar -->
         <aside class="pc-sidebar">
             <div class="sidebar-brand">BEEPREPARE</div>
             <nav class="sidebar-nav">
                 <a href="teacher-home.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
                     <span>Dashboard</span>
                 </a>
                 <a href="question-bank.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" /></svg>
                     <span>Bank Inventory</span>
                 </a>
                 <a href="generate-paper.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
                     <span>Generate Paper</span>
                 </a>
+
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="teacher-profile.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
                     <span>My Profile</span>
                 </a>
             </nav>
@@ -446,7 +447,7 @@
     <script type="module">
         import { apiCall, guardTeacher, getIndexPath, BP } from '../../assets/js/bee-core.js';
 
-        if (!guardTeacher()) {
+        if (!(await guardTeacher())) {
             window.location.href = getIndexPath();
         }
 
@@ -701,7 +702,24 @@
             loadRequests();
         };
 
-        document.addEventListener('DOMContentLoaded', loadRequests);
+        document.addEventListener('DOMContentLoaded', () => {
+            const name = localStorage.getItem(BP.NAME) || 'T';
+            const profileIcon = document.getElementById('profile-icon-btn');
+            if (profileIcon) {
+                profileIcon.innerText = name[0].toUpperCase();
+                profileIcon.onclick = () => window.location.href = 'teacher-profile.html';
+                profileIcon.classList.add('has-signal');
+                if (!document.getElementById('profile-signal')) {
+                    const dot = document.createElement('div');
+                    dot.id = 'profile-signal';
+                    dot.className = 'signal-dot';
+                    profileIcon.appendChild(dot);
+                }
+            }
+            BP.syncTeacherSignals();
+            if (!(await guardTeacher())) return;
+            loadRequests();
+        });
     </script>
 </body>
 

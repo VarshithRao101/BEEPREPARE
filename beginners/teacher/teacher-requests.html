@@ -351,7 +351,7 @@
             from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
         // Run guard first
-        if (!guardTeacher()) {
+        if (!(await guardTeacher())) {
             window.location.href = getIndexPath();
             throw new Error('Access denied');
         }
@@ -524,8 +524,11 @@
             pill.onclick = () => window.switchTab(status);
         });
 
-        document.addEventListener('DOMContentLoaded', loadRequests);
-    </script>ipt>
+        window.addEventListener('load', () => {
+            loadRequests();
+            setInterval(loadRequests, 5000); // Poll every 5 seconds for new student connectivity pulses
+        });
+    </script>
 </body>
 
 </html>

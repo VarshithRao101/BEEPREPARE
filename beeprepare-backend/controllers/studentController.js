@@ -324,6 +324,9 @@ const requestAccess = async (req, res) => {
 const getMyBanks = async (req, res) => {
   try {
     const studentId = req.user.googleUid;
+    
+    // Warm up Bank model for population
+    const _b = Bank.modelName;
 
     const requests = await AccessRequest.find({ studentId })
       .populate('bankId', 'subject class teacherName bankCode totalQuestions notesCount')
@@ -935,38 +938,47 @@ const submitDoubt = async (req, res) => {
       return error(res, 'You do not have access to this bank', 'FORBIDDEN', 403);
     }
 
-    const doubtRef = db.collection('doubts').doc();
-    const now = new Date();
-
-    await doubtRef.set({
-      studentId,
-      studentName: req.user.displayName,
-      teacherId: bank.teacherId,
-      bankId,
-      subject: subject || bank.subject,
-      status: 'pending',
-      unreadByTeacher: true,
-      unreadByStudent: false,
-      lastMessage: questionText.trim(),
-      lastMessageRole: 'student',
-      lastReplyAt: null,
-      createdAt: now,
-      updatedAt: now
+    // Check for existing pending doubt to maintain thread continuity
+    let doubt = await Doubt.findOne({ 
+      studentId, 
+      bankId, 
+      status: { $ne: 'resolved' } 
     });
 
-    const msgRef = doubtRef.collection('messages').doc();
-    await msgRef.set({
+    const now = new Date();
+    const newMessage = {
       messageId: uuidv4(),
-      senderId: studentId,
       senderRole: 'student',
       content: questionText.trim(),
       imageUrl: imageUrl || null,
       timestamp: now
-    });
+    };
+
+    if (doubt) {
+      // Resume existing thread
+      doubt.messages.push(newMessage);
+      doubt.unreadByTeacher = true;
+      doubt.updatedAt = now;
+      await doubt.save();
+    } else {
+      // Create new thread
+      doubt = await Doubt.create({
+        studentId,
+        studentName: req.user.displayName,
+        teacherId: bank.teacherId,
+        bankId,
+        subject: subject || bank.subject,
+        status: 'pending',
+        unreadByTeacher: true,
+        unreadByStudent: false,
+        messages: [newMessage],
+        lastReplyAt: null
+      });
+    }
 
     return success(res, 'Doubt submitted successfully', {
-      doubtId: doubtRef.id,
-      status: 'pending'
+      doubtId: doubt._id,
+      status: doubt.status
     }, 201);
   } catch (err) {
     console.error('submitDoubt error:', err);
@@ -982,37 +994,21 @@ const getDoubtMessages = async (req, res) => {
     const { id } = req.params;
     const studentId = req.user.googleUid;
 
-    const doubtDoc = await db.collection('doubts').doc(id).get();
-    if (!doubtDoc.exists) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
-    
-    const doubtData = doubtDoc.data();
-    if (doubtData.studentId !== studentId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+    const doubt = await Doubt.findById(id);
+    if (!doubt) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
+    if (doubt.studentId !== studentId) return error(res, 'Access denied', 'FORBIDDEN', 403);
 
     // Mark as read by student
-    if (doubtData.unreadByStudent) {
-      await db.collection('doubts').doc(id).update({ unreadByStudent: false });
+    if (doubt.unreadByStudent) {
+      doubt.unreadByStudent = false;
+      await doubt.save();
     }
-
-    const messagesSnapshot = await db.collection('doubts').doc(id).collection('messages')
-      .orderBy('timestamp', 'asc')
-      .get();
-
-    const messages = messagesSnapshot.docs.map(doc => {
-      const d = doc.data();
-      return {
-        messageId: d.messageId,
-        senderRole: d.senderRole,
-        content: d.content,
-        imageUrl: d.imageUrl || null,
-        timestamp: d.timestamp?.toDate ? d.timestamp.toDate() : d.timestamp
-      };
-    });
 
     return success(res, 'Messages fetched', {
       doubtId: id,
-      subject: doubtData.subject,
-      status: doubtData.status,
-      messages
+      subject: doubt.subject,
+      status: doubt.status,
+      messages: doubt.messages
     });
   } catch (err) {
     console.error('getDoubtMessages error:', err);
@@ -1070,6 +1066,7 @@ const sendDoubtMessage = async (req, res) => {
 const getBookmarks = async (req, res) => {
   try {
     const studentId = req.user.googleUid;
+    const _q = Question.modelName;
 
     const bookmarks = await Bookmark.find({ studentId })
       .sort({ createdAt: -1 })

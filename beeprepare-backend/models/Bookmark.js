@@ -1,8 +1,9 @@
-const { Schema, model } = require('mongoose');
+const { Schema } = require('mongoose');
+const { getMainConn } = require('../config/db');
 
 const bookmarkSchema = new Schema({
   studentId:    { type: String, required: true },
-  questionId:   { type: Schema.Types.ObjectId, ref: 'Question', required: true },
+  questionId:   { type: String, required: true }, // String (cross-DB safe — questions on Cluster 2)
   questionText: { type: String },
   subject:      { type: String },
   chapterName:  { type: String }
@@ -10,4 +11,14 @@ const bookmarkSchema = new Schema({
 
 bookmarkSchema.index({ studentId: 1, questionId: 1 }, { unique: true });
 
-module.exports = model('Bookmark', bookmarkSchema);
+let _Bookmark = null;
+module.exports = new Proxy(function() {}, {
+  get(_, prop) {
+    if (!_Bookmark) _Bookmark = getMainConn().model('Bookmark', bookmarkSchema);
+    return _Bookmark[prop];
+  },
+  construct(_, args) {
+    if (!_Bookmark) _Bookmark = getMainConn().model('Bookmark', bookmarkSchema);
+    return new _Bookmark(...args);
+  }
+});

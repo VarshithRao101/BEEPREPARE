@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Circles | BEEPREPARE Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: rgba(18, 18, 18, 0.9);
+            --surface2: rgba(30, 30, 30, 0.8);
+            --gold: #FFD700;
+            --gold-dim: rgba(255, 215, 0, 0.15);
+            --success: #4CAF50;
+            --danger: #ff4444;
+            --warning: #FFA500;
+            --text: #ffffff;
+            --muted: #888888;
+            --border: rgba(255, 215, 0, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: transparent; color: var(--text); padding-top: 130px; min-height: 100vh; }
+
+        .main-bg {
+            position: fixed; inset: 0; z-index: -1;
+            background: url('/assets/images/abstract-bg.png') no-repeat center center;
+            background-size: cover; filter: brightness(0.75);
+        }
+
+        header {
+            position: fixed; top: 20px; left: 20px; right: 20px; height: 80px;
+            background: var(--surface); border: 1px solid var(--border);
+            backdrop-filter: blur(25px); border-radius: 20px;
+            display: flex; align-items: center; padding: 0 30px; z-index: 1000;
+            justify-content: space-between;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .back-btn { 
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,1);
+            border-radius: 10px; color: var(--gold); text-decoration: none; transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--gold); color: #000; }
+        .header-title { font-weight: 900; color: var(--gold); font-size: 20px; letter-spacing: -0.5px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        .glass {
+            background: var(--surface); backdrop-filter: blur(25px);
+            border: 1px solid var(--border); border-radius: 30px;
+            padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 16px; color: var(--muted); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #333; }
+        td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+
+        .circle-code { font-family: monospace; color: var(--gold); font-weight: 700; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; }
+        .member-count { background: var(--surface2); padding: 2px 8px; border-radius: 4px; font-size: 11px; color: var(--muted); }
+
+        .btn-del { padding: 6px 12px; border-radius: 6px; font-size: 10px; font-weight: 900; cursor: pointer; border: 1px solid #ff4444; background: rgba(255,68,68,0.1); color: #ff4444; transition: 0.3s; }
+        .btn-del:hover { background: #ff4444; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="main-bg"></div>
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">←</a>
+            <span class="header-title">Neural Group Nodes</span>
+        </div>
+        <div class="header-right">
+            <span style="font-size: 13px; color: var(--gold); font-weight: 700; text-transform: uppercase;">Circle Management</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="glass" style="padding:0; overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Circle Name</th>
+                        <th>Unique ID (Code)</th>
+                        <th>Subject</th>
+                        <th>Guardian (Teacher)</th>
+                        <th>Nodes (Members)</th>
+                        <th>Established</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="circleTableBody">
+                    <!-- Dynamic -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { adminApi, showToast, showCodeModal } from './matrix-core.js';
+
+        async function fetchCircles() {
+            const res = await adminApi('/circles');
+            if (res && res.success) {
+                renderTable(res.data);
+            }
+        }
+
+        function renderTable(circles) {
+            const tbody = document.getElementById('circleTableBody');
+            if (circles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:50px; color:var(--muted);">NO ACTIVE CIRCLES DETECTED</td></tr>';
+                return;
+            }
+            tbody.innerHTML = circles.map(c => `
+                <tr>
+                    <td style="font-weight:700;">${c.name}</td>
+                    <td><span class="circle-code">${c.circleCode}</span></td>
+                    <td>${c.subject || 'General'}</td>
+                    <td style="font-size:12px; color:var(--muted);">${c.createdBy}</td>
+                    <td><span class="member-count">${c.members ? c.members.length : 0} Nodes</span></td>
+                    <td style="font-size:11px; color:var(--muted);">${new Date(c.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn-del" onclick="deleteCircle('${c._id}')">PURGE</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.deleteCircle = async (id) => {
+            const code = await showCodeModal("Purge Circle", "Permanently delete this group chat and remove all members.", true);
+            if (code) {
+                const res = await adminApi(`/circles/${id}`, 'DELETE', { actionCode: code });
+                if (res && res.success) {
+                    showToast("Circle purged successfully", "success");
+                    fetchCircles();
+                } else showToast(res?.message || "Purge failed", "error");
+            }
+        };
+
+        fetchCircles();
+    </script>
+</body>
+</html>

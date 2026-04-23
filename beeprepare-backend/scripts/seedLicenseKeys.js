@@ -3,35 +3,43 @@ require('../config/firebase');
 const { db } = require('../config/firebase');
 
 const seedKeys = async () => {
-  console.log('Seeding license keys to Firestore...');
+  console.log('Seeding standard activation/redeem keys to Firestore...');
 
   const expiresAt = new Date();
   expiresAt.setFullYear(expiresAt.getFullYear() + 1); // 1 year from now
 
-  // 5 Basic keys (3 subject slots)
-  const basicKeys = ['BASIC00000001','BASIC00000002','BASIC00000003','BASIC00000004','BASIC00000005'];
-  // 3 Premium keys (10 subject slots)
-  const premiumKeys = ['PREM000000001','PREM000000002','PREM000000003'];
+  // 5 Activation keys (Sets ACTIVE + 2 slots)
+  const activationKeys = ['BEE-TEST-001','BEE-TEST-002','BEE-TEST-003','BEE-TEST-004','BEE-TEST-005'];
+  // 5 Redeem keys (Adds +1 slot)
+  const redeemKeys = ['RDM-TEST-001','RDM-TEST-002','RDM-TEST-003','RDM-TEST-004','RDM-TEST-005'];
 
-  for (const key of basicKeys) {
+  for (const key of activationKeys) {
     await db.collection('activation_keys').doc(key).set({
-      key, plan: 'basic', subjectLimit: 3,
-      isUsed: false, assignedTo: null,
-      expiresAt, createdAt: new Date()
+      key, 
+      type: 'activation',
+      isUsed: false, 
+      usedBy: null,
+      usedAt: null,
+      expiresAt: null, // Unlimited/Manual
+      createdAt: new Date()
     });
-    console.log(`✅ Basic key added: ${key}`);
+    console.log(`✅ Activation key added: ${key}`);
   }
 
-  for (const key of premiumKeys) {
+  for (const key of redeemKeys) {
     await db.collection('activation_keys').doc(key).set({
-      key, plan: 'premium', subjectLimit: 10,
-      isUsed: false, assignedTo: null,
-      expiresAt, createdAt: new Date()
+      key, 
+      type: 'redeem',
+      isUsed: false, 
+      usedBy: null,
+      usedAt: null,
+      expiresAt: null,
+      createdAt: new Date()
     });
-    console.log(`✅ Premium key added: ${key}`);
+    console.log(`✅ Redeem key added: ${key}`);
   }
 
-  console.log('Done! All test keys seeded. 🐝');
+  console.log('Done! Standard keys seeded. 🐝');
   process.exit(0);
 };
 

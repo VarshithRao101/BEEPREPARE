@@ -2,20 +2,21 @@ const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/requireAuth');
 const { googleLogin, setRole, logout, wipeData } = require('../controllers/authController');
+const { validateGoogleLogin, validateSetRole } = require('../middleware/validators');
 
 /**
  * @route   POST /api/auth/google-login
  * @desc    Authenticate with Firebase ID Token
  * @access  Public
  */
-router.post('/google-login', googleLogin);
+router.post('/google-login', validateGoogleLogin, googleLogin);
 
 /**
  * @route   POST /api/auth/set-role
  * @desc    Initialize user role after first activation
  * @access  Protected
  */
-router.post('/set-role', requireAuth, setRole);
+router.post('/set-role', requireAuth, validateSetRole, setRole);
 
 /**
  * @route   POST /api/auth/wipe-data

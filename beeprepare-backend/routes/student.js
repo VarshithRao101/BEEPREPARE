@@ -4,6 +4,8 @@ const requireAuth = require('../middleware/requireAuth');
 const requireActivated = require('../middleware/requireActivated');
 const requireRole = require('../middleware/requireRole');
 const studentController = require('../controllers/studentController');
+const { otpLimiter } = require('../middleware/rateLimiters');
+const { validateDoubt, validateMessage } = require('../middleware/validators');
 
 const guard = [requireAuth, requireActivated, requireRole('student')];
 
@@ -15,13 +17,14 @@ router.put('/profile',                      ...guard, studentController.updatePr
 // Banks — NOTE: specific paths before :bankId param routes
 router.post('/banks/search',                ...guard, studentController.searchBank);
 router.post('/banks/request',               ...guard, studentController.requestAccess);
-router.post('/banks/verify-otp',            ...guard, studentController.verifyOTP);
+router.post('/banks/verify-otp',            otpLimiter, ...guard, studentController.verifyOTP);
 router.get('/banks',                        ...guard, studentController.getMyBanks);
 router.delete('/banks/:bankId',             ...guard, studentController.deleteBank);
 router.get('/banks/:bankId/chapters',       ...guard, studentController.getBankChapters);
 
 // Notes
 router.get('/notes',                        ...guard, studentController.getNotes);
+// router.get('/notes/:id/download',          ...guard, studentController.downloadNote);
 
 // Tests — specific before :sessionId
 router.post('/tests/generate',              ...guard, studentController.generateTest);
@@ -30,9 +33,9 @@ router.post('/tests/:sessionId/submit',     ...guard, studentController.submitTe
 
 // Doubts
 router.get('/doubts',                       ...guard, studentController.getDoubts);
-router.post('/doubts',                      ...guard, studentController.submitDoubt);
+router.post('/doubts',                      ...guard, validateDoubt, studentController.submitDoubt);
 router.get('/doubts/:id/messages',          ...guard, studentController.getDoubtMessages);
-router.post('/doubts/:id/messages',         ...guard, studentController.sendDoubtMessage);
+router.post('/doubts/:id/messages',         ...guard, validateMessage, studentController.sendDoubtMessage);
 
 // Bookmarks
 router.get('/bookmarks',                    ...guard, studentController.getBookmarks);

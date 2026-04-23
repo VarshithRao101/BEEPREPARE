@@ -12,48 +12,56 @@
         :root {
             --primary: #FFD700;
             --accent: #FFA500;
-            --bg-dark: #000000;
-            --surface: #121212;
-            --text-main: #FFFFFF;
-            --text-muted: #AAAAAA;
-            --border: rgba(255, 215, 0, 0.3);
+            --bg-page: #000000;
+            --surface: rgba(10, 10, 10, 0.7);
+            --text-main: #ffffff;
+            --text-muted: #bbbbbb;
+            --border-yellow: #FFD700;
         }
 
         body {
-            background-color: var(--bg-dark) !important;
+            background-image: url('assets/images/premium-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             color: var(--text-main) !important;
             font-family: 'Outfit', sans-serif;
             margin: 0 !important;
-            padding: 0 !important;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
+            position: relative;
         }
 
-        .main-bg {
+        body::before {
+            content: '';
             position: fixed;
             inset: 0;
-            background: url('assets/images/premium-bg.png') no-repeat center center;
-            background-size: cover;
+            background: rgba(0, 0, 0, 0.7);
             z-index: -1;
-            filter: brightness(0.4) grayscale(0.2);
         }
+
+        .main-bg { display: none; }
 
         .activation-card {
             width: 90%;
-            max-width: 460px;
-            padding: 40px;
-            background: rgba(18, 18, 18, 0.85);
-            backdrop-filter: blur(25px);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
+            max-width: 480px;
+            padding: 50px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--primary);
+            border-radius: 40px;
+            box-shadow: 
+                0 50px 100px rgba(0, 0, 0, 0.8), 
+                0 0 40px rgba(255, 215, 0, 0.1);
             position: relative;
             z-index: 10;
             text-align: center;
             animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 60px;
+            margin-bottom: 40px;
         }
 
         @keyframes slideUp {
@@ -62,7 +70,7 @@
         }
 
         .card-header h1 {
-            font-size: 32px;
+            font-size: 38px;
             font-weight: 900;
             margin: 0;
             background: linear-gradient(135deg, #fff, #FFD700);
@@ -76,41 +84,47 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 14px;
+            padding: 8px 16px;
             background: rgba(255, 215, 0, 0.1);
-            border: 1px solid var(--border);
+            border: 1px solid rgba(255, 215, 0, 0.3);
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 800;
             color: var(--primary);
             text-transform: uppercase;
             margin-bottom: 25px;
+            letter-spacing: 1px;
         }
 
         .status-dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             background: var(--primary);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary);
+            box-shadow: 0 0 15px var(--primary);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .5; transform: scale(1.5); }
+            50% { opacity: .5; transform: scale(1.4); }
         }
 
         .bee-flying {
-            width: 100px;
-            filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.5));
+            width: 120px;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
             animation: beeMove 3s ease-in-out infinite;
-            margin: 20px 0;
+            margin: 10px 0;
         }
 
         @keyframes beeMove {
-            0%, 100% { transform: translateY(0) rotate(-2deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        .auth-node-wrapper {
+            position: relative;
+            padding: 0;
         }
 
         .input-group {
@@ -127,24 +141,24 @@
             color: var(--primary);
             background: rgba(255, 215, 0, 0.1);
             width: 55px;
-            height: 55px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
         }
 
         .key-segment {
-            width: 75px;
-            height: 55px;
-            background: rgba(0, 0, 0, 0.5) !important;
-            border: 1px solid var(--border) !important;
-            border-radius: 12px !important;
+            width: 85px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 215, 0, 0.3) !important;
+            border-radius: 16px !important;
             color: #fff !important;
             text-align: center;
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 24px;
+            font-weight: 800;
             text-transform: uppercase;
             outline: none;
             transition: 0.3s;
@@ -153,21 +167,22 @@
 
         .key-segment:focus {
             border-color: var(--primary) !important;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2) !important;
-            transform: translateY(-2px);
+            background: rgba(255, 215, 0, 0.1) !important;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.4) !important;
+            transform: translateY(-3px);
         }
 
         .action-button {
             width: 100%;
-            height: 60px;
+            height: 65px;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             border: none;
-            border-radius: 18px;
+            border-radius: 20px;
             color: #000;
             font-size: 16px;
-            font-weight: 800;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             cursor: pointer;
             transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
@@ -175,29 +190,70 @@
 
         .action-button:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.4);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.5);
+            filter: brightness(1.1);
         }
 
         .abort-link {
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 13px;
             text-decoration: none;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 25px;
             display: inline-block;
             transition: 0.3s;
+            font-weight: 700;
         }
 
         .abort-link:hover {
             color: var(--primary);
+            text-shadow: 0 0 10px var(--primary);
+        }
+
+        .secondary-actions {
+            margin-top: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .glass-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            border-radius: 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .glass-btn:hover {
+            background: rgba(255, 215, 0, 0.08);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-btn {
+            color: var(--primary);
+            background: rgba(255, 215, 0, 0.05);
+            border-color: rgba(255, 215, 0, 0.3);
         }
 
         /* Success Overlay */
         .success-overlay {
             position: fixed;
             inset: 0;
-            background: var(--bg-dark);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 200;
             display: flex;
             align-items: center;
@@ -214,82 +270,100 @@
         }
 
         .loading-ring {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            border: 3px solid rgba(255, 215, 0, 0.1);
+            border: 4px solid rgba(255, 215, 0, 0.1);
             border-top-color: var(--primary);
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
         }
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 480px) {
             .activation-card {
-                padding: 30px 15px;
+                padding: 40px 20px;
+                border-radius: 30px;
             }
             .key-segment {
-                width: 60px;
-                height: 48px;
-                font-size: 14px;
-                letter-spacing: 1px;
+                width: 70px;
+                height: 55px;
+                font-size: 18px;
             }
             .prefix {
-                width: 45px;
-                height: 48px;
-                font-size: 12px;
+                width: 50px;
+                height: 55px;
+                font-size: 13px;
             }
-            .input-group {
-                gap: 6px;
-            }
+            .card-header h1 { font-size: 30px; }
+            .bee-flying { width: 90px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="main-bg"></div>
-
-    <div class="activation-card">
-        <div class="card-header">
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                System Uplink Active
-            </div>
-            <h1>Activation</h1>
-            <p style="color: var(--text-muted); font-size: 13px; margin-top: 10px;">Enter your 12-character license key to sync node.</p>
-        </div>
-
-        <img src="assets/custom-bee.png" alt="BEE Mascot" class="bee-flying">
-
-        <div class="activation-body">
-            <div class="input-group" style="gap: 15px; justify-content: center;">
-                <div class="prefix">BEE</div>
-                <span style="color: var(--primary); font-weight: 900; font-size: 20px;">-</span>
-                <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••" style="width: 80px;">
-                <span style="color: var(--primary); font-weight: 900; font-size: 20px;">-</span>
-                <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••" style="width: 80px;">
-                <span style="color: var(--primary); font-weight: 900; font-size: 20px;">-</span>
-                <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••" style="width: 80px;">
+<body>
+    <div class="activation-card" style="margin-top: 15vh;">
+        <div class="auth-node-wrapper">
+            <div class="card-header">
+                <div class="status-badge">
+                    <div class="status-dot"></div>
+                    System Uplink Active
+                </div>
+                <h1>Terminal Activation</h1>
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 10px; font-weight: 500;">Connect your identity to the BEE Network.</p>
             </div>
 
-            <button id="activateBtn" class="action-button activate-btn" onclick="activateKey()">
-                Authenticate Terminal
-            </button>
+            <div style="display: flex; justify-content: center; margin: 30px 0;">
+                <div style="position: relative;">
+                    <svg class="bee-flying" width="100" height="100" viewBox="0 0 24 24" fill="var(--primary)" style="filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" style="display:none;"/>
+                        <path d="M7 13c0 1.1.9 2 2 2s2-.9 2-2-.9-2-2-2-2 .9-2 2zm3.5-3.5C10.5 8.12 11.88 7 13.5 7S16.5 8.12 16.5 9.5s-1.38 2.5-3 2.5-3-1.12-3-2.5zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86.13.12.28.23.45.33.56.33 1.2.53 1.91.53.81 0 1.54-.25 2.14-.68.5.54 1.2 .88 1.99.88.94 0 1.76-.48 2.24-1.2.48.72 1.3 1.2 2.24 1.2.79 0 1.49-.34 1.99-.88.6.43 1.33.68 2.14.68.71 0 1.35-.2 1.91-.53.17-.1.32-.21.45-.33.03.28.05.57.05.86 0 4.41-3.59 8-8 8z" />
+                    </svg>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: var(--primary); filter: blur(35px); opacity: 0.3; border-radius: 50%;"></div>
+                </div>
+            </div>
 
-            <div style="margin-top: 30px;">
-                <a href="beginners/student/payment.html" style="color: var(--primary); font-size: 12px; font-weight: 700; text-decoration: none; text-transform: uppercase;">
-                    Get Lifetime License Key !!
-                </a>
-                <br>
-                <a href="javascript:void(0)" onclick="abortActivation()" class="abort-link">Terminate Uplink</a>
+            <div class="activation-body">
+                <div class="input-group">
+                    <div class="prefix">BEE</div>
+                    <span style="color: var(--primary); font-weight: 900; font-size: 24px;">-</span>
+                    <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••">
+                    <span style="color: var(--primary); font-weight: 900; font-size: 24px;">-</span>
+                    <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••">
+                    <span style="color: var(--primary); font-weight: 900; font-size: 24px;">-</span>
+                    <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••">
+                </div>
+
+                <div style="margin-bottom: 30px; text-align: left; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <span style="background: var(--primary); color: #000; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0;">1</span>
+                        <p style="margin: 0; font-size: 12px; color: #fff; line-height: 1.4;">Enter your 12-digit alphanumeric key precisely.</p>
+                    </div>
+                    <div style="display: flex; gap: 15px;">
+                        <span style="background: var(--primary); color: #000; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0;">2</span>
+                        <p style="margin: 0; font-size: 12px; color: #fff; line-height: 1.4;">Verification takes <b style="color: var(--primary);">2-5 seconds</b>. Once synced, your dashboard will unlock.</p>
+                    </div>
+                </div>
+
+                <button id="activateBtn" class="action-button activate-btn" onclick="activateKey()">
+                    Authenticate Terminal
+                </button>
+
+                <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                    <a href="beginners/student/payment.html?type=activation" style="color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Where do I find a key?</a>
+                    <a href="beginners/payment-status.html" style="color: rgba(255,215,0,0.5); text-decoration: none; font-size: 11px; font-weight: 600; text-transform: uppercase;">Check Purchase Status</a>
+                    <a href="#" onclick="signOutUser()" style="color: #ff4444; text-decoration: none; font-size: 10px; font-weight: 800; margin-top: 10px; opacity: 0.6; letter-spacing: 1px;">✕ TERMINATE SESSION</a>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="success-overlay" id="successOverlay">
         <div class="loading-ring"></div>
-        <div style="color: var(--primary); letter-spacing: 2px; font-size: 12px; text-transform: uppercase;">Establishing Connection...</div>
+        <div style="color: var(--primary); letter-spacing: 3px; font-size: 13px; text-transform: uppercase; font-weight: 900;">Establishing Secure Connection...</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -348,15 +422,29 @@
 
         let isChecking = false;
 
+        window.signOutUser = async () => {
+            const { value: confirmed } = await Swal.fire({
+                title: 'Terminate Session?',
+                text: 'You will need to sign in again with your Google account.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4444',
+                confirmButtonText: 'Yes, Sign Out'
+            });
+            if (confirmed) {
+                await auth.signOut();
+                localStorage.clear();
+                window.location.href = '/login.html';
+            }
+        };
+
         async function activateKey() {
-          // FIX 4: Prevent redundant activation
           if (localStorage.getItem(BP.ACTIVATED) === 'true') {
             window.location.href = 'beginners/role-select.html';
             return;
           }
-
           if (isChecking) return;
-          
+
           const values = Array.from(userBoxes).map(b => b.value.trim());
           
           if (values.some(v => v.length < 4)) {

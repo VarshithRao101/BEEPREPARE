@@ -1,5 +1,9 @@
 const { admin } = require('../config/firebase');
 const User = require('../models/User');
+const Bank = require('../models/Bank');
+const Question = require('../models/Question');
+const Note = require('../models/Note');
+const Bookmark = require('../models/Bookmark');
 const Doubt = require('../models/Doubt');
 const TestSession = require('../models/TestSession');
 const Streak = require('../models/Streak');
@@ -7,6 +11,7 @@ const ActivityLog = require('../models/ActivityLog');
 const AccessRequest = require('../models/AccessRequest');
 const { success, error } = require('../utils/responseHelper');
 const { logLogin } = require('../services/logService');
+const Blacklist = require('../models/Blacklist');
 
 // Helper: determine where to redirect user after login
 const getRedirectTarget = (user) => {
@@ -42,6 +47,12 @@ const googleLogin = async (req, res) => {
     }
 
     const { uid, email, name, picture } = decoded;
+
+    // --- BLACKLIST ENFORCEMENT ---
+    const isBlacklisted = await Blacklist.findOne({ email: email.toLowerCase().trim() });
+    if (isBlacklisted) {
+      return error(res, 'Your account has been permanently restricted from BEEPREPARE.', 'ACCOUNT_BLACK_LISTED', 403);
+    }
 
     let user;
     let isNewUser = false;
@@ -80,9 +91,15 @@ const googleLogin = async (req, res) => {
         if (user.licenseKey && !user.isActivated) {
           await User.updateOne(
             { _id: user._id },
-            { isActivated: true }
+            { 
+              isActivated: true,
+              planType: 'active',
+              subjectLimit: 1
+            }
           );
           user.isActivated = true;
+          user.planType = 'active';
+          user.subjectLimit = 1;
         }
       }
 
@@ -140,15 +157,44 @@ const setRole = async (req, res) => {
     }
 
     try {
-      await User.updateOne({ googleUid: req.user.googleUid }, { role }, { upsert: true });
+      const generateBeeId = (role) => {
+        const chars = '0123456789';
+        let num = '';
+        for (let i = 0; i < 4; i++) {
+          num += chars[Math.floor(
+            Math.random() * chars.length)];
+        }
+        return role === 'teacher'
+          ? `TEA-${num}`
+          : `STU-${num}`;
+      };
+
+      // Generate unique BEE ID
+      let beeId;
+      let attempts = 0;
+      do {
+        beeId = generateBeeId(role);
+        const exists = await User.findOne({ beeId });
+        if (!exists) break;
+        attempts++;
+      } while (attempts < 10);
+
+      await User.updateOne(
+        { googleUid: req.user.googleUid },
+        { role, beeId }
+      );
+
+      return success(res,
+        'Role set successfully', {
+        role,
+        beeId,
+        redirectTo: role === 'teacher'
+          ? 'teacher-home'
+          : 'student-home'
+      });
     } catch (dbErr) {
       throw dbErr;
     }
-
-    return success(res, 'Role set successfully', {
-      role,
-      redirectTo: role === 'teacher' ? 'teacher-home' : 'student-home'
-    });
 
   } catch (err) {
     console.error('setRole error:', err);
@@ -171,33 +217,69 @@ const logout = async (req, res) => {
 // POST /api/auth/wipe-data
 const wipeData = async (req, res) => {
   try {
-    const userId = req.user.googleUid;
+    const googleUid = req.user.googleUid;
+    const user = await User.findOne({ googleUid });
+    if (!user) return error(res, 'User not found', 'NOT_FOUND', 404);
 
-    // Purge cross-model data
+    // Get all banks
+    const banks = await Bank.find({ teacherId: googleUid });
+    const bankIds = banks.map(b => b._id.toString());
+
+    // Delete from Questions DB (Cluster 1)
+    if (bankIds.length > 0) {
+      await Question.deleteMany({
+        bankId: { $in: bankIds }
+      });
+    }
+
+    // Delete all main DB data (Cluster 2)
     await Promise.all([
-      Streak.deleteMany({ userId }),
-      TestSession.deleteMany({ studentId: userId }),
-      Doubt.deleteMany({ $or: [{ studentId: userId }, { teacherId: userId }] }),
-      ActivityLog.deleteMany({ userId }),
-      AccessRequest.deleteMany({ $or: [{ studentId: userId }, { teacherId: userId }] })
+      Bank.deleteMany({ teacherId: googleUid }),
+      Note.deleteMany({ teacherId: googleUid }),
+      AccessRequest.deleteMany({
+        $or: [
+          { studentId: googleUid },
+          { teacherId: googleUid }
+        ]
+      }),
+      Doubt.deleteMany({
+        $or: [
+          { studentId: googleUid },
+          { teacherId: googleUid }
+        ]
+      }),
+      TestSession.deleteMany({ studentId: googleUid }),
+      Streak.deleteMany({ userId: googleUid }),
+      Bookmark.deleteMany({ studentId: googleUid }),
+      ActivityLog.deleteMany({ userId: googleUid })
     ]);
 
-    // Reset User properties
-    const update = {
-      activeBanks: [],
-      subjects: [],
-      classes: [],
-      chapters: {},
-      totalQuestions: 0,
-      activeStudents: 0,
-      class: null
-    };
-
-    await User.updateOne({ googleUid: userId }, { $set: update });
+    // Reset user fields only (keep account, clear all data)
+    await User.updateOne(
+      { googleUid },
+      {
+        $set: {
+          subjects: [],
+          classes: [],
+          totalQuestions: 0,
+          activeStudents: 0,
+          activeBanks: [],
+          streak: {
+            current: 0,
+            best: 0,
+            lastActive: null
+          },
+          stats: {
+            testsTaken: 0,
+            avgScore: 0
+          }
+        }
+      }
+    );
 
     return success(res, 'All account data has been sanitized successfully', null);
   } catch (err) {
-    console.error('wipeData error:', err);
+    console.error('wipeData error:', err.message);
     return error(res, 'Failed to sanitize data hub', 'SERVER_ERROR', 500);
   }
 };

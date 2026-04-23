@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Bank | Matrix Core v14.1.9</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #FFD700;
+            --surface: rgba(15, 15, 15, 0.8);
+            --border: rgba(255, 215, 0, 0.15);
+            --text: #ffffff;
+            --muted: #888;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: #000; color: var(--text); overflow-x: hidden; min-height: 100vh; padding-top: 100px; }
+
+        .bg-gradient {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at 10% 10%, rgba(255, 215, 0, 0.05) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 90%, rgba(255, 215, 0, 0.05) 0%, transparent 40%);
+        }
+
+        header {
+            position: fixed; top: 0; left: 0; right: 0; height: 80px;
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); display: flex; align-items: center;
+            padding: 0 40px; justify-content: space-between; z-index: 100;
+        }
+
+        .back-link { color: var(--gold); text-decoration: none; font-weight: 700; font-size: 14px; }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px 40px; }
+
+        .tab-bar {
+            display: flex; gap: 20px; border-bottom: 1px solid var(--border);
+            margin-bottom: 30px; padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px; cursor: pointer; color: var(--muted);
+            font-weight: 700; transition: 0.3s; border-radius: 10px;
+        }
+
+        .tab.active { color: var(--gold); background: rgba(255, 215, 0, 0.1); }
+
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 20px; border-radius: 20px; text-align: center;
+        }
+
+        .stat-val { font-size: 32px; font-weight: 900; color: var(--gold); }
+        .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+        .controls {
+            display: flex; gap: 20px; margin-bottom: 20px; align-items: center;
+        }
+
+        .filter-pills { display: flex; gap: 10px; }
+        .pill {
+            padding: 8px 16px; border-radius: 20px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+            font-size: 13px; font-weight: 600;
+        }
+        .pill.active { background: var(--gold); color: #000; border-color: var(--gold); }
+
+        .search-box {
+            flex: 1; padding: 12px 20px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border); border-radius: 12px; color: #fff;
+            outline: none;
+        }
+
+        .table-container {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 24px; overflow: hidden; margin-bottom: 40px;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 20px; text-align: left; color: var(--muted); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+
+        .key-text { font-family: monospace; color: var(--gold); font-weight: 700; font-size: 15px; }
+
+        .status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+        .status-unused { background: rgba(76, 175, 80, 0.1); color: #4CAF50; }
+        .status-used { background: rgba(244, 67, 54, 0.1); color: #F44336; }
+
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        .pag-btn {
+            padding: 10px 20px; background: var(--surface); border: 1px solid var(--border);
+            color: var(--gold); cursor: pointer; border-radius: 10px; font-weight: 700;
+        }
+        .pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .generate-section {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 40px; border-radius: 30px; margin-top: 40px;
+        }
+
+        .gen-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+        .gen-input {
+            padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: 12px; color: #fff; outline: none; width: 100%;
+        }
+
+        .btn-generate {
+            width: 100%; padding: 20px; background: var(--gold); color: #000;
+            border: none; border-radius: 15px; font-size: 16px; font-weight: 900;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-gradient"></div>
+
+    <header>
+        <a href="index.html" class="back-link">← BACK TO MATRIX</a>
+        <h1 style="font-size: 20px; font-weight: 900; color: var(--gold); letter-spacing: 2px;">CIPHER VAULT</h1>
+        <div style="width: 100px;"></div>
+    </header>
+
+    <div class="container">
+        
+        <div class="tab-bar">
+            <div class="tab active" onclick="switchType('activation', this)">ACTIVATION KEYS</div>
+            <div class="tab" onclick="switchType('redeem', this)">REDEEM CODES</div>
+        </div>
+
+        <div class="stats-bar" id="statsContainer">
+            <div class="stat-card">
+                <div class="stat-val" id="totalCount">0</div>
+                <div class="stat-label">Total Allocated</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="usedCount" style="color: #F44336;">0</div>
+                <div class="stat-label">Used / Burned</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" id="availableCount" style="color: #4CAF50;">0</div>
+                <div class="stat-label">Available Nodes</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="filter-pills">
+                <div class="pill active" onclick="setFilter('all', this)">ALL</div>
+                <div class="pill" onclick="setFilter('unused', this)">UNUSED</div>
+                <div class="pill" onclick="setFilter('used', this)">USED</div>
+            </div>
+            <input type="text" class="search-box" id="searchBox" placeholder="Search by exact cipher string..." oninput="handleSearch()">
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Cipher Key</th>
+                        <th>User Association</th>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="keyTable">
+                    <!-- Dynamic -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Dynamic -->
+        </div>
+
+        <div class="generate-section">
+            <h2 style="font-size: 18px; font-weight: 900; color: var(--gold); margin-bottom: 25px; text-transform: uppercase;">Node Generation Terminal</h2>
+            <div class="gen-grid">
+                <div>
+                    <label style="font-size: 10px; color: var(--muted); display: block; margin-bottom: 8px;">QUANTITY</label>
+                    <select class="gen-input" id="genCount">
+                        <option value="50">50 Keys</option>
+                        <option value="100">100 Keys</option>
+                        <option value="500">500 Keys</option>
+                        <option value="1000">1000 Keys</option>
+                    </select>
+                </div>
+                <div style="grid-column: span 2;">
+                    <label style="font-size: 10px; color: var(--muted); display: block; margin-bottom: 8px;">VERIFICATION CODE</label>
+                    <input type="password" class="gen-input" id="genSecret" placeholder="Enter Generation Secret...">
+                </div>
+            </div>
+            <button class="btn-generate" onclick="handleGenerate()">EXECUTE GENERATION</button>
+        </div>
+        
+    </div>
+
+    <script type="module">
+        import { adminApi, showToast, showCodeModal } from './matrix-core.js';
+
+        let currentType = 'activation';
+        let currentStatus = 'all';
+        let currentPage = 1;
+        let searchQuery = '';
+        let allStats = {};
+
+        async function fetchStats() {
+            const res = await adminApi('/keys/stats');
+            if(res.success) {
+                allStats = res.data;
+                updateStatsUI();
+            }
+        }
+
+        function updateStatsUI() {
+            const s = allStats[currentType];
+            document.getElementById('totalCount').textContent = s.total;
+            document.getElementById('usedCount').textContent = s.used;
+            document.getElementById('availableCount').textContent = s.available;
+        }
+
+        async function fetchKeys() {
+            const url = `/keys?type=${currentType}&status=${currentStatus}&page=${currentPage}&limit=50&search=${searchQuery}`;
+            const res = await adminApi(url);
+            if(res.success) {
+                renderTable(res.data.keys);
+                renderPagination(res.data.pages, res.data.page);
+            }
+        }
+
+        function renderTable(keys) {
+            const tbody = document.getElementById('keyTable');
+            if(keys.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:50px; color:var(--muted);">NO RECORDS FOUND IN THIS SUB-SECTOR</td></tr>';
+                return;
+            }
+            tbody.innerHTML = keys.map(k => `
+                <tr>
+                    <td><span class="key-text">${k.key}</span></td>
+                    <td style="color: var(--muted); font-size: 12px;">${k.usedBy || 'UNASSOCIATED'}</td>
+                    <td style="color: var(--muted); font-size: 12px;">${new Date(k.createdAt).toLocaleString()}</td>
+                    <td><span class="status ${k.isUsed ? 'status-used' : 'status-unused'}">${k.isUsed ? 'BURNED' : 'ACTIVE'}</span></td>
+                    <td>
+                        <button onclick="deleteKey('${k._id}')" style="background:rgba(255,68,68,0.1); color:#ff4444; border:1px solid rgba(255,68,68,0.2); padding:5px 10px; border-radius:5px; font-size:10px; font-weight:800; cursor:pointer; transition:0.3s;">
+                            DELETE
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.deleteKey = async (id) => {
+            const confirmed = confirm("Permanently delete this key node?");
+            if(!confirmed) return;
+            const code = await showCodeModal("Delete Key", "Enter CODE_DELETE_KEY.", true);
+            if(code) {
+                const res = await adminApi(`/keys/${id}`, 'DELETE', { actionCode: code });
+                if(res.success) {
+                    showToast("Key deleted", "success");
+                    fetchStats();
+                    fetchKeys();
+                } else showToast(res.message, "error");
+            }
+        };
+
+        function renderPagination(total, current) {
+            const container = document.getElementById('pagination');
+            let html = `
+                <button class="pag-btn" ${current === 1 ? 'disabled' : ''} onclick="gotoPage(${current - 1})">PREV</button>
+                <div style="display:flex; align-items:center; gap:15px; font-weight:800; color:var(--gold); font-size:14px; padding:0 20px;">
+                    PAGE ${current} OF ${total}
+                </div>
+                <button class="pag-btn" ${current === total ? 'disabled' : ''} onclick="gotoPage(${current + 1})">NEXT</button>
+            `;
+            container.innerHTML = html;
+        }
+
+        window.switchType = (type, el) => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            currentType = type;
+            currentPage = 1;
+            updateStatsUI();
+            fetchKeys();
+        };
+
+        window.setFilter = (status, el) => {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            currentStatus = status;
+            currentPage = 1;
+            fetchKeys();
+        };
+
+        window.handleSearch = () => {
+            searchQuery = document.getElementById('searchBox').value.trim();
+            currentPage = 1;
+            fetchKeys();
+        };
+
+        window.gotoPage = (p) => {
+            currentPage = p;
+            fetchKeys();
+        };
+
+        window.handleGenerate = async () => {
+            const count = document.getElementById('genCount').value;
+            const secret = document.getElementById('genSecret').value;
+
+            if(!secret) {
+                showToast("Verification code required", "error");
+                return;
+            }
+
+            const res = await adminApi('/keys/generate', 'POST', {
+                actionCode: secret,
+                count: parseInt(count),
+                keyType: currentType
+            });
+
+            if(res.success) {
+                showToast(res.message, "success");
+                document.getElementById('genSecret').value = '';
+                fetchStats();
+                fetchKeys();
+            } else {
+                showToast(res.message, "error");
+            }
+        };
+
+        // Init
+        fetchStats();
+        fetchKeys();
+    </script>
+
+</body>
+</html>

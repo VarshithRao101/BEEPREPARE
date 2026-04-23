@@ -3,80 +3,665 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEE Command Authorization</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <title>BEEPREPARE Admin | System Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root { --adv-yellow: #FFCF00; --bg-dark: #000; }
-        body { background: var(--bg-dark); color: #fff; font-family: 'Outfit', sans-serif; margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        
+        :root {
+            --bg: #000000;
+            --surface: rgba(8, 8, 10, 0.2);
+            --surface2: rgba(10, 10, 12, 0.15);
+            --gold: #FFD700;
+            --gold-dim: rgba(255,215,0,0.15);
+            --success: #4CAF50;
+            --danger: #ff4444;
+            --warning: #FFA500;
+            --text: #ffffff;
+            --muted: #888888;
+            --border: rgba(255, 215, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: transparent;
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
         .main-bg {
-            position: fixed; inset: 0;
-            background: url('/assets/images/premium-bg.png') no-repeat center center;
-            background-size: cover; z-index: -1; filter: brightness(0.3);
+            position: fixed;
+            inset: 0;
+            background: #000 url('/assets/images/abstract-bg.png') no-repeat center center fixed;
+            background-size: cover;
+            z-index: -1;
+            filter: brightness(1.0);
         }
 
-        .login-card { 
-            width: 90%; max-width: 400px; padding: 50px 40px; background: rgba(18, 18, 18, 0.85); 
-            border-radius: 40px; text-align: center; backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 207, 0, 0.2); box-shadow: 0 40px 100px rgba(0,0,0,0.9);
-            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.7);
         }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        .logo-hexa {
-            width: 70px; height: 70px; margin: 0 auto 30px;
-            background: rgba(255, 207, 0, 0.1); border: 2px solid var(--adv-yellow);
-            border-radius: 20px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 30px rgba(255, 207, 0, 0.2);
+        /* LOGIN STYLES */
+        #login-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            background: #000 url('/assets/images/abstract-bg.png') no-repeat center center fixed;
+            background-size: cover;
         }
 
-        .title { font-size: 26px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 35px; background: linear-gradient(180deg, #fff, var(--adv-yellow)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        input { 
-            width: 100%; padding: 20px; margin-bottom: 18px; background: rgba(30, 31, 33, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 16px; color: #fff; font-family: inherit; font-size: 15px; box-sizing: border-box; transition: 0.3s;
+        #login-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            z-index: -1;
         }
-        input:focus { border-color: var(--adv-yellow); outline: none; background: rgba(40, 41, 44, 1); box-shadow: 0 0 15px rgba(255, 207, 0, 0.2); }
-        
-        .login-btn { 
-            width: 100%; padding: 18px; background: var(--adv-yellow); border: none; border-radius: 16px;
-            font-weight: 900; cursor: pointer; color: #000; text-transform: uppercase; letter-spacing: 2px;
-            transition: 0.3s; box-shadow: 0 10px 30px rgba(255, 207, 0, 0.2);
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .login-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 207, 0, 0.4); filter: brightness(1.1); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-box {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 24px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid var(--gold);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .login-card h2 {
+            margin-bottom: 8px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            font-size: 32px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
+            font-size: 15px;
+        }
+
+        .input-group input:focus {
+            border-color: var(--gold);
+            background: rgba(255,255,255,0.08);
+            box-shadow: 0 0 20px rgba(255,215,0,0.1);
+        }
+
+        .pass-toggle {
+            position: absolute;
+            right: 15px;
+            top: 38px;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 18px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            border-radius: 14px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(255,215,0,0.2);
+        }
+
+        .login-btn:active { transform: scale(0.98); }
+
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* GRID HOME STYLES */
+        #admin-home {
+            display: none;
+            padding: 60px 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+            width: 100%;
+            animation: fadeIn 1s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        .header h1 .logo-mini {
+            width: 40px;
+            height: 40px;
+            border: 1.5px solid var(--gold);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,215,0,0.05);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid rgba(255, 68, 68, 0.2);
+            color: var(--danger);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            color: #000;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+            padding: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            position: relative;
+        }
+
+        .stat-item:not(:last-child):after {
+            content: '';
+            position: absolute;
+            right: -12px;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .stat-val {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--gold);
+            display: block;
+            letter-spacing: -1px;
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+
+        .feature-card {
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            background: var(--surface2);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+        }
+
+        .feature-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-8px);
+            background: rgba(255,215,0,0.03);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+        }
+
+        .feature-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+        }
+
+        .feature-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .feature-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--danger);
+            color: #000;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 3px 10px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(255, 68, 68, 0.3);
+        }
+
+        .badge.info { background: var(--gold); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 1200px) {
+            .feature-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 1000px) {
+            .feature-grid { grid-template-columns: repeat(3, 1fr); }
+            .stats-bar { grid-template-columns: repeat(2, 2fr); }
+        }
+
+        @media (max-width: 800px) {
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 500px) {
+            .feature-grid { grid-template-columns: 1fr; }
+            .stats-bar { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 20px; text-align: center; }
+        }
     </style>
 </head>
 <body>
+
     <div class="main-bg"></div>
-    <div class="login-card">
-        <div class="logo-hexa">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFCF00" stroke-width="2.5">
-                <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
-                <circle cx="12" cy="12" r="3" fill="#FFCF00"></circle>
-            </svg>
+
+    <!-- Section A: LOGIN -->
+    <div id="login-overlay">
+        <div class="login-card glass">
+            <div class="logo-box">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2.5">
+                    <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
+                    <circle cx="12" cy="12" r="3" fill="#FFD700"></circle>
+                </svg>
+            </div>
+            <h2><span style="color: #FFD700;">BEE</span><span style="color: #e0e0e0;">PREPARE</span> Admin</h2>
+            <p style="color: var(--muted); font-size: 14px; margin-bottom: 35px; letter-spacing: 1px; font-weight: 600;">System Command Center</p>
+            
+            <div class="input-group">
+                <label>Admin Access ID</label>
+                <input type="text" id="adminId" placeholder="Enter ID">
+            </div>
+
+            <div class="input-group">
+                <label>Security Key</label>
+                <input type="password" id="adminPass" placeholder="Enter Password">
+                <span class="pass-toggle" id="togglePassBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </span>
+            </div>
+
+            <button class="login-btn" id="loginBtn">AUTHORIZE ACCESS</button>
+            <p id="errorMsg" style="color: var(--danger); font-size: 13px; margin-top: 20px; font-weight: 600; min-height: 20px;"></p>
         </div>
-        <div class="title">BEE Command Hub</div>
-        <input type="text" id="username" placeholder="VGMG IDENTITY">
-        <input type="password" id="password" placeholder="SECURITY PROTOCOL">
-        <button class="login-btn" onclick="verifyAuth()">ACCESS MATRIX</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function verifyAuth() {
-            const u = document.getElementById('username').value.toLowerCase();
-            const p = document.getElementById('password').value;
-            if (u === 'vgmg1419' && p === 'VGm@30072509679059') {
-                localStorage.setItem('bp_admin_session', 'active_v1419');
-                window.location.href = 'dashboard.html';
-            } else {
-                Swal.fire({
-                    icon: 'error', title: 'Unauthorized', text: 'Protocol Mismatch Recognized.',
-                    background: '#121212', color: '#fff', confirmButtonColor: '#FFCF00'
+    <!-- Section B: ADMIN GRID HOME -->
+    <div id="admin-home">
+        <header class="header">
+            <h1>
+                <div class="logo-mini">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2.5">
+                        <path d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"></path>
+                        <circle cx="12" cy="12" r="2" fill="#FFD700"></circle>
+                    </svg>
+                </div>
+                <span style="color: #FFD700;">BEE</span><span style="color: #e0e0e0;">PREPARE</span> Admin
+            </h1>
+            <div class="header-right">
+                <span id="welcomeId" style="font-weight: 700; font-size: 15px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px;">Admin Hub</span>
+                <button class="logout-btn" id="logoutBtn">TERMINATE SESSION</button>
+            </div>
+        </header>
+
+        <div class="stats-bar glass">
+            <div class="stat-item">
+                <span class="stat-val" id="stat-users">0</span>
+                <span class="stat-lbl">Active Nodes</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="stat-payments" style="color: var(--warning);">0</span>
+                <span class="stat-lbl">Pending Vaults</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="stat-keys">0</span>
+                <span class="stat-lbl">Available Keys</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="stat-banks">0</span>
+                <span class="stat-lbl">Central Banks</span>
+            </div>
+        </div>
+
+        <div class="feature-grid">
+            <!-- Cards will be populated by JS -->
+        </div>
+    </div>
+
+    <script type="module">
+        // Functions and setup...
+        const togglePass = () => {
+            const input = document.getElementById('adminPass');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        };
+
+        const login = async () => {
+            const adminId = document.getElementById('adminId').value.trim();
+            const password = document.getElementById('adminPass').value.trim();
+            const errorEl = document.getElementById('errorMsg');
+
+            if (!adminId || !password) {
+                errorEl.textContent = 'Identity and Security Key required.';
+                return;
+            }
+
+            const lockout = sessionStorage.getItem('lockout_until');
+            if (lockout && Date.now() < parseInt(lockout)) {
+                const mins = Math.ceil((parseInt(lockout) - Date.now()) / 60000);
+                errorEl.textContent = `CRITICAL: TERMINAL LOCKED. Try in ${mins}min`;
+                return;
+            }
+
+            const btn = document.getElementById('loginBtn');
+            const originalText = btn.textContent;
+            btn.textContent = 'PROTOCOL_AUTHENTICATING...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ adminId, password })
                 });
+                const data = await res.json();
+
+                if (data.success) {
+                    sessionStorage.setItem('admin_token', data.data.token);
+                    sessionStorage.setItem('admin_id', adminId);
+                    sessionStorage.removeItem('login_attempts');
+                    sessionStorage.removeItem('lockout_until');
+                    showGrid();
+                } else {
+                    let attempts = parseInt(sessionStorage.getItem('login_attempts') || '0') + 1;
+                    sessionStorage.setItem('login_attempts', attempts);
+                    if (attempts >= 3) {
+                        const until = Date.now() + 30 * 60 * 1000;
+                        sessionStorage.setItem('lockout_until', until);
+                        errorEl.textContent = 'VOID DETECTED. TERMINAL LOCKED 30M.';
+                    } else {
+                        errorEl.textContent = `ACCESS_DENIED. ${3 - attempts} ATTEMPTS REMAIN.`;
+                    }
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                errorEl.textContent = 'CORE_UNREACHABLE';
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        const logout = () => {
+            sessionStorage.clear();
+            window.location.reload();
+        };
+
+        async function showGrid() {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('admin-home').style.display = 'block';
+            document.getElementById('welcomeId').textContent = `SYSTEM_ROOT: ${sessionStorage.getItem('admin_id') || 'ADMIN'}`;
+            renderFeatures();
+            await loadQuickStats();
+        }
+
+        async function loadQuickStats() {
+            const token = sessionStorage.getItem('admin_token');
+            try {
+                const res = await fetch('/api/admin/overview', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('stat-users').innerText = data.data.activeNodes || 0;
+                    document.getElementById('stat-payments').innerText = data.data.pendingPayments || 0;
+                    document.getElementById('stat-banks').innerText = data.data.totalBanks || 0;
+                    
+                    const keysRes = await fetch('/api/admin/keys/stats', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const keysData = await keysRes.json();
+                    if (keysData.success) {
+                        // Sum both activation and redeem available keys
+                        const avail = (keysData.data.activation?.available || 0) + 
+                                     (keysData.data.redeem?.available || 0);
+                        document.getElementById('stat-keys').innerText = avail;
+                        updateBadges(data.data, keysData.data);
+                    }
+                }
+            } catch (err) {
+                console.error('Stats overflow error:', err);
             }
         }
+
+        const features = [
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>', name: 'Maintenance', desc: 'Secure Protocol Override', link: 'maintenance.html', id: 'f-maint' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>', name: 'Users', desc: 'Active Nodes & Student Units', link: 'users.html', id: 'f-users' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>', name: 'Payments', desc: 'Currency Verification Vault', link: 'payments.html', id: 'f-payments' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3L15.5 7.5z"></path></svg>', name: 'Key Bank', desc: 'Activation Code Generation', link: 'keys.html', id: 'f-keys' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14c.9 0 1.8.2 2.6.6a1 1 0 0 1 .5 1.1l-.1.3A8 8 0 0 1 21 11.5z"></path></svg>', name: 'Feedback', desc: 'Neural Network Responses', link: 'feedback.html', id: 'f-feedback' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>', name: 'Announcements', desc: 'Global Broadcaster Hub', link: 'announcements.html', id: 'f-ann' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M3 10h18"></path><path d="M5 6l7-3 7 3"></path><path d="M4 10v11"></path><path d="M20 10v11"></path><path d="M8 14v3"></path><path d="M12 14v3"></path><path d="M16 14v3"></path></svg>', name: 'Question Banks', desc: 'Academic Resource Cluster', link: 'banks.html', id: 'f-banks' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>', name: 'Analytics', desc: 'Platform Consumption Flow', link: 'analytics.html', id: 'f-analytics' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>', name: 'Block List', desc: 'Identity Purge Protocol', link: 'blocklist.html', id: 'f-block' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>', name: 'Settings', desc: 'Central Registry Overrides', link: 'settings.html', id: 'f-settings' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>', name: 'System Logs', desc: 'Core Event Traceback', link: 'logs.html', id: 'f-logs' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>', name: 'Activity', desc: 'Real-time Pulse Feed', link: 'activity.html', id: 'f-activity' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>', name: 'Bulk Upload', desc: 'Upload 5 questions at once', link: 'bulk-upload.html', id: 'f-bulk' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>', name: 'Study Circles', desc: 'Manage Group Chat IDs', link: 'study-circles.html', id: 'f-circles' }
+        ];
+
+        function renderFeatures() {
+            const grid = document.querySelector('.feature-grid');
+            grid.innerHTML = features.map(f => `
+                <div class="feature-card glass" id="${f.id}">
+                    <span class="feature-icon">${f.icon}</span>
+                    <span class="feature-name">${f.name}</span>
+                    <span class="feature-desc">${f.desc}</span>
+                    <div class="badge-container"></div>
+                </div>
+            `).join('');
+
+            // Attach listeners
+            features.forEach(f => {
+                const card = document.getElementById(f.id);
+                if (card) {
+                    card.addEventListener('click', () => {
+                        window.location.href = f.link;
+                    });
+                }
+            });
+        }
+
+        function updateBadges(overview, keys) {
+            if (overview.pendingPayments > 0) addBadge('f-payments', overview.pendingPayments, 'warning');
+            const avail = (keys.activation?.available || 0) + (keys.redeem?.available || 0);
+            if (avail > 0) addBadge('f-keys', avail, 'info');
+            if (overview.activeNodes > 0) addBadge('f-users', overview.activeNodes, 'info');
+        }
+
+        function addBadge(cardId, text, type) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+            let badge = card.querySelector('.badge');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = `badge ${type}`;
+                card.appendChild(badge);
+            }
+            badge.textContent = text;
+        }
+        // Export to global scope
+        window.showGrid = showGrid;
+
+        // EXECUTION START: Check entry state
+        async function checkAdminEntry() {
+            const token = sessionStorage.getItem('admin_token');
+            if (token) {
+                // Verify with server before showing grid
+                try {
+                    const res = await fetch('/api/admin/verify-session', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showGrid();
+                    } else {
+                        sessionStorage.clear();
+                        document.getElementById('login-overlay').style.display = 'flex';
+                    }
+                } catch (e) {
+                    sessionStorage.clear();
+                    document.getElementById('login-overlay').style.display = 'flex';
+                }
+            } else {
+                document.getElementById('login-overlay').style.display = 'flex';
+            }
+        }
+
+        // Attach Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginBtn = document.getElementById('loginBtn');
+            const togglePassBtn = document.getElementById('togglePassBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const adminPassInput = document.getElementById('adminPass');
+
+            if (loginBtn) loginBtn.addEventListener('click', login);
+            if (togglePassBtn) togglePassBtn.addEventListener('click', togglePass);
+            if (logoutBtn) logoutBtn.addEventListener('click', logout);
+            
+            // Handle Enter key for login
+            if (adminPassInput) {
+                adminPassInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') login();
+                });
+            }
+        });
+
+        checkAdminEntry();
     </script>
 </body>
 </html>

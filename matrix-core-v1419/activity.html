@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Feed | BEEPREPARE Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a1a; --surface: #111128; --surface2: #1a1a3a;
+            --gold: #FFD700; --gold-dim: rgba(255,215,0,0.15);
+            --success: #4CAF50; --danger: #ff4444; --warning: #FFA500;
+            --text: #ffffff; --muted: #888888;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: transparent; color: var(--text); padding-top: 90px; }
+
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 24px; }
+        
+        header {
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: var(--surface); border-bottom: 1px solid var(--gold-dim);
+            display: flex; align-items: center; padding: 0 24px; z-index: 1000;
+            justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .back-btn { cursor: pointer; font-size: 20px; color: var(--gold); text-decoration: none; }
+        .header-title { font-weight: 900; color: var(--gold); }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .admin-id { font-size: 12px; color: var(--muted); }
+        .logout-btn { background: var(--surface2); color: var(--danger); border: 1px solid #333; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 0 20px 50px; }
+        
+        .timeline { position: relative; padding-left: 30px; border-left: 2px solid #222; margin-top: 30px; }
+        .activity-item { position: relative; margin-bottom: 30px; padding: 20px; transform-origin: left; animation: slideIn 0.3s ease; }
+        .activity-dot { position: absolute; left: -41px; top: 25px; width: 16px; height: 16px; border-radius: 50%; border: 4px solid var(--bg); z-index: 10; }
+        
+        .type-question_added { background: #FFD700; box-shadow: 0 0 10px #FFD700; }
+        .type-paper_generated { background: #2196F3; box-shadow: 0 0 10px #2196F3; }
+        .type-student_approved { background: #4CAF50; box-shadow: 0 0 10px #4CAF50; }
+        .type-test_completed { background: #9C27B0; box-shadow: 0 0 10px #9C27B0; }
+        .type-doubt_replied { background: #FFA500; box-shadow: 0 0 10px #FFA500; }
+        .type-bank_joined { background: #009688; box-shadow: 0 0 10px #009688; }
+        .type-default { background: #888; }
+
+        .act-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .act-title { font-weight: 700; font-size: 14px; text-transform: capitalize; }
+        .act-time { font-size: 11px; color: var(--muted); }
+        .act-desc { font-size: 13px; color: #ccc; line-height: 1.4; }
+
+        .role-badge { 
+            font-size: 10px; font-weight: 800; text-transform: uppercase; 
+            padding: 2px 6px; border-radius: 4px; margin-right: 8px;
+            letter-spacing: 0.5px;
+        }
+        .role-teacher { background: var(--gold); color: #000; }
+        .role-student { background: #2196F3; color: #fff; }
+        .role-unknown { background: #333; color: #888; }
+
+        @keyframes slideIn { from { opacity:0; transform: scaleX(0.9); } to { opacity:1; transform: scaleX(1); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">←</a>
+            <span class="header-title">Real-time Activity Feed</span>
+        </div>
+        <div class="header-right">
+            <span class="admin-id" id="adminIdDisplay">Admin ID</span>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="timeline" id="activityTimeline">
+            <!-- Items populated by JS -->
+            <div style="color:#555; text-align:center; padding-top:100px;">Synchronizing with BEE activity stream...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { adminApi, showToast } from './matrix-core.js';
+
+        async function fetchActivity() {
+            const res = await adminApi('/activity?limit=50');
+            if (res && res.success) {
+                renderActivity(res.data);
+            }
+        }
+
+        function renderActivity(list) {
+            const container = document.getElementById('activityTimeline');
+            if (list.length === 0) {
+                container.innerHTML = '<div style="color:#555; text-align:center; padding-top:100px;">No platform activity recorded yet.</div>';
+                return;
+            }
+            container.innerHTML = list.map(item => `
+                <div class="glass activity-item">
+                    <div class="activity-dot type-${item.type || 'default'}"></div>
+                    <div class="act-header">
+                        <span class="act-title">
+                            <span class="role-badge role-${item.userRole}">${item.userRole}</span>
+                            <span style="color:var(--gold)">${item.userEmail}</span> 
+                            <span style="color:var(--muted); font-size:12px; margin-left:8px;">${(item.type || 'Action').replace(/_/g, ' ')}</span>
+                        </span>
+                        <span class="act-time">${timeAgo(new Date(item.createdAt))}</span>
+                    </div>
+                    <p class="act-desc"><b>${item.title || ''}</b> ${item.description || ''}</p>
+                </div>
+            `).join('');
+        }
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
+        setInterval(fetchActivity, 60000);
+        fetchActivity();
+    </script>
+</body>
+</html>

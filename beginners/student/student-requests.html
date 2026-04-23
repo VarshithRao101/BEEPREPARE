@@ -378,8 +378,11 @@
         };
 
         window.addEventListener('load', () => {
-            if (!guardStudent()) return;
+            if (!(await guardStudent())) return;
             loadRequests();
+            
+            // Auto-refresh requests every 5 seconds
+            setInterval(loadRequests, 5000);
             
             // Unify Streak Sync
             apiCall('/student/streak').then(res => {

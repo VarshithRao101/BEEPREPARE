@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env*
+.DS_Store
+*.log
+scratch/
+.agent/
+.gemini/
+.gsd/
+.vscode/
+package-lock.json
+*.tmp
+dist/
+build/

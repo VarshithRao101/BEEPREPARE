@@ -271,7 +271,7 @@
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-                    <span>Home Hub</span>
+                    <span>Dashboard</span>
                 </a>
                 <a href="student-bank.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -282,7 +282,7 @@
                     <span>Practice</span>
                 </a>
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 13.14L2 8.27L8.91 7.26L12 1Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="student-profile.html" class="sidebar-link">
@@ -373,31 +373,6 @@
         <div class="gen-status">Preparing Practice Paper...</div>
     </div>
 
-    <!-- Bottom Nav -->
-    <nav class="nav-bottom">
-        <a href="student-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-            <span>Home</span>
-        </a>
-        <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 6H2V20c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z" /></svg>
-            <span>Inventory</span>
-        </a>
-        <a href="../ai-chat.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" /></svg>
-            <span>AI</span>
-        </a>
-        <a href="student-generate.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
-            <span>Practice</span>
-        </a>
-        <a href="student-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-            <span>Profile</span>
-        </a>
-    </nav>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Bottom Nav -->
     <nav class="nav-bottom">
         <a href="student-home.html" class="nav-item">
@@ -621,7 +596,7 @@
         };
 
         window.addEventListener('load', () => {
-            if (!guardStudent()) return;
+            if (!(await guardStudent())) return;
             loadBanks();
             window.renderBlueprint();
         });

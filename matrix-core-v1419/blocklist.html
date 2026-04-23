@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block List | BEEPREPARE Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a1a; --surface: #111128; --surface2: #1a1a3a;
+            --gold: #FFD700; --gold-dim: rgba(255,215,0,0.15);
+            --success: #4CAF50; --danger: #ff4444; --warning: #FFA500;
+            --text: #ffffff; --muted: #888888;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: transparent; color: var(--text); padding-top: 90px; }
+
+        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 24px; }
+        
+        header {
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: var(--surface); border-bottom: 1px solid var(--gold-dim);
+            display: flex; align-items: center; padding: 0 24px; z-index: 1000;
+            justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .back-btn { cursor: pointer; font-size: 20px; color: var(--gold); text-decoration: none; }
+        .header-title { font-weight: 900; color: var(--gold); }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .admin-id { font-size: 12px; color: var(--muted); }
+        .logout-btn { background: var(--surface2); color: var(--danger); border: 1px solid #333; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+        
+        .add-card { margin-bottom: 30px; display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 15px; align-items: end; }
+        .input-group label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; border-radius: 8px; color: #fff; outline: none; }
+        input:focus { border-color: var(--danger); }
+        
+        .btn-add { background: var(--danger); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 900; cursor: pointer; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 16px; color: var(--muted); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #333; }
+        td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
+        
+        .btn-remove { background: none; border: 1px solid #333; color: var(--muted); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.3s; }
+        .btn-remove:hover { border-color: var(--success); color: var(--success); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">←</a>
+            <span class="header-title">System Block List</span>
+        </div>
+        <div class="header-right">
+            <span class="admin-id" id="adminIdDisplay">Admin ID</span>
+            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 style="font-size:18px; font-weight:900; color:var(--danger); margin-bottom:20px;">Blacklist Identity</h2>
+        <div class="glass add-card">
+            <div class="input-group">
+                <label>Target Email</label>
+                <input type="email" id="blockEmail" placeholder="user@example.com">
+            </div>
+            <div class="input-group">
+                <label>Reason for Block</label>
+                <input type="text" id="blockReason" placeholder="Fraudulent activity...">
+            </div>
+            <button class="btn-add" onclick="addToBlocklist()">COMMIT BLOCK</button>
+        </div>
+
+        <div class="glass" style="padding:0; overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Identity Email</th>
+                        <th>Reason</th>
+                        <th>Added By</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="blockTableBody">
+                    <!-- Data populated by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { adminApi, showToast, showCodeModal } from './matrix-core.js';
+
+        async function fetchBlocklist() {
+            const res = await adminApi('/blacklist');
+            if (res && res.success) {
+                renderTable(res.data);
+            }
+        }
+
+
+
+        function renderTable(list) {
+            const tbody = document.getElementById('blockTableBody');
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:var(--muted);">Block list is currently empty.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(item => `
+                <tr>
+                    <td style="font-weight:600;">${item.email}</td>
+                    <td style="color:var(--muted); font-size:12px;">${item.reason || 'No reason specified'}</td>
+                    <td style="font-size:12px;">${item.blockedBy || 'System'}</td>
+                    <td style="font-size:12px; color:var(--muted);">${new Date(item.createdAt).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn-remove" onclick="removeFromBlocklist('${item.email}')">Lift Block</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.addToBlocklist = async () => {
+            const email = document.getElementById('blockEmail').value.trim();
+            const reason = document.getElementById('blockReason').value.trim();
+            if (!email) return showToast("Email required", "warning");
+
+            const code = await showCodeModal("COMMIT HARD BLOCK", "This identity will be immediately purged and banned from the platform.", null, true);
+            if (code) {
+                const res = await adminApi('/blacklist', 'POST', { email, reason, actionCode: code });
+                if (res && res.success) {
+                    showToast("Identity purged.", "success");
+                    document.getElementById('blockEmail').value = '';
+                    document.getElementById('blockReason').value = '';
+                    fetchBlocklist();
+                } else showToast(res?.message || "Block failed", "error");
+            }
+        };
+
+        window.removeFromBlocklist = async (email) => {
+            const code = await showCodeModal("Lift Block", "Allow access for this identity again?", false);
+            if (code) {
+                const res = await adminApi('/blacklist', 'DELETE', { email, actionCode: code });
+                if (res && res.success) {
+                    showToast("Block lifted", "success");
+                    fetchBlocklist();
+                }
+            }
+        };
+
+        fetchBlocklist();
+    </script>
+
+</body>
+</html>

@@ -107,17 +107,44 @@
             transform: translateX(5px);
         }
 
-        .command-icon-box {
-            width: 44px;
-            height: 44px;
-            background: rgba(255, 215, 0, 0.05);
-            border: 1px solid rgba(255, 215, 0, 0.1);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            margin-right: 15px;
+        @media (min-width: 769px) {
+            .dashboard-sections {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+        }
+
+        /* BEE-SIGNAL Notification Dots */
+        .signal-dot {
+            position: absolute;
+            top: 1px;
+            right: 1px;
+            width: 9px;
+            height: 9px;
+            background: #ff4444;
+            border-radius: 50%;
+            border: 1.5px solid #050505;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.6);
+            z-index: 20;
+            pointer-events: none;
+            display: none; 
+            animation: beacon 2s infinite;
+        }
+
+        .welcome-title-styled {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        @keyframes beacon {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .has-signal {
+            position: relative !important;
         }
     </style>
 </head>
@@ -126,26 +153,26 @@
     <div class="main-layout">
         <!-- Lean Student Sidebar -->
         <aside class="pc-sidebar">
-            <div class="sidebar-brand">BEE COMMAND</div>
+            <div class="sidebar-brand"><span style="color: #FFD700;">BEE</span><span style="color: #e0e0e0;">PREPARE</span></div>
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link active">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    <span>Home Hub</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Dashboard</span>
                 </a>
-                <a href="student-banks.html" class="sidebar-link">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M8 7h6"></path><path d="M8 11h8"></path></svg>
+                <a href="student-bank.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                     <span>Bank Inventory</span>
                 </a>
-                <a href="student-practice.html" class="sidebar-link">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <a href="student-generate.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                     <span>Practice</span>
                 </a>
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="student-profile.html" class="sidebar-link">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
                     <span>My Profile</span>
                 </a>
             </nav>
@@ -156,7 +183,7 @@
         <main class="content-wrapper">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
                 <div style="display: block;">
-                    <h2 class="welcome-title">Hello, Scholar</h2>
+                    <h2 class="welcome-title-styled">Hello, <span id="student-name-header">Scholar</span></h2>
                     <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your learning environment is fully synchronized.</p>
                 </div>
                 <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
@@ -170,9 +197,38 @@
                         <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
                         <span id="streak-val-header" class="flame-count" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
                     </div>
-                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                    <div class="profile-icon has-signal" onclick="window.location.href='student-profile.html'">
+                        ST
+                        <div id="profile-signal" class="signal-dot"></div>
+                    </div>
                 </div>
             </header>
+
+            <!-- Quick Sync Actions -->
+            <div class="section-divider">
+                <span class="section-label">Quick Actions</span>
+                <div class="divider-line"></div>
+            </div>
+            <div style="margin-bottom: 25px;">
+                <div class="adv-card" onclick="window.location.href='../ai-chat.html'" style="padding: 24px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(0,0,0,0) 100%); cursor: pointer; border: 1.5px solid rgba(255, 215, 0, 0.2); position: relative; overflow: hidden;">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div style="width: 50px; height: 50px; background: var(--primary); color: #000; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--primary);">Consult BEE AI Assistant</h3>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; color: rgba(255,255,255,0.6);">Analyze doubts, solve papers, and get instant concept breakdowns.</p>
+                        </div>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color: var(--primary); opacity: 0.5;">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <!-- Small Glow Ornament -->
+                    <div style="position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: var(--primary); filter: blur(60px); opacity: 0.1; pointer-events: none;"></div>
+                </div>
+            </div>
 
             <!-- Active banks -->
             <div class="section-divider">
@@ -277,7 +333,7 @@
         }
 
         async function loadDashboard() {
-            if (!guardStudent()) return;
+            if (!(await guardStudent())) return;
 
             // Show skeletons immediately
             BP.showSkeleton('subject-container', 'card', 4);
@@ -285,9 +341,9 @@
             if(logWrapper) BP.showSkeleton('activity-log-wrapper', 'list', 5);
 
             // Show name immediately
-            const welcomeTitle = document.querySelector('.welcome-title');
+            const studentNameHeader = document.getElementById('student-name-header');
             const studentName = localStorage.getItem(BP.NAME) || 'Scholar';
-            welcomeTitle.textContent = `Hello, ${studentName.split(' ')[0]}`;
+            if(studentNameHeader) studentNameHeader.textContent = studentName.split(' ')[0];
 
             // Show loading state
             document.querySelectorAll('.adv-card').forEach(card => card.classList.add('loading'));
@@ -380,6 +436,20 @@
                         logWrapper.appendChild(item);
                     });
                 }
+
+                // BEE-SIGNAL Management
+                const profileSignal = document.getElementById('profile-signal');
+                const doubtSignal = document.getElementById('sidebar-doubt-signal');
+                const notesSignal = document.getElementById('sidebar-notes-signal');
+
+                // Check for unread stuff
+                const hasReplies = d.recentDoubts?.some(doubt => doubt.status === 'replied') || false;
+                // For notes, we can check if there are recent activities in log related to notes
+                const hasNewNotes = d.activityLog?.some(log => log.title.toLowerCase().includes('note') || log.description.toLowerCase().includes('note')) || false;
+
+                if (profileSignal) profileSignal.style.display = (hasReplies || hasNewNotes) ? 'block' : 'none';
+                if (doubtSignal) doubtSignal.style.display = hasReplies ? 'block' : 'none';
+                if (notesSignal) notesSignal.style.display = hasNewNotes ? 'block' : 'none';
 
                 // Load recent doubts
                 loadRecentDoubts();

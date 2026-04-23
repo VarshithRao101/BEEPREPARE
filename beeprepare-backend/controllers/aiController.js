@@ -1,176 +1,166 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const User = require('../models/User');
-const AiChat = require('../models/AiChat');
 const { success, error } = require('../utils/responseHelper');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
 
-const DAILY_LIMIT = 30; // Same for ALL users regardless of plan
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 1. GET /api/ai/sessions (Fetch user's chat history)
-// ══════════════════════════════════════════════════════════════════════════════
-const getSessions = async (req, res) => {
-  try {
-    const googleUid = req.user.googleUid;
-    const sessions = await AiChat.find({ userId: googleUid })
-      .sort({ lastMessageAt: -1 })
-      .select('title lastMessageAt messageCount');
-
-    return success(res, 'Sessions fetched', sessions);
-  } catch (err) {
-    console.error('getSessions error:', err);
-    return error(res, 'Failed to fetch chat sessions', 'SERVER_ERROR', 500);
-  }
-};
+const DAILY_LIMIT = 30;
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 2. GET /api/ai/sessions/:sessionId (Fetch specific session messages)
-// ══════════════════════════════════════════════════════════════════════════════
-const getSessionMessages = async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const googleUid = req.user.googleUid;
-
-    const chat = await AiChat.findOne({ _id: sessionId, userId: googleUid });
-    if (!chat) return error(res, 'Session not found', 'NOT_FOUND', 404);
-
-    return success(res, 'Messages fetched', chat.messages);
-  } catch (err) {
-    console.error('getSessionMessages error:', err);
-    return error(res, 'Failed to fetch messages', 'SERVER_ERROR', 500);
-  }
-};
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 3. POST /api/ai/chat (STATEFUL — Persistent History)
+// 1. POST /api/ai/chat (STATELESS — FAST CONVERSATION)
 // ══════════════════════════════════════════════════════════════════════════════
 const sendMessage = async (req, res) => {
   try {
-    const { message, sessionId = null } = req.body;
     const userRole = req.user.role;
     const googleUid = req.user.googleUid;
 
-    // Step 1: Validate message
-    if (!message || typeof message !== 'string' || message.trim() === '') {
-      return error(res, 'Message is required', 'EMPTY_MESSAGE', 400);
+    // Step 1: Validate message/image
+    const { message, image } = req.body;
+    if ((!message || message.trim() === '') && !image) {
+      return error(res, 'Message or image is required', 'EMPTY_CONTENT', 400);
     }
-    const cleanMessage = message.trim();
+    const cleanMessage = (message || '').trim();
 
     // Step 2: Check daily message limit
     let aiMessagesToday = req.user.aiMessagesToday || 0;
     let aiMessagesResetAt = req.user.aiMessagesResetAt || null;
 
     const now = new Date();
-    const todayMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-    if (!aiMessagesResetAt || new Date(aiMessagesResetAt) < todayMidnight) {
+    // RESET LOGIC: If never reset OR current time passed the reset mark
+    if (!aiMessagesResetAt || now >= new Date(aiMessagesResetAt)) {
       aiMessagesToday = 0;
-      await User.updateOne({ googleUid }, { $set: { aiMessagesToday: 0, aiMessagesResetAt: now } });
+      // Set reset to exactly 24 hours from the first message of the new cycle
+      aiMessagesResetAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      await User.updateOne({ googleUid }, { 
+        $set: { 
+          aiMessagesToday: 0, 
+          aiMessagesResetAt: aiMessagesResetAt 
+        } 
+      });
     }
 
     if (aiMessagesToday >= DAILY_LIMIT) {
       return res.status(429).json({
         success: false,
-        error: { code: 'DAILY_LIMIT_REACHED', limit: DAILY_LIMIT }
+        message: `Daily AI usage limit reached (${DAILY_LIMIT}). ✨ Activate your account for unlimited academic help, advanced problem solving, and priority access!`,
+        error: { 
+          code: 'DAILY_LIMIT_REACHED', 
+          limit: DAILY_LIMIT,
+          resetAt: aiMessagesResetAt
+        }
       });
     }
 
-    // Step 3: Manage Session
-    let chat;
-    if (sessionId) {
-      chat = await AiChat.findOne({ _id: sessionId, userId: googleUid });
-    }
-
-    if (!chat) {
-      // Create new session if none provided or none found
-      chat = await AiChat.create({
-        userId: googleUid,
-        userRole: userRole,
-        title: cleanMessage.length > 30 ? cleanMessage.substring(0, 30) + '...' : cleanMessage,
-        messages: []
-      });
-    }
-
-    // Step 4: Build Context and System Instruction
+    // Step 3: Build Context and System Instruction
     let systemInstruction = "";
     if (userRole === 'teacher') {
-      systemInstruction = `You are BEE AI, a premium academic assistant for teachers in BEEPREPARE.
+      systemInstruction = `You are BEE AI, a professional academic assistant for teachers in BEEPREPARE.
 Help with question generation, marking schemes, chapter summaries, and lesson planning for Class 8-10 (CBSE/Indian boards).
-Be professional, structured, and helpful. Use LaTeX for math if needed. Use Markdown.`;
+If an image is provided, analyze it to help the teacher.
+Be professional, structured, and helpful. Use Markdown.`;
     } else {
       systemInstruction = `You are BEE AI, a friendly academic assistant for students in BEEPREPARE.
-Help students understand Class 8-10 concepts (CBSE/Indian boards). Use simple language, mnemonics, and step-by-step solutions.
-Be encouraging and concise. Use Markdown and LaTeX for math.`;
+Help students understand Class 8-10 concepts (CBSE/Indian boards). If they provide a photo of a doubt or question, solve it step-by-step.
+Use simple language, mnemonics, and step-by-step solutions.
+Be encouraging and concise. Use Markdown.`;
     }
 
-    // Prepare history (last 5 messages)
-    const recentMessages = chat.messages.slice(-5).map(m => ({
-      role: m.role === 'user' ? 'user' : 'model',
-      parts: [{ text: m.content }]
-    }));
+    // Step 4: Build Groq Content (Support Vision)
+    let userContent = [];
+    if (cleanMessage) {
+      userContent.push({ type: 'text', text: cleanMessage });
+    }
+    if (image) {
+      userContent.push({
+        type: 'image_url',
+        image_url: { url: image }
+      });
+    }
 
-    // Step 5: Call Gemini
     try {
-      const model = genAI.getGenerativeModel({ 
-        model: 'gemini-flash-latest',
-        systemInstruction: systemInstruction 
-      });
+      const VISION_MODELS = [
+        'meta-llama/llama-4-scout-17b-16e-instruct',
+        'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant'
+      ];
 
-      const chatSession = model.startChat({
-        history: recentMessages,
-        generationConfig: {
-          maxOutputTokens: 1000,
-        },
-      });
+      let completion = null;
+      let lastError = null;
+      let successfulModel = '';
 
-      const result = await chatSession.sendMessage(cleanMessage);
-      const aiResponseText = result.response.text();
+      console.log('--- BEE AI SYNC START ---');
+      
+      for (const modelId of VISION_MODELS) {
+        try {
+          console.log(`Attempting Sync with Model: ${modelId}...`);
+          completion = await groq.chat.completions.create({
+            messages: [
+              { role: 'system', content: systemInstruction },
+              { role: 'user', content: userContent },
+            ],
+            model: modelId,
+            temperature: 0.7,
+            max_tokens: 1024,
+          });
+          
+          if (completion) {
+            successfulModel = modelId;
+            break; 
+          }
+        } catch (err) {
+          lastError = err;
+          console.warn(`Model ${modelId} failed/decommissioned. Trying next...`);
+        }
+      }
 
-      // Step 6: Update Database
-      chat.messages.push({ role: 'user', content: cleanMessage });
-      chat.messages.push({ role: 'model', content: aiResponseText });
-      chat.messageCount += 2;
-      chat.lastMessageAt = new Date();
-      await chat.save();
+      if (!completion) {
+        throw lastError; // Pass to the groqError catch block
+      }
 
+      const aiResponseText = completion.choices[0]?.message?.content || "";
+      console.log(`--- BEE AI SYNC SUCCESS (${successfulModel}) ---`);
+
+      // Step 6: Update User Limit
       await User.updateOne({ googleUid }, { $inc: { aiMessagesToday: 1 } });
 
       return success(res, 'AI Response successful', {
         aiMessage: aiResponseText,
-        sessionId: chat._id,
         messagesUsedToday: aiMessagesToday + 1,
         dailyLimit: DAILY_LIMIT,
-        remainingToday: DAILY_LIMIT - (aiMessagesToday + 1)
+        remainingToday: DAILY_LIMIT - (aiMessagesToday + 1),
+        resetAt: aiMessagesResetAt
       });
 
-    } catch (geminiError) {
-      console.error('Gemini Error:', geminiError);
-      return error(res, 'AI Error: ' + geminiError.message, 'API_ERROR', 500);
+    } catch (groqError) {
+      console.error('CRITICAL: Groq API Error Detected!');
+      console.error('Error Code:', groqError.status || 'N/A');
+      console.error('Error Message:', groqError.message);
+      
+      const errorMsg = groqError.message || "";
+      
+      if (errorMsg.includes('429') || errorMsg.includes('quota') || groqError.status === 429) {
+        return error(res, 'BEE AI is currently processing high traffic. Please retry in 60 seconds.', 'QUOTA_EXHAUSTED', 429);
+      }
+
+      if (groqError.status === 401 || groqError.status === 403) {
+        return error(res, 'Neural Link Authentication Failed. Contact Admin.', 'AUTH_ERROR', 500);
+      }
+
+      return error(res, `AI Service Insight: ${errorMsg || 'Connection reset by peer.'}`, 'API_ERROR', 500);
     }
   } catch (err) {
     console.error('sendMessage error:', err);
-    return error(res, 'Failed to send message', 'SERVER_ERROR', 500);
-  }
-};
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 4. DELETE /api/ai/sessions/:sessionId (Delete session)
-// ══════════════════════════════════════════════════════════════════════════════
-const deleteSession = async (req, res) => {
-  try {
-    const { sessionId } = req.params;
-    const googleUid = req.user.googleUid;
-    await AiChat.deleteOne({ _id: sessionId, userId: googleUid });
-    return success(res, 'Session deleted');
-  } catch (err) {
-    return error(res, 'Failed to delete session', 'SERVER_ERROR', 500);
+    return error(res, 'Failed to process message', 'SERVER_ERROR', 500);
   }
 };
 
 module.exports = {
-  getSessions,
-  getSessionMessages,
   sendMessage,
-  deleteSession
+  // Remaining empty handlers to avoid breaking route imports temporarily
+  getSessions: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
+  getSessionMessages: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
+  deleteSession: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
 };

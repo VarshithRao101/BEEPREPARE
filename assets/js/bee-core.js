@@ -31,14 +31,15 @@ export async function getFreshToken() {
     'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
   );
   const auth = getAuth();
-  
+
   // Strategy: Wait for status if currently null on page load
   let user = auth.currentUser;
   if (!user) {
     await new Promise(resolve => {
-      const unsubscribe = onAuthStateChanged(auth, (u) => {
+      let unsubscribe;
+      unsubscribe = onAuthStateChanged(auth, (u) => {
         user = u;
-        unsubscribe();
+        if (unsubscribe) unsubscribe();
         resolve();
       });
       setTimeout(() => { if (unsubscribe) unsubscribe(); resolve(); }, 800); // 800ms max wait for auth state
@@ -48,8 +49,8 @@ export async function getFreshToken() {
   if (!user) {
     // Return cached token if available, otherwise null
     // DO NOT REDIRECT HERE - Page Guards handle redirects
-    if (localStorage.getItem('bp_logging_out')) return null;
-    return localStorage.getItem('bp_token');
+    if (localStorage.getItem(BP.LOGGING_OUT)) return null;
+    return localStorage.getItem(BP.TOKEN);
   }
 
   // Rate limit refreshes to every 45 mins
@@ -62,11 +63,11 @@ export async function getFreshToken() {
     const token = await user.getIdToken();
     lastToken = token;
     lastFetchTime = now;
-    localStorage.setItem('bp_token', token);
+    localStorage.setItem(BP.TOKEN, token);
     return token;
   } catch (err) {
     console.error('Token fetch failed:', err);
-    return localStorage.getItem('bp_token');
+    return localStorage.getItem(BP.TOKEN);
   }
 }
 
@@ -152,11 +153,11 @@ export async function apiCall(
       console.log('[API_RECOVERY] Received 401. Refreshing architectural token and retrying...');
       lastToken = null;
       lastFetchTime = 0;
-      localStorage.removeItem('bp_token'); // Clean cached token
+      localStorage.removeItem(BP.TOKEN); // Clean cached token
 
       // Wait a tiny bit for Firebase to sync if it's lagging
       await new Promise(r => setTimeout(r, 400));
-      
+
       // Recursive retry
       return await apiCall(endpoint, method, body, needsAuth, true);
     }
@@ -169,10 +170,38 @@ export async function apiCall(
       return { success: false, message: 'Session invalid. Please login again.' };
     }
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      console.error('JSON Parse Error:', e);
+      return { success: false, message: 'Server response was not valid JSON' };
+    }
+
+    // MAINTENANCE CHECK (Step 9): If maintenance mode is active, block everything
+    if (data.code === 'MAINTENANCE_MODE' || data.maintenance === true) {
+      BP.showMaintenanceOverlay(data.message);
+      return data;
+    }
+
+    // GLOBAL BLOCKED/BLACKLISTED HANDLING
+    if (res.status === 403 && (data.error?.code === 'ACCOUNT_BLOCKED' || data.error?.code === 'ACCOUNT_BLACKLISTED')) {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.body.innerHTML = `
+        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a1a;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Arial,sans-serif;z-index:999999;">
+          <h1 style="color:#ff4444;font-size:48px;">🚫</h1>
+          <h2 style="color:#fff;margin:16px 0 8px;">Account Suspended</h2>
+          <p style="color:#888;max-width:400px;text-align:center;">Your account has been suspended. Contact support for assistance.</p>
+          <p style="color:#FFD700;margin-top:24px;">support@beeprepare.com</p>
+          <a href="/index.html" style="color:#555;margin-top:16px;font-size:14px;">Return to Home</a>
+        </div>
+      `;
+      return data;
+    }
 
     // Auto-update activation status if returned (but only if NOT logging out)
-    if (data?.data?.isActivated !== undefined && !localStorage.getItem('bp_logging_out')) {
+    if (data?.data?.isActivated !== undefined && !localStorage.getItem(BP.LOGGING_OUT)) {
       localStorage.setItem(BP.ACTIVATED, data.data.isActivated ? 'true' : 'false');
     }
 
@@ -196,23 +225,26 @@ export async function apiCall(
 }
 
 // Page guard for teacher pages
-export function guardTeacher() {
-  const uid = localStorage.getItem('bp_uid');
-  const activated =
-    localStorage.getItem('bp_activated');
-  const role = localStorage.getItem('bp_role');
+export async function guardTeacher() {
+  const uid = localStorage.getItem(BP.UID);
+  const activated = localStorage.getItem(BP.ACTIVATED);
+  const role = localStorage.getItem(BP.ROLE);
   const base = getIndexPath();
 
-  if (!uid) {
+  if (!uid || role !== 'teacher') {
     window.location.href = base;
     return false;
   }
+  
   if (activated !== 'true') {
-    window.location.href = base
-      .replace('index.html', 'activation.html');
+    window.location.href = base.replace('index.html', 'activation.html');
     return false;
   }
-  if (role !== 'teacher') {
+
+  // Cross-verify with server session
+  const res = await apiCall('/auth/verify-session', 'GET', null, true);
+  if (!res.success || res.data.role !== 'teacher') {
+    localStorage.clear();
     window.location.href = base;
     return false;
   }
@@ -220,43 +252,61 @@ export function guardTeacher() {
 }
 
 // Page guard for student pages
-export function guardStudent() {
-  const uid = localStorage.getItem('bp_uid');
-  const activated =
-    localStorage.getItem('bp_activated');
-  const role = localStorage.getItem('bp_role');
+export async function guardStudent() {
+  const uid = localStorage.getItem(BP.UID);
+  const activated = localStorage.getItem(BP.ACTIVATED);
+  const role = localStorage.getItem(BP.ROLE);
   const base = getIndexPath();
 
-  if (!uid) {
+  if (!uid || role !== 'student') {
     window.location.href = base;
     return false;
   }
+
   if (activated !== 'true') {
-    window.location.href = base
-      .replace('index.html', 'activation.html');
+    window.location.href = base.replace('index.html', 'activation.html');
     return false;
   }
-  if (role !== 'student') {
+
+  // Cross-verify with server session
+  const res = await apiCall('/auth/verify-session', 'GET', null, true);
+  if (!res.success || res.data.role !== 'student') {
+    localStorage.clear();
     window.location.href = base;
     return false;
   }
   return true;
 }
 
-// Page guard for admin pages
-export function guardAdmin() {
-  const uid = localStorage.getItem('bp_uid');
-  const role = localStorage.getItem('bp_role');
+// Page guard for admin pages (STRICT)
+export async function guardAdmin() {
+  const token = sessionStorage.getItem('admin_token');
   const base = getIndexPath();
 
-  if (!uid || role !== 'admin') {
+  if (!token) {
     window.location.href = base;
     return false;
   }
-  return true;
+
+  // Admin MUST verify with server on every dashboard entry
+  try {
+    const res = await fetch(API_BASE + '/admin/verify-session', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    if (!data.success) {
+      sessionStorage.clear();
+      window.location.href = base;
+      return false;
+    }
+    return true;
+  } catch (e) {
+    window.location.href = base;
+    return false;
+  }
 }
 
-// Debounce utility (Step 4)
+// Debounce utility
 export function debounce(func, timeout = 300) {
   let timer;
   return (...args) => {
@@ -276,35 +326,28 @@ export const BP = {
   ACTIVATED: 'bp_activated',
   PLAN: 'bp_plan',
   SUBJECT_LIMIT: 'bp_subject_limit',
-  
-  /**
-   * Helper to get current user data (Sync/Async)
-   * Prioritizes Firebase Auth but falls back to localStorage
-   */
+  LOGGING_OUT: 'bp_logging_out',
+  AI_DAILY_LIMIT: 30,
+
   getAuthUser: async () => {
     const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
     const auth = getAuth();
-    
-    // Wait for auth to initialize if needed (800ms max)
     if (!auth.currentUser) {
-       await new Promise(r => {
-         const uns = auth.onAuthStateChanged(u => { uns(); r(); });
-         setTimeout(r, 800);
-       });
+      await new Promise(r => {
+        let uns;
+        uns = auth.onAuthStateChanged(u => { if (uns) uns(); r(); });
+        setTimeout(r, 800);
+      });
     }
-
     const user = auth.currentUser;
     return {
-       uid: user?.uid || localStorage.getItem('bp_uid'),
-       displayName: user?.displayName || localStorage.getItem('bp_name'),
-       email: user?.email || localStorage.getItem('bp_email'),
-       photoURL: user?.photoURL || localStorage.getItem('bp_photo')
+      uid: user?.uid || localStorage.getItem(BP.UID),
+      displayName: user?.displayName || localStorage.getItem(BP.NAME),
+      email: user?.email || localStorage.getItem(BP.EMAIL),
+      photoURL: user?.photoURL || localStorage.getItem(BP.PHOTO)
     };
   },
-  /**
-   * Universal Streak Flame Animation (Matches Student POV)
-   * @param {string} canvasId - The ID of the canvas element
-   */
+
   initStreakFlame: (canvasId = 'streak-canvas') => {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -323,19 +366,19 @@ export const BP = {
       if (now - prev > interval) {
         prev = now;
         ctx.clearRect(0, 0, 16, 16);
-        ctx.strokeStyle = "#d14234"; // Outer
+        ctx.strokeStyle = "#d14234";
         let i = 0;
         for (let x = 4; x < 12; x++) {
           const h = Math.random() * (max[i] - min[i] + 1) + min[i];
           ctx.beginPath(); ctx.moveTo(x + 0.5, y[i++]); ctx.lineTo(x + 0.5, h); ctx.stroke();
         }
-        ctx.strokeStyle = "#f2a55f"; // Middle
+        ctx.strokeStyle = "#f2a55f";
         let j = 1;
         for (let x = 5; x < 11; x++) {
           const h = Math.random() * (max[j] - 5 - (min[j] - 5) + 1) + (min[j] - 5);
           ctx.beginPath(); ctx.moveTo(x + 0.5, y[j++] + 1); ctx.lineTo(x + 0.5, h); ctx.stroke();
         }
-        ctx.strokeStyle = "#e8dec5"; // Core
+        ctx.strokeStyle = "#e8dec5";
         let k = 3;
         for (let x = 7; x < 9; x++) {
           const h = Math.random() * (max[k] - 9 - (min[k] - 9) + 1) + (min[k] - 9);
@@ -346,43 +389,44 @@ export const BP = {
     }
     flame();
   },
-  
-  /**
-   * GLOBAL MAINTENANCE PROTOCOL
-   * Checks system status and injects overlay if active
-   */
+
+  showMaintenanceOverlay: (msg) => {
+    if (document.querySelector('.maintenance-overlay')) return;
+    
+    // Disable all interactive elements
+    document.querySelectorAll('button, input, a, form').forEach(el => el.disabled = true);
+    // Prevent further navigation
+    window.onbeforeunload = () => true;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'maintenance-overlay';
+    overlay.innerHTML = `
+      <div class="maintenance-content" style="max-width: 600px; padding: 40px; background: rgba(10,10,10,0.8); border: 1px solid rgba(255,207,0,0.2); border-radius: 40px; backdrop-filter: blur(20px); position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100000; text-align: center; font-family: sans-serif; color: #fff;">
+        <div style="margin: 0 auto 30px; width: 100px; height: 100px; background: rgba(255,207,0,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,207,0,0.2);">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFCF00" stroke-width="1.5">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"/>
+            </svg>
+        </div>
+        <div style="background: rgba(255,207,0,0.1); color: #FFCF00; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 25px;">Matrix Reconstruction</div>
+        <h1 style="font-size: 42px; margin-bottom: 25px; color: #fff;">Maintenance Active</h1>
+        <p style="font-size: 16px; color: #fff; line-height: 1.8; opacity: 0.8; font-weight: 400;">
+            ${msg || 'The BEE core is currently undergoing manual synchronization. <br> System access is restricted. Please contact customer care.'}
+        </p>
+        <div style="margin-top: 40px; font-size: 10px; color: #FFCF00; letter-spacing: 4px; font-weight: 900; opacity: 0.3;">
+          CORE_SEC_LEVEL: 1419 // ACCESS_DENIED
+        </div>
+      </div>
+    `;
+    document.body.prepend(overlay);
+    document.body.style.overflow = 'hidden';
+  },
+
   initMaintenanceCheck: async () => {
     try {
-      // EXCLUDE ADMIN PORTAL (Secret URL check)
       if (window.location.pathname.includes('matrix-core-v1419')) return;
-
       const res = await apiCall('/system/maintenance', 'GET', null, false);
       if (res && res.success && res.data.isMaintenance) {
-        // INJECT MAINTENANCE OVERLAY
-        const overlay = document.createElement('div');
-        overlay.className = 'maintenance-overlay';
-        overlay.innerHTML = `
-          <div class="maintenance-content" style="max-width: 600px; padding: 40px; background: rgba(10,10,10,0.8); border: 1px solid rgba(255,207,0,0.2); border-radius: 40px; backdrop-filter: blur(20px);">
-            <div style="margin: 0 auto 30px; width: 100px; height: 100px; background: rgba(255,207,0,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,207,0,0.2);">
-                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#FFCF00" stroke-width="1.5">
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.77 3.77z"/>
-                </svg>
-            </div>
-            <div class="maintenance-badge" style="margin-bottom: 25px;">Matrix Reconstruction</div>
-            <h1 class="maintenance-title" style="font-size: 42px; margin-bottom: 25px;">Maintenance Active</h1>
-            <p class="maintenance-msg" style="font-size: 16px; color: #fff; line-height: 1.8; opacity: 0.8; font-weight: 400;">
-                The BEE core is currently undergoing manual synchronization. <br>
-                <strong>System access is restricted. Please contact customer care.</strong>
-            </p>
-            <div style="margin-top: 40px; font-size: 10px; color: #FFCF00; letter-spacing: 4px; font-weight: 900; opacity: 0.3;">
-              CORE_SEC_LEVEL: 1419 // ACCESS_DENIED
-            </div>
-          </div>
-        `;
-        document.body.prepend(overlay);
-        document.body.style.overflow = 'hidden';
-        
-        // Block all UI interactions
+        BP.showMaintenanceOverlay(res.data.message);
         window.stop();
       }
     } catch (e) {
@@ -390,18 +434,13 @@ export const BP = {
     }
   },
 
-  /**
-   * SKELETON LOADER UTILITY
-   * Replaces content with shimmery placeholders
-   */
   showSkeleton: (containerId, type = 'card', count = 3) => {
     const cont = document.getElementById(containerId);
     if (!cont) return;
-    
     let html = '';
-    for(let i=0; i<count; i++) {
-        if (type === 'card') {
-            html += `
+    for (let i = 0; i < count; i++) {
+      if (type === 'card') {
+        html += `
                 <div class="adv-card skeleton" style="min-height: 150px; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
                     <div class="skeleton-title skeleton"></div>
                     <div class="skeleton-text skeleton"></div>
@@ -421,9 +460,59 @@ export const BP = {
         }
     }
     cont.innerHTML = html;
+  },
+
+  initAnnouncementBanner: async () => {
+    try {
+      if (window.location.pathname.includes('admin') || 
+          window.location.pathname.endsWith('index.html') || 
+          window.location.pathname === '/') return;
+
+      const res = await fetch(API_BASE + '/announcements/active');
+      const data = await res.json();
+
+      if (data && data.success && data.announcement) {
+        const banner = document.createElement('div');
+        banner.id = 'bee-announcement-banner';
+        banner.style.cssText = 'background:#FFD700;color:#000;padding:12px;text-align:center;font-weight:bold;position:sticky;top:0;z-index:10000;font-family:sans-serif;display:flex;justify-content:center;align-items:center;gap:15px;box-shadow:0 4px 10px rgba(0,0,0,0.2);';
+        banner.innerHTML = `
+          <span>📢 ${data.announcement.message}</span>
+          <button onclick="this.parentElement.remove()" style="background:transparent;border:none;font-size:20px;cursor:pointer;line-height:1;">✕</button>
+        `;
+        document.body.prepend(banner);
+      }
+    } catch (e) {
+      console.warn('Announcement fetch failed');
+    }
+  },
+
+  syncTeacherSignals: async () => {
+    try {
+      const res = await apiCall('/teacher/dashboard');
+      if (res && res.success) {
+        const hasReq = res.data.pendingRequestsCount > 0;
+        const hasDoubt = res.data.pendingDoubtsCount > 0;
+        
+        const reqDots = document.querySelectorAll('#sidebar-request-signal, #card-request-signal');
+        const doubtDots = document.querySelectorAll('#sidebar-doubt-signal, #card-doubt-signal');
+        const profileDots = document.querySelectorAll('#profile-signal');
+
+        reqDots.forEach(d => d.style.display = hasReq ? 'block' : 'none');
+        doubtDots.forEach(d => d.style.display = hasDoubt ? 'block' : 'none');
+        profileDots.forEach(d => d.style.display = (hasReq || hasDoubt) ? 'block' : 'none');
+      }
+    } catch(e) { console.warn("Signal Sync Failed", e); }
   }
 };
 
-// AUTO-INIT MAINTENANCE CHECK
-window.addEventListener('DOMContentLoaded', BP.initMaintenanceCheck);
+// AUTO-INIT TASKS
+const initCore = () => {
+    BP.initMaintenanceCheck();
+    BP.initAnnouncementBanner();
+};
 
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initCore);
+} else {
+    initCore();
+}

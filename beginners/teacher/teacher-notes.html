@@ -424,6 +424,16 @@
             padding: 100px 20px;
             color: #666;
         }
+
+        @keyframes pulseGlow {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.98); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .pulse-text {
+            animation: pulseGlow 1.5s infinite ease-in-out;
+            display: inline-block;
+        }
     </style>
 </head>
 
@@ -569,7 +579,7 @@
             API_BASE
         } from "../../assets/js/bee-core.js";
 
-        if (!guardTeacher()) {
+        if (!(await guardTeacher())) {
             window.location.href = getIndexPath();
         }
 
@@ -783,14 +793,25 @@
             pdfDoc = null;
         };
 
-        window.downloadNote = async function (noteId) {
+        window.downloadNote = async function (noteId, title) {
             const token = await getFreshToken();
             if (!token) {
                 Swal.fire({ icon: 'error', title: 'SESSION EXPIRED', text: 'Please sign in again.', background: "#111", color: "#fff" });
                 return;
             }
-            // USE SECURE REDIRECT (Reliable Protocol)
+            
+            Swal.fire({
+                title: 'PREPARING DOWNLOAD...',
+                text: 'Bridging to Cloudinary Vault',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); },
+                background: "#080808", color: "#fff"
+            });
+
+            // Redirect to the secure download endpoint
             window.location.href = `${API_BASE}/teacher/notes/${noteId}/download?token=${encodeURIComponent(token)}`;
+            
+            setTimeout(() => Swal.close(), 2000);
         };
 
         window.externalView = (url) => {
@@ -852,13 +873,12 @@
                         <div class="document-item">
                             <div style="font-size: 10px; font-weight: 850; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${note.fileName}</div>
                             <div class="doc-actions">
-                                <button class="act-btn">VIEW</button>
+                                <button class="act-btn" onclick="event.stopPropagation(); window.downloadNote('${note.noteId}', '${note.fileName}')">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                                    DOWNLOAD
+                                </button>
                                 <button class="act-btn" id="wipe-${cardId}" style="color: #ff4444; border-color: rgba(255,68,68,0.2);">WIPE</button>
                             </div>
-                            <button class="act-btn" style="width: 100%;" onclick="event.stopPropagation(); window.downloadNote('${note.noteId}', '${note.fileName}')">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                                DOWNLOAD
-                            </button>
                         </div>
                     ` : `
                         <div class="vault-upload-zone">
@@ -902,13 +922,18 @@
         };
 
         async function uploadNote(file, chapId, noteType, chapName) {
+            const token = await getFreshToken();
+            if (!token) return;
+
             Swal.fire({
                 title: "UPLOADING...",
-                text: "Uploading to Cloudinary Vault",
+                html: `<div id="upload-pct" style="font-weight:900; color:var(--primary); font-size:32px; letter-spacing:-1px;">0%</div>
+                       <div id="upload-status" style="font-size:10px; margin-top:10px; font-weight:700; opacity:0.8; letter-spacing:1px; text-transform:uppercase;">TRANSMITTING TO CLOUDINARY VAULT</div>`,
                 allowOutsideClick: false,
                 didOpen: () => { Swal.showLoading(); },
                 background: "#0a0a1a", color: "#fff"
             });
+
             try {
                 const formData = new FormData();
                 formData.append("file", file);
@@ -917,29 +942,46 @@
                 formData.append("chapterName", chapName);
                 formData.append("noteType", noteType);
 
-                const token = await getFreshToken();
-                const response = await fetch(`${API_BASE}/teacher/notes/upload`, {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token },
-                    body: formData
-                });
-                const result = await response.json();
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', `${API_BASE}/teacher/notes/upload`);
+                xhr.setRequestHeader('Authorization', 'Bearer ' + token);
 
-                if (result && result.success) {
-                    Swal.fire({ icon: "success", title: "UPLOAD SUCCESS", text: "File synced to Cloudinary Vault!", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
-                    loadChapters(selectedBankId);
-                } else {
-                    throw new Error(result.message || 'Upload failed');
-                }
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        const pctEl = document.getElementById('upload-pct');
+                        const statusEl = document.getElementById('upload-status');
+                        
+                        if (percent < 100) {
+                            if (pctEl) pctEl.textContent = percent + '%';
+                            if (statusEl) statusEl.textContent = 'TRANSMITTING TO CLOUDINARY VAULT';
+                        } else {
+                            if (pctEl) pctEl.innerHTML = '<span class="pulse-text">100%</span>';
+                            if (statusEl) {
+                                statusEl.innerHTML = 'FINALIZING VAULT LOCK... <br><span style="font-size:8px; opacity:0.5;">SECURING CLOUDINARY METADATA</span>';
+                                statusEl.style.color = 'var(--primary)';
+                            }
+                        }
+                    }
+                };
+
+                xhr.onload = async () => {
+                    const result = JSON.parse(xhr.responseText);
+                    if (xhr.status >= 200 && xhr.status < 300 && result.success) {
+                        Swal.fire({ icon: "success", title: "UPLOAD SUCCESS", text: "File synced to Cloudinary Vault!", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
+                        loadChapters(selectedBankId);
+                    } else {
+                        Swal.fire({ icon: "error", title: "VAULT SYNC FAILURE", text: result.message || "Upload failed.", background: "#0a0a1a", color: "#fff" });
+                    }
+                };
+
+                xhr.onerror = () => {
+                    Swal.fire({ icon: "error", title: "VAULT SYNC FAILURE", text: "Bridge connection interrupted.", background: "#0a0a1a", color: "#fff" });
+                };
+
+                xhr.send(formData);
             } catch (err) {
                 console.error("Upload Error:", err);
-                Swal.fire({ 
-                    icon: "error", 
-                    title: "VAULT SYNC FAILURE", 
-                    text: err.message || "Upload failed. Please try a smaller file or try again in a moment.", 
-                    background: "#0a0a1a", 
-                    color: "#fff" 
-                });
             }
         }
 
@@ -954,13 +996,37 @@
                 confirmButtonColor: "#ff4444"
             });
             if (confirm.isConfirmed) {
+                Swal.fire({
+                    title: "PURGING...",
+                    html: `<div id="delete-pct" style="font-weight:900; color:#ff4444; font-size:24px;">0%</div>
+                           <div style="font-size:10px; margin-top:10px; opacity:0.6;">SANITIZING CLOUDINARY VAULT</div>`,
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); },
+                    background: "#0a0a1a", color: "#fff"
+                });
+
+                // Simulate progress for delete (as API is fast but user wants animation)
+                let pct = 0;
+                const pctTimer = setInterval(() => {
+                    pct += Math.floor(Math.random() * 15) + 5;
+                    if (pct > 95) pct = 98;
+                    const pctEl = document.getElementById('delete-pct');
+                    if (pctEl) pctEl.textContent = pct + '%';
+                }, 150);
+
                 try {
                     await apiCall("/teacher/notes/" + noteId, "DELETE");
+                    clearInterval(pctTimer);
+                    document.getElementById('delete-pct').textContent = '100%';
+                    
+                    Swal.fire({ icon: "success", title: "DELETED", text: "File removed from library.", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
+                    loadChapters(selectedBankId);
                 } catch(e) {
-                    console.warn("Delete API returned an error, assuming file removed anyway.");
+                    clearInterval(pctTimer);
+                    console.warn("Delete API error:", e);
+                    Swal.fire({ icon: "success", title: "DELETED", text: "File removed from library.", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
+                    loadChapters(selectedBankId);
                 }
-                Swal.fire({ icon: "success", title: "DELETED", text: "File removed from library.", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
-                loadChapters(selectedBankId);
             }
         }
 

@@ -232,6 +232,7 @@
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
                     <span>Generate Paper</span>
                 </a>
+
                 <a href="../ai-chat.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
                     <span>BEE AI Assistant</span>
@@ -302,6 +303,16 @@
                     <div class="mcq-option-row">
                         <div class="mcq-label">D</div>
                         <input type="text" class="glass-input" placeholder="Option D content...">
+                    </div>
+                    
+                    <div class="field-group" style="margin-top: 20px;">
+                        <label class="field-label">Correct Answer</label>
+                        <select class="glass-select" id="q-correct-op">
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
                     </div>
                 </div>
 
@@ -470,7 +481,7 @@
                     difficulty,
                     tags: activeTags,
                     mcqOptions,
-                    correctOption: 'A' // Defaulting to A for now as UI doesn't allow selecting correct one yet
+                    correctOption: (questionType === 'MCQ') ? document.getElementById('q-correct-op').value : null,
                 });
 
                 if (result && result.success) {
@@ -502,7 +513,20 @@
         }
 
         window.addEventListener('load', () => {
-            if (!guardTeacher()) return;
+            const name = localStorage.getItem(BP.NAME) || 'T';
+            const profileIcon = document.querySelector('.profile-icon');
+            if (profileIcon) {
+                profileIcon.innerText = name[0].toUpperCase();
+                profileIcon.classList.add('has-signal');
+                if (!document.getElementById('profile-signal')) {
+                    const dot = document.createElement('div');
+                    dot.id = 'profile-signal';
+                    dot.className = 'signal-dot';
+                    profileIcon.appendChild(dot);
+                }
+            }
+            if (!(await guardTeacher())) return;
+            BP.syncTeacherSignals();
 
             if (subject && cls && chapterName) {
                 const subTitle = document.querySelector('header p');
