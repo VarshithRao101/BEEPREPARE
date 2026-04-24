@@ -38,12 +38,13 @@ const securityHeaders = helmet({
       ],
       connectSrc: [
         "'self'",
-        "https://firebaseapp.com",
+        "https://*.firebaseapp.com",
+        "https://*.googleapis.com",
         "https://identitytoolkit.googleapis.com",
         "https://securetoken.googleapis.com",
         "wss:"
       ],
-      frameSrc: ["'none'"],
+      frameSrc: ["'self'", "https://*.firebaseapp.com", "https://*.google.com"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: []
     }
@@ -180,24 +181,48 @@ const SENSITIVE_FIELDS = [
 ];
 
 const removeSensitiveFields = (obj) => {
+  if (!obj) return obj;
+  
+  // Handle arrays
   if (Array.isArray(obj)) {
     return obj.map(removeSensitiveFields);
   }
-  if (typeof obj !== 'object' || !obj) {
+  
+  // Handle non-objects
+  if (typeof obj !== 'object') {
     return obj;
   }
-  const clean = { ...obj };
-  for (const field of SENSITIVE_FIELDS) {
-    if (clean[field] !== undefined) {
-      delete clean[field];
-    }
+
+  // Deep clone to avoid mutating original and handle enumerable properties correctly
+  let clean;
+  try {
+    clean = JSON.parse(JSON.stringify(obj));
+  } catch (err) {
+    return obj; // Fallback if circular or non-serializable
   }
-  for (const key of Object.keys(clean)) {
-    if (typeof clean[key] === 'object') {
-      clean[key] = removeSensitiveFields(clean[key]);
+
+  const recursivelyClean = (item) => {
+    if (!item || typeof item !== 'object') return item;
+    
+    if (Array.isArray(item)) {
+      return item.map(recursivelyClean);
     }
-  }
-  return clean;
+
+    for (const field of SENSITIVE_FIELDS) {
+      if (Object.prototype.hasOwnProperty.call(item, field)) {
+        delete item[field];
+      }
+    }
+
+    for (const key of Object.keys(item)) {
+      if (item[key] && typeof item[key] === 'object') {
+        item[key] = recursivelyClean(item[key]);
+      }
+    }
+    return item;
+  };
+
+  return recursivelyClean(clean);
 };
 
 // === IP EXTRACTION ===

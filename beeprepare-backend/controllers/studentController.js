@@ -215,9 +215,9 @@ const updateProfile = async (req, res) => {
     if (phone !== undefined) updates.phone = phone;
 
     if (className !== undefined) {
-      const validClasses = ['Class 7', 'Class 8', 'Class 9', 'Class 10'];
+      const validClasses = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
       if (!validClasses.includes(className)) {
-        return error(res, 'Class must be Class 7, 8, 9, or 10', 'INVALID_CLASS', 400);
+        return error(res, 'Class must be between Class 6 and 12', 'INVALID_CLASS', 400);
       }
       updates.class = className;
     }
@@ -227,7 +227,8 @@ const updateProfile = async (req, res) => {
     }
 
     await User.updateOne({ googleUid: req.user.googleUid }, updates);
-    return success(res, 'Profile updated successfully', updates);
+    const updatedUser = await User.findOne({ googleUid: req.user.googleUid }).lean();
+    return success(res, 'Profile updated successfully', updatedUser);
   } catch (err) {
     console.error('updateProfile error:', err);
     return error(res, 'Failed to update profile', 'SERVER_ERROR', 500);

@@ -82,7 +82,8 @@ const checkPaymentStatus = async (req, res) => {
   try {
     const { utrNumber } = req.params;
     const payment = await PaymentRequest.findOne({ utrNumber })
-      .select('status paymentType createdAt rejectionReason');
+      .select('status paymentType createdAt rejectionReason')
+      .lean();
 
     if (!payment) {
       return error(res, 'Payment request not found', 'NOT_FOUND', 404);

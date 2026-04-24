@@ -76,12 +76,14 @@ const getDashboard = async (req, res) => {
   try {
     const teacherId = req.user.googleUid;
 
+    console.log(`[DASHBOARD] Fetching data for teacher ${teacherId}...`);
     const [banks, activityLogs, pendingDoubtsCount, pendingRequestsCount] = await Promise.all([
       Bank.find({ teacherId }).select('subject class bankCode totalQuestions notesCount chapters isActive').lean(),
       ActivityLog.find({ userId: teacherId }).sort({ createdAt: -1 }).limit(10).lean(),
       Doubt.countDocuments({ teacherId, unreadByTeacher: true }),
       AccessRequest.countDocuments({ teacherId, status: 'pending' })
     ]);
+    console.log(`[DASHBOARD] DB Queries complete for ${teacherId}`);
 
     const user = req.user;
     // Self-healing: Recalculate unique subjects count for stats
@@ -97,7 +99,7 @@ const getDashboard = async (req, res) => {
       subjects: banks.map(b => ({
         bankId: b._id,
         subject: b.subject,
-        class: (b.class || '').replace('Class ', ''), // Normalize for "10" vs "Class 10" matching
+        class: b.class, // Keep full name for frontend consistency (e.g. "Class 10")
         bankCode: b.bankCode,
         totalQuestions: b.totalQuestions,
         notesCount: b.notesCount,
@@ -134,19 +136,18 @@ const getProfile = async (req, res) => {
 
     let totalNotes = 0;
     try {
-      const notesSnapshot = await db.collection('notes')
-        .where('teacherId', '==', teacherId)
-        .get();
-      totalNotes = notesSnapshot.size;
+      totalNotes = await Note.countDocuments({ teacherId });
     } catch (e) {
-      console.warn('Firestore read failed in getProfile (likely quota):', e.message);
+      console.warn('Note count failed in getProfile:', e.message);
     }
 
+    console.log(`[PROFILE] Fetching data for teacher ${teacherId}...`);
     const [banks, totalQuestions, papersGenerated] = await Promise.all([
       Bank.find({ teacherId }).lean(),
       Question.countDocuments({ createdBy: teacherId }),
       ActivityLog.countDocuments({ userId: teacherId, type: 'paper_generated' })
     ]);
+    console.log(`[PROFILE] DB Queries complete: ${banks.length} banks, ${totalQuestions} questions.`);
 
     // ── Self-Healing: Sync subjects/classes from Banks if User doc is drifted ────
     const bankSubjects = [...new Set(banks.map(b => b.subject))];
@@ -165,11 +166,13 @@ const getProfile = async (req, res) => {
     }
 
     if (needsUserUpdate) {
+      console.log(`[PROFILE] Syncing drifted user state for ${teacherId}`);
       await User.updateOne({ googleUid: teacherId }, updateOps);
       user.subjects = bankSubjects;
       user.classes = bankClasses;
     }
 
+    console.log(`[PROFILE] Returning success for ${teacherId}`);
     return success(res, 'Profile fetched', {
       googleUid: user.googleUid,
       email: user.email,
@@ -185,8 +188,8 @@ const getProfile = async (req, res) => {
       aiMessagesToday: user.aiMessagesToday || 0,
       licenseActivatedAt: user.licenseActivatedAt,
       licenseExpiresAt: user.licenseExpiresAt,
-      subjects: user.subjects,
-      classes: user.classes,
+      subjects: user.subjects || [],
+      classes: user.classes || [],
       chapters: user.chapters || {},
       stats: {
         totalQuestions,
@@ -230,28 +233,38 @@ const updateProfile = async (req, res) => {
     }
 
     if (subjects !== undefined) {
-      if (!Array.isArray(subjects)) {
+      let subjectsArray = subjects;
+      if (subjects && typeof subjects === 'object' && !Array.isArray(subjects)) {
+        subjectsArray = Object.values(subjects);
+        console.log(`[FIX] Converted object-like subjects to array for ${teacherId}`);
+      }
+      if (!Array.isArray(subjectsArray)) {
+        console.warn(`[updateProfile] Invalid subjects format from user ${teacherId}:`, subjects);
         return error(res, 'Subjects must be an array', 'INVALID_SUBJECTS', 400);
       }
-      if (subjects.length > (req.user.subjectLimit || 1)) {
+      if (subjectsArray.length > (req.user.subjectLimit || 1)) {
         return error(res, `Subject limit reached (${req.user.subjectLimit || 1}). ✨ Activate your account to manage more subjects and expand your academic reach!`, 'LIMIT_EXCEEDED', 403);
       }
       const validSubjects = ['Physics', 'Chemistry', 'Mathematics', 'Maths', 'Biology', 'English', 'Telugu', 'Hindi', 'Social', 'Social Studies', 'Science', 'EVS', 'Computer', 'History', 'Geography'];
-      if (!subjects.every(s => validSubjects.includes(s))) {
+      if (!subjectsArray.every(s => validSubjects.includes(s))) {
         return error(res, 'One or more invalid subjects selected', 'INVALID_SUBJECT', 400);
       }
-      updates.subjects = subjects;
+      updates.subjects = subjectsArray;
     }
 
     if (classes !== undefined) {
-      if (!Array.isArray(classes)) {
+      let classesArray = classes;
+      if (classes && typeof classes === 'object' && !Array.isArray(classes)) {
+        classesArray = Object.values(classes);
+      }
+      if (!Array.isArray(classesArray)) {
         return error(res, 'Classes must be an array', 'INVALID_CLASSES', 400);
       }
       const validClasses = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
-      if (!classes.every(c => validClasses.includes(c))) {
+      if (!classesArray.every(c => validClasses.includes(c))) {
         return error(res, 'One or more invalid classes selected', 'INVALID_CLASS', 400);
       }
-      updates.classes = classes;
+      updates.classes = classesArray;
     }
 
     if (chapters !== undefined) {
@@ -367,7 +380,7 @@ const addSubject = async (req, res) => {
     }
 
     const validSubjects = ['Physics', 'Chemistry', 'Mathematics', 'Maths', 'Biology', 'English', 'Telugu', 'Hindi', 'Social', 'Social Studies', 'Science', 'EVS', 'Computer', 'History', 'Geography'];
-    const validClasses = ['Class 7', 'Class 8', 'Class 9', 'Class 10'];
+    const validClasses = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
 
     if (!validSubjects.includes(subject)) {
       return error(res, 'Invalid subject', 'INVALID_SUBJECT', 400);

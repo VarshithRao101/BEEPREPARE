@@ -405,6 +405,15 @@
                 </span>
             </div>
 
+            <div class="input-group" id="captcha-group" style="display: none; margin-bottom: 30px;">
+                <label id="captcha-label">Security Challenge</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <div id="captcha-question" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; font-weight: 800; border: 1px solid rgba(255,215,0,0.2); font-size: 14px; min-width: 120px;">---</div>
+                    <input type="number" id="captcha-input" placeholder="Answer" style="flex: 1; padding: 12px;">
+                </div>
+                <input type="hidden" id="captcha-token">
+            </div>
+
             <button class="login-btn" id="loginBtn">AUTHORIZE ACCESS</button>
             <p id="errorMsg" style="color: var(--danger); font-size: 13px; margin-top: 20px; font-weight: 600; min-height: 20px;"></p>
         </div>
@@ -459,13 +468,34 @@
             input.type = input.type === 'password' ? 'text' : 'password';
         };
 
+        const fetchCaptcha = async () => {
+            try {
+                const res = await fetch('/api/admin-security/captcha');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('captcha-question').textContent = data.data.question;
+                    document.getElementById('captcha-token').value = data.data.token;
+                    document.getElementById('captcha-group').style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Security challenge failed to load');
+            }
+        };
+
         const login = async () => {
             const adminId = document.getElementById('adminId').value.trim();
             const password = document.getElementById('adminPass').value.trim();
+            const captcha = document.getElementById('captcha-input').value.trim();
+            const captchaToken = document.getElementById('captcha-token').value;
             const errorEl = document.getElementById('errorMsg');
 
             if (!adminId || !password) {
                 errorEl.textContent = 'Identity and Security Key required.';
+                return;
+            }
+
+            if (document.getElementById('captcha-group').style.display !== 'none' && !captcha) {
+                errorEl.textContent = 'Please solve the security challenge.';
                 return;
             }
 
@@ -485,25 +515,30 @@
                 const res = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ adminId, password })
+                    body: JSON.stringify({ adminId, password, captcha, captchaToken })
                 });
                 const data = await res.json();
 
                 if (data.success) {
                     sessionStorage.setItem('admin_token', data.data.token);
-                    sessionStorage.setItem('admin_id', adminId);
+                    sessionStorage.setItem('admin_id', data.data.adminId || adminId);
                     sessionStorage.removeItem('login_attempts');
                     sessionStorage.removeItem('lockout_until');
                     showGrid();
                 } else {
                     let attempts = parseInt(sessionStorage.getItem('login_attempts') || '0') + 1;
                     sessionStorage.setItem('login_attempts', attempts);
-                    if (attempts >= 3) {
+                    
+                    if (data.error?.code === 'CAPTCHA_REQUIRED' || data.error?.code === 'INVALID_CAPTCHA') {
+                        errorEl.textContent = 'Invalid security challenge answer.';
+                        fetchCaptcha();
+                    } else if (attempts >= 3) {
                         const until = Date.now() + 30 * 60 * 1000;
                         sessionStorage.setItem('lockout_until', until);
                         errorEl.textContent = 'VOID DETECTED. TERMINAL LOCKED 30M.';
                     } else {
                         errorEl.textContent = `ACCESS_DENIED. ${3 - attempts} ATTEMPTS REMAIN.`;
+                        if (attempts >= 1) fetchCaptcha();
                     }
                     btn.textContent = originalText;
                     btn.disabled = false;

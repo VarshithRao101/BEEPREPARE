@@ -595,7 +595,7 @@
             }
         };
 
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             if (!(await guardStudent())) return;
             loadBanks();
             window.renderBlueprint();

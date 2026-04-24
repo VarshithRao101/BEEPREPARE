@@ -45,7 +45,7 @@ const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
 
 const adminLogin = async (req, res) => {
   try {
-    const { adminId, password } = req.body;
+    const { adminId, password, captcha, captchaToken } = req.body;
     const ip = req.ip;
 
     if (!adminId || !password) {
@@ -54,7 +54,22 @@ const adminLogin = async (req, res) => {
         'MISSING_CREDENTIALS', 400);
     }
 
-    // Brute force check
+    // 1. CAPTCHA Verification
+    if (!captcha || !captchaToken) {
+        return error(res, 'Security challenge incomplete', 'CAPTCHA_REQUIRED', 400);
+    }
+
+    const [tokenPart, expectedSum, expiry] = captchaToken.split(':');
+    const crypto = require('crypto');
+    const verifyToken = crypto.createHmac('sha256', process.env.ADMIN_JWT_SECRET)
+        .update(`${expectedSum}-${expiry}`)
+        .digest('hex');
+
+    if (tokenPart !== verifyToken || Date.now() > parseInt(expiry) || parseInt(captcha) !== parseInt(expectedSum)) {
+        return error(res, 'Security challenge failed or expired', 'INVALID_CAPTCHA', 403);
+    }
+
+    // 2. Brute force check
     const attemptKey = `${ip}_${adminId}`;
     const attempts = loginAttempts.get(attemptKey) || { count: 0, lastTry: 0 };
 
@@ -66,9 +81,9 @@ const adminLogin = async (req, res) => {
     }
 
     const { verifyAdminCredentials, generateAdminToken } = require('../utils/adminAuth');
-    const isMatch = verifyAdminCredentials(adminId.trim(), password.trim());
+    const authResult = await verifyAdminCredentials(adminId.trim(), password.trim());
 
-    if (!isMatch) {
+    if (!authResult) {
       const newCount = attempts.count + 1;
       loginAttempts.set(attemptKey, { count: newCount, lastTry: Date.now() });
       
@@ -81,18 +96,34 @@ const adminLogin = async (req, res) => {
     // Clear attempts on success
     loginAttempts.delete(attemptKey);
 
+    const tokenJwt = generateAdminToken(authResult.id);
+
     // Register session in DB for revocation tracking
     await AdminSession.create({
-      adminId: adminId.trim(),
-      token,
+      adminId: authResult.id,
+      token: tokenJwt,
       ip,
       userAgent: req.headers['user-agent'] || 'unknown',
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000) // 8h
     });
 
+    // Log Activity
+    try {
+        await ActivityLog.create({
+            adminId: authResult.id,
+            action: 'ADMIN_LOGIN',
+            target: 'SYSTEM',
+            details: `Login successful via ${authResult.type} credentials`,
+            ip,
+            userAgent: req.headers['user-agent'] || 'unknown'
+        });
+    } catch (logErr) {
+        console.warn('Login logging failed:', logErr.message);
+    }
+
     return success(res, 'Login successful', {
-      token,
-      adminId: adminId.trim(),
+      token: tokenJwt,
+      adminId: authResult.id,
       expiresIn: '8h'
     });
 
@@ -177,10 +208,10 @@ const getOverview = async (req, res) => {
       Question.countDocuments(),
       TestSession.countDocuments(),
       PaymentRequest.countDocuments({ status: 'pending' }),
-      PaymentRequest.find({ status: 'approved' }),
-      User.find().sort({ createdAt: -1 }).limit(10).select('email displayName role createdAt'),
-      AppSettings.findOne({ key: 'maintenance_mode' }),
-      Announcement.findOne({ isActive: true }).sort({ createdAt: -1 }),
+      PaymentRequest.find({ status: 'approved' }).lean(),
+      User.find().sort({ createdAt: -1 }).limit(10).select('email displayName role createdAt').lean(),
+      AppSettings.findOne({ key: 'maintenance_mode' }).lean(),
+      Announcement.findOne({ isActive: true }).sort({ createdAt: -1 }).lean(),
       getDbHealth()
     ]);
 
@@ -243,7 +274,8 @@ const getUsers = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit))
-      .select('googleUid email displayName role isActivated planType createdAt isBlocked lastLoginAt');
+      .select('googleUid email displayName role isActivated planType createdAt isBlocked lastLoginAt')
+      .lean();
 
     const total = await User.countDocuments(query);
 
@@ -423,7 +455,8 @@ const getPayments = async (req, res) => {
   const payments = await PaymentRequest.find(query)
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
-    .limit(parseInt(limit));
+    .limit(parseInt(limit))
+    .lean();
 
   const total = await PaymentRequest.countDocuments(query);
 
@@ -527,9 +560,21 @@ const deletePaymentRequest = async (req, res) => {
     return error(res, 'Invalid action code', 'INVALID_CODE', 403);
   }
 
-  const payment = await PaymentRequest.findByIdAndDelete(id);
-  if (!payment) return error(res, 'Payment not found', 'NOT_FOUND', 404);
+  const mongoose = require('mongoose');
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    console.warn(`[ADMIN_ACTION] Invalid ID format provided: ${id}`);
+    return error(res, 'Invalid ID format', 'INVALID_ID', 400);
+  }
 
+  console.log(`[ADMIN_ACTION] Deleting payment request: ${id}`);
+  const payment = await PaymentRequest.findOneAndDelete({ _id: id });
+  
+  if (!payment) {
+    console.warn(`[ADMIN_ACTION] Payment not found for deletion: ${id}`);
+    return error(res, 'Payment not found', 'NOT_FOUND', 404);
+  }
+
+  console.log(`[ADMIN_ACTION] Payment deleted successfully: ${id}`);
   return success(res, 'Payment request deleted');
 };
 
@@ -541,9 +586,21 @@ const deleteLicenseKey = async (req, res) => {
     return error(res, 'Invalid action code', 'INVALID_CODE', 403);
   }
 
-  const key = await LicenseKey.findByIdAndDelete(id);
-  if (!key) return error(res, 'Key not found', 'NOT_FOUND', 404);
+  const mongoose = require('mongoose');
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    console.warn(`[ADMIN_ACTION] Invalid ID format provided: ${id}`);
+    return error(res, 'Invalid ID format', 'INVALID_ID', 400);
+  }
 
+  console.log(`[ADMIN_ACTION] Deleting license key: ${id}`);
+  const key = await LicenseKey.findOneAndDelete({ _id: id });
+
+  if (!key) {
+    console.warn(`[ADMIN_ACTION] Key not found for deletion: ${id}`);
+    return error(res, 'Key not found', 'NOT_FOUND', 404);
+  }
+
+  console.log(`[ADMIN_ACTION] Key deleted successfully: ${id}`);
   return success(res, 'License key deleted');
 };
 

@@ -204,10 +204,10 @@
                     <td><span class="status-pill status-${p.status}">${p.status}</span></td>
                     <td class="actions">
                         ${p.status === 'pending' ? `
-                            <button class="btn-approve" onclick="approvePayment('${p._id}')">Approve</button>
-                            <button class="btn-reject" onclick="rejectPayment('${p._id}')">Reject</button>
+                            <button class="btn-approve" onclick="approvePayment('${p._id.toString()}')">Approve</button>
+                            <button class="btn-reject" onclick="rejectPayment('${p._id.toString()}')">Reject</button>
                         ` : ''}
-                        <button class="btn-reject" style="background:#444;" onclick="deletePayment('${p._id}')">Delete</button>
+                        <button class="btn-reject" style="background:#444;" onclick="deletePayment('${p._id.toString()}')">Delete</button>
                     </td>
                 </tr>
             `).join('');

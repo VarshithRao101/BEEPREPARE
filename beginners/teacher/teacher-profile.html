@@ -673,6 +673,15 @@
     }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.onerror = function(msg, url, line, col, error) {
+            alert("JS Error: " + msg + "\nAt: " + url + ":" + line + ":" + col);
+            return false;
+        };
+        window.onunhandledrejection = function(event) {
+            alert("Unhandled Rejection: " + event.reason);
+        };
+    </script>
 </head>
 
 <body>
@@ -1076,30 +1085,122 @@
             stats: { classes: 0, papers: 0, questions: 0 }
         };
 
+        // Define global functions at the top of the module to prevent ReferenceErrors
+        window.openEditProfile = () => {
+            const currentPlanLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 1;
+            document.getElementById('subject-count-limit').innerText = currentPlanLimit;
+            document.getElementById('edit-display-name').value = appState.name || '';
+            
+            const nameInput = document.getElementById('edit-display-name');
+            if (appState.nameChanged) {
+                nameInput.disabled = true;
+                nameInput.style.opacity = '0.5';
+                nameInput.style.cursor = 'not-allowed';
+                nameInput.title = "Identity locked — can only be changed once.";
+            }
+
+            appState.isActiveUser = (appState.planType === 'active');
+            activeChapters = appState.chapters || {};
+
+            const editModal = document.getElementById('editProfileModal');
+            editModal.style.display = 'flex';
+            setTimeout(() => editModal.classList.add('modal-active'), 10);
+            renderSubjects();
+            renderClasses();
+        };
+
+        window.closeEditProfile = () => {
+            const editModal = document.getElementById('editProfileModal');
+            editModal.classList.remove('modal-active');
+            setTimeout(() => editModal.style.display = 'none', 300);
+        };
+
+        window.saveAndClose = async () => {
+            const btn = document.getElementById('save-profile-btn');
+            const originalText = btn.innerText;
+            btn.innerText = 'Saving...';
+            btn.disabled = true;
+
+            const name = document.getElementById('edit-display-name').value.trim();
+
+            if (name.length < 2) {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                return Swal.fire({ icon: 'error', title: 'Invalid Name', background: '#1a1a2e', color: '#fff' });
+            }
+
+            try {
+                // Defensive: Ensure subjects and classes are sent as arrays
+                const subjectsArray = Array.isArray(appState.subjects) ? appState.subjects : Object.values(appState.subjects || {});
+                const classesArray = Array.isArray(appState.classes) ? appState.classes : Object.values(appState.classes || {});
+
+                const res = await apiCall('/teacher/profile', 'PUT', {
+                    displayName: name,
+                    classes: classesArray,
+                    subjects: subjectsArray,
+                    chapters: activeChapters
+                });
+
+                if (res && res.success) {
+                    await initProfile();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Profile Updated',
+                        text: 'Your subjects and chapters have been updated.',
+                        confirmButtonColor: '#ffc107',
+                        background: '#1a1a2e', color: '#fff'
+                    });
+                    window.closeEditProfile();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Update Failed', text: res ? res.message : 'Unknown error', background: '#1a1a2e', color: '#fff' });
+                }
+            } catch (e) {
+                console.error('Save failed:', e);
+                Swal.fire({ icon: 'error', title: 'Network Error', background: '#1a1a2e', color: '#fff' });
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        };
+
         const logoutModal = document.getElementById('logoutModal');
 
         async function initProfile() {
-            const res = await apiCall('/teacher/profile');
-            if (res && res.success) {
-                appState = { ...appState, ...res.data };
-                localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 1);
-                
-                // Fetch real bank combinations for dropdown accuracy
-                const dash = await apiCall('/teacher/dashboard');
-                if(dash && dash.success) {
-                    appState.ownBanks = dash.data.subjects;
+            try {
+                console.log('[INIT] Starting profile sync...');
+                const res = await apiCall('/teacher/profile');
+                if (res && res.success) {
+                    appState = { ...appState, ...res.data };
+                    appState.subjects = Array.isArray(appState.subjects) ? appState.subjects : [];
+                    appState.classes = Array.isArray(appState.classes) ? appState.classes : [];
+                    
+                    localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 1);
+                    
+                    // Fetch real bank combinations for dropdown accuracy
+                    const dash = await apiCall('/teacher/dashboard');
+                    if(dash && dash.success) {
+                        appState.ownBanks = dash.data.subjects;
+                    }
+                } else {
+                    console.warn('[INIT] Profile fetch unsuccessful:', res);
                 }
+
+                // Sync BEE-SIGNAL dots
+                await BP.syncTeacherSignals().catch(e => console.warn("Signal sync failed", e));
+
+                updateUI();
+            } catch (err) {
+                console.error('[INIT] Critical failure in initProfile:', err);
+                // Even on error, try to update UI with what we have (initial state)
+                updateUI();
             }
-
-            // Sync BEE-SIGNAL dots
-            BP.syncTeacherSignals();
-
-            updateUI();
         }
 
         function updateUI() {
-            document.querySelector('.profile-name').innerText = appState.displayName || appState.name;
-            const initials = (appState.displayName || appState.name).split(' ').map(n => n[0]).join('').toUpperCase();
+            console.log('[UI] Updating profile UI...', appState);
+            const name = appState.displayName || appState.name || 'Teacher';
+            document.querySelector('.profile-name').innerText = name;
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
             document.querySelector('.profile-avatar').innerText = initials;
             document.querySelector('.profile-icon').innerText = initials[0] || 'T';
             
@@ -1210,33 +1311,9 @@
 
         let activeChapters = {};
 
-        window.openEditProfile = () => {
-            const currentPlanLimit = parseInt(localStorage.getItem(BP.SUBJECT_LIMIT)) || 0;
-            document.getElementById('subject-count-limit').innerText = currentPlanLimit;
-            document.getElementById('edit-display-name').value = appState.name || '';
-            
-            // Name Change Lock UI
-            const nameInput = document.getElementById('edit-display-name');
-            if (appState.nameChanged) {
-                nameInput.disabled = true;
-                nameInput.style.opacity = '0.5';
-                nameInput.style.cursor = 'not-allowed';
-                nameInput.title = "Identity locked — can only be changed once.";
-            }
 
-            appState.isActiveUser = (appState.planType === 'active');
-            activeChapters = appState.chapters || {};
 
-            editModal.style.display = 'flex';
-            setTimeout(() => editModal.classList.add('modal-active'), 10);
-            renderSubjects();
-            renderClasses();
-        };
 
-        window.closeEditProfile = () => {
-            editModal.classList.remove('modal-active');
-            setTimeout(() => editModal.style.display = 'none', 300);
-        };
 
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1559,24 +1636,7 @@
             });
         };
 
-        window.removeChapter = (key, idx) => {
-            Swal.fire({
-                title: 'Delete Chapter?',
-                text: "Are you sure you want to remove this chapter?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ff4d4d',
-                cancelButtonColor: '#333',
-                confirmButtonText: 'Yes, delete',
-                background: '#1a1a2e',
-                color: '#fff'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    activeChapters[key].splice(idx, 1);
-                    loadChapters();
-                }
-            });
-        };
+
 
         window.handleWipeData = async function() {
             // Layer 1: Warning
@@ -1634,56 +1694,7 @@
             }
         }
 
-        window.saveAndClose = async () => {
-            const btn = document.getElementById('save-profile-btn');
-            btn.innerText = 'Saving...';
-            btn.disabled = true;
 
-            const name = document.getElementById('edit-display-name').value.trim();
-
-            if (name.length < 2) {
-                btn.innerText = 'Save Selection';
-                btn.disabled = false;
-                return Swal.fire({ icon: 'error', title: 'Invalid Name', background: '#1a1a2e', color: '#fff' });
-            }
-
-            try {
-                // Now saving the chapters correctly to the backend map.
-                const res = await apiCall('/teacher/profile', 'PUT', {
-                    displayName: name,
-                    classes: appState.classes,
-                    subjects: appState.subjects,
-                    chapters: activeChapters
-                });
-
-                if (res && res.success) {
-                    appState.displayName = name;
-                    appState.name = name;
-                    appState.chapters = activeChapters;
-                    localStorage.setItem(BP.NAME, name);
-                    
-                    // Full refresh to ensure backend sync (self-healing, etc)
-                    await initProfile();
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Profile Updated',
-                        text: 'Your subjects and chapters have been updated.',
-                        showConfirmButton: true,
-                        confirmButtonText: 'Great!',
-                        confirmButtonColor: '#ffc107',
-                        background: '#1a1a2e', color: '#fff'
-                    });
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Update Failed', text: res ? res.message : 'Unknown error', background: '#1a1a2e', color: '#fff' });
-                }
-            } catch (e) {
-                console.error(e);
-            }
-
-            btn.innerText = 'Save Selection';
-            btn.disabled = false;
-        };
 
         document.addEventListener('DOMContentLoaded', () => {
             initProfile();

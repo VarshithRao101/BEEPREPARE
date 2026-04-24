@@ -166,8 +166,8 @@
                     <td><span style="color: ${bank.isActive ? 'var(--success)' : 'var(--danger)'}; font-weight:900;">${bank.isActive ? 'LIVE' : 'HALTED'}</span></td>
                     <td>
                         <div class="actions">
-                            <button class="btn-act btn-deact" onclick="deactivateBank('${bank._id}')">HALT</button>
-                            <button class="btn-act btn-del" onclick="deleteBank('${bank._id}')">PURGE</button>
+                            <button class="btn-act btn-deact" onclick="deactivateBank('${bank._id.toString()}')">HALT</button>
+                            <button class="btn-act btn-del" onclick="deleteBank('${bank._id.toString()}')">PURGE</button>
                         </div>
                     </td>
                 </tr>

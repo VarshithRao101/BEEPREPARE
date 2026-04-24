@@ -247,7 +247,7 @@
                     <td style="color: var(--muted); font-size: 12px;">${new Date(k.createdAt).toLocaleString()}</td>
                     <td><span class="status ${k.isUsed ? 'status-used' : 'status-unused'}">${k.isUsed ? 'BURNED' : 'ACTIVE'}</span></td>
                     <td>
-                        <button onclick="deleteKey('${k._id}')" style="background:rgba(255,68,68,0.1); color:#ff4444; border:1px solid rgba(255,68,68,0.2); padding:5px 10px; border-radius:5px; font-size:10px; font-weight:800; cursor:pointer; transition:0.3s;">
+                        <button onclick="deleteKey('${k._id.toString()}')" style="background:rgba(255,68,68,0.1); color:#ff4444; border:1px solid rgba(255,68,68,0.2); padding:5px 10px; border-radius:5px; font-size:10px; font-weight:800; cursor:pointer; transition:0.3s;">
                             DELETE
                         </button>
                     </td>

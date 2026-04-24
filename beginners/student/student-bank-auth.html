@@ -407,7 +407,7 @@
             }
         };
 
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             if (!(await guardStudent())) return;
             loadRequestContext();
 
@@ -420,6 +420,7 @@
                 }
             });
         });
+
     </script>
     <style>
         @keyframes shake {

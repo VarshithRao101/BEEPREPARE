@@ -25,8 +25,11 @@ export async function adminApi(endpoint, method = 'GET', body = null) {
     };
     if (body) options.body = JSON.stringify(body);
     
+    // Ensure endpoint is a string and not an object accidentally passed in
+    const safeEndpoint = String(endpoint).replace('[object Object]', 'INVALID_ID');
+    
     try {
-        const res = await fetch(API_BASE + endpoint, options);
+        const res = await fetch(API_BASE + safeEndpoint, options);
         if (res.status === 401) {
             sessionStorage.clear();
             window.location.href = 'index.html';

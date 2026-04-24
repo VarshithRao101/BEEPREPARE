@@ -284,4 +284,12 @@ const wipeData = async (req, res) => {
   }
 };
 
-module.exports = { googleLogin, setRole, logout, wipeData };
+const verifySession = async (req, res) => {
+  return success(res, 'Session valid', {
+    uid: req.user.googleUid,
+    role: req.user.role,
+    isActivated: req.user.isActivated
+  });
+};
+
+module.exports = { googleLogin, setRole, logout, wipeData, verifySession };

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const requireAuth = require('../middleware/requireAuth');
-const { googleLogin, setRole, logout, wipeData } = require('../controllers/authController');
+const { googleLogin, setRole, logout, wipeData, verifySession } = require('../controllers/authController');
 const { validateGoogleLogin, validateSetRole } = require('../middleware/validators');
 
 /**
@@ -25,6 +25,7 @@ router.post('/set-role', requireAuth, validateSetRole, setRole);
  */
 router.post('/wipe-data', requireAuth, wipeData);
 
+router.get('/verify-session', requireAuth, verifySession);
 router.post('/logout', requireAuth, logout);
 
 module.exports = router;

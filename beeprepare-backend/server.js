@@ -51,6 +51,10 @@ app.use((req, res, next) => {
 });
 
 // === REQUEST TRACKING ===
+app.use((req, res, next) => {
+  console.log(`[REQUEST] ${req.method} ${req.url} - ${new Date().toISOString()}`);
+  next();
+});
 app.use(requestTracker);
 
 // === CORS — LOCKED DOWN ===
@@ -141,7 +145,7 @@ app.get('/gatekeeper', (req, res) => {
       <body>
           <div class="bg"></div>
           <div class="card">
-              <h1>🚫 Access Denied</h1>
+              <h1>Access Denied</h1>
               <p>Matrix Node Entry Requires Authorized Key.</p>
           </div>
       </body>
@@ -150,6 +154,145 @@ app.get('/gatekeeper', (req, res) => {
   }
   const currentCode = getRollingSecret(0);
   res.redirect(`/gate/${currentCode}/index.html`);
+});
+
+// Vault Login Handler (Firebase ID Token Verify)
+app.post('/api/admin-security/vault-login', async (req, res) => {
+    const { idToken } = req.body;
+    const admin = require('firebase-admin');
+    const ALLOWED_EMAILS = [
+        'ravindarraodevarneni@gmail.com',
+        'vcccricket7@gmail.com'
+    ];
+
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const email = decodedToken.email;
+
+        if (!ALLOWED_EMAILS.includes(email)) {
+            return res.status(403).json({ success: false, message: 'UNAUTHORIZED_EMAIL' });
+        }
+
+        const { getActiveCredentials } = require('./utils/adminAuth');
+        const creds = await getActiveCredentials();
+
+        res.json({ success: true, data: creds });
+    } catch (err) {
+        res.status(401).json({ success: false, message: 'INVALID_TOKEN' });
+    }
+});
+
+app.get('/vault', async (req, res) => {
+  const key = req.query.key;
+  const vaultKey = process.env.ADMIN_VAULT_KEY || 'BEE_VAULT_DEFAULT_SECRET';
+  
+  if (!key || key !== vaultKey) {
+    return res.status(403).send('UNAUTHORIZED_VAULT_ACCESS');
+  }
+
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>BEE Vault | Security Node</title>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
+            body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #000; color: #fff; font-family: 'Outfit', sans-serif; }
+            .card { background: rgba(18, 18, 18, 0.8); backdrop-filter: blur(20px); padding: 40px; border-radius: 40px; border: 1px solid rgba(255, 215, 0, 0.2); text-align: center; max-width: 420px; width: 90%; }
+            h1 { color: #FFD700; font-size: 28px; margin-bottom: 10px; font-weight: 900; }
+            p { color: #888; font-size: 14px; margin-bottom: 30px; }
+            .google-btn { background: #fff; color: #000; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s; margin-top: 20px; }
+            .google-btn:hover { background: #FFD700; transform: translateY(-3px); }
+            .creds-container { display: none; text-align: left; margin-top: 20px; }
+            .item { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,215,0,0.1); margin-bottom: 15px; }
+            label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 5px; }
+            .val { font-size: 18px; font-weight: 800; color: #fff; font-family: monospace; }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <h1>Matrix Vault</h1>
+            <p id="status-msg">Identity Verification Required</p>
+            
+            <button id="login-btn" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                Authorize with Google
+            </button>
+
+            <div id="creds-box" class="creds-container">
+                <div class="item">
+                    <label>Admin ID</label>
+                    <div id="admin-id" class="val">---</div>
+                </div>
+                <div class="item">
+                    <label>Security Key</label>
+                    <div id="admin-pass" class="val">---</div>
+                </div>
+                <p style="font-size: 11px; color: #FFD700; text-align: center; margin-top: 10px;">Dynamic credentials active (30m).</p>
+            </div>
+        </div>
+
+        <script type="module">
+            import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+            import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, setPersistence, inMemoryPersistence } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyBUTRNqsbkzLVpYs7oCt1v335PVuomdQ_0",
+                authDomain: "beeprepare-1d7b8.firebaseapp.com",
+                projectId: "beeprepare-1d7b8",
+                storageBucket: "beeprepare-1d7b8.firebasestorage.app",
+                messagingSenderId: "221629340476",
+                appId: "1:221629340476:web:b9fd677eb5ee0984721c39"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+            // Set strict persistence and sign out to force fresh login
+            try {
+                await setPersistence(auth, inMemoryPersistence);
+                await signOut(auth);
+            } catch(e) { console.warn("Persistence init failed", e); }
+
+            document.getElementById('login-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('login-btn');
+                btn.disabled = true;
+                btn.textContent = "Verifying...";
+                
+                try {
+                    const provider = new GoogleAuthProvider();
+                    provider.setCustomParameters({ prompt: 'select_account' }); // Always show account picker
+                    
+                    const result = await signInWithPopup(auth, provider);
+                    const idToken = await result.user.getIdToken();
+
+                    const res = await fetch('/api/admin-security/vault-login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idToken })
+                    });
+                    
+                    const data = await res.json();
+                    if (data.success) {
+                        btn.style.display = 'none';
+                        document.getElementById('status-msg').textContent = "Identity Confirmed: " + result.user.email;
+                        document.getElementById('status-msg').style.color = "#4CAF50";
+                        document.getElementById('creds-box').style.display = 'block';
+                        document.getElementById('admin-id').textContent = data.data.id;
+                        document.getElementById('admin-pass').textContent = data.data.pass;
+                    } else {
+                        throw new Error(data.message || 'Access Denied');
+                    }
+                } catch (err) {
+                    alert(err.message === 'UNAUTHORIZED_EMAIL' ? "CRITICAL: Email Not in Authorized List." : "Identity Verification Failed.");
+                    btn.disabled = false;
+                    btn.textContent = "Authorize with Google";
+                }
+            });
+        </script>
+    </body>
+    </html>
+  `);
 });
 
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
@@ -219,6 +362,26 @@ app.use('/api/payment', paymentLimiter, require('./routes/payment'));
 
 // Admin (protected by rolling gateway)
 app.use('/api/admin', require('./routes/admin'));
+
+// CAPTCHA Generation
+app.get('/api/admin-security/captcha', (req, res) => {
+  const num1 = Math.floor(Math.random() * 10) + 1;
+  const num2 = Math.floor(Math.random() * 10) + 1;
+  const sum = num1 + num2;
+  
+  // Store the result in a temporary signed token
+  const captchaToken = crypto.createHmac('sha256', process.env.ADMIN_JWT_SECRET)
+    .update(`${sum}-${Date.now() + 5 * 60 * 1000}`) // Valid for 5 mins
+    .digest('hex');
+    
+  res.json({
+    success: true,
+    data: {
+      question: `What is ${num1} + ${num2}?`,
+      token: `${captchaToken}:${sum}:${Date.now() + 5 * 60 * 1000}`
+    }
+  });
+});
 
 // Other routes
 app.use('/api/quotes', requireAuth, require('./routes/quotes'));
