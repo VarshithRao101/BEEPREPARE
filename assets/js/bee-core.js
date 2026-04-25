@@ -1,7 +1,10 @@
 // ============================================
 // BEE CORE — Shared utilities for BEEPREPARE
-// Import this in every HTML page
 // ============================================
+
+// Vercel Analytics Injection
+import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics/+esm';
+inject();
 
 // Firebase Config
 export const firebaseConfig = {
