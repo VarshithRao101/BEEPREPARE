@@ -31,7 +31,7 @@ const seedSettings = async () => {
     { key: 'announcement_expires', value: null },
     { key: 'activation_price', value: 250 },
     { key: 'extra_slot_price', value: 100 },
-    { key: 'allowed_origins', value: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5000'] }
+    { key: 'allowed_origins', value: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5000', 'https://beeprepare.vercel.app'] }
   ];
 
   try {
