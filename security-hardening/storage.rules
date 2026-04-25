@@ -1,0 +1,108 @@
+// ═══════════════════════════════════════════════════════════════════
+// BEEPREPARE — FIREBASE STORAGE SECURITY RULES v2.0
+// ═══════════════════════════════════════════════════════════════════
+// Deploy with: firebase deploy --only storage
+// ═══════════════════════════════════════════════════════════════════
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper Functions ──────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isAuthenticated() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // File size check (in bytes)
+    function isWithinSizeLimit(maxBytes) {
+      return request.resource.size <= maxBytes;
+    }
+
+    // Only allow specific image content types
+    function isValidImage() {
+      return request.resource.contentType.matches('image/jpeg')
+          || request.resource.contentType.matches('image/png')
+          || request.resource.contentType.matches('image/webp');
+    }
+
+    // Only allow PDF documents
+    function isValidPDF() {
+      return request.resource.contentType.matches('application/pdf');
+    }
+
+    // ── /profilePictures/{userId}/{fileName} ──────────────────────
+    match /profilePictures/{userId}/{fileName} {
+      // Anyone authenticated can read profile pictures
+      allow read: if isAuthenticated();
+
+      // Only the owner can upload their own profile picture
+      allow write: if isOwner(userId)
+        && isEmailVerified()
+        && isValidImage()
+        && isWithinSizeLimit(2 * 1024 * 1024);  // 2 MB max
+
+      allow delete: if isOwner(userId);
+    }
+
+    // ── /paymentScreenshots/{userId}/{fileName} ───────────────────
+    // Users upload their UTR/screenshot proof for payment verification
+    match /paymentScreenshots/{userId}/{fileName} {
+      // Only the owner can read their own screenshots
+      allow read: if isOwner(userId);
+
+      // Upload: owner only, image only, max 5MB
+      allow create: if isOwner(userId)
+        && isEmailVerified()
+        && isValidImage()
+        && isWithinSizeLimit(5 * 1024 * 1024);  // 5 MB max
+
+      // No updates (immutable after upload)
+      allow update: if false;
+
+      // No client-side deletes (admin handles via backend)
+      allow delete: if false;
+    }
+
+    // ── /studyMaterials/{circleId}/{fileName} ─────────────────────
+    match /studyMaterials/{circleId}/{fileName} {
+      // Members can read (checked via custom claim or Firestore lookup)
+      // NOTE: Firestore lookups in Storage rules are NOT supported directly.
+      // Use a Cloud Function to generate signed URLs instead for member-only access.
+      // For now: authenticated read only.
+      allow read: if isAuthenticated() && isEmailVerified();
+
+      // Write: backend only (no client uploads to study materials)
+      allow write: if false;
+    }
+
+    // ── /announcements/{fileName} ─────────────────────────────────
+    match /announcements/{fileName} {
+      // Authenticated read
+      allow read: if isAuthenticated();
+      // Write: backend only
+      allow write: if false;
+    }
+
+    // ── /exports/{adminId}/{fileName} ─────────────────────────────
+    // Admin-generated exports (CSV, reports)
+    match /exports/{adminId}/{fileName} {
+      // No client access
+      allow read, write: if false;
+    }
+
+    // ── DEFAULT: Deny everything not explicitly matched ────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

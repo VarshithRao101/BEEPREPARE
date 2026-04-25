@@ -9,6 +9,7 @@ const path = require('path');
 const crypto = require('crypto');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
+const compression = require('compression');
 
 const {
   securityHeaders,
@@ -17,6 +18,10 @@ const {
   blockSuspiciousRequests,
   sanitizeResponse
 } = require('./middleware/security');
+
+// ═══ FORTRESS — Advanced Security Layer ═══
+const { fortressStack } = require('./middleware/fortress');
+const { csrfTokenEndpoint } = require('./middleware/csrf');
 
 const {
   globalLimiter,
@@ -32,37 +37,23 @@ const {
 const { connectDB } = require('./config/db');
 require('./config/firebase');
 const logger = require('./utils/logger');
+const requireAuth = require('./middleware/requireAuth');
+
 
 // === SYSTEM CONFIG ===
 app.set('trust proxy', 1); // Trust the first proxy (Vercel, Render, Nginx etc.) for IP tracking
 
-// Connect DBs
-connectDB();
-
-// === SECURITY HEADERS FIRST ===
-app.use(securityHeaders);
-
-// Manual Security Guard (Just in case)
-app.use((req, res, next) => {
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  next();
-});
-
-// === REQUEST TRACKING ===
-app.use((req, res, next) => {
-  console.log(`[REQUEST] ${req.method} ${req.url} - ${new Date().toISOString()}`);
-  next();
-});
-app.use(requestTracker);
+// === COMPRESSION — SPEED OPTIMIZATION ===
+app.use(compression());
 
 // === CORS — LOCKED DOWN ===
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || [
   'http://localhost:5500',
   'http://127.0.0.1:5500',
   'http://localhost:5000',
-  'http://127.0.0.1:5000'
+  'http://127.0.0.1:5000',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
 ];
 
 app.use(cors({
@@ -82,8 +73,19 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-CSRF-Token', 'Idempotency-Key']
 }));
+
+// ═══════════════════════════════════════════════════════════════
+// FORTRESS — 12-Layer Security Stack (MUST be first middleware)
+// Blocks: SQLi, NoSQLi, XSS, SSTI, XXE, Command Injection,
+//         Path Traversal, Prototype Pollution, Header Injection,
+//         JSON Bombs, Scanner Bots, URL Overflow, Hard-blocked IPs
+// ═══════════════════════════════════════════════════════════════
+app.use(fortressStack);
+
+// === SECURITY HEADERS FIRST ===
+app.use(securityHeaders);
 
 // === REQUEST PARSING WITH LIMITS ===
 app.use(express.json({
@@ -115,6 +117,11 @@ app.use(sanitizeResponse);
 // === RATE LIMITING ===
 app.use(globalLimiter);
 app.use(speedLimiter);
+
+// === CSRF TOKEN ENDPOINT ===
+// Admin panel calls GET /api/csrf-token before any state-changing request
+app.get('/api/csrf-token', requireAuth, csrfTokenEndpoint);
+app.get('/api/admin-csrf-token', csrfTokenEndpoint); // Admin uses this (no user auth)
 
 // === ROLLING ADMIN GATEWAY ===
 const getRollingSecret = (offset = 0) => {
@@ -330,8 +337,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// === ROUTES WITH SPECIFIC LIMITERS ===
-const requireAuth = require('./middleware/requireAuth');
+// === ROUTES WITH RATE LIMITING ===
 
 // Auth routes (with strict limiting)
 app.use('/api/auth', authLimiter, require('./routes/auth'));
@@ -357,7 +363,7 @@ app.use('/api/feedback', requireAuth, require('./routes/feedback'));
 // Circles
 app.use('/api/circles', requireAuth, require('./routes/circles'));
 
-// Payment (public with payment limiter)
+// Payment (public submit with payment limiter + full security stack; status/resend locked)
 app.use('/api/payment', paymentLimiter, require('./routes/payment'));
 
 // Admin (protected by rolling gateway)
@@ -462,13 +468,31 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  logger.info(`BEEPREPARE running on port ${PORT}`);
-});
 
-process.on('SIGTERM', () => {
-  server.close(() => process.exit(0));
-});
+// === STARTUP SEQUENCE — CONNECT DB THEN LISTEN ===
+const startApp = async () => {
+  try {
+    await connectDB();
+    if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+        const server = app.listen(PORT, () => {
+          logger.info(`BEEPREPARE running on port ${PORT}`);
+        });
+
+        process.on('SIGTERM', () => {
+          server.close(() => process.exit(0));
+        });
+    } else {
+        logger.info('BEEPREPARE running in serverless mode');
+    }
+  } catch (err) {
+    logger.error('CRITICAL STARTUP FAILURE:', err);
+    if (!process.env.VERCEL) process.exit(1);
+  }
+};
+
+startApp();
+
+module.exports = app;
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);

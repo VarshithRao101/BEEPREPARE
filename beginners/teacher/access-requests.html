@@ -451,13 +451,7 @@
             window.location.href = getIndexPath();
         }
 
-        // Set profile icon initials
-        const name = localStorage.getItem(BP.NAME) || 'T';
-        const profileBtn = document.getElementById('profile-icon-btn');
-        if (profileBtn) {
-            profileBtn.innerText = name[0].toUpperCase();
-            profileBtn.onclick = () => window.location.href = 'teacher-profile.html';
-        }
+        // Profile initials and signal initialization moved to the bottom of the script
 
         let currentRequests = [];
         let filterStatus = 'pending';
@@ -702,24 +696,22 @@
             loadRequests();
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const name = localStorage.getItem(BP.NAME) || 'T';
-            const profileIcon = document.getElementById('profile-icon-btn');
-            if (profileIcon) {
-                profileIcon.innerText = name[0].toUpperCase();
-                profileIcon.onclick = () => window.location.href = 'teacher-profile.html';
-                profileIcon.classList.add('has-signal');
-                if (!document.getElementById('profile-signal')) {
-                    const dot = document.createElement('div');
-                    dot.id = 'profile-signal';
-                    dot.className = 'signal-dot';
-                    profileIcon.appendChild(dot);
-                }
+        // Initialize
+        const userName = localStorage.getItem(BP.NAME) || 'T';
+        const profileBtn = document.getElementById('profile-icon-btn');
+        if (profileBtn) {
+            profileBtn.innerText = userName[0].toUpperCase();
+            profileBtn.onclick = () => window.location.href = 'teacher-profile.html';
+            profileBtn.classList.add('has-signal');
+            if (!document.getElementById('profile-signal')) {
+                const dot = document.createElement('div');
+                dot.id = 'profile-signal';
+                dot.className = 'signal-dot';
+                profileBtn.appendChild(dot);
             }
-            BP.syncTeacherSignals();
-            if (!(await guardTeacher())) return;
-            loadRequests();
-        });
+        }
+        BP.syncTeacherSignals();
+        loadRequests();
     </script>
 </body>
 

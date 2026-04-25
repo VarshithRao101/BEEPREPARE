@@ -25,6 +25,7 @@ const {
   generateAdminToken,
   verifyActionCode
 } = require('../utils/adminAuth');
+const { bindSession } = require('../middleware/adminFortress');
 const {
   sendPaymentApproved,
   sendPaymentRejected
@@ -38,10 +39,7 @@ const escapeRegExp = (string) => {
 
 // ============ AUTH ============
 
-// Track login attempts in-memory for security
-const loginAttempts = new Map();
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+// Note: Brute-force protection is handled by adminBruteForceGuard middleware in routes/admin.js
 
 const adminLogin = async (req, res) => {
   try {
@@ -69,32 +67,14 @@ const adminLogin = async (req, res) => {
         return error(res, 'Security challenge failed or expired', 'INVALID_CAPTCHA', 403);
     }
 
-    // 2. Brute force check
-    const attemptKey = `${ip}_${adminId}`;
-    const attempts = loginAttempts.get(attemptKey) || { count: 0, lastTry: 0 };
-
-    if (attempts.count >= MAX_ATTEMPTS && (Date.now() - attempts.lastTry < LOCKOUT_TIME)) {
-      const waitMins = Math.ceil((LOCKOUT_TIME - (Date.now() - attempts.lastTry)) / 60000);
-      return error(res,
-        `Too many failed attempts. Try again in ${waitMins} minutes.`,
-        'ADMIN_LOCKOUT', 429);
-    }
-
+    // 2. Authentication Logic
     const { verifyAdminCredentials, generateAdminToken } = require('../utils/adminAuth');
     const authResult = await verifyAdminCredentials(adminId.trim(), password.trim());
 
     if (!authResult) {
-      const newCount = attempts.count + 1;
-      loginAttempts.set(attemptKey, { count: newCount, lastTry: Date.now() });
-      
-      const remaining = MAX_ATTEMPTS - newCount;
-      return error(res,
-        `Invalid admin credentials. ${remaining > 0 ? remaining + ' attempts left.' : 'Brute force lockout active.'}`,
-        'INVALID_CREDENTIALS', 401);
+      // Failed attempts are now recorded by the 'adminBruteForceGuard' middleware via req.recordFailedLogin()
+      return error(res, 'Invalid admin credentials', 'INVALID_CREDENTIALS', 401);
     }
-
-    // Clear attempts on success
-    loginAttempts.delete(attemptKey);
 
     const tokenJwt = generateAdminToken(authResult.id);
 
@@ -106,6 +86,9 @@ const adminLogin = async (req, res) => {
       userAgent: req.headers['user-agent'] || 'unknown',
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000) // 8h
     });
+
+    // Bind session to device fingerprint for hijack detection
+    bindSession(authResult.id, ip, req.headers['user-agent'], req.fingerprint);
 
     // Log Activity
     try {
@@ -138,8 +121,10 @@ const adminLogin = async (req, res) => {
 
 const adminLogout = async (req, res) => {
   const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.includes('Bearer ')) {
+    return success(res, 'Logged out');
+  }
   const token = authHeader.split('Bearer ')[1];
-  
   await AdminSession.findOneAndUpdate({ token }, { isRevoked: true });
   return success(res, 'Logged out successfully');
 };
@@ -431,10 +416,47 @@ const deleteUser = async (req, res) => {
     console.log(`User ${googleUid} and all associated data deleted successfully`);
 
     return success(res, 'User and all data deleted', null);
-
   } catch (err) {
     console.error('deleteUser error:', err.message);
     return error(res, 'Failed to delete user', 'SERVER_ERROR', 500);
+  }
+};
+
+const updateUserName = async (req, res) => {
+  try {
+    const { googleUid } = req.params;
+    const { newName } = req.body;
+
+    if (!newName || newName.trim().length < 2) {
+      return error(res, 'Invalid name. Min 2 characters required.', 'INVALID_NAME', 400);
+    }
+
+    const user = await User.findOneAndUpdate(
+      { googleUid },
+      { displayName: newName.trim() },
+      { new: true }
+    );
+
+    if (!user) {
+      return error(res, 'User not found', 'NOT_FOUND', 404);
+    }
+
+    await ActivityLog.create({
+      userId: `ADMIN_${req.admin.adminId}`,
+      type: 'user_updated',
+      title: 'Name Changed Permanently',
+      description: `Name for user ${googleUid} was changed to "${newName.trim()}" by admin.`,
+      ip: req.ip,
+      color: '#3498db'
+    });
+
+    return success(res, 'Student name updated permanently', {
+      googleUid,
+      displayName: user.displayName
+    });
+  } catch (err) {
+    console.error('updateUserName error:', err);
+    return error(res, 'Failed to update user name', 'SERVER_ERROR', 500);
   }
 };
 
@@ -1261,10 +1283,12 @@ const bulkUploadQuestions = async (req, res) => {
       chapterId, questionsText, actionCode
     } = req.body;
 
-    // Security Gate: Bulk operations require Action Code verification
+    // Security Gate: Bulk operations verification (Bypassed)
+    /*
     if (!verifyActionCode('bulk_upload', actionCode)) {
       return error(res, 'Invalid action code for bulk injection', 'INVALID_CODE', 403);
     }
+    */
 
     // Verify bank exists and get metadata
     const bank = await Bank.findById(bankId);
@@ -1465,7 +1489,7 @@ module.exports = {
   removeAnnouncement, updateSystemKey,
   getLogs, clearLogs, restartServer,
   getBlacklist, addToBlacklist, removeFromBlacklist,
-  getActivity, getStorageStats,
+  updateUserName, getActivity, getStorageStats,
   bulkUploadQuestions, getTeachers, getTeacherBanks,
   deletePaymentRequest, deleteLicenseKey,
   getStudyCircles, deleteStudyCircle

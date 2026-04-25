@@ -248,6 +248,7 @@
                                         ? `<button onclick="unblockUser('${u.googleUid}')">Unblock</button>`
                                         : `<button onclick="confirmBlock('${u.googleUid}')" style="color:var(--danger);">Block User</button>`
                                     }
+                                    <button onclick="changeName('${u.googleUid}', '${u.displayName}')" style="color:var(--gold);">Change Name</button>
                                     <button onclick="confirmDelete('${u.googleUid}')" class="danger" style="color:var(--danger);">Delete Permanent</button>
                                 </div>
                             </div>
@@ -345,6 +346,19 @@
                 const res = await adminApi(`/users/${uid}`, 'DELETE', { actionCode: code });
                 if (res && res.success) { showToast("User purged", "success"); fetchUsers(); }
                 else showToast(res?.message || "Failed", "error");
+            }
+        };
+
+        window.changeName = async (uid, currentName) => {
+            const newName = prompt(`Enter new permanent name for user (Current: ${currentName}):`, currentName);
+            if (newName && newName.trim() !== currentName) {
+                const res = await adminApi(`/users/${uid}/update-name`, 'POST', { newName: newName.trim() });
+                if (res && res.success) {
+                    showToast("Name updated permanently", "success");
+                    fetchUsers();
+                } else {
+                    showToast(res?.message || "Failed to update name", "error");
+                }
             }
         };
 

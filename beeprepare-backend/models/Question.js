@@ -30,7 +30,7 @@ const questionSchema = new Schema({
   },
   correctOption: { type: String, enum: ['A', 'B', 'C', 'D'] },
   isImportant:   { type: Boolean, required: true, default: false },
-  tags:          [{ type: String, enum: ['Important', 'Repeated', 'Exam Focus', 'Formula Based'] }],
+  tags:          [{ type: String, enum: ['Important', 'Repeated', 'Exam Focus', 'Formula', 'Conceptual', 'Formula Based'] }],
 
   // ── Metadata & Cross-refs ───────────────────────────────────────────────
   chapterId:     { type: String }, 

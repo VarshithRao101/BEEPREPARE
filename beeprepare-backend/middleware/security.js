@@ -13,6 +13,7 @@ const securityHeaders = helmet({
         "https://cdn.jsdelivr.net",
         "https://www.gstatic.com",
         "https://apis.google.com",
+        "https://cdn.sheetjs.com",
         "blob:", 
         "'unsafe-inline'"
       ],
@@ -36,6 +37,7 @@ const securityHeaders = helmet({
         "https://res.cloudinary.com",
         "https://lh3.googleusercontent.com"
       ],
+      mediaSrc: ["'self'", "data:"],
       connectSrc: [
         "'self'",
         "https://*.firebaseapp.com",
@@ -50,7 +52,7 @@ const securityHeaders = helmet({
     }
   },
   crossOriginEmbedderPolicy: false,
-  crossOriginOpenerPolicy: false,
+  crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
@@ -91,19 +93,25 @@ const sanitizeObject = (obj) => {
   if (typeof obj !== 'object' || !obj) {
     return obj;
   }
+  
+  // Handle Arrays
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizeObject);
+  }
+
   const clean = {};
   for (const key of Object.keys(obj)) {
-    // Block MongoDB operators
-    if (key.startsWith('$') ||
-        key.includes('.')) {
+    // Block MongoDB operators at the start of keys ONLY
+    if (key.startsWith('$')) {
       continue;
     }
+
     const val = obj[key];
     if (typeof val === 'string') {
+      // Remove potentially harmful script tags but keep normal text
       clean[key] = val
         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/javascript:/gi, '')
-        .replace(/on\w+\s*=/gi, '')
+        .replace(/on\w+\s*=/gi, '') // Remove inline event handlers
         .trim();
     } else if (typeof val === 'object') {
       clean[key] = sanitizeObject(val);
@@ -118,20 +126,19 @@ const sanitizeObject = (obj) => {
 const blockSuspiciousRequests = (req, res, next) => {
   const suspicious = [
     '../', '..\\',
-    '<script', 'javascript:',
+    '<script',
     'eval(', 'exec(',
-    'SELECT ', 'DROP TABLE',
+    'DROP TABLE',
     'UNION SELECT',
     '/etc/passwd',
-    'cmd.exe',
-    'powershell'
+    'cmd.exe'
   ];
 
   const checkString = (str) => {
     if (typeof str !== 'string') return false;
+    // Only block if it looks like an actual exploit attempt
     return suspicious.some(pattern =>
-      str.toLowerCase().includes(
-        pattern.toLowerCase())
+      str.includes(pattern) // Case sensitive for some patterns to avoid common words
     );
   };
 
@@ -152,8 +159,8 @@ const blockSuspiciousRequests = (req, res, next) => {
     );
     return res.status(400).json({
       success: false,
-      message: 'Invalid request.',
-      error: { code: 'INVALID_REQUEST' }
+      message: 'Security violation detected.',
+      error: { code: 'SECURITY_BLOCK' }
     });
   }
   next();

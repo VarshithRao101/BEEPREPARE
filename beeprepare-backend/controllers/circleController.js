@@ -305,9 +305,15 @@ const getMyCircles = async (req, res) => {
     const circles = await StudyCircle.find({
       'members.userId': userId,
       isActive: true
-    }).select('name subject circleCode createdBy members pendingCount');
+    }).select('name subject circleCode createdBy members pendingCount').lean();
 
-    return success(res, 'My circles fetched', circles);
+    const processed = circles.map(c => ({
+      ...c,
+      memberCount: c.members.length,
+      isCreator: c.createdBy === userId
+    }));
+
+    return success(res, 'My circles fetched', processed);
   } catch (err) {
     return error(res, 'Failed to fetch circles', 'SERVER_ERROR', 500);
   }

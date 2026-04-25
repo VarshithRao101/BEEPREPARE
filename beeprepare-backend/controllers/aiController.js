@@ -42,7 +42,10 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    if (aiMessagesToday >= DAILY_LIMIT) {
+    // PAID USER BYPASS: If account is activated, they get unlimited (or very high) limit
+    const isPaidUser = req.user.isActivated || req.user.planType === 'active';
+    
+    if (!isPaidUser && aiMessagesToday >= DAILY_LIMIT) {
       return res.status(429).json({
         success: false,
         message: `Daily AI usage limit reached (${DAILY_LIMIT}). ✨ Activate your account for unlimited academic help, advanced problem solving, and priority access!`,
@@ -74,9 +77,24 @@ Be encouraging and concise. Use Markdown.`;
       userContent.push({ type: 'text', text: cleanMessage });
     }
     if (image) {
+      // If it's a Firebase URL, we need a signed URL for AI to access it
+      let accessibleUrl = image;
+      if (image.includes('firebasestorage') || image.includes('storage.googleapis.com')) {
+          try {
+              const { bucket } = require('../config/firebase');
+              const path = decodeURIComponent(image.split('/o/')[1].split('?')[0]);
+              const [signedUrl] = await bucket.file(path).getSignedUrl({
+                  action: 'read',
+                  expires: Date.now() + 15 * 60 * 1000 // 15 mins
+              });
+              accessibleUrl = signedUrl;
+          } catch (e) {
+              console.warn('AI Signed URL failed, using raw:', e.message);
+          }
+      }
       userContent.push({
         type: 'image_url',
-        image_url: { url: image }
+        image_url: { url: accessibleUrl }
       });
     }
 

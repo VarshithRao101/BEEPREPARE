@@ -462,6 +462,8 @@
     </div>
 
     <script type="module">
+        import { adminApi } from './matrix-core.js';
+
         // Functions and setup...
         const togglePass = () => {
             const input = document.getElementById('adminPass');
@@ -603,6 +605,7 @@
             { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>', name: 'Analytics', desc: 'Platform Consumption Flow', link: 'analytics.html', id: 'f-analytics' },
             { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>', name: 'Block List', desc: 'Identity Purge Protocol', link: 'blocklist.html', id: 'f-block' },
             { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>', name: 'Settings', desc: 'Central Registry Overrides', link: 'settings.html', id: 'f-settings' },
+            { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>', name: 'Name Overrider', desc: 'Permanent Identity Re-brand', link: '#', id: 'f-name-override' },
             { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>', name: 'System Logs', desc: 'Core Event Traceback', link: 'logs.html', id: 'f-logs' },
             { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>', name: 'Activity', desc: 'Real-time Pulse Feed', link: 'activity.html', id: 'f-activity' },
             { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>', name: 'Bulk Upload', desc: 'Upload 5 questions at once', link: 'bulk-upload.html', id: 'f-bulk' },
@@ -625,10 +628,32 @@
                 const card = document.getElementById(f.id);
                 if (card) {
                     card.addEventListener('click', () => {
-                        window.location.href = f.link;
+                        if (f.id === 'f-name-override') {
+                            handleNameOverride();
+                        } else {
+                            window.location.href = f.link;
+                        }
                     });
                 }
             });
+        }
+
+        async function handleNameOverride() {
+            const uid = prompt("Enter Student Unique ID (Google UID):");
+            if (!uid) return;
+            const newName = prompt("Enter New Permanent Name:");
+            if (!newName) return;
+
+            try {
+                const res = await adminApi(`/users/${uid}/update-name`, 'POST', { newName });
+                if (res && res.success) {
+                    alert("Name updated successfully!");
+                } else {
+                    alert("Error: " + (res?.message || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Failed to communicate with server.");
+            }
         }
 
         function updateBadges(overview, keys) {

@@ -495,10 +495,20 @@
         const auth = getAuth(app);
 
         async function loadMyBanks() {
-            BP.showSkeleton('joined-banks-list', 'card', 3);
-            const result = await apiCall('/student/banks');
-            if (result && result.success) {
-                renderBankCards(result.data);
+            const grid = document.querySelector('.banks-grid');
+            // Only show skeleton if we don't have any cards yet (initial load)
+            const hasCards = grid && grid.children.length > 0 && !grid.innerHTML.includes('No synced hubs');
+            if (!hasCards) {
+                BP.showSkeleton('joined-banks-list', 'card', 3);
+            }
+            
+            try {
+                const result = await apiCall('/student/banks');
+                if (result && result.success) {
+                    renderBankCards(result.data);
+                }
+            } catch (e) {
+                console.error('Bank sync failed:', e);
             }
         }
 

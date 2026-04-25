@@ -830,13 +830,13 @@
                         <span style="color: var(--primary);">→</span>
                     </div>
                     
-                    <div class="menu-item adv-card" onclick="window.location.href='teacher-feedback.html'" style="margin-top: 10px;">
+                    <div class="menu-item adv-card" onclick="window.location.href='../customer-care.html'" style="margin-top: 10px;">
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                                <path d="M9 10h6M9 14h3"/>
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7z"/>
+                                <path d="M17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z"/>
                             </svg>
-                            <span style="font-weight: 700;">Support & Feedback</span>
+                            <span style="font-weight: 700;">Customer Care</span>
                         </div>
                         <span style="color: var(--primary);">→</span>
                     </div>
@@ -1176,17 +1176,20 @@
                     
                     localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 1);
                     
-                    // Fetch real bank combinations for dropdown accuracy
+                    // Fetch dashboard data once for BOTH banks list and signal dots
                     const dash = await apiCall('/teacher/dashboard');
                     if(dash && dash.success) {
                         appState.ownBanks = dash.data.subjects;
+                        
+                        // Sync Signal dots manually from dashboard data (avoids extra API call)
+                        const hasReq = dash.data.pendingRequestsCount > 0;
+                        const hasDoubt = dash.data.pendingDoubtsCount > 0;
+                        const profileDots = document.querySelectorAll('#profile-signal');
+                        profileDots.forEach(d => d.style.display = (hasReq || hasDoubt) ? 'block' : 'none');
                     }
                 } else {
                     console.warn('[INIT] Profile fetch unsuccessful:', res);
                 }
-
-                // Sync BEE-SIGNAL dots
-                await BP.syncTeacherSignals().catch(e => console.warn("Signal sync failed", e));
 
                 updateUI();
             } catch (err) {
@@ -1696,10 +1699,10 @@
 
 
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initProfile();
-        });
+        // Initialize
+        initProfile();
     </script>
+    <script src="../../assets/js/customer-care.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,47 @@
+{
+  "version": 2,
+  "name": "beeprepare",
+  "builds": [
+    {
+      "src": "beeprepare-backend/server.js",
+      "use": "@vercel/node",
+      "config": { "includeFiles": ["assets/**", "matrix-core-v1419/**", "beeprepare-backend/**"] }
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "activation.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "beginners/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/beeprepare-backend/server.js" },
+    { "source": "/gatekeeper", "destination": "/beeprepare-backend/server.js" },
+    { "source": "/gate/(.*)", "destination": "/beeprepare-backend/server.js" },
+    { "source": "/vault", "destination": "/beeprepare-backend/server.js" },
+    { "source": "/health", "destination": "/beeprepare-backend/server.js" },
+    { "source": "/(index.html)?", "destination": "/index.html" },
+    { "source": "/beginners/(.*)", "destination": "/beginners/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}

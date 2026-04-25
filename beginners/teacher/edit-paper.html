@@ -33,9 +33,8 @@
             background-size: 100% 100%, 20px 20px, 20px 20px;
             overflow-y: auto;
             position: relative;
-            padding: 40px 20px 120px 20px;
-            display: flex;
-            justify-content: center;
+            padding: 60px 20px 150px 20px;
+            display: block !important;
         }
 
 
@@ -44,14 +43,91 @@
             color: #000 !important;
             width: 210mm;
             min-height: 297mm;
+            height: auto !important; /* Grow with content */
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             padding: 20mm;
-            padding-bottom: 30mm;
+            padding-bottom: 50mm;
             box-sizing: border-box;
             font-family: 'Times New Roman', serif;
             position: relative;
             transform-origin: top center;
             transition: transform 0.2s ease;
+            border: 2px solid #000; /* Formal Paper Border */
+            margin: 40px auto !important;
+            display: block !important;
+            overflow: visible !important;
+        }
+
+        @media (max-width: 850px) {
+            .canvas-area {
+                padding: 10px 5px !important;
+            }
+            .paper-sheet {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 10mm 5mm !important;
+                margin: 0 !important;
+                border-width: 1px !important;
+                box-shadow: none !important;
+                min-height: auto !important;
+                font-size: 12px !important;
+            }
+            .paper-sheet::before {
+                display: none !important;
+            }
+            .paper-header h2 { font-size: 1.1em !important; }
+            .paper-header h3 { font-size: 0.9em !important; }
+            .paper-header h4 { font-size: 1em !important; }
+            
+            /* Responsive header meta row */
+            .paper-header > div[style*="display: flex"], 
+            .paper-meta-row { 
+                flex-direction: column !important; 
+                gap: 5px !important; 
+                align-items: flex-start !important; 
+            }
+            
+            .floating-toolbar {
+                width: 98% !important;
+                bottom: 10px !important;
+                padding: 6px !important;
+                gap: 5px !important;
+            }
+            .tool-btn {
+                width: 38px !important;
+                height: 38px !important;
+            }
+            .tool-btn.primary {
+                padding: 0 12px !important;
+                font-size: 12px !important;
+            }
+            .q-actions {
+                right: 0 !important;
+                top: -25px !important;
+                flex-direction: row !important;
+                background: #333;
+                padding: 2px;
+                border-radius: 4px;
+                display: none !important; /* Hide actions on mobile for cleaner view */
+            }
+        }
+
+        .question-item, .section-header {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Decorative academic inner border */
+        .paper-sheet::before {
+            content: '';
+            position: absolute;
+            top: 5mm;
+            left: 5mm;
+            right: 5mm;
+            bottom: 5mm;
+            border: 1px solid #eee;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .paper-footer {
@@ -177,11 +253,11 @@
         }
 
         .mcq-options-grid {
-            margin-top: 8px;
-            padding-left: 24px;
+            margin-top: 10px;
+            padding-left: 25px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px 20px;
         }
 
         .layout-modal {
@@ -364,12 +440,27 @@
         };
 
         async function initPaper() {
-            const html = localStorage.getItem('bp_paper_html');
+            let html = localStorage.getItem('bp_paper_html');
             if (html) {
+                // SELF-HEALING: Remove any extra closing divs at the very end that cause background clipping
+                html = html.trim();
+                while (html.endsWith('</div>')) {
+                    const lastDivIndex = html.lastIndexOf('</div>');
+                    const openDivs = (html.match(/<div\b/g) || []).length;
+                    const closeDivs = (html.match(/<\/div/g) || []).length;
+                    
+                    if (closeDivs > openDivs) {
+                        html = html.substring(0, lastDivIndex) + html.substring(lastDivIndex + 6);
+                        html = html.trim();
+                    } else {
+                        break;
+                    }
+                }
+
                 paper.innerHTML = html;
                 setupActions();
             } else {
-                Swal.fire({ icon: 'error', title: 'No Data', text: 'Please generate a paper first.' }).then(() => window.location.href = 'generate-paper.html');
+                Swal.fire({ icon: 'error', title: 'No Data', text: 'Generate a paper first.' }).then(() => window.location.href = 'generate.html');
             }
         }
 

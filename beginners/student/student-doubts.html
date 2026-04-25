@@ -269,9 +269,31 @@
         @keyframes pulse-skeleton { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }
 
         .sync-progress-msg {
-            font-size: 10px; color: var(--primary); font-weight: 800; text-transform: uppercase;
-            letter-spacing: 1px; display: flex; align-items: center; gap: 8px; margin-top: 5px;
+            font-size: 9px; 
+            color: var(--primary); 
+            font-weight: 900; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            margin-top: 8px;
+            animation: pulse-sync 1.5s infinite;
         }
+        @keyframes pulse-sync {
+            0%, 100% { opacity: 0.5; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .btn-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 
@@ -344,7 +366,8 @@
                     <input type="file" id="hub-file" hidden accept="image/*" onchange="previewFile(this)">
                     <textarea id="hub-input" class="composer" placeholder="Consulting mentor..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
                     <button class="btn-tool prime" id="hub-send-btn" onclick="transmitMessage()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        <div class="btn-spinner" id="btn-spinner" style="display: none;"></div>
+                        <svg id="btn-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                     </button>
                 </div>
             </div>
@@ -461,24 +484,27 @@
 
         function renderMessages(messages) {
             const stream = document.getElementById('chat-stream');
-            const html = messages.map(m => {
+            
+            messages.forEach(m => {
+                const msgId = `msg-${m._id || m.timestamp}`;
+                if (document.getElementById(msgId)) return;
+
                 const side = m.senderRole === 'student' ? 'student' : 'teacher';
                 const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                return `
-                    <div class="bubble ${side}">
-                        ${m.imageUrl ? `<img src="${m.imageUrl}" class="bubble-img-node" onclick="event.stopPropagation(); showLightbox('${m.imageUrl}')">` : ''}
-                        <div style="word-break: break-word;">${m.content}</div>
-                        <div style="font-size: 9px; opacity: 0.4; margin-top: 8px; text-align: ${side === 'student' ? 'right' : 'left'}; font-weight:800;">
-                            ${m.isSending ? '⏳ SYNCING...' : time}
-                        </div>
+                
+                const div = document.createElement('div');
+                div.id = msgId;
+                div.className = `bubble ${side}`;
+                div.innerHTML = `
+                    ${m.imageUrl ? `<img src="${m.imageUrl}" class="bubble-img-node" onclick="event.stopPropagation(); showLightbox('${m.imageUrl}')">` : ''}
+                    <div style="word-break: break-word;">${m.content}</div>
+                    <div style="font-size: 9px; opacity: 0.4; margin-top: 8px; text-align: ${side === 'student' ? 'right' : 'left'}; font-weight:800;">
+                        ${m.isSending ? '⏳ SYNCING...' : time}
                     </div>
                 `;
-            }).join('');
-            
-            if (stream.innerHTML !== html) {
-                stream.innerHTML = html;
+                stream.appendChild(div);
                 stream.scrollTop = stream.scrollHeight;
-            }
+            });
         }
 
         window.transmitMessage = async () => {
@@ -503,18 +529,22 @@
             stream.scrollTop = stream.scrollHeight;
 
             const oldText = msg;
+            const btnIcon = document.getElementById('btn-icon');
+            const btnSpinner = document.getElementById('btn-spinner');
+            
             input.value = '';
             input.style.height = 'auto';
             btn.disabled = true;
-            btn.style.opacity = '0.5';
+            btnIcon.style.display = 'none';
+            btnSpinner.style.display = 'block';
 
             let syncStatus = tempBubble.querySelector('.sync-progress-msg');
             let statusStep = 0;
-            const statusMsgs = ['⏳ UPLOADING PACKETS...', '⏳ NEURAL PROCESSING...', '⏳ ESTABLISHING LINK...'];
+            const statusMsgs = ['⏳ ENCRYPTING...', '📡 UPLOADING...', '🧠 PROCESSING...', '🔗 ESTABLISHING...'];
             const progressTimer = setInterval(() => {
-                syncStatus.textContent = statusMsgs[statusStep % statusMsgs.length];
+                syncStatus.innerHTML = `<span>${statusMsgs[statusStep % statusMsgs.length]}</span>`;
                 statusStep++;
-            }, 3500);
+            }, 2000);
 
             try {
                 const activeBank = allBanks.find(b => b.bankId === currentBankId);
@@ -539,7 +569,8 @@
                 Swal.fire({ icon: 'error', title: 'UPSTREAM ERROR', text: 'Chat sequence failed. Input restored.', background: '#111114', color: '#fff' });
             } finally {
                 btn.disabled = false;
-                btn.style.opacity = '1';
+                btnIcon.style.display = 'block';
+                btnSpinner.style.display = 'none';
                 document.getElementById(tempId)?.remove();
             }
         };

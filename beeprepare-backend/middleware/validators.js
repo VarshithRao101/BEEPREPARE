@@ -63,7 +63,7 @@ const validateQuestion = [
     .isLength({ min: 5, max: 1000 })
     .withMessage('Question 5-1000 chars'),
   body('questionType')
-    .isIn(['MCQ', 'Short Answer', 'Very Short Answer', 'Long Answer', 'Essay'])
+    .isIn(['MCQ', 'Very Short', 'Short', 'Long', 'Essay'])
     .withMessage('Invalid question type'),
   body('marks')
     .isInt({ min: 1, max: 10 })

@@ -14,9 +14,9 @@ export const firebaseConfig = {
 };
 
 // Single source of truth for API URL
-// Change this ONE line to switch between
-// dev and production:
-export const API_BASE = 'http://127.0.0.1:5000/api';
+export const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+  ? 'http://localhost:5000/api' 
+  : '/api';
 
 // Globally initialize Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';

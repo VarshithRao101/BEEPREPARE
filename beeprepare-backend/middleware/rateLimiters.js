@@ -14,10 +14,11 @@ setInterval(() => {
   }
 }, 60 * 60 * 1000);
 
-// Global limiter
+// Global limiter — Relaxed for better performance
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 100,
+  max: 300, // Increased from 100
+  validate: { default: false },
   message: {
     success: false,
     message: 'Too many requests.',
@@ -30,6 +31,7 @@ const globalLimiter = rateLimit({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
+  validate: { default: false },
   message: {
     success: false,
     message: 'Too many auth attempts.',
@@ -43,8 +45,8 @@ const authLimiter = rateLimit({
 const activationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
-  keyGenerator: (req) => req.ip + '_activation',
-  validate: { keyGeneratorIpFallback: false },
+  // Standardized IP detection for activation
+  validate: { default: false },
   message: {
     success: false,
     message: 'Too many activation attempts.',
@@ -57,8 +59,8 @@ const activationLimiter = rateLimit({
 const aiLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 20,
-  keyGenerator: (req) => req.user?.googleUid || req.ip,
-  validate: { keyGeneratorIpFallback: false },
+  keyGenerator: (req) => req.user?.googleUid || req.ip || 'anonymous',
+  validate: { default: false },
   message: {
     success: false,
     message: 'Too many AI requests.',
@@ -71,8 +73,8 @@ const aiLimiter = rateLimit({
 const otpLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 5,
-  keyGenerator: (req) => (req.user?.googleUid || req.ip) + '_otp',
-  validate: { keyGeneratorIpFallback: false },
+  keyGenerator: (req) => (req.user?.googleUid || req.ip || 'anonymous') + '_otp',
+  validate: { default: false },
   message: {
     success: false,
     message: 'Too many OTP attempts.',
@@ -85,8 +87,8 @@ const otpLimiter = rateLimit({
 const paymentLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 3,
-  keyGenerator: (req) => req.body?.email || req.ip,
-  validate: { keyGeneratorIpFallback: false },
+  keyGenerator: (req) => req.body?.email || req.ip || 'anonymous',
+  validate: { default: false },
   message: {
     success: false,
     message: 'Too many payment submissions.',
@@ -99,8 +101,8 @@ const paymentLimiter = rateLimit({
 const uploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 20,
-  keyGenerator: (req) => req.user?.googleUid || req.ip,
-  validate: { keyGeneratorIpFallback: false },
+  keyGenerator: (req) => req.user?.googleUid || req.ip || 'anonymous',
+  validate: { default: false },
   message: {
     success: false,
     message: 'Upload limit reached.',
@@ -109,11 +111,11 @@ const uploadLimiter = rateLimit({
   skip: (req) => req.bypassRateLimit === true
 });
 
-// Slow down repeated requests
+// Slow down repeated requests — Optimized to be less intrusive
 const speedLimiter = slowDown({
   windowMs: 15 * 60 * 1000,
-  delayAfter: 50,
-  delayMs: () => 500,
+  delayAfter: 200, // Increased from 50
+  delayMs: () => 100, // Reduced from 500
   skip: (req) => req.bypassRateLimit === true
 });
 

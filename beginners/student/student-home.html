@@ -53,6 +53,19 @@
             transition: 0.3s;
         }
 
+        @media (max-width: 768px) {
+            #subjects-container, #grades-container {
+                grid-template-columns: 1fr !important;
+            }
+            .welcome-title-styled {
+                font-size: 24px !important;
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
         /* Grades Section - Match Teacher Class Card */
         .class-card {
             height: 90px;

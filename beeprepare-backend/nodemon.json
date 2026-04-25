@@ -1,0 +1,4 @@
+{
+  "ignore": ["logs/*", "scratch/*", "node_modules/*"],
+  "delay": 1000
+}

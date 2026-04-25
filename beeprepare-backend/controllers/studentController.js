@@ -15,6 +15,8 @@ const Note = require('../models/Note');
 const Quote = require('../models/Quote');
 const { success, error } = require('../utils/responseHelper');
 const { generatePdfUrl } = require('../utils/cloudinaryHelper');
+const getChapterId = require('../utils/getChapterId');
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const shuffleArray = (arr) => {
@@ -106,18 +108,22 @@ const getDashboard = async (req, res) => {
       };
     });
 
-    const quotes = await Quote.find({});
     let dailyQuote = { text: "Keep the BEE matrix aligned with your goals.", author: "BEE Team", category: "academic" };
-    if (quotes.length > 0) {
-      const todayString = new Date().toISOString().split('T')[0];
-      let hash = 0;
-      for (let i = 0; i < todayString.length; i++) {
-        hash = ((hash << 5) - hash) + todayString.charCodeAt(i);
-        hash |= 0;
+    try {
+      const quoteCount = await Quote.countDocuments();
+      if (quoteCount > 0) {
+        const todayString = new Date().toISOString().split('T')[0];
+        let hash = 0;
+        for (let i = 0; i < todayString.length; i++) {
+          hash = ((hash << 5) - hash) + todayString.charCodeAt(i);
+          hash |= 0;
+        }
+        const index = Math.abs(hash) % quoteCount;
+        const q = await Quote.findOne().skip(index).lean();
+        if (q) dailyQuote = { text: q.text, author: q.author || 'Be Prepare', category: q.category };
       }
-      const index = Math.abs(hash) % quotes.length;
-      const q = quotes[index];
-      dailyQuote = { text: q.text, author: q.author || 'Be Prepare', category: q.category };
+    } catch (quoteErr) {
+      console.warn('Quote fetch failed:', quoteErr.message);
     }
 
     return success(res, 'Dashboard data fetched', {
@@ -167,18 +173,41 @@ const getProfile = async (req, res) => {
     ]);
 
     const stats = testAgg[0] || { count: 0, avgScore: 0 };
+    const user = req.user;
+
+    // Self-healing: Assign beeId if missing
+    if (!user.beeId) {
+        const generateBeeId = () => {
+            const chars = '0123456789';
+            let num = '';
+            for (let i = 0; i < 4; i++) num += chars[Math.floor(Math.random() * chars.length)];
+            return `STU-${num}`;
+        };
+        let newId;
+        let attempts = 0;
+        do {
+            newId = generateBeeId();
+            const exists = await User.findOne({ beeId: newId });
+            if (!exists) break;
+            attempts++;
+        } while (attempts < 10);
+        
+        await User.updateOne({ googleUid: studentId }, { beeId: newId });
+        user.beeId = newId;
+    }
 
     return success(res, 'Profile fetched', {
-      googleUid: req.user.googleUid,
-      email: req.user.email,
-      displayName: req.user.displayName,
-      photoUrl: req.user.photoUrl,
-      phone: req.user.phone,
-      class: req.user.class,
-      planType: req.user.planType,
-      isActivated: req.user.isActivated,
-      aiMessagesToday: req.user.aiMessagesToday || 0,
-      activeBanks: req.user.activeBanks || [],
+      googleUid: user.googleUid,
+      email: user.email,
+      displayName: user.displayName,
+      photoUrl: user.photoUrl,
+      phone: user.phone,
+      beeId: user.beeId,
+      class: user.class,
+      planType: user.planType,
+      isActivated: user.isActivated,
+      aiMessagesToday: user.aiMessagesToday || 0,
+      activeBanks: user.activeBanks || [],
       streak: streak
         ? { currentStreak: streak.currentStreak, bestStreak: streak.bestStreak, totalActiveDays: streak.totalActiveDays }
         : { currentStreak: 0, bestStreak: 0, totalActiveDays: 0 },
@@ -187,9 +216,10 @@ const getProfile = async (req, res) => {
         avgScore: Math.round(stats.avgScore || 0),
         queryCount: queryCount
       },
-      createdAt: req.user.createdAt,
-      licenseActivatedAt: req.user.licenseActivatedAt,
-      licenseExpiresAt: req.user.licenseExpiresAt
+      createdAt: user.createdAt,
+      nameChanged: user.nameChanged || false,
+      licenseActivatedAt: user.licenseActivatedAt,
+      licenseExpiresAt: user.licenseExpiresAt
     });
   } catch (err) {
     console.error('getProfile error:', err);
@@ -209,7 +239,11 @@ const updateProfile = async (req, res) => {
       if (typeof displayName !== 'string' || displayName.trim().length < 2) {
         return error(res, 'Display name must be at least 2 characters', 'INVALID_NAME', 400);
       }
+      if (req.user.nameChanged) {
+        return error(res, 'Identity is locked. You have already updated your protocol name once.', 'IDENTITY_LOCKED', 403);
+      }
       updates.displayName = displayName.trim();
+      updates.nameChanged = true;
     }
 
     if (phone !== undefined) updates.phone = phone;
@@ -333,19 +367,21 @@ const getMyBanks = async (req, res) => {
       .populate('bankId', 'subject class teacherName bankCode totalQuestions notesCount')
       .lean();
 
-    const banks = requests.map(r => ({
-      requestId: r._id,
-      bankId: r.bankId?._id,
-      subject: r.bankId?.subject,
-      class: r.bankId?.class,
-      teacherName: r.bankId?.teacherName,
-      bankCode: r.bankId?.bankCode,
-      totalQuestions: r.bankId?.totalQuestions,
-      notesCount: r.bankId?.notesCount,
-      status: r.status,
-      requestedAt: r.requestedAt,
-      activatedAt: r.otpVerifiedAt || null
-    }));
+    const banks = requests
+      .filter(r => r.bankId) // Filter out deleted banks
+      .map(r => ({
+        requestId: r._id,
+        bankId: r.bankId?._id,
+        subject: r.bankId?.subject,
+        class: r.bankId?.class,
+        teacherName: r.bankId?.teacherName,
+        bankCode: r.bankId?.bankCode,
+        totalQuestions: r.bankId?.totalQuestions,
+        notesCount: r.bankId?.notesCount,
+        status: r.status,
+        requestedAt: r.requestedAt,
+        activatedAt: r.otpVerifiedAt || null
+      }));
 
     // Sort: active first, then pending, then rejected
     const order = { active: 0, approved: 1, pending: 2, rejected: 3, locked: 4 };
@@ -661,11 +697,18 @@ const generateTest = async (req, res) => {
 
       let typeSelected = [...fromImportant, ...fromNormal].slice(0, needed);
       
-      // Map to plain objects and apply blueprint marks
-      typeSelected = typeSelected.map(q => ({
-        ...(q.toObject ? q.toObject() : q),
-        marks: requestedMarks
-      }));
+      // Map to session schema (cross-DB safe) and apply blueprint marks
+      typeSelected = typeSelected.map(q => {
+        const plain = q.toObject ? q.toObject() : q;
+        return {
+          questionId: String(plain._id),
+          questionText: plain.questionText,
+          questionType: plain.questionType,
+          marks: requestedMarks,
+          mcqOptions: plain.mcqOptions,
+          correctOption: plain.correctOption
+        };
+      });
 
       if (typeSelected.length > 0) {
         selected.push(...typeSelected);
@@ -687,15 +730,37 @@ const generateTest = async (req, res) => {
 
     // Build Premium Paper HTML (Professional Style)
     let paperHtml = `
-<div class="paper-header" style="font-family: 'Times New Roman', serif;">
-  <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 20px;">
-    <h2 style="margin: 0; font-size: 1.4em;">BEEPREPARE ACADEMIC NODE — PRACTICE ARCHITECTURE</h2>
-    <h3 style="margin: 5px 0; font-size: 1.1em; text-transform: uppercase;">SUBJECT: ${bank.subject} (CLASS: ${bank.class})</h3>
-    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-weight: bold; font-size: 0.9em;">
-      <span>Subject Code: ${bank.bankCode}</span>
-      <span>Max Marks: ${totalMarks}</span>
+<div class="paper-header" style="font-size: inherit;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5em;">
+    <div style="text-align: left;">
+      <span style="font-weight: bold; border-bottom: 1px solid #000; padding: 2px 10px;">Roll No: _____________</span>
     </div>
-  </div>`;
+    <div style="text-align: right; font-size: 0.8em; color: #666;">
+      Code No: BP-ST-${Math.random().toString(36).substring(7).toUpperCase()}
+    </div>
+  </div>
+
+  <h2 style="margin: 0; font-size: 1.5em; text-align: center; font-family: 'Times New Roman', serif;">BOARD OF ACADEMIC EXCELLENCE (BEEPREPARE)</h2>
+  <h3 style="margin: 5px 0 1em 0; font-size: 1.2em; text-transform: uppercase; text-align: center; font-family: 'Times New Roman', serif;">ANNUAL EXAMINATION (2025–26)</h3>
+  <h4 style="margin: 0; font-size: 1.3em; border-bottom: 2px solid #000; padding-bottom: 0.8em; text-align: center; font-family: 'Times New Roman', serif;">
+    SUBJECT: ${bank.subject.toUpperCase()} (CLASS: ${bank.class})
+  </h4>
+
+  <div class="paper-meta-row" style="display: flex; justify-content: space-between; margin-top: 1em; font-weight: bold; font-size: 1em; font-family: 'Times New Roman', serif;">
+    <span>Maximum Time: 3 Hours</span>
+    <span>Maximum Marks: ${totalMarks}</span>
+  </div>
+</div>
+
+<div style="margin: 1.5em 0; border: 1px solid #000; padding: 1em; font-size: 0.9em; line-height: 1.6; font-family: 'Times New Roman', serif;">
+  <strong>GENERAL INSTRUCTIONS:</strong>
+  <ol style="margin: 0.5em 0 0 1.5em; padding: 0;">
+    <li>This question paper contains ${selected.length} questions across various sections.</li>
+    <li>All questions are compulsory.</li>
+    <li>Read each question carefully before answering.</li>
+    <li>Maintain clean and legible handwriting.</li>
+  </ol>
+</div>`;
 
     let qNumber = 1;
     for (const [idx, section] of sectionDefs.entries()) {
@@ -724,11 +789,11 @@ const generateTest = async (req, res) => {
 
         if (q.questionType === 'MCQ' && q.mcqOptions) {
           paperHtml += `
-          <div class="mcq-options-grid" style="margin: 8px 0 0 25px; display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.95em;">
-            <div>(A) ${q.mcqOptions.A || ''}</div>
-            <div>(B) ${q.mcqOptions.B || ''}</div>
-            <div>(C) ${q.mcqOptions.C || ''}</div>
-            <div>(D) ${q.mcqOptions.D || ''}</div>
+          <div class="mcq-options-grid" style="margin: 0.8em 0 0 2.5em; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5em 1.5em; font-size: 0.95em;">
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(A)</span> <span>${q.mcqOptions.A || ''}</span></div>
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(B)</span> <span>${q.mcqOptions.B || ''}</span></div>
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(C)</span> <span>${q.mcqOptions.C || ''}</span></div>
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(D)</span> <span>${q.mcqOptions.D || ''}</span></div>
           </div>`;
         }
 
@@ -740,7 +805,6 @@ const generateTest = async (req, res) => {
         qNumber++;
       }
     }
-    paperHtml += `</div>`;
 
     const session = await TestSession.create({
       studentId,

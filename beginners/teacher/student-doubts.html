@@ -174,9 +174,31 @@
         @keyframes pulse-skeleton { 0% { opacity: 0.3; } 50% { opacity: 0.6; } 100% { opacity: 0.3; } }
 
         .sync-progress-msg {
-            font-size: 10px; color: var(--primary); font-weight: 800; text-transform: uppercase;
-            letter-spacing: 1px; display: flex; align-items: center; gap: 8px; margin-top: 5px;
+            font-size: 9px; 
+            color: var(--primary); 
+            font-weight: 900; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            margin-top: 8px;
+            animation: pulse-sync 1.5s infinite;
         }
+        @keyframes pulse-sync {
+            0%, 100% { opacity: 0.5; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .btn-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .scholar-anchor { display: flex; align-items: center; gap: 12px; }
         .anchor-id { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; }
@@ -347,7 +369,8 @@
                     <input type="file" id="hub-file" hidden accept="image/*" onchange="previewFile(this)">
                     <textarea id="hub-response" class="composer" placeholder="Provide expert clarity..." rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
                     <button class="btn-action prime" id="hub-send-btn" onclick="sendExpertResponse()">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        <div class="btn-spinner" id="btn-spinner" style="display: none;"></div>
+                        <svg id="btn-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                     </button>
                 </div>
             </div>
@@ -445,24 +468,27 @@
 
         function renderMessages(messages) {
             const stream = document.getElementById('msg-stream');
-            const html = messages.map(m => {
+            
+            messages.forEach(m => {
+                const msgId = `msg-${m._id || m.timestamp}`;
+                if (document.getElementById(msgId)) return;
+
                 const side = m.senderRole === 'student' ? 'student' : 'teacher';
                 const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                return `
-                    <div class="bubble ${side}">
-                        ${m.imageUrl ? `<img src="${m.imageUrl}" class="bubble-img" onclick="showLightbox('${m.imageUrl}')">` : ''}
-                        <div style="word-break: break-word;">${m.content}</div>
-                        <div style="font-size: 9px; opacity: 0.3; margin-top: 8px; text-align: ${side === 'teacher' ? 'right' : 'left'}; font-weight:800;">
-                            ${m.isSending ? '⏳ SYNCING...' : time}
-                        </div>
+                
+                const div = document.createElement('div');
+                div.id = msgId;
+                div.className = `bubble ${side}`;
+                div.innerHTML = `
+                    ${m.imageUrl ? `<img src="${m.imageUrl}" class="bubble-img" onclick="showLightbox('${m.imageUrl}')">` : ''}
+                    <div style="word-break: break-word;">${m.content}</div>
+                    <div style="font-size: 9px; opacity: 0.3; margin-top: 8px; text-align: ${side === 'teacher' ? 'right' : 'left'}; font-weight:800;">
+                        ${m.isSending ? '⏳ SYNCING...' : time}
                     </div>
                 `;
-            }).join('');
-            
-            if (stream.innerHTML !== html) {
-                stream.innerHTML = html;
+                stream.appendChild(div);
                 stream.scrollTop = stream.scrollHeight;
-            }
+            });
         }
 
         window.sendExpertResponse = async () => {
@@ -488,17 +514,22 @@
             stream.scrollTop = stream.scrollHeight;
 
             const oldText = data;
+            const btnIcon = document.getElementById('btn-icon');
+            const btnSpinner = document.getElementById('btn-spinner');
+            
             btn.disabled = true;
+            btnIcon.style.display = 'none';
+            btnSpinner.style.display = 'block';
             input.value = '';
             input.style.height = 'auto';
 
             let syncStatus = tempBubble.querySelector('.sync-progress-msg');
             let statusStep = 0;
-            const statusMsgs = ['⏳ DELIVERY IN PROGRESS...', '⏳ SYNCING RESOLUTION...', '⏳ ENCRYPTING PACKETS...'];
+            const statusMsgs = ['⏳ ENCRYPTING...', '📡 UPLOADING...', '🧠 PROCESSING...', '🔗 ESTABLISHING...'];
             const progressTimer = setInterval(() => {
-                syncStatus.textContent = statusMsgs[statusStep % statusMsgs.length];
+                syncStatus.innerHTML = `<span>${statusMsgs[statusStep % statusMsgs.length]}</span>`;
                 statusStep++;
-            }, 3500);
+            }, 2000);
 
             try {
                 const res = await apiCall(`/teacher/doubts/${currentChatId}/reply`, 'POST', { 
@@ -519,6 +550,8 @@
                 Swal.fire({ icon: 'error', title: 'SYNCHRONIZATION ERROR', text: 'Packet delivery failed. Input restored.', background: '#111114', color: '#fff' });
             } finally {
                 btn.disabled = false;
+                btnIcon.style.display = 'block';
+                btnSpinner.style.display = 'none';
                 document.getElementById(tempId)?.remove();
             }
         };

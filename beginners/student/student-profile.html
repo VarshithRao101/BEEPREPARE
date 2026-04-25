@@ -308,15 +308,16 @@
                         <div class="divider-line"></div>
                     </div>
 
-                    <div class="adv-card" style="padding: 24px; background: rgba(255, 215, 0, 0.02); border: 1px solid var(--border);">
-                        <p style="color: #ff4d4d; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                            CRITICAL: Name Updates propagate to all nodes & teachers
+                    <div class="adv-card" style="padding: 24px; background: rgba(255, 215, 0, 0.02); border: 1px solid var(--border); text-align: center;">
+                        <p style="color: var(--primary); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
+                            Identity Synchronization
                         </p>
-                        <div style="position: relative; margin-bottom: 12px;">
-                            <input type="text" id="edit-name-input" class="redeem-input" style="margin-bottom: 0; text-align: left; padding: 12px 15px; font-size: 15px; letter-spacing: 0.5px; border-radius: 10px;" placeholder="Full Name">
-                        </div>
-                        <button onclick="handleUpdateName()" id="save-name-btn" class="auth-btn" style="padding: 12px; font-size: 11px;">Update Protocol Identity</button>
+                        <p style="color: var(--text-muted); font-size: 13px; line-height: 1.6;">
+                            To maintain academic integrity, manual name updates are disabled. 
+                            <br>
+                            <span style="color: var(--primary); font-weight: 900;">CONTACT CUSTOMER CARE FOR NAME CHANGING.</span>
+                        </p>
+                        <button onclick="window.location.href='../customer-care.html'" class="auth-btn" style="padding: 12px; font-size: 11px; margin-top: 15px;">Message Support Hub</button>
                     </div>
 
                     <div class="menu-item adv-card" onclick="window.location.href='student-doubts.html'">
@@ -327,10 +328,10 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity: 0.3;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
 
-                    <div class="menu-item adv-card" onclick="window.location.href='student-feedback.html'">
+                    <div class="menu-item adv-card" onclick="window.location.href='../customer-care.html'">
                         <div style="display: flex; align-items: center;">
-                            <div class="menu-icon-box" style="width: 36px; height: 36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z" /></svg></div>
-                            <span style="font-weight: 700; color: #fff; font-size: 13px;">Feedback Node</span>
+                            <div class="menu-icon-box" style="width: 36px; height: 36px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg></div>
+                            <span style="font-weight: 700; color: #fff; font-size: 13px;">Customer Care</span>
                         </div>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="opacity: 0.3;"><polyline points="9 18 15 12 9 6"></polyline></svg>
                     </div>
@@ -668,6 +669,7 @@
             loadProfile();
         });
     </script>
+    <script src="../../assets/js/customer-care.js"></script>
 </body>
 
 </html>

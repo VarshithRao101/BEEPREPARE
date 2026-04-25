@@ -354,8 +354,35 @@
         }
         .message:not(.message-own) .message-bubble { border-top-left-radius: 4px; }
 
-        .message-pending { opacity: 0.5; filter: grayscale(1); }
+        .message-pending { opacity: 0.7; }
         .message-pending .message-bubble { border: 1.5px dashed var(--border-gold); }
+
+        .sync-progress-msg {
+            font-size: 8px; 
+            color: var(--primary); 
+            font-weight: 950; 
+            text-transform: uppercase;
+            letter-spacing: 1.5px; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            margin-top: 6px;
+            animation: pulse-sync 1.5s infinite;
+        }
+        @keyframes pulse-sync {
+            0%, 100% { opacity: 0.5; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .btn-spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .chat-footer {
             padding: 30px 40px;
@@ -551,8 +578,9 @@
 
                 <div class="chat-footer">
                     <input type="text" class="chat-input" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
-                    <button class="btn-send" onclick="sendMessage()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                    <button class="btn-send" id="btn-send-circle" onclick="sendMessage()">
+                        <div class="btn-spinner" id="btn-spinner" style="display: none;"></div>
+                        <svg id="btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                     </button>
                 </div>
             </div>
@@ -600,10 +628,25 @@
             }
 
             async function refreshCircles() {
-                const res = await apiCall('/circles/my');
-                if (res.success) {
-                    myCircles = res.data;
-                    renderSidebar();
+                try {
+                    const res = await apiCall('/circles/my');
+                    if (res && res.success) {
+                        myCircles = res.data;
+                        renderSidebar();
+                    } else {
+                        throw new Error(res?.message || 'Failed to sync circles');
+                    }
+                } catch (err) {
+                    console.error('Circle sync error:', err);
+                    const list = document.getElementById('circleList');
+                    list.innerHTML = `
+                        <div style="text-align:center; padding:60px 20px;">
+                            <div style="font-size:32px; margin-bottom:10px;">📡</div>
+                            <div style="font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#ff4444;">Signal Interruption</div>
+                            <p style="font-size:11px; color:#666; margin-top:10px;">We couldn't connect to the circle hub.</p>
+                            <button class="btn-action btn-gold" style="margin-top:15px; padding:8px 15px; font-size:9px;" onclick="location.reload()">Retry Connection</button>
+                        </div>
+                    `;
                 }
             }
 
@@ -625,8 +668,8 @@
                     <div class="circle-card ${activeId === c._id ? 'active' : ''}" onclick="selectCircle('${c._id}')">
                         <div class="sub-tag">${c.subject || 'Study'}</div>
                         <h3>${c.name}</h3>
-                        <div class="meta">${c.members.length} members</div>
-                        ${isCreator ? `<div class="circle-indicator" id="badge-${c._id}" style="display:${c.pendingCount > 0 ? 'block' : 'none'}">${c.pendingCount}</div>` : ''}
+                        <div class="meta">${c.memberCount || c.members?.length || 0} members</div>
+                        ${isCreator ? `<div class="circle-indicator" id="badge-${c._id}" style="display:${(c.pendingCount || 0) > 0 ? 'block' : 'none'}">${c.pendingCount}</div>` : ''}
                     </div>
                 `}).join('');
             }
@@ -649,7 +692,7 @@
                 document.getElementById('chatActive').style.display = 'flex';
                 document.getElementById('activeCircleName').textContent = circle.name;
                 document.getElementById('activeSubject').textContent = circle.subject || 'All Subjects';
-                document.getElementById('activeMemberCount').textContent = circle.members.length;
+                document.getElementById('activeMemberCount').textContent = circle.memberCount || circle.members?.length || 0;
                 document.getElementById('activeCircleCode').textContent = circle.circleCode;
                 document.getElementById('activeCircleCodeSmall').textContent = `ID: ${circle.circleCode}`;
 
@@ -675,6 +718,13 @@
                 const input = document.getElementById('msgInput');
                 const content = input.value.trim();
                 if (!content || !activeId) return;
+                const btn = document.getElementById('btn-send-circle');
+                const btnIcon = btn.querySelector('#btn-icon');
+                const btnSpinner = btn.querySelector('#btn-spinner');
+
+                btn.disabled = true;
+                btnIcon.style.display = 'none';
+                btnSpinner.style.display = 'block';
                 input.value = '';
 
                 // Optimistic UI: Pre-render message
@@ -708,6 +758,10 @@
                      if (tempEl) tempEl.style.opacity = '0.3';
                      alert(res.message);
                 }
+
+                btn.disabled = false;
+                btnIcon.style.display = 'block';
+                btnSpinner.style.display = 'none';
             }
 
             async function pollMessages() {
@@ -769,7 +823,7 @@
                         <div class="message-meta">
                             <span>${m.senderName}</span>
                             <span class="role-badge role-${m.senderRole}">${m.senderRole}</span>
-                            ${m.isPending ? '<span style="color:var(--primary); font-size:8px; font-weight:900;">• SENDING</span>' : ''}
+                            ${m.isPending ? '<div class="sync-progress-msg">⏳ SENDING...</div>' : ''}
                             ${isCreator && !m.isPending ? `<span style="color:#ff4444; margin-left:10px; cursor:pointer; font-size:10px; font-weight:900;" onclick="delMsg('${m._id}')">DELETE</span>` : ''}
                         </div>
                         <div class="message-bubble">${m.content}</div>

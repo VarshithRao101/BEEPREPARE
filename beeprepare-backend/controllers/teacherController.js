@@ -15,6 +15,8 @@ const { cloudinary, generatePdfUrl } = require('../utils/cloudinaryHelper');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const getChapterId = require('../utils/getChapterId');
+
 
 // ─── Multer Setup (memory storage — buffer uploaded to Firebase) ───────────
 const upload = multer({
@@ -142,16 +144,58 @@ const getProfile = async (req, res) => {
     }
 
     console.log(`[PROFILE] Fetching data for teacher ${teacherId}...`);
-    const [banks, totalQuestions, papersGenerated] = await Promise.all([
-      Bank.find({ teacherId }).lean(),
+    
+    // Self-healing: Assign beeId if missing
+    if (!user.beeId) {
+        const generateBeeId = () => {
+            const chars = '0123456789';
+            let num = '';
+            for (let i = 0; i < 4; i++) num += chars[Math.floor(Math.random() * chars.length)];
+            return `TEA-${num}`;
+        };
+        let newId;
+        let attempts = 0;
+        do {
+            newId = generateBeeId();
+            const exists = await User.findOne({ beeId: newId });
+            if (!exists) break;
+            attempts++;
+        } while (attempts < 10);
+        
+        await User.updateOne({ googleUid: teacherId }, { beeId: newId });
+        user.beeId = newId;
+    }
+
+    // Split queries to handle Cluster 1 (Questions) and Cluster 2 (App Data) separately
+    const banksPromise = Bank.find({ teacherId }).lean();
+    const activityPromise = ActivityLog.countDocuments({ userId: teacherId, type: 'paper_generated' });
+    
+    // Cluster 1 can be slow or unstable — wrap in 5s timeout and fallback to user.totalQuestions
+    const questionCountPromise = Promise.race([
       Question.countDocuments({ createdBy: teacherId }),
-      ActivityLog.countDocuments({ userId: teacherId, type: 'paper_generated' })
+      new Promise((_, reject) => setTimeout(() => reject(new Error('CLUSTER_1_TIMEOUT')), 5000))
+    ]).catch(err => {
+      console.warn(`[PROFILE_SYNC] Question count failed for ${teacherId}: ${err.message}`);
+      return user.totalQuestions || 0;
+    });
+
+    const [banks, totalQuestions, papersGenerated] = await Promise.all([
+      banksPromise,
+      questionCountPromise,
+      activityPromise
     ]);
     console.log(`[PROFILE] DB Queries complete: ${banks.length} banks, ${totalQuestions} questions.`);
 
-    // ── Self-Healing: Sync subjects/classes from Banks if User doc is drifted ────
+    // ── Self-Healing: Sync subjects/classes/chapters from Banks if User doc is drifted ────
     const bankSubjects = [...new Set(banks.map(b => b.subject))];
     const bankClasses = [...new Set(banks.map(b => b.class))];
+    
+    // Map existing bank chapters back to the user's chapter template
+    const bankChaptersMap = {};
+    banks.forEach(b => {
+      const key = `${b.class}-${b.subject}`;
+      bankChaptersMap[key] = b.chapters.map(c => c.chapterName);
+    });
 
     let needsUserUpdate = false;
     const updateOps = {};
@@ -164,12 +208,18 @@ const getProfile = async (req, res) => {
       updateOps.classes = bankClasses;
       needsUserUpdate = true;
     }
+    // Deep compare chapters map
+    if (JSON.stringify(user.chapters || {}) !== JSON.stringify(bankChaptersMap)) {
+      updateOps.chapters = bankChaptersMap;
+      needsUserUpdate = true;
+    }
 
     if (needsUserUpdate) {
-      console.log(`[PROFILE] Syncing drifted user state for ${teacherId}`);
-      await User.updateOne({ googleUid: teacherId }, updateOps);
+      console.log(`[PROFILE] Syncing drifted user state (subjects/classes/chapters) for ${teacherId}`);
+      await User.updateOne({ googleUid: teacherId }, { $set: updateOps });
       user.subjects = bankSubjects;
       user.classes = bankClasses;
+      user.chapters = bankChaptersMap;
     }
 
     console.log(`[PROFILE] Returning success for ${teacherId}`);
@@ -282,53 +332,100 @@ const updateProfile = async (req, res) => {
     await User.updateOne({ googleUid: teacherId }, updates);
 
     // ── Auto-sync Banks & Chapters (Parallelized for Speed) ──────────────────
-    const finalSubjects = updates.subjects || req.user.subjects || [];
-    const finalClasses  = updates.classes  || req.user.classes  || [];
-    const finalChapters = updates.chapters || req.user.chapters || {};
+    // 1. Sanitize and Deduplicate Inputs
+    const rawSubjects = updates.subjects || user.subjects || [];
+    const rawClasses  = updates.classes  || user.classes  || [];
+    
+    // Ensure they are arrays of strings and unique
+    const finalSubjects = [...new Set(
+      (Array.isArray(rawSubjects) ? rawSubjects : [])
+        .filter(s => typeof s === 'string' && s.trim().length > 0)
+    )];
+    const finalClasses = [...new Set(
+      (Array.isArray(rawClasses) ? rawClasses : [])
+        .filter(c => typeof c === 'string' && c.trim().length > 0)
+    )];
+    const finalChapters = updates.chapters || user.chapters || {};
 
-    if (updates.subjects !== undefined || updates.classes !== undefined || updates.chapters !== undefined || updates.displayName !== undefined) {
+    if (updates.subjects !== undefined || updates.classes !== undefined || updates.chapters !== undefined || updates.displayName !== undefined || updates.phone !== undefined) {
       const existingBanks = await Bank.find({ teacherId });
 
-      // 1. Concurrent Deletion (Cascading cleanup for orphaned subjects)
-      const banksToDelete = existingBanks.filter(b => !finalSubjects.includes(b.subject));
+      // 1. Concurrent Deletion (Cascading cleanup for orphaned subjects OR orphaned classes)
+      // We delete a bank if its subject is removed OR its class is removed
+      const banksToDelete = existingBanks.filter(b => 
+        !finalSubjects.includes(b.subject) || !finalClasses.includes(b.class)
+      );
       
       const deleteOps = banksToDelete.map(async (bank) => {
-        const notes = await Note.find({ bankId: bank._id }).lean();
-        // Fire and forget storage deletion to avoid blocking DB write
-        notes.forEach(note => { if (note.fileUrl) deleteFromStorage(note.fileUrl); });
-        
-        return Promise.all([
-          Question.deleteMany({ bankId: String(bank._id) }), // String — cross-DB safe
-          Note.deleteMany({ bankId: bank._id }),
-          AccessRequest.deleteMany({ bankId: bank._id }),
-          Bank.findByIdAndDelete(bank._id),
-          logActivity(teacherId, 'bank_deleted', 'Bank Destroyed', 
-            `The ${bank.subject} bank for ${bank.class} was permanently removed.`, '#FF4D4D')
-        ]);
+        try {
+          const notes = await Note.find({ bankId: bank._id }).lean();
+          
+          // Cascading storage cleanup
+          notes.forEach(note => {
+            if (note.fileUrl) deleteFromStorage(note.fileUrl);
+          });
+
+          return Promise.all([
+            Question.deleteMany({ bankId: String(bank._id) }),
+            Note.deleteMany({ bankId: bank._id }),
+            AccessRequest.deleteMany({ bankId: bank._id }),
+            Bank.findByIdAndDelete(bank._id),
+            logActivity(teacherId, 'bank_deleted', 'Bank Destroyed', 
+              `The ${bank.subject} bank for ${bank.class} was permanently removed.`, '#FF4D4D')
+          ]);
+        } catch (delErr) {
+          console.error(`Failed to delete bank ${bank._id}:`, delErr);
+          throw delErr;
+        }
       });
 
-      // 2. Concurrent Creation/Update (SYNC CHAPTERS for all current combinations)
+      // 2. Synchronization (Update existing or Create new)
+      const teacherName = updates.displayName || user.displayName;
       const syncOps = [];
+
       for (const className of finalClasses) {
         for (const subject of finalSubjects) {
           const normalizedClass = className.startsWith('Class ') ? className : `Class ${className}`;
+          
+          // Check if bank already exists in our snapshot
           let bank = existingBanks.find(b => b.subject === subject && b.class === normalizedClass);
           
+          // Skip if this bank is scheduled for deletion
+          if (bank && banksToDelete.some(b => b._id.toString() === bank._id.toString())) {
+            continue; 
+          }
+
           const chapterKey = `${normalizedClass}-${subject}`;
           const rawChapterList = finalChapters[chapterKey] || [];
           
-          const syncChapters = rawChapterList.map((cName, idx) => ({
-            chapterId: Buffer.from(`${chapterKey}-${cName}`).toString('hex').slice(0, 24),
-            chapterName: cName,
-            order: idx + 1
-          }));
+          // Map chapters while preserving questionCount if the chapter already exists in the bank
+          // Defensive: Handle both string arrays and object arrays from various sync states
+          if (!Array.isArray(rawChapterList)) {
+            console.warn(`Chapters for ${chapterKey} is not an array. Skipping sync for this combination.`);
+            continue;
+          }
+
+          const syncChapters = rawChapterList.map((c, idx) => {
+            const cName = typeof c === 'string' ? c : (c?.chapterName || '');
+            if (!cName || cName.trim().length === 0) return null;
+
+            const chapterId = getChapterId(normalizedClass, subject, cName);
+            const existingChapter = bank?.chapters?.find(ch => ch.chapterId === chapterId);
+            
+            return {
+              chapterId,
+              chapterName: cName.trim(),
+              order: idx + 1,
+              questionCount: existingChapter ? (existingChapter.questionCount || 0) : 0
+            };
+          }).filter(Boolean);
 
           if (!bank) {
             syncOps.push((async () => {
               const bankCode = await generateSyncCode();
               await Bank.create({
                 teacherId,
-                teacherName: updates.displayName || req.user.displayName,
+                teacherName,
                 subject,
                 class: normalizedClass,
                 chapters: syncChapters,
@@ -338,15 +435,17 @@ const updateProfile = async (req, res) => {
                 notesCount: 0,
                 isActive: true
               });
-              return logActivity(teacherId, 'bank_created', 'Bank Initialized',
-                `New ${subject} bank for ${normalizedClass} is ready.`, '#FFD700');
+
+              return logActivity(teacherId, 'bank_created', 'Bank Initialized', 
+                `Automated sync engine established a new ${subject} terminal for ${normalizedClass}.`, '#4CAF50');
             })());
           } else {
+            // Update existing bank with new chapters and potential name change
             syncOps.push(Bank.updateOne(
               { _id: bank._id },
               { 
                 chapters: syncChapters,
-                teacherName: updates.displayName || req.user.displayName,
+                teacherName,
                 isActive: true
               }
             ));
@@ -358,10 +457,17 @@ const updateProfile = async (req, res) => {
     }
     // ── End Bank Sync ───────────────────────────────────────────────────────
 
-    return success(res, 'Profile updated successfully', updates);
+    return success(res, 'Profile and subject banks synchronized.', {
+      ...user,
+      ...updates,
+      subjects: finalSubjects,
+      classes: finalClasses,
+      chapters: finalChapters
+    });
+
   } catch (err) {
     console.error('updateProfile error:', err);
-    return error(res, 'Failed to update profile', 'SERVER_ERROR', 500);
+    return error(res, `Failed to update profile: ${err.message}`, 'SERVER_ERROR', 500);
   }
 };
 
@@ -563,7 +669,8 @@ const addChapter = async (req, res) => {
       return error(res, 'A chapter with this name already exists', 'DUPLICATE_CHAPTER', 409);
     }
 
-    const chapterId = `ch${bank.chapters.length + 1}`;
+    const chapterId = getChapterId(bank.class, bank.subject, chapterName);
+
     const newChapter = {
       chapterId,
       chapterName: chapterName.trim(),
@@ -843,9 +950,17 @@ const deleteQuestion = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const generatePaper = async (req, res) => {
   try {
-    const { bankId, selectedChapters, blueprint, layout } = req.body;
+    let { bankId, selectedChapters, blueprint, layout } = req.body;
     const teacherId = req.user.googleUid;
-    const paperId = uuidv4(); // Generate unique ID for this exam architecture
+    const paperId = uuidv4();
+
+    // Safety: Convert object-wrapped arrays back to clean arrays if needed (fixes CastError)
+    if (selectedChapters && typeof selectedChapters === 'object' && !Array.isArray(selectedChapters)) {
+      selectedChapters = Object.values(selectedChapters);
+    }
+    if (blueprint && typeof blueprint === 'object' && !Array.isArray(blueprint)) {
+      blueprint = Object.values(blueprint);
+    }
 
     if (!bankId || !selectedChapters || !blueprint) {
       return error(res, 'bankId, selectedChapters, and blueprint are required', 'MISSING_FIELDS', 400);
@@ -933,12 +1048,13 @@ const generatePaper = async (req, res) => {
 
         // Add to our dynamic layout
         sectionDefs.push({
-          label: labels[sectionDefs.length] || '?',
+          label: labels[sectionDefs.length] || String.fromCharCode(65 + sectionDefs.length),
           type: typeName,
           key: blueprintKey,
           marksEach: requestedMarks,
           count: typeSelected.length,
-          total: typeSelected.length * requestedMarks
+          total: typeSelected.length * requestedMarks,
+          questions: typeSelected // Store questions directly to avoid filter bugs
         });
       }
     });
@@ -964,7 +1080,7 @@ const generatePaper = async (req, res) => {
     SUBJECT: ${bank.subject.toUpperCase()} (CLASS: ${bank.class})
   </h4>
 
-  <div style="display: flex; justify-content: space-between; margin-top: 1em; font-weight: bold; font-size: 1em;">
+  <div class="paper-meta-row" style="display: flex; justify-content: space-between; margin-top: 1em; font-weight: bold; font-size: 1em;">
     <span>Maximum Time: 3 Hours</span>
     <span>Maximum Marks: ${totalMarks}</span>
   </div>
@@ -974,8 +1090,8 @@ const generatePaper = async (req, res) => {
   <strong>GENERAL INSTRUCTIONS:</strong>
   <ol style="margin: 0.5em 0 0 1.5em; padding: 0;">
     <li>This question paper contains ${selected.length} questions in ${sectionDefs.length} sections.</li>
-    <li>Section A consists of multiple-choice questions of 1 mark each.</li>
-    <li>Sections B, C, D and E contain questions of different weightage based on the provided blueprint.</li>
+    ${sectionDefs[0]?.type === 'MCQ' ? '<li>Section A consists of multiple-choice questions of 1 mark each.</li>' : ''}
+    <li>Sections ${sectionDefs.length > 1 ? sectionDefs.slice(1).map(s => s.label).join(', ') : 'B, C, D'} contain questions of different weightage based on the provided blueprint.</li>
     <li>All questions are compulsory. However, internal choice is provided in some questions.</li>
     <li>Use of calculators is strictly prohibited.</li>
   </ol>
@@ -983,16 +1099,15 @@ const generatePaper = async (req, res) => {
 
     let qNumber = 1;
 
-    for (const [idx, section] of sectionDefs.entries()) {
-      const sectionQs = selected.filter(q => q.questionType === section.type);
+    for (const section of sectionDefs) {
+      const sectionQs = section.questions;
       if (sectionQs.length === 0) continue;
 
-      const marksEach = sectionQs[0].marks || 1;
-      const sectionTotal = sectionQs.reduce((s, q) => s + (q.marks || 0), 0);
+      const marksEach = section.marksEach || 1;
 
       paperHtml += `
       <div style="text-align: center; font-weight: bold; text-transform: uppercase; padding: 0.5em; background: #f2f2f2; border: 1px solid #ccc; margin: 2em 0 1em 0; font-size: 1.1em;">
-        SECTION - ${idx === 0 ? 'A' : idx === 1 ? 'B' : idx === 2 ? 'C' : idx === 3 ? 'D' : 'E'}
+        SECTION - ${section.label}
       </div>
       <div style="text-align: right; font-style: italic; font-size: 0.9em; margin-bottom: 0.8em;">
         (${sectionQs.length} questions × ${marksEach} mark${marksEach > 1 ? 's' : ''} each)
@@ -1012,11 +1127,11 @@ const generatePaper = async (req, res) => {
 
         if (q.questionType === 'MCQ' && q.mcqOptions) {
           paperHtml += `
-          <div class="mcq-options-grid" style="margin: 0.8em 0 0 2em; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5em; font-size: 0.95em;">
-            <div>(A) ${q.mcqOptions.A || ''}</div>
-            <div>(B) ${q.mcqOptions.B || ''}</div>
-            <div>(C) ${q.mcqOptions.C || ''}</div>
-            <div>(D) ${q.mcqOptions.D || ''}</div>
+          <div class="mcq-options-grid" style="margin: 0.8em 0 0 2.5em; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5em 1.5em; font-size: 0.95em;">
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(A)</span> <span>${q.mcqOptions.A || ''}</span></div>
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(B)</span> <span>${q.mcqOptions.B || ''}</span></div>
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(C)</span> <span>${q.mcqOptions.C || ''}</span></div>
+            <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(D)</span> <span>${q.mcqOptions.D || ''}</span></div>
           </div>`;
         }
 
@@ -1041,12 +1156,12 @@ const generatePaper = async (req, res) => {
 
     // Step 10: Return result
     return success(res, 'Paper generated successfully', {
-      paperId: uuidv4(),
+      paperId, // FIXED: Return the same ID used in the HTML
       paperHtml,
       totalMarks,
       questionCount: selected.length,
       selectedQuestions: selected.map(q => ({
-        questionId: q._id,
+        questionId: q._id || q.id,
         questionText: q.questionText,
         questionType: q.questionType,
         marks: q.marks,

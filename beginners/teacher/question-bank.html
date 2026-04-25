@@ -461,7 +461,8 @@
             window.location.href = `add-question.html?bankId=${selectedBankId}&chapterId=${chapterId}&chapterName=${encodeURIComponent(chapterName)}&subject=${encodeURIComponent(selectedSubject)}&class=${selectedClass}`;
         };
 
-        window.addEventListener('load', loadBanks);
+        // Initialize
+        loadBanks();
     </script>
 </body>
 

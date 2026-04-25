@@ -91,6 +91,22 @@
             }
         }
 
+        @media (max-width: 768px) {
+            #subjects-container, #grades-container {
+                grid-template-columns: 1fr !important;
+            }
+            .welcome-title-styled {
+                font-size: 24px !important;
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .header-title-styled {
+                font-size: 20px !important;
+            }
+        }
+
         /* BEE-SIGNAL Notification Dots */
         .signal-dot {
             position: absolute;
@@ -320,7 +336,13 @@
             }
 
             const response = await apiCall('/teacher/dashboard');
-            if (!response || !response.success) return;
+            if (!response || !response.success) {
+                const container = document.getElementById('subjects-container');
+                if (container) {
+                    container.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #ff4d4d; padding: 20px; font-weight: 800; border: 1px dashed #ff4d4d; border-radius: 12px;">SIGNAL DROPPED (SYNC ERROR)</div>`;
+                }
+                return;
+            }
 
             const data = response.data;
 
@@ -412,10 +434,9 @@
             BP.syncTeacherSignals();
         }
 
-        window.addEventListener('load', () => {
-            loadDashboard();
-            setInterval(loadDashboard, 15000); // Pulse every 15 seconds to refresh stats/signals
-        });
+        // Initialize
+        loadDashboard();
+        setInterval(loadDashboard, 15000); // Pulse every 15 seconds to refresh stats/signals
     </script>
 </body>
 

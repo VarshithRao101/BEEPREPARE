@@ -331,12 +331,18 @@
                         });
                     }
                 } else {
-                    list.innerHTML = '<div style="text-align: center; color: #ff4d4d; padding: 40px; font-weight: 800;">HUB RESPONSE ERROR</div>';
+                    const errorMsg = result?.message || 'HUB RESPONSE ERROR';
+                    list.innerHTML = `<div style="text-align: center; color: #ff4d4d; padding: 40px; font-weight: 800;">${errorMsg}</div>`;
                     zeroState.style.display = 'block';
                 }
             } catch (err) {
                 console.error('Request Load Error:', err);
-                list.innerHTML = '<div style="text-align: center; color: #ff4d4d; padding: 40px; font-weight: 800;">SIGNAL INTERFERENCE (CRASH)</div>';
+                const isBusy = err.message === 'SERVER_BUSY';
+                list.innerHTML = `
+                    <div style="text-align: center; color: #ff4d4d; padding: 40px; font-weight: 800;">
+                        ${isBusy ? 'SYSTEM BUSY (RETRYING...)' : 'SIGNAL INTERFERENCE (OFFLINE)'}
+                    </div>
+                `;
             }
         }
 

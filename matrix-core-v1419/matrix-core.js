@@ -3,7 +3,9 @@
  * Handles Authentication, API Calls, and Centralized UI Components
  */
 
-const API_BASE = 'http://localhost:5000/api/admin';
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://localhost:5000/api/admin' 
+    : '/api/admin';
 const AUTH_TOKEN = sessionStorage.getItem('admin_token');
 const ADMIN_ID = sessionStorage.getItem('admin_id');
 
@@ -13,7 +15,30 @@ if (!AUTH_TOKEN && !window.location.pathname.endsWith('index.html')) {
 }
 
 /**
+ * CSRF Token Cache — fetched once per session, reused until expiry
+ */
+let _csrfToken = null;
+let _csrfExpiry = 0;
+
+async function getCsrfToken() {
+    const now = Date.now();
+    if (_csrfToken && now < _csrfExpiry - 60000) return _csrfToken; // Reuse if >1min left
+    try {
+        const res = await fetch(API_BASE.replace('/admin', '') + '/admin-csrf-token', {
+            headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+        });
+        const data = await res.json();
+        if (data.success) {
+            _csrfToken = data.data.csrfToken;
+            _csrfExpiry = data.data.expiresAt;
+        }
+    } catch (_) { /* Non-blocking — server still validates */ }
+    return _csrfToken;
+}
+
+/**
  * Standardized Admin API Caller
+ * Automatically attaches CSRF token on POST/PUT/PATCH/DELETE requests.
  */
 export async function adminApi(endpoint, method = 'GET', body = null) {
     const options = {
@@ -24,7 +49,13 @@ export async function adminApi(endpoint, method = 'GET', body = null) {
         }
     };
     if (body) options.body = JSON.stringify(body);
-    
+
+    // Auto-attach CSRF token on state-changing requests
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+        const csrfToken = await getCsrfToken();
+        if (csrfToken) options.headers['X-CSRF-Token'] = csrfToken;
+    }
+
     // Ensure endpoint is a string and not an object accidentally passed in
     const safeEndpoint = String(endpoint).replace('[object Object]', 'INVALID_ID');
     

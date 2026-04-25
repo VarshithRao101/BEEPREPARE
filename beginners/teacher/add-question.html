@@ -512,27 +512,26 @@
             }
         }
 
-        window.addEventListener('load', () => {
-            const name = localStorage.getItem(BP.NAME) || 'T';
-            const profileIcon = document.querySelector('.profile-icon');
-            if (profileIcon) {
-                profileIcon.innerText = name[0].toUpperCase();
-                profileIcon.classList.add('has-signal');
-                if (!document.getElementById('profile-signal')) {
-                    const dot = document.createElement('div');
-                    dot.id = 'profile-signal';
-                    dot.className = 'signal-dot';
-                    profileIcon.appendChild(dot);
-                }
+        // Initialize
+        const name = localStorage.getItem(BP.NAME) || 'T';
+        const profileIcon = document.querySelector('.profile-icon');
+        if (profileIcon) {
+            profileIcon.innerText = name[0].toUpperCase();
+            profileIcon.classList.add('has-signal');
+            if (!document.getElementById('profile-signal')) {
+                const dot = document.createElement('div');
+                dot.id = 'profile-signal';
+                dot.className = 'signal-dot';
+                profileIcon.appendChild(dot);
             }
-            if (!(await guardTeacher())) return;
-            BP.syncTeacherSignals();
+        }
+        if (!(await guardTeacher())) throw new Error('Unauthorized');
+        BP.syncTeacherSignals();
 
-            if (subject && cls && chapterName) {
-                const subTitle = document.querySelector('header p');
-                subTitle.innerHTML = `${subject} (Class ${cls}) • <span style="color: var(--primary)">${chapterName}</span>`;
-            }
-        });
+        if (subject && cls && chapterName) {
+            const subTitle = document.querySelector('header p');
+            subTitle.innerHTML = `${subject} (Class ${cls}) • <span style="color: var(--primary)">${chapterName}</span>`;
+        }
     </script>
 </body>
 </html>
