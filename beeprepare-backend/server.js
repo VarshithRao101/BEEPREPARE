@@ -84,10 +84,11 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()
   'http://127.0.0.1:3000'
 ];
 
-// Auto-inject Vercel domain if missing
-if (process.env.VERCEL && !process.env.ALLOWED_ORIGINS) {
+// Auto-inject production domains
+if (process.env.VERCEL) {
     allowedOrigins.push('https://beeprepare.vercel.app');
 }
+
 
 
 app.use(cors({
