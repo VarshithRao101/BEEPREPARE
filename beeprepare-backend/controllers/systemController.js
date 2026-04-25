@@ -1,9 +1,11 @@
 const SystemConfig = require('../models/SystemConfig');
+const { connectDB } = require('../config/db');
 const { success, error } = require('../utils/responseHelper');
 
 // GET /api/system/maintenance
 const getMaintenanceStatus = async (req, res) => {
   try {
+    await connectDB();
     const config = await SystemConfig.findOne({ key: 'maintenance_mode' });
     return success(res, 'Maintenance status fetched', { 
       isMaintenance: config ? config.value : false 
@@ -16,6 +18,7 @@ const getMaintenanceStatus = async (req, res) => {
 // POST /api/admin/maintenance (Admin only)
 const toggleMaintenance = async (req, res) => {
   try {
+    await connectDB();
     const { status } = req.body; // true/false
     
     // Check if admin (role-based security)

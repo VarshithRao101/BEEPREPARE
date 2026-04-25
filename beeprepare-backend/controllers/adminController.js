@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const { connectDB } = require('../config/db');
 const LicenseKey = require('../models/LicenseKey');
 const Bank = require('../models/Bank');
 const Question = require('../models/Question');
@@ -43,6 +44,7 @@ const escapeRegExp = (string) => {
 
 const adminLogin = async (req, res) => {
   try {
+    await connectDB();
     const { adminId, password, captcha, captchaToken } = req.body;
     const ip = req.ip;
 
@@ -156,6 +158,7 @@ const getDbHealth = async () => {
 
 const getOverview = async (req, res) => {
   try {
+    await connectDB();
     const [
       totalUsers,
       totalTeachers,

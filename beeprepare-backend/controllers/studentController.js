@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { connectDB } = require('../config/db');
 const crypto = require('crypto');
 const { db, bucket } = require('../config/firebase');
 const User = require('../models/User');
@@ -75,6 +76,7 @@ const generateSignedUrl = async (fileUrl) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getDashboard = async (req, res) => {
   try {
+    await connectDB();
     const studentId = req.user.googleUid;
 
     const [streak, testSessions, recentDoubts, activityLogs] = await Promise.all([
@@ -161,6 +163,7 @@ const getDashboard = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getProfile = async (req, res) => {
   try {
+    await connectDB();
     const studentId = req.user.googleUid;
 
     const [streak, testAgg, queryCount] = await Promise.all([

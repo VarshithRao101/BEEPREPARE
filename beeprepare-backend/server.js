@@ -41,6 +41,12 @@ const logger = require('./utils/logger');
 const requireAuth = require('./middleware/requireAuth');
 
 
+const { connectDB } = require('./config/db');
+const mongoose = require('mongoose');
+
+// Apply global mongoose settings
+mongoose.set('bufferCommands', false);
+
 // === SYSTEM CONFIG ===
 app.set('trust proxy', 1);
 
@@ -49,19 +55,17 @@ app.set('trust proxy', 1);
 // ═══════════════════════════════════════════════════════════════
 app.use(async (req, res, next) => {
   try {
-    const { mainConn, questionsConn } = require('./config/db');
-    if (!mainConn() || !questionsConn()) {
-      await connectDB();
-    }
+    // Health checks and direct assets skip the guard
+    if (req.path === '/health' || req.path.includes('.')) return next();
+    
+    await connectDB();
     next();
   } catch (err) {
-    // Don't block health checks
-    if (req.path === '/health') return next();
     logger.error('Connection Guard Error:', err);
-    res.status(500).json({ 
+    res.status(503).json({ 
       success: false, 
-      message: 'Server synchronization failed.', 
-      error: { code: 'CONNECT_ERROR' } 
+      message: 'Server synchronization failed (DB).', 
+      error: { code: 'DB_CONNECTION_ERROR' } 
     });
   }
 });

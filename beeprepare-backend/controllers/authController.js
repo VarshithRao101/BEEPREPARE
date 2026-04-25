@@ -1,4 +1,5 @@
 const { admin } = require('../config/firebase');
+const { connectDB } = require('../config/db');
 const User = require('../models/User');
 const Bank = require('../models/Bank');
 const Question = require('../models/Question');
@@ -27,6 +28,7 @@ const getRedirectTarget = (user) => {
 // POST /api/auth/google-login
 const googleLogin = async (req, res) => {
   try {
+    await connectDB();
     const { idToken } = req.body;
     if (!idToken) {
       return error(res,
@@ -144,6 +146,7 @@ const googleLogin = async (req, res) => {
 // POST /api/auth/set-role
 const setRole = async (req, res) => {
   try {
+    await connectDB();
     const { role } = req.body;
 
     if (!role || !['teacher', 'student'].includes(role)) {
@@ -205,6 +208,7 @@ const setRole = async (req, res) => {
 // POST /api/auth/logout
 const logout = async (req, res) => {
   try {
+    await connectDB();
 
     await admin.auth().revokeRefreshTokens(req.user.googleUid);
     return success(res, 'Logged out successfully', null);
@@ -217,6 +221,7 @@ const logout = async (req, res) => {
 // POST /api/auth/wipe-data
 const wipeData = async (req, res) => {
   try {
+    await connectDB();
     const googleUid = req.user.googleUid;
     const user = await User.findOne({ googleUid });
     if (!user) return error(res, 'User not found', 'NOT_FOUND', 404);
@@ -285,6 +290,7 @@ const wipeData = async (req, res) => {
 };
 
 const verifySession = async (req, res) => {
+  await connectDB();
   return success(res, 'Session valid', {
     uid: req.user.googleUid,
     role: req.user.role,

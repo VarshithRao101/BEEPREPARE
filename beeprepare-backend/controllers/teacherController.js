@@ -1,4 +1,5 @@
 const multer = require('multer');
+const { connectDB } = require('../config/db');
 const crypto = require('crypto');
 const { admin, db, bucket } = require('../config/firebase');
 const User = require('../models/User');
@@ -76,6 +77,7 @@ const deleteFromStorage = async (identifier, resource_type = 'raw') => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getDashboard = async (req, res) => {
   try {
+    await connectDB();
     const teacherId = req.user.googleUid;
 
     console.log(`[DASHBOARD] Fetching data for teacher ${teacherId}...`);
@@ -133,6 +135,7 @@ const getDashboard = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getProfile = async (req, res) => {
   try {
+    await connectDB();
     const teacherId = req.user.googleUid;
     const user = req.user;
 
