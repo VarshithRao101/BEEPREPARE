@@ -1,23 +1,28 @@
-const { Schema } = require('mongoose');
-const { getMainConn } = require('../config/db');
+const mongoose = require('mongoose');
 
-const blacklistSchema = new Schema({
-  email:     { type: String, required: true, unique: true, lowercase: true, trim: true },
-  reason:    { type: String, default: 'Administrative Block' },
-  blockedBy: { type: String, required: true },
-  blockedAt: { type: Date, default: Date.now },
-  isActive:  { type: Boolean, default: true },
-  expiresAt: { type: Date, default: null }
+const blacklistSchema = new mongoose.Schema({
+    ip: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true
+    },
+    reason: String,
+    strikes: {
+        type: Number,
+        default: 1
+    },
+    isPermanentlyBanned: {
+        type: Boolean,
+        default: false
+    },
+    lastAttempt: {
+        type: Date,
+        default: Date.now
+    }
 }, { timestamps: true });
 
-let _Blacklist = null;
-module.exports = new Proxy(function() {}, {
-  get(_, prop) {
-    if (!_Blacklist) _Blacklist = getMainConn().model('Blacklist', blacklistSchema);
-    return _Blacklist[prop];
-  },
-  construct(_, args) {
-    if (!_Blacklist) _Blacklist = getMainConn().model('Blacklist', blacklistSchema);
-    return new _Blacklist(...args);
-  }
-});
+// Auto-expire non-permanent bans after 24 hours
+blacklistSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 86400, partialFilterExpression: { isPermanentlyBanned: false } });
+
+module.exports = mongoose.model('Blacklist', blacklistSchema);

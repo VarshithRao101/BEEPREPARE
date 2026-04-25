@@ -18,6 +18,7 @@
 
 const crypto = require('crypto');
 const logger = require('../utils/logger');
+const { recordStrike } = require('./ipShield');
 
 // ═══════════════════════════════════════════════════════════════════
 // § 1. THREAT INTELLIGENCE — Pattern libraries
@@ -248,6 +249,11 @@ const recordAnomaly = (ip, type, requestId) => {
   }
   record.count++;
   record.events.push({ type, requestId, at: now });
+
+  // ═══════════════════════════════════════════════════════════════
+  // PERSISTENT BAN SYSTEM
+  // ═══════════════════════════════════════════════════════════════
+  recordStrike(ip, `Security Anomaly: ${type}`);
 
   if (record.count >= ANOMALY_THRESHOLD) {
     hardBlockStore.set(ip, now + HARD_BLOCK_DURATION_MS);

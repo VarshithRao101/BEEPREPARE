@@ -22,6 +22,7 @@ const {
 // ═══ FORTRESS — Advanced Security Layer ═══
 const { fortressStack } = require('./middleware/fortress');
 const { csrfTokenEndpoint } = require('./middleware/csrf');
+const { ipShield } = require('./middleware/ipShield');
 
 const {
   globalLimiter,
@@ -41,7 +42,12 @@ const requireAuth = require('./middleware/requireAuth');
 
 
 // === SYSTEM CONFIG ===
-app.set('trust proxy', 1); // Trust the first proxy (Vercel, Render, Nginx etc.) for IP tracking
+app.set('trust proxy', 1);
+
+// ═══════════════════════════════════════════════════════════════
+// AUTOMATED IP SHIELD — 1st Line of Defense
+// ═══════════════════════════════════════════════════════════════
+app.use(ipShield);
 
 // === COMPRESSION — SPEED OPTIMIZATION ===
 app.use(compression());
