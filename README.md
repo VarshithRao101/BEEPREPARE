@@ -1,11 +1,11 @@
-# 🐝 BEEPREPARE — The Ultimate Academic Preparation Node
+# BEEPREPARE - The Ultimate Academic Preparation Node
 
 ![BEEPREPARE Banner](assets/images/premium-bg.png)
 
 > **Institutional-grade preparation platform for students and educators.**  
 > Built with a high-security architecture, real-time synchronization, and AI-driven insights.
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 BEEPREPARE is designed as a **Unified Full-Stack Application** optimized for **Vercel** serverless deployment.
 
@@ -15,7 +15,7 @@ BEEPREPARE is designed as a **Unified Full-Stack Application** optimized for **V
 - **Identity**: Firebase Authentication & Admin SDK
 - **Security**: 12-Layer "Fortress" Middleware Stack
 
-## 🚀 Deployment (Vercel)
+## Deployment (Vercel)
 
 This project is pre-configured for Vercel. To deploy:
 
@@ -29,7 +29,7 @@ This project is pre-configured for Vercel. To deploy:
     - `ALLOWED_ORIGINS`: Set to your production URL.
 4.  Click **Deploy**.
 
-## 🛡️ Security Features
+## Security Features
 
 - **Matrix Vault**: Identity-verified admin credentials management.
 - **Rolling Gateway**: Time-based dynamic paths for admin entry points.
@@ -37,7 +37,7 @@ This project is pre-configured for Vercel. To deploy:
 - **CSRF Protection**: Stateful token validation for all write operations.
 - **Rate Limiting**: Intelligent limiting for AI, Auth, and Payment nodes.
 
-## 📁 Directory Structure
+## Directory Structure
 
 ```text
 ├── beeprepare-backend/   # Node.js Express API Engine
@@ -48,7 +48,7 @@ This project is pre-configured for Vercel. To deploy:
 └── vercel.json           # Unified Deployment Logic
 ```
 
-## 🛠️ Local Development
+## Local Development
 
 1.  Clone the repo.
 2.  Install dependencies: `npm install`.
