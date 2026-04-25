@@ -42,7 +42,7 @@ const requireAuth = require('./middleware/requireAuth');
 const mongoose = require('mongoose');
 
 // Apply global mongoose settings
-mongoose.set('bufferCommands', false);
+// Note: We removed global bufferCommands: false here to avoid Blacklist crash
 
 // === SYSTEM CONFIG ===
 app.set('trust proxy', 1);
@@ -58,11 +58,14 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    logger.error('Connection Guard Error:', err);
+    console.error('Connection Guard Crash:', err);
     res.status(503).json({ 
       success: false, 
       message: 'Server synchronization failed (DB).', 
-      error: { code: 'DB_CONNECTION_ERROR' } 
+      error: { 
+        code: 'DB_CONNECTION_ERROR',
+        details: err.message
+      } 
     });
   }
 });
