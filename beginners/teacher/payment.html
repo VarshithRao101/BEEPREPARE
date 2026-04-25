@@ -50,8 +50,8 @@
         /* Header - Branding Left, Cancel Center */
         header {
             padding: 15px 5%;
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
             background: transparent;
             z-index: 1000;
@@ -488,10 +488,10 @@
 <body>
     <header>
         <div class="header-brand">
+            <img src="../../assets/custom-bee.png" alt="BEE Logo" style="width: 45px; height: 45px; object-fit: contain;">
             <span style="font-weight: 900; font-size: 28px; letter-spacing: 1px;"><span style="color: #FFD700;">BEE</span><span style="color: #e0e0e0;">PREPARE</span></span>
         </div>
         <button class="btn-back" onclick="window.history.back()">✕ CANCEL</button>
-        <div style="grid-column: 3;"></div> <!-- Spacer for grid centering -->
     </header>
 
     <div class="process-box">
