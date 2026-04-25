@@ -308,7 +308,7 @@ app.get('/vault', async (req, res) => {
   `);
 });
 
-app.use('/assets', express.static(path.join(__dirname, '../assets')));
+app.use('/assets', express.static(path.resolve(__dirname, '../assets')));
 app.use('/gate/:code', (req, res, next) => {
   const code = req.params.code;
   const current = getRollingSecret(0);
@@ -317,7 +317,7 @@ app.use('/gate/:code', (req, res, next) => {
     return next();
   }
   res.status(404).send('<h1>🔍 Node Not Found</h1><p>Expired or invalid path.</p>');
-}, express.static(path.join(__dirname, `../${process.env.ADMIN_FOLDER_NAME || 'matrix-core-v1419'}`)));
+}, express.static(path.resolve(__dirname, `../${process.env.ADMIN_FOLDER_NAME || 'matrix-core-v1419'}`)));
 
 // === MAINTENANCE MODE CHECK ===
 app.use(async (req, res, next) => {

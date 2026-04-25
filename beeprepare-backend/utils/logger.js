@@ -9,6 +9,30 @@ const logFormat = winston.format.printf(({ level, message, timestamp, ...metadat
   return msg;
 });
 
+const transports = [];
+
+// DO NOT write to files on Vercel (Read-Only Filesystem)
+if (!process.env.VERCEL) {
+  transports.push(
+    new winston.transports.File({ 
+      filename: path.join(__dirname, '../logs/error.log'), 
+      level: 'error' 
+    }),
+    new winston.transports.File({ 
+      filename: path.join(__dirname, '../logs/combined.log') 
+    })
+  );
+}
+
+// Always use Console on Vercel/Production for log aggregation
+transports.push(new winston.transports.Console({
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.timestamp({ format: 'HH:mm:ss' }),
+    logFormat
+  )
+}));
+
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
@@ -16,28 +40,7 @@ const logger = winston.createLogger({
     winston.format.metadata({ fillExcept: ['message', 'level', 'timestamp'] }),
     winston.format.json()
   ),
-  transports: [
-    // Error logs to file
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/error.log'), 
-      level: 'error' 
-    }),
-    // Combined logs to file
-    new winston.transports.File({ 
-      filename: path.join(__dirname, '../logs/combined.log') 
-    })
-  ]
+  transports
 });
-
-// Always log to console in development with colors
-if (process.env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.timestamp({ format: 'HH:mm:ss' }),
-      logFormat
-    )
-  }));
-}
 
 module.exports = logger;
