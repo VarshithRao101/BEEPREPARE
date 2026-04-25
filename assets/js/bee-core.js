@@ -174,11 +174,12 @@ export async function apiCall(
     }
 
     let data;
+    const text = await res.text();
     try {
-      data = await res.json();
+      data = JSON.parse(text);
     } catch (e) {
-      console.error('JSON Parse Error:', e);
-      return { success: false, message: 'Server response was not valid JSON' };
+      console.error('JSON Parse Error. Server returned:', text);
+      return { success: false, message: 'Server synchronization failed. Please try again later.' };
     }
 
     // MAINTENANCE CHECK (Step 9): If maintenance mode is active, block everything

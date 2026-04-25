@@ -444,31 +444,25 @@ app.use((req, res) => {
 
 // === GLOBAL ERROR HANDLER ===
 app.use((err, req, res, next) => {
+  const requestId = req.id || 'unknown';
   logger.error(err.message, {
-    requestId: req.id,
+    requestId,
     path: req.originalUrl,
     ip: req.ip,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 
-  if (err.message === 'Not allowed by CORS') {
-    return res.status(403).json({
-      success: false,
-      message: 'Access denied.',
-      error: { code: 'CORS_BLOCKED' }
-    });
-  }
-
   const message = process.env.NODE_ENV === 'development'
     ? err.message
-    : 'Something went wrong.';
+    : 'A secure server error occurred.';
 
+  // Ensure we ALWAYS return JSON
   res.status(err.status || 500).json({
     success: false,
     message,
     error: {
       code: err.code || 'SERVER_ERROR',
-      requestId: req.id
+      requestId
     }
   });
 });
@@ -478,7 +472,12 @@ const PORT = process.env.PORT || 5000;
 // === STARTUP SEQUENCE — CONNECT DB THEN LISTEN ===
 const startApp = async () => {
   try {
-    await connectDB();
+    // Only block startup on DB failure if NOT on Vercel
+    // On Vercel, we want the function to stay alive to report errors
+    await connectDB().catch(err => {
+        logger.error('DB CONNECTION DELAYED OR FAILED:', err);
+    });
+
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
         const server = app.listen(PORT, () => {
           logger.info(`BEEPREPARE running on port ${PORT}`);
@@ -487,12 +486,9 @@ const startApp = async () => {
         process.on('SIGTERM', () => {
           server.close(() => process.exit(0));
         });
-    } else {
-        logger.info('BEEPREPARE running in serverless mode');
     }
   } catch (err) {
     logger.error('CRITICAL STARTUP FAILURE:', err);
-    if (!process.env.VERCEL) process.exit(1);
   }
 };
 

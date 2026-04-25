@@ -9,6 +9,12 @@ const ipShield = async (req, res, next) => {
     const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
     try {
+        const mongoose = require('mongoose');
+        // If DB not connected, skip the check (don't block legitimate users)
+        if (mongoose.connection.readyState !== 1) {
+            return next();
+        }
+
         const bannedEntry = await Blacklist.findOne({ ip });
 
         if (bannedEntry && (bannedEntry.isPermanentlyBanned || bannedEntry.strikes >= 3)) {
