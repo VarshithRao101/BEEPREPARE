@@ -47,4 +47,5 @@ const seedSettings = async () => {
   }
 };
 
-module.exports = { AppSettings, model: AppSettings, seedSettings };
+module.exports = AppSettings;
+module.exports.seedSettings = seedSettings;
