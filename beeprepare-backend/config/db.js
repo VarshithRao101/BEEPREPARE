@@ -9,8 +9,6 @@ if (!cached) {
   };
 }
 
-mongoose.set('bufferCommands', false);
-
 const connectDB = async () => {
   if (cached.mainConn && cached.questionsConn) {
     return { mainConn: cached.mainConn, questionsConn: cached.questionsConn };

@@ -147,6 +147,7 @@ const googleLogin = async (req, res) => {
 const setRole = async (req, res) => {
   try {
     await connectDB();
+    await connectDB();
     const { role } = req.body;
 
     if (!role || !['teacher', 'student'].includes(role)) {

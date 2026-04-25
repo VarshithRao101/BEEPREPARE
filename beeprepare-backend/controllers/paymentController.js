@@ -1,6 +1,7 @@
 const PaymentRequest = require('../models/PaymentRequest');
 const ActivityLog = require('../models/ActivityLog');
 const AppSettings = require('../models/AppSettings');
+const { connectDB } = require('../config/db');
 const {
   sendPaymentSubmitted,
   sendPaymentApproved
@@ -14,6 +15,7 @@ const { success, error } =
 // paymentType: activation | extra_slot
 const submitPayment = async (req, res) => {
   try {
+    await connectDB();
     let { authEmail, email, utrNumber, paymentType } = req.body;
 
     // Fallback if authEmail is not provided
