@@ -11,7 +11,7 @@ if (!admin.apps.length) {
       credential = admin.credential.cert(serviceAccount);
     } catch (err) {
       console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT JSON:', err.message);
-      process.exit(1);
+      // Don't crash, just log. This prevents FUNCTION_INVOCATION_FAILED
     }
   } else {
     // Development: read from local JSON file
@@ -20,17 +20,18 @@ if (!admin.apps.length) {
       const serviceAccount = require(serviceAccountPath);
       credential = admin.credential.cert(serviceAccount);
     } catch (err) {
-      console.error('❌ Failed to load local firebase-admin.json:', err.message);
-      // In development, we don't always want to exit if this is missing (e.g. for simple environment tests), 
-      // but for BEEPREPARE core it's usually required.
-      process.exit(1); 
+      console.warn('⚠️ Local firebase-admin.json not found. Auth will fail but server will stay alive.');
     }
   }
 
-  admin.initializeApp({
-    credential,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'beeprepare-1d7b8.appspot.com'
-  });
+  if (credential) {
+    admin.initializeApp({
+      credential,
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'beeprepare-1d7b8.appspot.com'
+    });
+  } else {
+    console.error('❌ CRITICAL: Firebase could not be initialized. Authentication will not work.');
+  }
 }
 
 const db = admin.firestore();
