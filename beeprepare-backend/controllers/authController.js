@@ -134,10 +134,9 @@ const googleLogin = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('CRITICAL LOGIN ERROR:',
-      err.message, err.stack);
+    console.error('CRITICAL LOGIN ERROR:', err.message, err.stack);
     return error(res,
-      'Authentication failed',
+      'Authentication failed: ' + err.message,
       'AUTH_FAILED', 500
     );
   }
