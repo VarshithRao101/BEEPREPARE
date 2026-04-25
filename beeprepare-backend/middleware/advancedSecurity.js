@@ -1,9 +1,9 @@
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 
 // Tracker: UUID per request
 const requestIdentifier = (req, res, next) => {
-  req.id = uuidv4();
+  req.id = crypto.randomUUID();
   res.setHeader('X-Request-Id', req.id);
   next();
 };

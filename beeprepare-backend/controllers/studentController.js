@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const { db, bucket } = require('../config/firebase');
 const User = require('../models/User');
 const Bank = require('../models/Bank');
@@ -1012,7 +1012,7 @@ const submitDoubt = async (req, res) => {
 
     const now = new Date();
     const newMessage = {
-      messageId: uuidv4(),
+      messageId: crypto.randomUUID(),
       senderRole: 'student',
       content: questionText.trim(),
       imageUrl: imageUrl || null,
@@ -1102,7 +1102,7 @@ const sendDoubtMessage = async (req, res) => {
     }
 
     const message = {
-      messageId: uuidv4(),
+      messageId: crypto.randomUUID(),
       senderRole: 'student',
       content: content.trim(),
       imageUrl: imageUrl || null,

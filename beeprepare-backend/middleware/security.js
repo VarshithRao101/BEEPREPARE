@@ -1,7 +1,7 @@
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 // === SECURITY HEADERS ===
 const securityHeaders = helmet({
@@ -68,7 +68,7 @@ const securityHeaders = helmet({
 
 // === REQUEST ID TRACKING ===
 const requestTracker = (req, res, next) => {
-  req.id = uuidv4();
+  req.id = crypto.randomUUID();
   res.setHeader('x-request-id', req.id);
   res.setHeader('X-Powered-By', 'BEEPREPARE');
   next();

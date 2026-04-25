@@ -45,6 +45,28 @@ const requireAuth = require('./middleware/requireAuth');
 app.set('trust proxy', 1);
 
 // ═══════════════════════════════════════════════════════════════
+// CONNECTION GUARD — Ensure DB is ready before any request
+// ═══════════════════════════════════════════════════════════════
+app.use(async (req, res, next) => {
+  try {
+    const { mainConn, questionsConn } = require('./config/db');
+    if (!mainConn() || !questionsConn()) {
+      await connectDB();
+    }
+    next();
+  } catch (err) {
+    // Don't block health checks
+    if (req.path === '/health') return next();
+    logger.error('Connection Guard Error:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server synchronization failed.', 
+      error: { code: 'CONNECT_ERROR' } 
+    });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
 // AUTOMATED IP SHIELD — 1st Line of Defense
 // ═══════════════════════════════════════════════════════════════
 app.use(ipShield);
@@ -61,6 +83,12 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()
   'http://localhost:3000',
   'http://127.0.0.1:3000'
 ];
+
+// Auto-inject Vercel domain if missing
+if (process.env.VERCEL && !process.env.ALLOWED_ORIGINS) {
+    allowedOrigins.push('https://beeprepare.vercel.app');
+}
+
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -328,7 +356,7 @@ app.use(async (req, res, next) => {
   }
   try {
     const AppSettings = require('./models/AppSettings');
-    const setting = await AppSettings.findOne({ key: 'maintenance_mode' }).lean();
+    const setting = await AppSettings.findOne({ key: 'maintenance_mode' }).lean().catch(() => null);
     if (setting?.value === true) {
       return res.status(503).json({
         success: false,
@@ -338,7 +366,8 @@ app.use(async (req, res, next) => {
       });
     }
   } catch (err) {
-    // Don't block if settings fail
+    // Don't block if settings fail or DB not ready
+    console.warn('[Maintenance Check Deferred]', err.message);
   }
   next();
 });
@@ -347,6 +376,8 @@ app.use(async (req, res, next) => {
 
 // Auth routes (with strict limiting)
 app.use('/api/auth', authLimiter, require('./routes/auth'));
+
+
 
 // License (with activation limit)
 app.use('/api/license', requireAuth, activationLimiter, require('./routes/license'));

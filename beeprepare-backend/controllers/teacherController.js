@@ -1,5 +1,5 @@
 const multer = require('multer');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 const { admin, db, bucket } = require('../config/firebase');
 const User = require('../models/User');
 const Bank = require('../models/Bank');
@@ -952,7 +952,7 @@ const generatePaper = async (req, res) => {
   try {
     let { bankId, selectedChapters, blueprint, layout } = req.body;
     const teacherId = req.user.googleUid;
-    const paperId = uuidv4();
+    const paperId = crypto.randomUUID();
 
     // Safety: Convert object-wrapped arrays back to clean arrays if needed (fixes CastError)
     if (selectedChapters && typeof selectedChapters === 'object' && !Array.isArray(selectedChapters)) {
@@ -1602,7 +1602,7 @@ const replyToDoubt = async (req, res) => {
 
     const now = new Date();
     const message = {
-      messageId: uuidv4(),
+      messageId: crypto.randomUUID(),
       senderId: teacherId,
       senderRole: 'teacher',
       content: content?.trim() || '[Image Attached]',

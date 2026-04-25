@@ -10,6 +10,7 @@ const { validateGoogleLogin, validateSetRole } = require('../middleware/validato
  * @access  Public
  */
 router.post('/google-login', validateGoogleLogin, googleLogin);
+router.post('/google_login', validateGoogleLogin, googleLogin); // Alias for underscore version
 
 /**
  * @route   POST /api/auth/set-role

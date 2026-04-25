@@ -7,6 +7,7 @@ let mainConn = null;
 let questionsConn = null;
 
 const connectDB = async () => {
+  if (mainConn && questionsConn) return;
   try {
     // ── 1. Main DB connection (Cluster 2) ─────────────────────────────────
     console.log('⏳ Connecting to Main App DB (Cluster 2)...');
@@ -58,7 +59,11 @@ const connectDB = async () => {
 
   } catch (err) {
     console.error('MongoDB connection failed ❌', err.message);
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    } else {
+      console.warn('⚠️ Serverless environment detected. Continuing without DB to report diagnostics.');
+    }
   }
 };
 
