@@ -29,11 +29,12 @@ const connectDB = async () => {
       if (!process.env.MONGODB_QUESTIONS_URI) throw new Error('MONGODB_QUESTIONS_URI missing');
 
       console.log('Connecting to Main DB...');
-      cached.mainConn = await mongoose.createConnection(process.env.MONGODB_URI, opts);
+      await mongoose.connect(process.env.MONGODB_URI, opts);
+      cached.mainConn = mongoose.connection;
       console.log('Main DB connected');
 
       console.log('Connecting to Questions DB...');
-      cached.questionsConn = await mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts);
+      cached.questionsConn = await mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts).asPromise();
       console.log('Questions DB connected');
 
       cached.mainConn.on('disconnected', () => {
