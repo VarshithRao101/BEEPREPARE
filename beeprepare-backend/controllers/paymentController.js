@@ -1,7 +1,6 @@
 const PaymentRequest = require('../models/PaymentRequest');
 const ActivityLog = require('../models/ActivityLog');
-const { AppSettings } =
-  require('../models/AppSettings');
+const AppSettings = require('../models/AppSettings');
 const {
   sendPaymentSubmitted,
   sendPaymentApproved

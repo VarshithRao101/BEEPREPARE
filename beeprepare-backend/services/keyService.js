@@ -1,6 +1,6 @@
 const { db } = require('../config/firebase');
 const User = require('../models/User');
-const { AppSettings } = require('../models/AppSettings');
+const AppSettings = require('../models/AppSettings');
 const FirestoreTracker = require('../utils/firestoreTracker');
 
 // REGEX: Strict validation as per Step 3
