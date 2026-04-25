@@ -1,85 +1,86 @@
 const mongoose = require('mongoose');
 
-// Cache connections for serverless environments (Vercel)
-let cachedMain = global.mongooseMain;
-if (!cachedMain) {
-  cachedMain = global.mongooseMain = { conn: null, promise: null };
+let cached = global._mongooseCache;
+if (!cached) {
+  cached = global._mongooseCache = {
+    mainConn: null,
+    questionsConn: null,
+    promise: null
+  };
 }
 
-let cachedQuestions = global.mongooseQuestions;
-if (!cachedQuestions) {
-  cachedQuestions = global.mongooseQuestions = { conn: null, promise: null };
-}
-
-// Global Mongoose settings
-mongoose.set('strictQuery', true);
 mongoose.set('bufferCommands', false);
 
 const connectDB = async () => {
-  // 1. Connect to Main App DB (Cluster 2)
-  if (!cachedMain.conn) {
-    if (!cachedMain.promise) {
-      console.log('[DB] Establishing new connection to Main DB...');
-      const opts = {
-        serverSelectionTimeoutMS: 10000,
-        socketTimeoutMS: 45000,
-        bufferCommands: false,
-      };
-      cachedMain.promise = mongoose.connect(process.env.MONGODB_URI, opts).then((m) => {
-        console.log('✅ Main MongoDB connected');
-        return m.connection;
-      });
-    }
-    try {
-      cachedMain.conn = await cachedMain.promise;
-    } catch (e) {
-      cachedMain.promise = null;
-      console.error('❌ Main DB Connection Error:', e.message);
-      throw e;
-    }
+  if (cached.mainConn && cached.questionsConn) {
+    return { mainConn: cached.mainConn, questionsConn: cached.questionsConn };
   }
 
-  // 2. Connect to Questions DB (Cluster 1)
-  if (!cachedQuestions.conn) {
-    if (!cachedQuestions.promise) {
-      console.log('[DB] Establishing new connection to Questions DB...');
-      const opts = {
-        serverSelectionTimeoutMS: 10000,
-        socketTimeoutMS: 45000,
-        bufferCommands: false,
-      };
-      // We use createConnection for the secondary cluster
-      const conn = mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts);
-      cachedQuestions.promise = new Promise((resolve, reject) => {
-        conn.on('connected', () => {
-          console.log('✅ Questions MongoDB connected');
-          resolve(conn);
-        });
-        conn.on('error', (err) => {
-          console.error('❌ Questions DB Connection Error:', err.message);
-          reject(err);
-        });
-      });
-    }
-    try {
-      cachedQuestions.conn = await cachedQuestions.promise;
-    } catch (e) {
-      cachedQuestions.promise = null;
-      throw e;
-    }
-  }
+  if (cached.promise) return cached.promise;
 
-  return { main: cachedMain.conn, questions: cachedQuestions.conn };
+  const opts = {
+    serverSelectionTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
+    bufferCommands: false,
+    maxPoolSize: 10,
+  };
+
+  cached.promise = (async () => {
+    try {
+      if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI missing');
+      if (!process.env.MONGODB_QUESTIONS_URI) throw new Error('MONGODB_QUESTIONS_URI missing');
+
+      console.log('Connecting to Main DB...');
+      cached.mainConn = await mongoose.createConnection(process.env.MONGODB_URI, opts);
+      console.log('Main DB connected');
+
+      console.log('Connecting to Questions DB...');
+      cached.questionsConn = await mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts);
+      console.log('Questions DB connected');
+
+      cached.mainConn.on('disconnected', () => {
+        console.error('Main DB disconnected');
+        cached.mainConn = null;
+        cached.promise = null;
+      });
+
+      cached.questionsConn.on('disconnected', () => {
+        console.error('Questions DB disconnected');
+        cached.questionsConn = null;
+        cached.promise = null;
+      });
+
+      cached.mainConn.on('error', (err) => console.error('Main DB error:', err.message));
+      cached.questionsConn.on('error', (err) => console.error('Questions DB error:', err.message));
+
+      return { mainConn: cached.mainConn, questionsConn: cached.questionsConn };
+
+    } catch (err) {
+      cached.promise = null;
+      cached.mainConn = null;
+      cached.questionsConn = null;
+      console.error('MongoDB connection failed:', err.message);
+      throw err;
+    }
+  })();
+
+  return cached.promise;
 };
 
 const getMainConn = () => {
-  if (!cachedMain.conn) throw new Error('Main DB not connected. Call connectDB() first.');
-  return cachedMain.conn;
+  if (!cached.mainConn) throw new Error('Main DB not connected. Call connectDB() first.');
+  return cached.mainConn;
 };
 
 const getQuestionsConn = () => {
-  if (!cachedQuestions.conn) throw new Error('Questions DB not connected. Call connectDB() first.');
-  return cachedQuestions.conn;
+  if (!cached.questionsConn) throw new Error('Questions DB not connected. Call connectDB() first.');
+  return cached.questionsConn;
 };
 
-module.exports = { connectDB, getMainConn, getQuestionsConn };
+module.exports = {
+  connectDB,
+  getMainConn,
+  getQuestionsConn,
+  mainConn: () => cached.mainConn,
+  questionsConn: () => cached.questionsConn
+};

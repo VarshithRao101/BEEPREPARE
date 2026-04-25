@@ -39,9 +39,6 @@ const { connectDB } = require('./config/db');
 require('./config/firebase');
 const logger = require('./utils/logger');
 const requireAuth = require('./middleware/requireAuth');
-
-
-const { connectDB } = require('./config/db');
 const mongoose = require('mongoose');
 
 // Apply global mongoose settings
