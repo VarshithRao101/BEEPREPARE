@@ -321,6 +321,11 @@
             const teacherName = localStorage.getItem(BP.NAME) || 'Professor';
             if(teacherNameHeader) teacherNameHeader.textContent = teacherName.split(' ')[0];
 
+            // Show skeletons immediately
+            BP.showSkeleton('subjects-container', 'card', 2);
+            BP.showSkeleton('grades-container', 'card', 3);
+            BP.showSkeleton('activity-container', 'list', 5);
+
             // Init Header Profile
             const profileIcon = document.getElementById('profile-icon-btn');
             if (profileIcon) {
@@ -404,11 +409,9 @@
 
             // ── Activity Log ──────────────────────────────────
             const activityContainer = document.getElementById('activity-container');
-            const historyBtn = activityContainer.querySelector('button');
-            // Remove old items
-            activityContainer.querySelectorAll('.activity-item').forEach(el => el.remove());
-
             if (data.activityLog && data.activityLog.length > 0) {
+                // Clear skeletons
+                activityContainer.innerHTML = '';
                 data.activityLog.slice(0, 8).forEach(log => {
                     const item = document.createElement('div');
                     item.className = 'activity-item';
@@ -422,13 +425,21 @@
                             <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">${log.description || ''}</div>
                         </div>
                     `;
-                    activityContainer.insertBefore(item, historyBtn);
+                    activityContainer.appendChild(item);
                 });
+                
+                // Re-add history button
+                const historyBtn = document.createElement('button');
+                historyBtn.onclick = () => window.location.href='activity-history.html';
+                historyBtn.style = 'width: 100%; margin-top: 25px; padding: 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 12px; color: var(--primary); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s;';
+                historyBtn.innerText = 'View Full History →';
+                historyBtn.onmouseover = function() { this.style.background='rgba(255,215,0,0.1)';this.style.borderColor='var(--primary)'; };
+                historyBtn.onmouseout = function() { this.style.background='rgba(255,255,255,0.05)';this.style.borderColor='var(--border)'; };
+                activityContainer.appendChild(historyBtn);
             } else {
-                const empty = document.createElement('div');
-                empty.style = 'color: var(--text-muted); text-align: center; padding: 30px 0; font-size: 13px;';
-                empty.textContent = 'No activity yet. Start adding questions!';
-                activityContainer.insertBefore(empty, historyBtn);
+                activityContainer.innerHTML = `
+                    <div style="color: var(--text-muted); text-align: center; padding: 30px 0; font-size: 13px;">No activity yet. Start adding questions!</div>
+                `;
             }
 
             BP.syncTeacherSignals();

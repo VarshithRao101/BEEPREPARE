@@ -660,6 +660,25 @@ header {
     position: relative !important;
 }
 
+/* Skeleton Pulse Animation */
+@keyframes skeleton-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #1a1a1e 25%, #2a2a2e 50%, #1a1a1e 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeleton-shimmer 1.5s infinite linear !important;
+    border-radius: 12px !important;
+    border: none !important;
+}
+
+.skeleton-text { height: 12px !important; margin-bottom: 10px !important; width: 80% !important; }
+.skeleton-title { height: 20px !important; margin-bottom: 15px !important; width: 60% !important; }
+.skeleton-circle { border-radius: 50% !important; width: 40px !important; height: 40px !important; }
+.skeleton-rect { height: 140px !important; width: 100% !important; }
+
 /* FIX: SweetAlert MUST be above the 2500 z-index modal */
 .swal2-container {
     z-index: 10000 !important;

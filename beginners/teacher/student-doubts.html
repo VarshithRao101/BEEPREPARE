@@ -33,6 +33,7 @@
             display: grid;
             grid-template-columns: 340px 1fr;
             height: 100vh;
+            height: 100dvh;
             width: 100vw;
             transition: 0.3s;
         }
@@ -297,9 +298,11 @@
         @media (max-width: 850px) {
             .resolution-hub { grid-template-columns: 100vw 100vw; width: 200vw; transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
             .resolution-hub.chat-active { transform: translateX(-100vw); }
-            .logs-sidebar { width: 100vw; height: 100vh; }
-            .interaction-hub { width: 100vw; height: 100vh; }
+            .logs-sidebar { width: 100vw; height: 100dvh; }
+            .interaction-hub { width: 100vw; height: 100dvh; }
             .btn-return { display: flex; }
+            .response-console { padding: 12px; margin-bottom: 5px; }
+            .composer { font-size: 16px; min-height: 40px; }
         }
 
         ::-webkit-scrollbar { width: 5px; }

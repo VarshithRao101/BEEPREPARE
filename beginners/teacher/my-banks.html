@@ -11,7 +11,7 @@
         .content-wrapper { padding: 40px; }
         .selection-hub {
             display: grid;
-            grid-template-columns: 1fr 1fr auto;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border);
@@ -20,6 +20,20 @@
             margin-bottom: 40px;
             align-items: flex-end;
             backdrop-filter: blur(20px);
+        }
+
+        @media (max-width: 768px) {
+            .selection-hub {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                padding: 15px;
+                margin-bottom: 25px;
+            }
+            .selection-hub .filter-group:last-child {
+                grid-column: span 2;
+            }
+            .content-wrapper { padding: 20px 15px; }
+            .glass-select { padding: 12px 15px; font-size: 13px; }
         }
 
         .filter-group { display: flex; flex-direction: column; gap: 8px; }
