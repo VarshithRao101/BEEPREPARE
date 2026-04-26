@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -64,6 +64,7 @@
 
         .stars { color: var(--gold); letter-spacing: 2px; }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -74,7 +75,7 @@
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin ID</span>
-            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            <button class="logout-btn" onclick="terminateSession()">LOGOUT</button>
         </div>
     </header>
 
@@ -166,5 +167,6 @@
         fetchFeedback();
     </script>
 
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

@@ -81,7 +81,7 @@ router.get('/analytics', ctrl.getAnalytics);
 
 // Settings — all require action codes
 router.get('/settings', ctrl.getSettings);
-router.post('/settings/maintenance', requireActionCode('MAINTENANCE_ON'),    ctrl.toggleMaintenance);
+router.post('/settings/maintenance', ctrl.toggleMaintenance); // Controller handles ON vs OFF code validation separately
 router.post('/settings/announcement', ctrl.setAnnouncement);
 router.delete('/settings/announcement', ctrl.removeAnnouncement);
 router.post('/settings/update-key', requireActionCode('GENERATE_KEYS'),     ctrl.updateSystemKey);

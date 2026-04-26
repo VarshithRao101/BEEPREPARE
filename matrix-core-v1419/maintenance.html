@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -89,6 +89,7 @@
             margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;
         }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -100,7 +101,7 @@
         <div class="header-right">
             <span id="pageTitle" style="color:#fff; font-weight:600; font-size:14px; margin-right:20px;">Maintenance Control</span>
             <span class="admin-id" id="adminIdDisplay">Admin ID</span>
-            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            <button class="logout-btn" onclick="terminateSession()">LOGOUT</button>
         </div>
     </header>
 
@@ -228,5 +229,6 @@
         init();
     </script>
 
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

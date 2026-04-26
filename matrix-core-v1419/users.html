@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -122,11 +122,25 @@
         .detail-item label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
         .detail-item span { font-size: 14px; font-weight: 600; }
 
+        /* Rename Modal */
+        #rename-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; display: none; align-items: center; justify-content: center; }
+        #rename-overlay.active { display: flex; }
+        .rename-card { width: 90%; max-width: 420px; background: #0a0a0a; border: 1px solid var(--gold); border-radius: 20px; padding: 36px; animation: modalPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes modalPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+        .rename-card h3 { color: var(--gold); font-weight: 900; font-size: 18px; margin-bottom: 6px; }
+        .rename-card p { color: #666; font-size: 13px; margin-bottom: 24px; }
+        .rename-card input { width: 100%; padding: 14px 16px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; font-size: 15px; outline: none; margin-bottom: 20px; font-family: 'Outfit', sans-serif; }
+        .rename-card input:focus { border-color: var(--gold); }
+        .rename-actions { display: flex; gap: 12px; }
+        .rename-cancel { flex: 1; padding: 12px; background: transparent; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 13px; }
+        .rename-confirm { flex: 1; padding: 12px; background: var(--gold); color: #000; border: none; border-radius: 10px; cursor: pointer; font-weight: 900; font-size: 13px; }
+
         .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 30px; padding-bottom: 50px; }
         .page-btn { padding: 8px 16px; background: var(--surface2); border: 1px solid #333; color: var(--text); border-radius: 6px; cursor: pointer; }
         .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .page-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -140,7 +154,7 @@
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin Hub</span>
-            <button class="logout-btn" onclick="logout()">TERMINATE SESSION</button>
+            <button class="logout-btn" onclick="terminateSession()">TERMINATE SESSION</button>
         </div>
     </header>
 
@@ -178,6 +192,19 @@
 
         <div class="pagination" id="pagination">
             <!-- Buttons populated by JS -->
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="rename-overlay">
+        <div class="rename-card">
+            <h3>Change Display Name</h3>
+            <p id="rename-subtitle">Enter the new permanent name for this user.</p>
+            <input type="text" id="rename-input" placeholder="New display name..." />
+            <div class="rename-actions">
+                <button class="rename-cancel" onclick="closeRenameModal()">CANCEL</button>
+                <button class="rename-confirm" onclick="submitRename()">CONFIRM</button>
+            </div>
         </div>
     </div>
 
@@ -248,7 +275,7 @@
                                         ? `<button onclick="unblockUser('${u.googleUid}')">Unblock</button>`
                                         : `<button onclick="confirmBlock('${u.googleUid}')" style="color:var(--danger);">Block User</button>`
                                     }
-                                    <button onclick="changeName('${u.googleUid}', '${u.displayName}')" style="color:var(--gold);">Change Name</button>
+                                    <button onclick="changeName('${u.googleUid}')" data-uid="${u.googleUid}" data-name="${(u.displayName || '').replace(/"/g, '&quot;')}" style="color:var(--gold);">Change Name</button>
                                     <button onclick="confirmDelete('${u.googleUid}')" class="danger" style="color:var(--danger);">Delete Permanent</button>
                                 </div>
                             </div>
@@ -349,21 +376,49 @@
             }
         };
 
-        window.changeName = async (uid, currentName) => {
-            const newName = prompt(`Enter new permanent name for user (Current: ${currentName}):`, currentName);
-            if (newName && newName.trim() !== currentName) {
-                const res = await adminApi(`/users/${uid}/update-name`, 'POST', { newName: newName.trim() });
-                if (res && res.success) {
-                    showToast("Name updated permanently", "success");
-                    fetchUsers();
-                } else {
-                    showToast(res?.message || "Failed to update name", "error");
-                }
+        let _renameUid = null;
+
+        window.changeName = (uid) => {
+            // Find the button and pull the current name safely from data attr
+            const btn = document.querySelector(`[data-uid="${uid}"]`);
+            const currentName = btn ? btn.getAttribute('data-name') : '';
+            _renameUid = uid;
+            document.getElementById('rename-input').value = currentName;
+            document.getElementById('rename-subtitle').textContent = `Current name: ${currentName || '(none)'}`;
+            document.getElementById('rename-overlay').classList.add('active');
+            setTimeout(() => document.getElementById('rename-input').focus(), 100);
+        };
+
+        window.closeRenameModal = () => {
+            document.getElementById('rename-overlay').classList.remove('active');
+            _renameUid = null;
+        };
+
+        window.submitRename = async () => {
+            const newName = document.getElementById('rename-input').value.trim();
+            if (!newName || newName.length < 2) {
+                showToast('Name must be at least 2 characters', 'warning');
+                return;
+            }
+            const res = await adminApi(`/users/${_renameUid}/update-name`, 'POST', { newName });
+            if (res && res.success) {
+                showToast('Name updated permanently', 'success');
+                closeRenameModal();
+                fetchUsers();
+            } else {
+                showToast(res?.message || 'Failed to update name', 'error');
             }
         };
+
+        // Allow Enter key in rename input
+        document.getElementById('rename-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitRename();
+            if (e.key === 'Escape') closeRenameModal();
+        });
 
         fetchUsers();
     </script>
 
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

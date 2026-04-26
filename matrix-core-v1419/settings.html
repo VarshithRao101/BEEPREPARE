@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -50,6 +50,7 @@
         
         .refresh-btn { background: var(--surface2); color: #fff; border: 1px solid #333; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 20px; }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -128,20 +129,42 @@
                 false
             );
 
-            if (code) {
-                const res = await adminApi('/settings', 'POST', {
-                    key, value: val, actionCode: code
-                });
-                if (res && res.success) {
-                    showToast("Registry updated successfully", "success");
-                    fetchSettings();
-                } else {
-                    showToast(res?.message || "Modification failed", "error");
+            if (!code) return;
+
+            let res = null;
+
+            // Route to the correct backend endpoint based on the key
+            if (key === 'maintenance_mode' || key === 'maintenance_message') {
+                const enabled = key === 'maintenance_mode' 
+                    ? (val === 'true' || val === '1') 
+                    : undefined;
+                const body = { actionCode: code };
+                if (key === 'maintenance_mode') body.enabled = enabled;
+                if (key === 'maintenance_message') {
+                    // Need current maintenance state — get it from toggle or default false
+                    const overviewData = await adminApi('/overview');
+                    body.enabled = overviewData?.data?.maintenanceMode ?? false;
+                    body.message = val;
                 }
+                res = await adminApi('/settings/maintenance', 'POST', body);
+            } else if (key.startsWith('announcement')) {
+                showToast('Use the Announcements page to modify broadcast settings.', 'info');
+                return;
+            } else {
+                showToast(`Setting "${key}" cannot be modified directly from this panel.`, 'warning');
+                return;
+            }
+
+            if (res && res.success) {
+                showToast("Registry updated successfully", "success");
+                fetchSettings();
+            } else {
+                showToast(res?.message || "Modification failed", "error");
             }
         };
 
         fetchSettings();
     </script>
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

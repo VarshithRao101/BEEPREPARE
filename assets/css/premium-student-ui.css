@@ -114,15 +114,17 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.15) !important;
 }
 
-/* Universal Buttons */
+/* Universal Buttons — hover handled by hover-interactions.css */
 .btn-adv, .btn-primary, .btn-finish, .unlock-btn, .btn-enter-otp {
     background: linear-gradient(135deg, #FFD700, #FFA500) !important;
     color: #000 !important;
     border: none !important;
-    transition: all 0.2s ease !important;
+    transition: transform 220ms cubic-bezier(0.175,0.885,0.32,1.275),
+                box-shadow 220ms cubic-bezier(0.25,0.8,0.25,1) !important;
 }
 .btn-adv:hover, .btn-primary:hover, .btn-finish:hover, .unlock-btn:hover, .btn-enter-otp:hover {
-    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3) !important;
+    box-shadow: 0 12px 32px rgba(255, 215, 0, 0.35),
+                0 0 0 1px rgba(255, 215, 0, 0.5) !important;
 }
 
 /* SweetAlert Glassmorphism (Overriding defaults) */

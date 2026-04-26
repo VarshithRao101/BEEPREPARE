@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -47,6 +47,7 @@
         
         .push-btn { background: var(--gold); color: #000; border: none; padding: 16px; border-radius: 8px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -57,7 +58,7 @@
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin ID</span>
-            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            <button class="logout-btn" onclick="terminateSession()">LOGOUT</button>
         </div>
     </header>
 
@@ -146,5 +147,6 @@
         fetchCurrent();
     </script>
 
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

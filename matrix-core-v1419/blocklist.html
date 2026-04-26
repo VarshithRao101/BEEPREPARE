@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -46,6 +46,7 @@
         .btn-remove { background: none; border: 1px solid #333; color: var(--muted); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.3s; }
         .btn-remove:hover { border-color: var(--success); color: var(--success); }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -56,7 +57,7 @@
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin ID</span>
-            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            <button class="logout-btn" onclick="terminateSession()">LOGOUT</button>
         </div>
     </header>
 
@@ -128,7 +129,7 @@
             const reason = document.getElementById('blockReason').value.trim();
             if (!email) return showToast("Email required", "warning");
 
-            const code = await showCodeModal("COMMIT HARD BLOCK", "This identity will be immediately purged and banned from the platform.", null, true);
+            const code = await showCodeModal("COMMIT HARD BLOCK", "This identity will be immediately purged and banned from the platform.", true);
             if (code) {
                 const res = await adminApi('/blacklist', 'POST', { email, reason, actionCode: code });
                 if (res && res.success) {
@@ -154,5 +155,6 @@
         fetchBlocklist();
     </script>
 
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

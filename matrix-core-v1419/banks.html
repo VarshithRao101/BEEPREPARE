@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -94,6 +94,7 @@
         .btn-deact { background: var(--warning); color: #000; }
         .btn-del { background: var(--danger); color: #fff; }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -105,7 +106,7 @@
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin Hub</span>
-            <button class="logout-btn" onclick="logout()">TERMINATE SESSION</button>
+            <button class="logout-btn" onclick="terminateSession()">TERMINATE SESSION</button>
         </div>
     </header>
 
@@ -195,5 +196,6 @@
         fetchBanks();
     </script>
 
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -51,6 +51,7 @@
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -61,7 +62,7 @@
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin ID</span>
-            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            <button class="logout-btn" onclick="terminateSession()">LOGOUT</button>
         </div>
     </header>
 
@@ -148,5 +149,6 @@
         fetchLogs();
     </script>
 
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -90,6 +90,7 @@
             .meter-grid { grid-template-columns: 1fr; }
         }
     </style>
+<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -100,7 +101,7 @@
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin ID</span>
-            <button class="logout-btn" onclick="logout()">LOGOUT</button>
+            <button class="logout-btn" onclick="terminateSession()">LOGOUT</button>
         </div>
     </header>
 
@@ -234,5 +235,6 @@
         fetchStats();
         setInterval(fetchStats, 60000);
     </script>
+<script src="/assets/js/ripple.js"></script>
 </body>
 </html>

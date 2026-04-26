@@ -1,0 +1,709 @@
+/* ============================================================
+   BEEPREPARE — PREMIUM HOVER INTERACTIONS SYSTEM v2.0
+   Design: Apple / Linear / Stripe / Vercel feel
+   Timing: 150ms–300ms ease-in-out
+   ============================================================ */
+
+/* ─── 1. CSS ANIMATION TOKENS ─────────────────────────────── */
+:root {
+  --ease-spring:   cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-smooth:   cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-out:      cubic-bezier(0.0, 0.0, 0.2, 1);
+  --dur-fast:      150ms;
+  --dur-base:      220ms;
+  --dur-slow:      300ms;
+
+  /* Gold palette */
+  --gold:          #FFD700;
+  --gold-dim:      rgba(255, 215, 0, 0.18);
+  --gold-glow:     rgba(255, 215, 0, 0.35);
+  --gold-glow-lg:  rgba(255, 215, 0, 0.55);
+
+  /* Danger palette */
+  --red-soft:      rgba(255, 60, 60, 0.12);
+  --red-border:    rgba(255, 60, 60, 0.4);
+  --red-glow:      rgba(255, 60, 60, 0.3);
+  --red-solid:     #ff4444;
+
+  /* Success palette */
+  --green-soft:    rgba(52, 211, 153, 0.12);
+  --green-border:  rgba(52, 211, 153, 0.4);
+  --green-solid:   #34d399;
+
+  /* Surface */
+  --hover-lift-sm: translateY(-2px);
+  --hover-lift-md: translateY(-4px);
+  --hover-lift-lg: translateY(-8px);
+}
+
+/* ─── 2. RIPPLE ENGINE ──────────────────────────────────────── */
+.ripple-host {
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes rippleExpand {
+  0%   { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: rippleExpand 550ms var(--ease-out) forwards;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.18);
+  width: 100px;
+  height: 100px;
+  margin-left: -50px;
+  margin-top: -50px;
+}
+
+.ripple-wave.danger {
+  background: rgba(255, 60, 60, 0.22);
+}
+
+.ripple-wave.gold {
+  background: rgba(255, 215, 0, 0.22);
+}
+
+/* ─── 3. PRIMARY / ACTION BUTTONS ───────────────────────────── */
+
+/* Gold primary button — the main CTA */
+.btn-primary,
+.btn-adv,
+.btn-finish,
+.login-btn,
+.unlock-btn,
+.btn-enter-otp,
+.update-btn,
+.rename-confirm,
+button.primary {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform     var(--dur-base) var(--ease-spring),
+    box-shadow    var(--dur-base) var(--ease-smooth),
+    background    var(--dur-base) var(--ease-smooth),
+    border-color  var(--dur-base) var(--ease-smooth) !important;
+  will-change: transform, box-shadow;
+}
+
+.btn-primary:hover,
+.btn-adv:hover,
+.btn-finish:hover,
+.login-btn:hover,
+.unlock-btn:hover,
+.btn-enter-otp:hover,
+.update-btn:hover,
+.rename-confirm:hover,
+button.primary:hover {
+  transform: var(--hover-lift-md) scale(1.015) !important;
+  box-shadow:
+    0 12px 32px -4px var(--gold-glow),
+    0 0 0 1px rgba(255, 215, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+.btn-primary:active,
+.btn-adv:active,
+.btn-finish:active,
+.login-btn:active,
+.unlock-btn:active,
+.update-btn:active,
+.rename-confirm:active,
+button.primary:active {
+  transform: scale(0.97) translateY(1px) !important;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2) !important;
+  transition-duration: var(--dur-fast) !important;
+}
+
+/* ─── 4. OUTLINE / SECONDARY BUTTONS ───────────────────────── */
+.btn-outline,
+.rename-cancel,
+.refresh-btn,
+.pill,
+.page-btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform     var(--dur-base) var(--ease-spring),
+    box-shadow    var(--dur-base) var(--ease-smooth),
+    background    var(--dur-base) var(--ease-smooth),
+    border-color  var(--dur-base) var(--ease-smooth),
+    color         var(--dur-base) var(--ease-smooth) !important;
+  will-change: transform;
+}
+
+.btn-outline:hover,
+.rename-cancel:hover,
+.refresh-btn:hover,
+.page-btn:not([disabled]):hover {
+  transform: var(--hover-lift-sm) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+}
+
+.btn-outline:active,
+.rename-cancel:active,
+.refresh-btn:active {
+  transform: scale(0.97) !important;
+  transition-duration: var(--dur-fast) !important;
+}
+
+/* Pills (filter tabs) */
+.pill:hover {
+  border-color: var(--gold) !important;
+  color: var(--gold) !important;
+  transform: var(--hover-lift-sm) !important;
+  box-shadow: 0 6px 18px rgba(255, 215, 0, 0.12) !important;
+}
+
+.pill.active {
+  transform: none !important;
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.25) !important;
+}
+
+/* ─── 5. DESTRUCTIVE BUTTONS ("Purge", "Delete", "Block") ───── */
+.logout-btn,
+.btn-logout,
+.btn-danger,
+button.danger,
+[class*="purge"],
+[class*="delete-btn"],
+[class*="danger-btn"] {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform       var(--dur-base) var(--ease-spring),
+    box-shadow      var(--dur-base) var(--ease-smooth),
+    background      var(--dur-base) var(--ease-smooth),
+    border-color    var(--dur-base) var(--ease-smooth),
+    color           var(--dur-base) var(--ease-smooth) !important;
+  will-change: transform;
+}
+
+.logout-btn:hover,
+.btn-logout:hover,
+.btn-danger:hover,
+button.danger:hover {
+  transform: var(--hover-lift-sm) scale(1.015) !important;
+  background: rgba(255, 60, 60, 0.14) !important;
+  border-color: var(--red-solid) !important;
+  box-shadow:
+    0 8px 24px var(--red-glow),
+    0 0 0 1px rgba(255, 60, 60, 0.35) !important;
+  color: #ff6b6b !important;
+}
+
+.logout-btn:active,
+.btn-logout:active,
+.btn-danger:active {
+  transform: scale(0.96) !important;
+  transition-duration: var(--dur-fast) !important;
+}
+
+/* Destructive dropdown items */
+.dropdown-content button.danger:hover,
+.dropdown-content button[style*="danger"]:hover {
+  background: rgba(255, 60, 60, 0.1) !important;
+  color: #ff6b6b !important;
+  padding-left: 18px !important;
+  transition: all var(--dur-base) var(--ease-smooth) !important;
+}
+
+/* ─── 6. CONFIRMATION BUTTON (satisfying press feel) ─────────── */
+.confirm-btn,
+.btn-confirm,
+input[type="submit"],
+.rename-confirm {
+  --confirm-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  transition:
+    transform       var(--dur-base) var(--ease-spring),
+    box-shadow      var(--dur-base) var(--ease-smooth) !important;
+}
+
+.confirm-btn:hover,
+.btn-confirm:hover,
+.rename-confirm:hover {
+  animation: confirmPulse 600ms var(--ease-smooth) both !important;
+}
+
+@keyframes confirmPulse {
+  0%   { box-shadow: 0 0 0 0 var(--gold-glow); }
+  50%  { box-shadow: 0 0 0 8px rgba(255, 215, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+/* ─── 7. CARDS ───────────────────────────────────────────────── */
+
+/* Feature cards (admin home grid) */
+.feature-card {
+  transition:
+    transform     var(--dur-slow) var(--ease-spring),
+    box-shadow    var(--dur-slow) var(--ease-smooth),
+    border-color  var(--dur-slow) var(--ease-smooth),
+    background    var(--dur-slow) var(--ease-smooth) !important;
+  will-change: transform;
+}
+
+.feature-card:hover {
+  transform: var(--hover-lift-lg) scale(1.02) !important;
+  border-color: var(--gold) !important;
+  background: rgba(255, 215, 0, 0.04) !important;
+  box-shadow:
+    0 24px 48px -12px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 215, 0, 0.22),
+    0 0 30px rgba(255, 215, 0, 0.07) !important;
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.18) rotate(3deg) !important;
+  filter: drop-shadow(0 0 10px var(--gold-glow)) !important;
+  transition: transform var(--dur-slow) var(--ease-spring),
+              filter    var(--dur-slow) var(--ease-smooth) !important;
+}
+
+.feature-card:active {
+  transform: scale(0.97) translateY(-2px) !important;
+  transition-duration: var(--dur-fast) !important;
+}
+
+/* General glass cards (.adv-card, .dash-card, etc.) */
+.adv-card,
+.subject-card,
+.class-card,
+.dash-card,
+.role-card,
+.bank-card,
+.test-card,
+.paper-card,
+.result-card,
+.history-card,
+.action-card,
+.insight-card,
+.quote-card-dynamic,
+.subject-mini-card,
+.request-card,
+.timeline-card,
+.document-item {
+  transition:
+    transform     var(--dur-slow) var(--ease-spring),
+    box-shadow    var(--dur-slow) var(--ease-smooth),
+    border-color  var(--dur-slow) var(--ease-smooth) !important;
+  will-change: transform;
+}
+
+/* Lift + gold border + glow on card hover */
+.adv-card:hover,
+.subject-card:hover,
+.class-card:hover,
+.dash-card:hover,
+.role-card:hover,
+.bank-card:hover,
+.test-card:hover,
+.paper-card:hover,
+.result-card:hover,
+.history-card:hover,
+.insight-card:hover,
+.action-card:hover,
+.subject-mini-card:hover,
+.request-card:hover,
+.document-item:hover {
+  transform: var(--hover-lift-md) scale(1.01) !important;
+  border-color: rgba(255, 215, 0, 0.55) !important;
+  box-shadow:
+    0 16px 40px -8px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 215, 0, 0.18),
+    0 0 24px rgba(255, 215, 0, 0.06) !important;
+}
+
+/* Glass setting card (admin settings page) */
+.glass.setting-card {
+  transition:
+    transform     var(--dur-base) var(--ease-spring),
+    border-color  var(--dur-base) var(--ease-smooth),
+    box-shadow    var(--dur-base) var(--ease-smooth) !important;
+}
+
+.glass.setting-card:hover {
+  transform: var(--hover-lift-sm) !important;
+  border-color: rgba(255, 215, 0, 0.4) !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35),
+              0 0 0 1px rgba(255, 215, 0, 0.15) !important;
+}
+
+/* ─── 8. MODALS ──────────────────────────────────────────────── */
+
+/* Modal backdrop fade-in */
+@keyframes backdropIn {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(14px); }
+}
+
+/* Modal card slide-up + fade */
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.rename-card,
+.detail-card,
+.custom-modal,
+.swal2-popup {
+  animation: modalSlideUp var(--dur-slow) var(--ease-spring) both !important;
+}
+
+/* Close button micro-interaction */
+.close-btn {
+  transition:
+    transform  var(--dur-base) var(--ease-spring),
+    color      var(--dur-base) var(--ease-smooth),
+    background var(--dur-base) var(--ease-smooth) !important;
+  border-radius: 50%;
+  padding: 4px 8px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg) scale(1.15) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+/* ─── 9. DROPDOWNS ───────────────────────────────────────────── */
+
+@keyframes dropdownReveal {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.dropdown-content.show {
+  animation: dropdownReveal var(--dur-base) var(--ease-spring) both !important;
+  border-color: rgba(255, 215, 0, 0.2) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6),
+              0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+.dropdown-content button {
+  transition:
+    background  var(--dur-fast) var(--ease-smooth),
+    color       var(--dur-fast) var(--ease-smooth),
+    padding-left var(--dur-base) var(--ease-smooth) !important;
+}
+
+.dropdown-content button:hover {
+  background: rgba(255, 215, 0, 0.06) !important;
+  color: var(--gold) !important;
+  padding-left: 18px !important;
+}
+
+/* ─── 10. TABLE ROWS ────────────────────────────────────────── */
+tbody tr {
+  transition:
+    background var(--dur-fast) var(--ease-smooth) !important;
+}
+
+tbody tr:hover {
+  background: rgba(255, 215, 0, 0.04) !important;
+}
+
+/* Action "•••" button */
+.action-btn {
+  transition:
+    transform   var(--dur-base) var(--ease-spring),
+    color       var(--dur-fast) var(--ease-smooth),
+    background  var(--dur-fast) var(--ease-smooth) !important;
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+}
+
+.action-btn:hover {
+  color: var(--gold) !important;
+  background: rgba(255, 215, 0, 0.08) !important;
+  transform: scale(1.2) !important;
+}
+
+.action-btn:active {
+  transform: scale(0.95) !important;
+  transition-duration: var(--dur-fast) !important;
+}
+
+/* ─── 11. NAVIGATION ITEMS ───────────────────────────────────── */
+.nav-item {
+  transition:
+    color       var(--dur-base) var(--ease-smooth),
+    transform   var(--dur-base) var(--ease-spring) !important;
+  border-radius: 12px;
+}
+
+.nav-item:hover:not(.active) {
+  color: #fff !important;
+  transform: translateY(-3px) !important;
+}
+
+.nav-item:active {
+  transform: scale(0.9) !important;
+  transition-duration: var(--dur-fast) !important;
+}
+
+/* Sidebar links */
+.sidebar-link {
+  transition:
+    background    var(--dur-base) var(--ease-smooth),
+    color         var(--dur-base) var(--ease-smooth),
+    border-color  var(--dur-base) var(--ease-smooth),
+    padding-left  var(--dur-slow) var(--ease-smooth),
+    box-shadow    var(--dur-base) var(--ease-smooth) !important;
+}
+
+.sidebar-link:hover:not(.active) {
+  background: rgba(255, 215, 0, 0.07) !important;
+  color: #fff !important;
+  border-color: rgba(255, 215, 0, 0.18) !important;
+  padding-left: 26px !important;
+  box-shadow: inset 3px 0 0 var(--gold) !important;
+}
+
+.sidebar-link:hover svg {
+  color: var(--gold) !important;
+  transform: scale(1.15) !important;
+  transition: transform var(--dur-base) var(--ease-spring),
+              color      var(--dur-fast) var(--ease-smooth) !important;
+}
+
+/* Back button (header) */
+.back-btn {
+  transition:
+    background  var(--dur-base) var(--ease-smooth),
+    color       var(--dur-base) var(--ease-smooth),
+    transform   var(--dur-base) var(--ease-spring),
+    box-shadow  var(--dur-base) var(--ease-smooth) !important;
+}
+
+.back-btn:hover {
+  background: var(--gold) !important;
+  color: #000 !important;
+  transform: translateX(-3px) !important;
+  box-shadow: 0 4px 14px rgba(255, 215, 0, 0.3) !important;
+}
+
+/* ─── 12. INPUT FIELDS ──────────────────────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  transition:
+    border-color  var(--dur-base) var(--ease-smooth),
+    box-shadow    var(--dur-base) var(--ease-smooth),
+    background    var(--dur-base) var(--ease-smooth) !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(255, 215, 0, 0.35) !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--gold) !important;
+  box-shadow:
+    0 0 0 3px rgba(255, 215, 0, 0.12),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  background: rgba(40, 41, 44, 0.9) !important;
+}
+
+/* ─── 13. ICON WRAPPERS ─────────────────────────────────────── */
+.action-icon,
+.subject-icon-wrapper,
+.sub-icon,
+.bank-icon-lg,
+.menu-icon,
+.modal-icon-header {
+  transition:
+    transform     var(--dur-slow) var(--ease-spring),
+    background    var(--dur-slow) var(--ease-smooth),
+    border-color  var(--dur-slow) var(--ease-smooth),
+    box-shadow    var(--dur-slow) var(--ease-smooth) !important;
+}
+
+/* Parent card hover triggers icon glow */
+.action-card:hover .action-icon,
+.subject-card:hover .subject-icon-wrapper,
+.bank-card:hover .bank-icon-lg,
+.menu-item:not(.no-hover):hover .menu-icon {
+  background: rgba(255, 215, 0, 0.14) !important;
+  border-color: var(--gold) !important;
+  box-shadow:
+    0 0 22px rgba(255, 215, 0, 0.28),
+    inset 0 0 12px rgba(255, 215, 0, 0.14) !important;
+  transform: scale(1.12) rotate(4deg) !important;
+}
+
+/* ─── 14. PROFILE / AVATAR ──────────────────────────────────── */
+.profile-icon,
+.user-avatar,
+.profile-avatar {
+  transition:
+    transform   var(--dur-slow) var(--ease-spring),
+    box-shadow  var(--dur-slow) var(--ease-smooth) !important;
+}
+
+.profile-icon:hover,
+.user-avatar:hover,
+.profile-avatar:hover {
+  transform: rotate(8deg) scale(1.12) !important;
+  box-shadow: 0 12px 30px rgba(255, 215, 0, 0.45) !important;
+}
+
+/* ─── 15. SUBJECT PILLS ─────────────────────────────────────── */
+.subject-pill {
+  transition:
+    transform    var(--dur-base) var(--ease-spring),
+    background   var(--dur-base) var(--ease-smooth),
+    border-color var(--dur-base) var(--ease-smooth),
+    box-shadow   var(--dur-base) var(--ease-smooth) !important;
+}
+
+.subject-pill:hover {
+  transform: translateY(-3px) scale(1.05) !important;
+  background: rgba(255, 215, 0, 0.15) !important;
+  border-color: var(--gold) !important;
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.22) !important;
+}
+
+/* ─── 16. SELECTION CARDS (role/stream picker) ──────────────── */
+.selection-card,
+.role-card {
+  transition:
+    transform     var(--dur-slow) var(--ease-spring),
+    border-color  var(--dur-slow) var(--ease-smooth),
+    box-shadow    var(--dur-slow) var(--ease-smooth),
+    background    var(--dur-slow) var(--ease-smooth) !important;
+}
+
+.selection-card:hover,
+.role-card:hover {
+  transform: var(--hover-lift-lg) scale(1.02) !important;
+  border-color: var(--gold) !important;
+  box-shadow:
+    0 20px 48px -10px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 215, 0, 0.25),
+    0 0 30px rgba(255, 215, 0, 0.08) !important;
+}
+
+.selection-card:hover .selection-icon {
+  transform: scale(1.18) rotate(5deg) !important;
+  transition: transform var(--dur-slow) var(--ease-spring) !important;
+}
+
+/* ─── 17. MENU ITEMS (profile page settings list) ───────────── */
+.menu-item:not(.no-hover) {
+  transition:
+    transform    var(--dur-base) var(--ease-spring),
+    border-color var(--dur-base) var(--ease-smooth),
+    box-shadow   var(--dur-base) var(--ease-smooth),
+    background   var(--dur-base) var(--ease-smooth) !important;
+}
+
+.menu-item:not(.no-hover):hover {
+  transform: var(--hover-lift-sm) !important;
+  border-color: rgba(255, 215, 0, 0.4) !important;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 215, 0, 0.12) !important;
+}
+
+.menu-item:hover .menu-arrow {
+  color: var(--gold) !important;
+  transform: translateX(6px) !important;
+  transition: transform var(--dur-base) var(--ease-spring),
+              color      var(--dur-fast) var(--ease-smooth) !important;
+}
+
+/* ─── 18. STAT BOXES ────────────────────────────────────────── */
+.stat-item,
+.stat-box {
+  transition: transform var(--dur-base) var(--ease-spring) !important;
+}
+
+.stat-item:hover,
+.stat-box:hover {
+  transform: var(--hover-lift-sm) !important;
+}
+
+.stat-item:hover .stat-val,
+.stat-box:hover .stat-value {
+  color: var(--gold) !important;
+  text-shadow: 0 0 18px var(--gold-glow) !important;
+  transition: color      var(--dur-base) var(--ease-smooth),
+              text-shadow var(--dur-base) var(--ease-smooth) !important;
+}
+
+/* ─── 19. HEADER BACK/LOGO BUTTON ───────────────────────────── */
+.logo-box,
+.logo-mini {
+  transition:
+    box-shadow    var(--dur-base) var(--ease-smooth),
+    border-color  var(--dur-base) var(--ease-smooth) !important;
+}
+
+.logo-box:hover,
+.logo-mini:hover {
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.35) !important;
+  border-color: var(--gold) !important;
+}
+
+/* ─── 20. WARNING / PURGE CONFIRMATION (pulse emphasis) ─────── */
+@keyframes dangerPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 60, 60, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(255, 60, 60, 0.18); }
+}
+
+.btn-purge,
+[onclick*="purge"],
+[onclick*="delete"],
+[onclick*="confirmDelete"],
+[onclick*="confirmBlock"] {
+  border: 1px solid rgba(255, 60, 60, 0.3) !important;
+  color: #ff6b6b !important;
+  background: rgba(255, 60, 60, 0.06) !important;
+  transition:
+    transform       var(--dur-base) var(--ease-spring),
+    box-shadow      var(--dur-base) var(--ease-smooth),
+    background      var(--dur-base) var(--ease-smooth),
+    border-color    var(--dur-base) var(--ease-smooth) !important;
+}
+
+[onclick*="confirmDelete"]:hover,
+[onclick*="confirmBlock"]:hover {
+  transform: var(--hover-lift-sm) scale(1.02) !important;
+  background: rgba(255, 60, 60, 0.12) !important;
+  border-color: var(--red-solid) !important;
+  box-shadow: 0 8px 20px var(--red-glow) !important;
+  animation: dangerPulse 1.2s ease-in-out infinite !important;
+}
+
+/* ─── 21. ACCESSIBILITY: RESPECT MOTION PREFERENCE ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:    0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration:   0.01ms !important;
+  }
+  .ripple-wave { display: none !important; }
+}
+
+/* ─── 22. FOCUS-VISIBLE RING (keyboard nav accessibility) ────── */
+:focus-visible {
+  outline: 2px solid var(--gold) !important;
+  outline-offset: 3px !important;
+  border-radius: 6px;
+}
