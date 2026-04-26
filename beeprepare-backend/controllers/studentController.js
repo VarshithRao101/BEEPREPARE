@@ -998,6 +998,9 @@ const submitDoubt = async (req, res) => {
     if (questionText.trim().length < 10) {
       return error(res, 'Question must be at least 10 characters', 'TOO_SHORT', 400);
     }
+    if (questionText.trim().length > 500) {
+      return error(res, 'To save database storage, please keep your question under 500 characters', 'TOO_LONG', 400);
+    }
 
     const bank = await Bank.findById(bankId);
     if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
@@ -1006,6 +1009,12 @@ const submitDoubt = async (req, res) => {
       return error(res, 'You do not have access to this bank', 'FORBIDDEN', 403);
     }
 
+    // Limit active doubts to max 3
+    const activeDoubtsCount = await Doubt.countDocuments({
+      studentId,
+      status: { $ne: 'resolved' }
+    });
+
     // Check for existing pending doubt to maintain thread continuity
     let doubt = await Doubt.findOne({ 
       studentId, 
@@ -1013,12 +1022,38 @@ const submitDoubt = async (req, res) => {
       status: { $ne: 'resolved' } 
     });
 
+    if (!doubt && activeDoubtsCount >= 3) {
+      return error(res, 'You have reached the maximum of 3 active doubts. Please mark older doubts as resolved before starting a new one.', 'MAX_DOUBTS_REACHED', 400);
+    }
+
+    if (doubt && doubt.messages.length >= 50) {
+      return error(res, 'This doubt thread has reached the maximum 50 messages limit. Please mark it as resolved and start a new one if needed.', 'THREAD_FULL', 400);
+    }
+
+    // Process Base64 image to Cloudinary if needed to save DB storage
+    let finalImageUrl = imageUrl || null;
+    if (imageUrl && imageUrl.startsWith('data:image')) {
+      try {
+        const { cloudinary } = require('../utils/cloudinaryHelper');
+        const uploadRes = await cloudinary.uploader.upload(imageUrl, {
+          folder: `doubts/student_${studentId}`,
+          resource_type: 'image',
+          format: 'webp',
+          quality: 'auto'
+        });
+        finalImageUrl = uploadRes.secure_url;
+      } catch (uploadErr) {
+        console.error('Cloudinary upload failure (student doubt):', uploadErr);
+        return error(res, 'Failed to process image attachment', 'UPLOAD_ERROR', 500);
+      }
+    }
+
     const now = new Date();
     const newMessage = {
       messageId: crypto.randomUUID(),
       senderRole: 'student',
       content: questionText.trim(),
-      imageUrl: imageUrl || null,
+      imageUrl: finalImageUrl,
       timestamp: now
     };
 
@@ -1065,6 +1100,35 @@ const getDoubtMessages = async (req, res) => {
     const doubt = await Doubt.findById(id);
     if (!doubt) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
     if (doubt.studentId !== studentId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+
+    // Apply Data Retention Rules: Expire images older than 70 hours
+    const expiryTime = new Date(Date.now() - 70 * 60 * 60 * 1000);
+    let modified = false;
+
+    for (let msg of doubt.messages) {
+      if (msg.imageUrl && msg.imageUrl !== 'EXPIRED' && msg.timestamp <= expiryTime) {
+         // Perform Cloudinary deletion if it's a cloudinary URL
+         if (msg.imageUrl.includes('cloudinary.com')) {
+           try {
+             const urlObj = new URL(msg.imageUrl);
+             const parts = urlObj.pathname.split('/');
+             const uploadIndex = parts.findIndex(p => p === 'upload');
+             if (uploadIndex !== -1) {
+                 const publicIdWithExt = parts.slice(uploadIndex + 2).join('/');
+                 const fullPublicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.'));
+                 const { cloudinary } = require('../utils/cloudinaryHelper');
+                 await cloudinary.uploader.destroy(fullPublicId);
+             }
+           } catch(e) { console.error('Cloudinary cleanup error (student):', e); }
+         }
+         msg.imageUrl = 'EXPIRED';
+         modified = true;
+      }
+    }
+
+    if (modified) {
+      await doubt.save();
+    }
 
     // Mark as read by student
     if (doubt.unreadByStudent) {

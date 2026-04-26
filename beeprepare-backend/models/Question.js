@@ -19,7 +19,9 @@ const questionSchema = new Schema({
   questionType: { type: String, required: true, enum: ['MCQ', 'Very Short', 'Short', 'Long', 'Essay'], index: true },
 
   // ── Question Content ────────────────────────────────────────────────────
-  questionText:  { type: String, required: true, minlength: 10, maxlength: 2000 },
+  questionText:  { type: String, required: true, minlength: 10, maxlength: 80 },
+  imageUrl:      { type: String }, // For diagram uploads
+  imagePublicId: { type: String }, // For Cloudinary persistent storage
   marks:         { type: Number, required: true },
   difficulty:    { type: String, required: true, enum: ['Easy', 'Medium', 'Hard'], default: 'Easy' },
   mcqOptions: {

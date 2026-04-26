@@ -799,7 +799,8 @@ const addQuestion = async (req, res) => {
     const {
       bankId, chapterId, chapterName,
       questionText, questionType, marks,
-      difficulty, tags, mcqOptions, correctOption
+      difficulty, tags, mcqOptions, correctOption,
+      imageUrl
     } = req.body;
 
     const teacherId = req.user.googleUid;
@@ -844,6 +845,11 @@ const addQuestion = async (req, res) => {
     const chapter = bank.chapters.find(c => c.chapterId === chapterId);
     if (!chapter) return error(res, 'Chapter not found in this bank', 'CHAPTER_NOT_FOUND', 404);
 
+    // Limit max 100 questions per chapter to prevent MongoDB document bloat
+    if (chapter.questionCount >= 100) {
+      return error(res, 'Architecture limit reached. A single chapter node can hold a maximum of 100 questions. Please clear old data or create a new chapter.', 'LIMIT_REACHED', 400);
+    }
+
     // MCQ validation
     if (questionType === 'MCQ') {
       if (!mcqOptions || !mcqOptions.A || !mcqOptions.B || !mcqOptions.C || !mcqOptions.D) {
@@ -858,6 +864,27 @@ const addQuestion = async (req, res) => {
     const importantTags = ['Important', 'Repeated', 'Exam Focus'];
     const tagsArr = Array.isArray(tags) ? tags : [];
     const isImportant = tagsArr.some(t => importantTags.includes(t));
+
+    // Handle Cloudinary Upload
+    let finalImageUrl = null;
+    let finalImagePublicId = null;
+
+    if (imageUrl && imageUrl.startsWith('data:image')) {
+      try {
+        const { cloudinary } = require('../utils/cloudinaryHelper');
+        const uploadRes = await cloudinary.uploader.upload(imageUrl, {
+          folder: `questions/teacher_${teacherId}`,
+          resource_type: 'image',
+          format: 'webp',
+          quality: 'auto'
+        });
+        finalImageUrl = uploadRes.secure_url;
+        finalImagePublicId = uploadRes.public_id;
+      } catch (uploadErr) {
+        console.error('Cloudinary upload failure:', uploadErr);
+        return error(res, 'Failed to process diagram attachment', 'UPLOAD_ERROR', 500);
+      }
+    }
 
     // Create optimized question — includes full hierarchy for Cluster 2 schema
     const question = await Question.create({
@@ -876,6 +903,8 @@ const addQuestion = async (req, res) => {
       isImportant,
       tags: tagsArr,
       chapterId,
+      imageUrl: finalImageUrl,
+      imagePublicId: finalImagePublicId,
       createdBy: teacherId,
       bankId: String(bankId) // Store as String — cross-DB safe
     });
@@ -923,6 +952,15 @@ const deleteQuestion = async (req, res) => {
 
     const bank = await Bank.findById(question.bankId);
     if (!bank || bank.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+
+    if (question.imagePublicId) {
+      try {
+        const { cloudinary } = require('../utils/cloudinaryHelper');
+        await cloudinary.uploader.destroy(question.imagePublicId);
+      } catch (e) {
+        console.error('Failed to delete question diagram', e);
+      }
+    }
 
     await Question.findByIdAndDelete(id);
 
@@ -1135,6 +1173,13 @@ const generatePaper = async (req, res) => {
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(B)</span> <span>${q.mcqOptions.B || ''}</span></div>
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(C)</span> <span>${q.mcqOptions.C || ''}</span></div>
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(D)</span> <span>${q.mcqOptions.D || ''}</span></div>
+          </div>`;
+        }
+
+        if (q.imageUrl) {
+          paperHtml += `
+          <div style="margin: 1em 0 0 2.5em; text-align: left;">
+            <img src="${q.imageUrl}" alt="Diagram" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #ccc;">
           </div>`;
         }
 
@@ -1553,6 +1598,35 @@ const getDoubtMessages = async (req, res) => {
     if (!doubt) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
     if (doubt.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
 
+    // Apply Data Retention Rules: Expire images older than 70 hours
+    const expiryTime = new Date(Date.now() - 70 * 60 * 60 * 1000);
+    let modified = false;
+
+    for (let msg of doubt.messages) {
+      if (msg.imageUrl && msg.imageUrl !== 'EXPIRED' && msg.timestamp <= expiryTime) {
+         // Perform Cloudinary deletion if it's a cloudinary URL
+         if (msg.imageUrl.includes('cloudinary.com')) {
+           try {
+             const urlObj = new URL(msg.imageUrl);
+             const parts = urlObj.pathname.split('/');
+             const uploadIndex = parts.findIndex(p => p === 'upload');
+             if (uploadIndex !== -1) {
+                 const publicIdWithExt = parts.slice(uploadIndex + 2).join('/');
+                 const fullPublicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.'));
+                 const { cloudinary } = require('../utils/cloudinaryHelper');
+                 await cloudinary.uploader.destroy(fullPublicId);
+             }
+           } catch(e) { console.error('Cloudinary cleanup error (teacher):', e); }
+         }
+         msg.imageUrl = 'EXPIRED';
+         modified = true;
+      }
+    }
+
+    if (modified) {
+      await doubt.save();
+    }
+
     // Mark as read by teacher
     if (doubt.unreadByTeacher) {
       doubt.unreadByTeacher = false;
@@ -1583,10 +1657,17 @@ const replyToDoubt = async (req, res) => {
     if ((!content || !content.trim()) && !imageUrl) {
       return error(res, 'Reply content or image is required', 'EMPTY_CONTENT', 400);
     }
+    if (content && content.trim().length > 500) {
+      return error(res, 'To preserve cloud architecture stability, please keep replies under 500 characters', 'TOO_LONG', 400);
+    }
 
     const doubt = await Doubt.findById(id);
     if (!doubt) return error(res, 'Doubt not found', 'NOT_FOUND', 404);
     if (doubt.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
+
+    if (doubt.messages.length >= 50) {
+      return error(res, 'This doubt thread has reached the maximum 50 messages limit. The student must mark it as resolved and start a new one.', 'THREAD_FULL', 400);
+    }
 
     // Process Base64 image to Cloudinary if needed
     let finalImageUrl = imageUrl || null;
@@ -1594,7 +1675,9 @@ const replyToDoubt = async (req, res) => {
       try {
         const uploadRes = await cloudinary.uploader.upload(imageUrl, {
           folder: `doubts/teacher_${teacherId}`,
-          resource_type: 'auto'
+          resource_type: 'image',
+          format: 'webp',
+          quality: 'auto'
         });
         finalImageUrl = uploadRes.secure_url;
       } catch (uploadErr) {

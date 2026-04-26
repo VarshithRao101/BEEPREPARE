@@ -369,6 +369,7 @@
                         <span class="q-badge q-type">${q.questionType}</span>
                         <span class="q-badge q-diff">${q.difficulty}</span>
                         <span class="q-badge q-diff">${q.marks} Mark${q.marks > 1 ? 's' : ''}</span>
+                        ${q.imageUrl ? '<span class="q-badge" style="background: rgba(255,215,0,0.1); color: var(--primary); border: 1px solid var(--primary);">[DIAGRAM ATTACHED]</span>' : ''}
                     </div>
                     <p style="font-size: 16px; color: #fff; line-height: 1.6; margin-bottom: 20px;">${q.questionText}</p>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">

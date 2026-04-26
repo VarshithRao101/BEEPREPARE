@@ -128,12 +128,12 @@ app.use(securityHeaders);
 
 // === REQUEST PARSING WITH LIMITS ===
 app.use(express.json({
-  limit: '10mb',
+  limit: '2mb',
   strict: true
 }));
 app.use(express.urlencoded({
   extended: true,
-  limit: '10mb'
+  limit: '2mb'
 }));
 
 // === SECURITY MIDDLEWARE CHAIN ===
@@ -513,6 +513,11 @@ const startApp = async () => {
     await connectDB().catch(err => {
         logger.error('DB CONNECTION DELAYED OR FAILED:', err);
     });
+
+    // Start automated 70-hour background cleanup
+    const { run70HourCleanup } = require('./utils/cleanupService');
+    run70HourCleanup();
+    setInterval(run70HourCleanup, 60 * 60 * 1000); // Check every hour
 
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
         const server = app.listen(PORT, () => {
