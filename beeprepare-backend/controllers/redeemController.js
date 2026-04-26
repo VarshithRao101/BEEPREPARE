@@ -13,7 +13,7 @@ const redeemCode = async (req, res) => {
         'MISSING_CODE', 400);
     }
 
-    const codeTrimmed = code.trim();
+    const codeTrimmed = code.trim().toUpperCase();
 
     // Must be activated to redeem
     if (!req.user.isActivated) {

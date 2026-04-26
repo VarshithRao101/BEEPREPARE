@@ -13,7 +13,7 @@ const verifyKey = async (req, res) => {
         'MISSING_KEY', 400);
     }
 
-    const keyTrimmed = licenseKey.trim();
+    const keyTrimmed = licenseKey.trim().toUpperCase();
 
     // Atomic claim — prevents race conditions
     const key = await LicenseKey

@@ -535,6 +535,9 @@ const approvePayment = async (req, res) => {
   // 5. Send approval email
   try {
     await sendPaymentApproved(payment.email, licenseKey, payment.paymentType);
+    if (payment.authEmail && payment.authEmail.toLowerCase() !== payment.email.toLowerCase()) {
+      await sendPaymentApproved(payment.authEmail, licenseKey, payment.paymentType);
+    }
   } catch (err) {
     console.error('Email Fail:', err);
   }
@@ -570,6 +573,9 @@ const rejectPayment = async (req, res) => {
 
   try {
     await sendPaymentRejected(payment.email, reason);
+    if (payment.authEmail && payment.authEmail.toLowerCase() !== payment.email.toLowerCase()) {
+      await sendPaymentRejected(payment.authEmail, reason);
+    }
   } catch (err) {
     console.error('Email Fail:', err);
   }

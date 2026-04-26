@@ -4,6 +4,7 @@ const { getMainConn } = require('../config/db');
 const paymentRequestSchema = new Schema({
   authEmail:    { type: String, required: true },
   email:        { type: String, required: true },
+  phone:        { type: String, default: null },
   utrNumber:    { type: String, required: true },
   paymentType:  { type: String, enum: ['activation', 'extra_slot'], required: true },
   amount:       { type: Number, required: true },

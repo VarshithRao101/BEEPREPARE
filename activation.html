@@ -431,7 +431,7 @@
             if (confirmed) {
                 await auth.signOut();
                 localStorage.clear();
-                window.location.href = '/login.html';
+                window.location.href = 'index.html';
             }
         };
 
@@ -442,7 +442,7 @@
           }
           if (isChecking) return;
 
-          const values = Array.from(userBoxes).map(b => b.value.trim());
+          const values = Array.from(userBoxes).map(b => b.value.trim().toUpperCase());
           
           if (values.some(v => v.length < 4)) {
             // Shake animation

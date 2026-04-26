@@ -16,7 +16,7 @@ const { success, error } =
 const submitPayment = async (req, res) => {
   try {
     await connectDB();
-    let { authEmail, email, utrNumber, paymentType } = req.body;
+    let { authEmail, email, phone, utrNumber, paymentType } = req.body;
 
     // Fallback if authEmail is not provided
     if (!authEmail) authEmail = email;
@@ -46,6 +46,7 @@ const submitPayment = async (req, res) => {
     const paymentRequest = await PaymentRequest.create({
       authEmail,
       email,
+      phone,
       utrNumber,
       paymentType,
       amount,

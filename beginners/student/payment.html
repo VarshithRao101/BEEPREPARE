@@ -643,6 +643,12 @@
                     </div>
 
                     <div class="form-group">
+                        <label>WhatsApp Number</label>
+                        <input type="tel" id="submit-phone" placeholder="Enter your WhatsApp number (optional)">
+                        <p style="font-size: 10px; color: #888; margin-top: 5px;">We will send activation updates here.</p>
+                    </div>
+
+                    <div class="form-group">
                         <label>12-Digit UTR / Transaction ID</label>
                         <input type="text" id="submit-utr" placeholder="Enter UPI Reference Number">
                     </div>
@@ -658,12 +664,12 @@
                         </ul>
                     </div>
 
-                    <div class="terms-row" onclick="toggleCheck('agree')">
+                    <div class="terms-row" onclick="toggleCheck('agree', event)">
                         <input type="checkbox" id="agree" style="margin-top: 3px;" onchange="validateForm()">
                         <span>I understand that providing a false UTR or edited screenshot is an act of fraud.</span>
                     </div>
 
-                    <div class="terms-row" style="margin-top: 10px;" onclick="toggleCheck('legal')">
+                    <div class="terms-row" style="margin-top: 10px;" onclick="toggleCheck('legal', event)">
                         <input type="checkbox" id="legal" style="margin-top: 3px;" onchange="validateForm()">
                         <span style="color: #ffb8b8; font-weight: 700;">I accept that both my Google Identity and Contact Email will be permanently blocked if verification fails due to false data.</span>
                     </div>
@@ -782,6 +788,7 @@
         window.submitProof = async () => {
             const authEmail = document.getElementById('auth-email').value.trim();
             const email = document.getElementById('submit-email').value.trim();
+            const phone = document.getElementById('submit-phone').value.trim();
             const utr = document.getElementById('submit-utr').value.trim();
             const agreed = document.getElementById('agree').checked;
 
@@ -807,6 +814,7 @@
             const res = await apiCall('/payment/submit', 'POST', {
                 authEmail,
                 email,
+                phone,
                 utrNumber: utr,
                 paymentType: selectedPlan
             });
@@ -821,7 +829,10 @@
             }
         };
 
-        window.toggleCheck = (id) => {
+        window.toggleCheck = (id, event) => {
+            if (event && event.target.tagName === 'INPUT') {
+                return;
+            }
             const cb = document.getElementById(id);
             if (cb) {
                 cb.checked = !cb.checked;
