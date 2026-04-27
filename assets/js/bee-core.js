@@ -527,8 +527,12 @@ export const BP = {
     if (!loader) return;
     BP._loaderCount = Math.max(0, (BP._loaderCount || 1) - 1);
     if (BP._loaderCount === 0) {
-      loader.classList.remove('active');
-      document.body.style.overflow = ''; // Unlock scroll
+      setTimeout(() => {
+        if (BP._loaderCount === 0) {
+          loader.classList.remove('active');
+          document.body.style.overflow = ''; // Unlock scroll
+        }
+      }, 300); // Small grace period to prevent flickering
     }
   },
 
@@ -536,13 +540,12 @@ export const BP = {
     if (document.getElementById('bee-loader-overlay')) return;
 
     // Inject CSS dynamically
-    const depth = window.location.pathname.split('/').filter(Boolean).length;
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     let prefix = '';
-    // This logic needs to be robust for both dev (localhost/folder) and prod (vercel)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    
+    if (isLocal) {
         // Local often has a project folder in the path
         if (window.location.pathname.includes('BEEPREPARE-main')) {
-            // We need to find the distance to BEEPREPARE-main
             const parts = window.location.pathname.split('/');
             const idx = parts.indexOf('BEEPREPARE-main');
             if (idx !== -1) {
@@ -550,22 +553,27 @@ export const BP = {
                 for(let i=0; i<dist; i++) prefix += '../';
             }
         } else {
+            const depth = window.location.pathname.split('/').filter(Boolean).length;
             if (depth === 2) prefix = '../';
             else if (depth >= 3) prefix = '../../';
         }
     } else {
-        // Vercel/Prod: Root is /
-        if (depth === 1) prefix = '';
-        else if (depth === 2) prefix = '../';
-        else if (depth >= 3) prefix = '../../';
+        // Vercel/Prod: Always use absolute paths from root
+        prefix = '/';
     }
     
     if (!document.getElementById('bee-loader-css')) {
       const link = document.createElement('link');
       link.id = 'bee-loader-css';
       link.rel = 'stylesheet';
-      link.href = prefix + 'assets/css/loader.css';
+      link.href = prefix + (prefix === '/' ? '' : '') + 'assets/css/loader.css';
       document.head.appendChild(link);
+    }
+
+    if (!document.body) {
+      // If body is missing (very early call), wait and try once
+      setTimeout(() => BP.initLoader(), 50);
+      return;
     }
 
     const loaderHtml = `

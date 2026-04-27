@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1206,20 +1206,32 @@
             document.querySelector('.profile-name').innerText = name;
             const initials = name.split(' ').map(n => n[0]).join('').toUpperCase();
             document.querySelector('.profile-avatar').innerText = initials;
-            document.querySelector('.profile-icon').innerText = initials[0] || 'T';
+            
+            // Header icon (fallback to T if needed)
+            const headerIcon = document.querySelector('.profile-icon');
+            if (headerIcon) {
+                headerIcon.innerHTML = initials[0] || 'T';
+                // Keep the signal dot if it exists
+                if (!headerIcon.querySelector('#profile-signal')) {
+                    headerIcon.insertAdjacentHTML('beforeend', '<div id="profile-signal" class="signal-dot"></div>');
+                }
+            }
             
             // Plan Badge Logic
             const badge = document.getElementById('plan-badge');
             if (badge) {
+                badge.style.transition = '0.3s';
                 if (appState.planType === 'active') {
                    badge.innerText = 'ACTIVE ✓';
                    badge.style.background = 'var(--primary)';
                    badge.style.color = '#000';
+                   badge.style.opacity = '1';
                    badge.onclick = () => window.location.href='payment.html?type=extra_slot';
                 } else {
                    badge.innerText = 'FREE';
                    badge.style.background = '#333';
                    badge.style.color = '#888';
+                   badge.style.opacity = '1';
                    badge.innerHTML = 'FREE <span style="display:block; font-size:8px; margin-top:2px; color:var(--primary);">↑ ACTIVATE</span>';
                    badge.onclick = () => window.location.href='payment.html?type=activation';
                 }
