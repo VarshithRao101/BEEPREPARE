@@ -566,7 +566,8 @@ export const BP = {
       const link = document.createElement('link');
       link.id = 'bee-loader-css';
       link.rel = 'stylesheet';
-      link.href = prefix + (prefix === '/' ? '' : '') + 'assets/css/loader.css';
+      // Force cache refresh with v2.0
+      link.href = prefix + (prefix === '/' ? '' : '') + 'assets/css/loader.css?v=2.0';
       document.head.appendChild(link);
     }
 
