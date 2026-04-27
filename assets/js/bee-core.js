@@ -539,12 +539,10 @@ export const BP = {
   initLoader: () => {
     if (document.getElementById('bee-loader-overlay')) return;
 
-    // Inject CSS dynamically
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     let prefix = '';
     
     if (isLocal) {
-        // Local often has a project folder in the path
         if (window.location.pathname.includes('BEEPREPARE-main')) {
             const parts = window.location.pathname.split('/');
             const idx = parts.indexOf('BEEPREPARE-main');
@@ -558,21 +556,44 @@ export const BP = {
             else if (depth >= 3) prefix = '../../';
         }
     } else {
-        // Vercel/Prod: Always use absolute paths from root
         prefix = '/';
     }
     
+    // Inject CSS Link with Cache Buster (v2.2)
     if (!document.getElementById('bee-loader-css')) {
       const link = document.createElement('link');
       link.id = 'bee-loader-css';
       link.rel = 'stylesheet';
-      // Force cache refresh with v2.0
-      link.href = prefix + (prefix === '/' ? '' : '') + 'assets/css/loader.css?v=2.0';
+      link.href = prefix + 'assets/css/loader.css?v=2.2';
       document.head.appendChild(link);
     }
 
+    // NUCLEAR OPTION: Inject critical loader styles directly via JS 
+    // This ensures the loader works even if the CSS file is cached/missing
+    if (!document.getElementById('bee-loader-style-inline')) {
+        const style = document.createElement('style');
+        style.id = 'bee-loader-style-inline';
+        style.textContent = `
+            .bee-loader-overlay {
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(5px);
+                display: none; align-items: center; justify-content: center;
+                z-index: 999999; opacity: 0; transition: opacity 0.4s ease;
+                pointer-events: none;
+            }
+            .bee-loader-overlay.active { display: flex; opacity: 1; pointer-events: all; }
+            .loader-container { 
+                background: rgba(15, 15, 20, 0.95); padding: 40px; border-radius: 30px;
+                border: 1px solid rgba(255, 215, 0, 0.3); display: flex; flex-direction: column;
+                align-items: center; gap: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            }
+            .loader-main-text { color: #FFD700; font-size: 13px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-top: 15px; }
+            @media (max-width: 480px) { .loader-container { padding: 25px; width: 80%; } .loader-main-text { font-size: 10px; letter-spacing: 2px; } }
+        `;
+        document.head.appendChild(style);
+    }
+
     if (!document.body) {
-      // If body is missing (very early call), wait and try once
       setTimeout(() => BP.initLoader(), 50);
       return;
     }
@@ -598,6 +619,7 @@ export const BP = {
       </div>
     `;
     document.body.insertAdjacentHTML('beforeend', loaderHtml);
+    console.log("[BEE CORE] Loader Node Protocol v2.2 Initialized");
   }
 };
 
