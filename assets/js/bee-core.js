@@ -97,8 +97,10 @@ export async function apiCall(
   method = 'GET',
   body = null,
   needsAuth = true,
-  isRetry = false // Track retry attempts (Step 8 Seal)
+  isRetry = false, // Track retry attempts (Step 8 Seal)
+  showOverlay = true // PREMIUM LOADER (Step 10)
 ) {
+  if (showOverlay) BP.showLoader();
   // GLOBAL SAFETY (Step 1): Rate limiting in frontend
   const now = Date.now();
 
@@ -204,13 +206,14 @@ export async function apiCall(
       return data;
     }
 
-    // Auto-update activation status if returned (but only if NOT logging out)
     if (data?.data?.isActivated !== undefined && !localStorage.getItem(BP.LOGGING_OUT)) {
       localStorage.setItem(BP.ACTIVATED, data.data.isActivated ? 'true' : 'false');
     }
 
+    if (showOverlay) BP.hideLoader();
     return data;
   } catch (err) {
+    if (showOverlay) BP.hideLoader();
     console.error('API Error:', err);
     if (err.message === 'SERVER_BUSY') {
       if (window.Swal) {
@@ -506,11 +509,92 @@ export const BP = {
         profileDots.forEach(d => d.style.display = (hasReq || hasDoubt) ? 'block' : 'none');
       }
     } catch(e) { console.warn("Signal Sync Failed", e); }
+  },
+
+  showLoader: () => {
+    let loader = document.getElementById('bee-loader-overlay');
+    if (!loader) {
+      BP.initLoader();
+      loader = document.getElementById('bee-loader-overlay');
+    }
+    BP._loaderCount = (BP._loaderCount || 0) + 1;
+    loader.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Lock scroll
+  },
+
+  hideLoader: () => {
+    let loader = document.getElementById('bee-loader-overlay');
+    if (!loader) return;
+    BP._loaderCount = Math.max(0, (BP._loaderCount || 1) - 1);
+    if (BP._loaderCount === 0) {
+      loader.classList.remove('active');
+      document.body.style.overflow = ''; // Unlock scroll
+    }
+  },
+
+  initLoader: () => {
+    if (document.getElementById('bee-loader-overlay')) return;
+
+    // Inject CSS dynamically
+    const depth = window.location.pathname.split('/').filter(Boolean).length;
+    let prefix = '';
+    // This logic needs to be robust for both dev (localhost/folder) and prod (vercel)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        // Local often has a project folder in the path
+        if (window.location.pathname.includes('BEEPREPARE-main')) {
+            // We need to find the distance to BEEPREPARE-main
+            const parts = window.location.pathname.split('/');
+            const idx = parts.indexOf('BEEPREPARE-main');
+            if (idx !== -1) {
+                const dist = parts.length - idx - 2;
+                for(let i=0; i<dist; i++) prefix += '../';
+            }
+        } else {
+            if (depth === 2) prefix = '../';
+            else if (depth >= 3) prefix = '../../';
+        }
+    } else {
+        // Vercel/Prod: Root is /
+        if (depth === 1) prefix = '';
+        else if (depth === 2) prefix = '../';
+        else if (depth >= 3) prefix = '../../';
+    }
+    
+    if (!document.getElementById('bee-loader-css')) {
+      const link = document.createElement('link');
+      link.id = 'bee-loader-css';
+      link.rel = 'stylesheet';
+      link.href = prefix + 'assets/css/loader.css';
+      document.head.appendChild(link);
+    }
+
+    const loaderHtml = `
+      <div id="bee-loader-overlay" class="bee-loader-overlay">
+        <div class="loader-container">
+          <div class="infinity-loader">
+            <svg viewBox="0 0 120 60">
+              <path class="infinity-path" d="M30,30 C30,10 60,10 60,30 C60,50 90,50 90,30 C90,10 60,10 60,30 C60,50 30,50 30,30" />
+              <circle class="loader-dot dot-1" r="5" />
+              <circle class="loader-dot dot-2" r="5" />
+              <circle class="loader-dot dot-3" r="5" />
+              <circle class="loader-dot dot-4" r="5" />
+              <circle class="loader-dot dot-5" r="5" />
+            </svg>
+          </div>
+          <div class="loader-text-wrapper">
+            <div class="loader-main-text">Synchronizing</div>
+            <div class="loader-sub-text">BEE CORE Protocol v1.4.19</div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loaderHtml);
   }
 };
 
 // AUTO-INIT TASKS
 const initCore = () => {
+    BP.initLoader();
     BP.initMaintenanceCheck();
     BP.initAnnouncementBanner();
 };

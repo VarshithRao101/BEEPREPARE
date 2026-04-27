@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -359,10 +359,6 @@
         </div>
     </div>
 
-    <div class="success-overlay" id="successOverlay">
-        <div class="loading-ring"></div>
-        <div style="color: var(--primary); letter-spacing: 3px; font-size: 13px; text-transform: uppercase; font-weight: 900;">Establishing Secure Connection...</div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
@@ -380,7 +376,6 @@
 
         const userBoxes = document.querySelectorAll('.key-input');
         const btn = document.querySelector('.activate-btn');
-        const overlay = document.getElementById('successOverlay');
 
         userBoxes.forEach((input, index) => {
             input.addEventListener('input', (e) => {
@@ -471,7 +466,6 @@
           isChecking = true;
           btn.disabled = true;
           btn.innerText = 'Authenticating...';
-          overlay.classList.add('active');
 
           try {
             const result = await apiCall('/license/verify', 'POST', { licenseKey: fullKey });
@@ -486,8 +480,6 @@
               }, 1500);
 
             } else {
-              overlay.classList.remove('active');
-              
               const code = result?.error?.code;
               let msg = 'Invalid key. Please try again.';
 
@@ -514,7 +506,6 @@
               });
             }
           } catch (err) {
-            overlay.classList.remove('active');
             console.error('Activation error:', err);
           } finally {
             // Rate limit: 5s cooldown

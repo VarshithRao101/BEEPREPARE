@@ -1,0 +1,116 @@
+
+:root {
+    --loader-primary: #FFD700;
+    --loader-accent: #FFA500;
+    --loader-bg: rgba(0, 0, 0, 0.85);
+}
+
+.bee-loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--loader-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s;
+    pointer-events: all; /* Block clicks */
+}
+
+.bee-loader-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loader-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+/* Infinity Dot Animation */
+.infinity-loader {
+    position: relative;
+    width: 120px;
+    height: 60px;
+}
+
+.infinity-loader svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.infinity-path {
+    fill: none;
+    stroke: rgba(255, 215, 0, 0.1);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.loader-dot {
+    fill: var(--loader-primary);
+    filter: drop-shadow(0 0 8px var(--loader-primary));
+}
+
+/* Premium Text Styling */
+.loader-text-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.loader-main-text {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    animation: textPulse 2s infinite ease-in-out;
+}
+
+.loader-sub-text {
+    color: var(--loader-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+@keyframes textPulse {
+    0%, 100% { opacity: 0.6; transform: scale(0.98); letter-spacing: 5px; }
+    50% { opacity: 1; transform: scale(1); letter-spacing: 7px; }
+}
+
+/* Infinity Dots Logic */
+.dot-1 { animation: dotMove 2s infinite linear; }
+.dot-2 { animation: dotMove 2s infinite linear -0.4s; }
+.dot-3 { animation: dotMove 2s infinite linear -0.8s; }
+.dot-4 { animation: dotMove 2s infinite linear -1.2s; }
+.dot-5 { animation: dotMove 2s infinite linear -1.6s; }
+
+@keyframes dotMove {
+    0% { offset-distance: 0%; opacity: 0; transform: scale(0.3); }
+    10% { opacity: 1; transform: scale(1); }
+    90% { opacity: 1; transform: scale(1); }
+    100% { offset-distance: 100%; opacity: 0; transform: scale(0.3); }
+}
+
+/* Using offset-path for a true infinity loop */
+.loader-dot {
+    offset-path: path('M30,30 C30,10 60,10 60,30 C60,50 90,50 90,30 C90,10 60,10 60,30 C60,50 30,50 30,30');
+    offset-rotate: auto;
+}
