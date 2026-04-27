@@ -135,6 +135,25 @@
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
 
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .loader-container {
+        padding: 30px;
+        border-radius: 30px;
+        width: 85%;
+        max-width: 300px;
+    }
+
+    .pl {
+        --size: 4em; /* Smaller grid on mobile */
+    }
+
+    .loader-main-text {
+        font-size: 11px;
+        letter-spacing: 3px;
+    }
+}
+
 /* Keyframes (Ported from provided SCSS) */
 @keyframes dot-rotate {
     from, 22% { animation-timing-function: ease-out; transform: rotate(-45deg); }
