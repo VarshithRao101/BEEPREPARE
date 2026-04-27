@@ -1,9 +1,6 @@
-
-:root {
-    --loader-primary: #FFD700;
-    --loader-accent: #FFA500;
-    --loader-bg: rgba(0, 0, 0, 0.85);
-}
+/* ============================================
+   BEE CORE — Premium Dot Grid Loader
+   ============================================ */
 
 .bee-loader-overlay {
     position: fixed;
@@ -11,8 +8,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(10, 10, 15, 0.85);
-    backdrop-filter: blur(15px);
+    background: rgba(0, 0, 0, 0.5); /* Subtle background to keep UI visible */
+    backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -29,87 +26,200 @@
     visibility: visible;
 }
 
+/* Loader Container */
 .loader-container {
-    text-align: center;
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    padding: 50px;
+    border-radius: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 30px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    transform: scale(0.9);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Infinity Dot Animation */
-.infinity-loader {
+.bee-loader-overlay.active .loader-container {
+    transform: scale(1);
+}
+
+/* 3x3 Dot Grid Animation (Converted from SCSS) */
+.pl {
+    --size: 6em;
+    --dot-yellow: #FFD700;
+    --dot-grey: #888888;
+    --dot-white: #FFFFFF;
+    --dot-gold: #FFC107;
+    
+    aspect-ratio: 1;
+    display: grid;
+    gap: calc(var(--size) * 0.125);
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: var(--size);
+}
+
+.pl__dot {
     position: relative;
-    width: 120px;
-    height: 60px;
 }
 
-.infinity-loader svg {
+.pl__dot,
+.pl__dot::before,
+.pl__dot::after {
+    animation-duration: 2s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.pl__dot::before,
+.pl__dot::after {
+    aspect-ratio: 1;
+    background-color: #FFFFFF;
+    border-radius: 50%;
+    content: "";
+    display: block;
+    position: absolute;
     width: 100%;
-    height: 100%;
-    overflow: visible;
+    transition: background-color 0.3s;
 }
 
-.infinity-path {
-    fill: none;
-    stroke: rgba(255, 215, 0, 0.1);
-    stroke-width: 2;
-    stroke-linecap: round;
+.pl__dot::after {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
 }
 
-.loader-dot {
-    fill: var(--loader-primary);
-    filter: drop-shadow(0 0 8px var(--loader-primary));
-}
+/* Color Modifiers */
+.pl__dot--yellow::before, .pl__dot--yellow::after { background-color: var(--dot-yellow); }
+.pl__dot--grey::before, .pl__dot--grey::after { background-color: var(--dot-grey); }
+.pl__dot--white::before, .pl__dot--white::after { background-color: var(--dot-white); }
+.pl__dot--gold::before, .pl__dot--gold::after { background-color: var(--dot-gold); }
 
-/* Premium Text Styling */
-.loader-text-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
+/* Wave Sizes */
+.pl__dot--lg::after { width: 500%; }
+.pl__dot--sm::after { width: 167%; }
 
+/* Rotation Logic */
+.pl__dot:nth-child(even) { animation-name: dot-rotate; }
+.pl__dot:nth-child(2) { transform-origin: 50% 200%; }
+.pl__dot:nth-child(4) { transform-origin: 200% 50%; }
+.pl__dot:nth-child(6) { transform-origin: -100% 50%; }
+.pl__dot:nth-child(8) { transform-origin: 50% -100%; }
+
+/* Animation Mapping */
+.pl__dot:nth-child(1)::before { animation-name: dot-scale1; }
+.pl__dot:nth-child(2)::before { animation-name: dot-scale2; }
+.pl__dot:nth-child(3)::before { animation-name: dot-scale3; }
+.pl__dot:nth-child(4)::before { animation-name: dot-scale4; }
+.pl__dot:nth-child(5)::before { animation-name: dot-scale5; }
+.pl__dot:nth-child(6)::before { animation-name: dot-scale6; }
+.pl__dot:nth-child(7)::before { animation-name: dot-scale7; }
+.pl__dot:nth-child(8)::before { animation-name: dot-scale8; }
+.pl__dot:nth-child(9)::before { animation-name: dot-scale9; }
+
+.pl__dot:nth-child(3)::after { animation-name: dot-wave3; }
+.pl__dot:nth-child(5)::after { animation-name: dot-wave5a, dot-wave5b; }
+.pl__dot:nth-child(7)::after { animation-name: dot-wave7; }
+.pl__dot:nth-child(9)::after { animation-name: dot-wave9; }
+
+/* Static Loading Text */
 .loader-main-text {
-    color: #fff;
+    color: #FFD700;
     font-size: 14px;
     font-weight: 900;
+    text-transform: uppercase;
     letter-spacing: 5px;
-    text-transform: uppercase;
+    margin-top: 10px;
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-    animation: textPulse 2s infinite ease-in-out;
 }
 
-.loader-sub-text {
-    color: var(--loader-primary);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    opacity: 0.6;
+/* Keyframes (Ported from provided SCSS) */
+@keyframes dot-rotate {
+    from, 22% { animation-timing-function: ease-out; transform: rotate(-45deg); }
+    37%, to { transform: rotate(0); }
 }
 
-@keyframes textPulse {
-    0%, 100% { opacity: 0.6; transform: scale(0.98); letter-spacing: 5px; }
-    50% { opacity: 1; transform: scale(1); letter-spacing: 7px; }
+@keyframes dot-scale1 {
+    from, 36% { transform: translate(0, 0) scale(0); }
+    50%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(75%, 75%) scale(0); }
 }
 
-/* Infinity Dots Logic */
-.dot-1 { animation: dotMove 2s infinite linear; }
-.dot-2 { animation: dotMove 2s infinite linear -0.4s; }
-.dot-3 { animation: dotMove 2s infinite linear -0.8s; }
-.dot-4 { animation: dotMove 2s infinite linear -1.2s; }
-.dot-5 { animation: dotMove 2s infinite linear -1.6s; }
-
-@keyframes dotMove {
-    0% { offset-distance: 0%; opacity: 0; transform: scale(0.3); }
-    10% { opacity: 1; transform: scale(1); }
-    90% { opacity: 1; transform: scale(1); }
-    100% { offset-distance: 100%; opacity: 0; transform: scale(0.3); }
+@keyframes dot-scale2 {
+    from, 25% { animation-timing-function: ease-out; transform: translate(0, 0) scale(0); }
+    40%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(0, -100%) scale(0); }
 }
 
-/* Using offset-path for a true infinity loop */
-.loader-dot {
-    offset-path: path('M30,30 C30,10 60,10 60,30 C60,50 90,50 90,30 C90,10 60,10 60,30 C60,50 30,50 30,30');
-    offset-rotate: auto;
+@keyframes dot-scale3 {
+    from, 27% { animation-timing-function: ease-in; transform: translate(0, 0) scale(0); }
+    45%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(-75%, 75%) scale(0); }
+}
+
+@keyframes dot-scale4 {
+    from, 28% { animation-timing-function: ease-out; transform: translate(0, 0) scale(0); }
+    43%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(-100%, 0) scale(0); }
+}
+
+@keyframes dot-scale5 {
+    from, 9%, to { transform: scale(0); }
+    26% { transform: scale(1.17); }
+    41%, 75% { transform: scale(1); }
+}
+
+@keyframes dot-scale6 {
+    from, 22% { animation-timing-function: ease-out; transform: translate(0, 0) scale(0); }
+    37%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(100%, 0) scale(0); }
+}
+
+@keyframes dot-scale7 {
+    from, 36% { animation-timing-function: ease-in; transform: translate(0, 0) scale(0); }
+    53%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(75%, -75%) scale(0); }
+}
+
+@keyframes dot-scale8 {
+    from, 24% { animation-timing-function: ease-out; transform: translate(0, 0) scale(0); }
+    39%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(0, 100%) scale(0); }
+}
+
+@keyframes dot-scale9 {
+    from, 32% { animation-timing-function: ease-in; transform: translate(0, 0) scale(0); }
+    49%, 71% { transform: translate(0, 0) scale(1); }
+    87%, to { transform: translate(-75%, -75%) scale(0); }
+}
+
+@keyframes dot-wave3 {
+    from { visibility: hidden; }
+    45% { opacity: 1; transform: translate(-50%, -50%) scale(calc(1 / 1.67)); visibility: hidden; }
+    61%, to { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes dot-wave5a {
+    from { transform: translate(-50%, -50%) scale(0.2); }
+    8% { transform: translate(-50%, -50%) scale(0.8); }
+    25%, to { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes dot-wave5b {
+    from, 25%, to { opacity: 0; }
+    8% { opacity: 0.5; }
+}
+
+@keyframes dot-wave7 {
+    from { visibility: hidden; }
+    53% { opacity: 1; transform: translate(-50%, -50%) scale(calc(1 / 1.67)); visibility: hidden; }
+    69%, to { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes dot-wave9 {
+    from { visibility: hidden; }
+    49% { opacity: 1; transform: translate(-50%, -50%) scale(calc(1 / 1.67)); visibility: hidden; }
+    65%, to { opacity: 0; transform: translate(-50%, -50%) scale(1); }
 }

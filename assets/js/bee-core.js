@@ -579,19 +579,19 @@ export const BP = {
     const loaderHtml = `
       <div id="bee-loader-overlay" class="bee-loader-overlay">
         <div class="loader-container">
-          <div class="infinity-loader">
-            <svg viewBox="0 0 120 60">
-              <path class="infinity-path" d="M30,30 C30,10 60,10 60,30 C60,50 90,50 90,30 C90,10 60,10 60,30 C60,50 30,50 30,30" />
-              <circle class="loader-dot dot-1" r="5" />
-              <circle class="loader-dot dot-2" r="5" />
-              <circle class="loader-dot dot-3" r="5" />
-              <circle class="loader-dot dot-4" r="5" />
-              <circle class="loader-dot dot-5" r="5" />
-            </svg>
+          <div class="pl">
+            <div class="pl__dot"></div>
+            <div class="pl__dot"></div>
+            <div class="pl__dot pl__dot--yellow pl__dot--sm"></div>
+            <div class="pl__dot"></div>
+            <div class="pl__dot pl__dot--gold pl__dot--lg"></div>
+            <div class="pl__dot"></div>
+            <div class="pl__dot pl__dot--white pl__dot--sm"></div>
+            <div class="pl__dot"></div>
+            <div class="pl__dot pl__dot--grey pl__dot--sm"></div>
           </div>
           <div class="loader-text-wrapper">
-            <div class="loader-main-text">Synchronizing</div>
-            <div class="loader-sub-text">BEE CORE Protocol v1.4.19</div>
+            <div class="loader-main-text">Loading</div>
           </div>
         </div>
       </div>
