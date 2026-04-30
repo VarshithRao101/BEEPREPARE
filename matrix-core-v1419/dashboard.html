@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -273,7 +273,10 @@
             const message = document.getElementById('ann-msg').value;
             if(!message) return;
 
-            const res = await adminApi('/settings/announcement', 'POST', { text: message, target: 'all' });
+            const code = await showCodeModal('PUSH BROADCAST', 'Enter action code to push global notification:', false);
+            if(!code) return;
+
+            const res = await adminApi('/settings/announcement', 'POST', { text: message, target: 'all', actionCode: code });
             if(res && res.success) {
                 showToast('Broadcast live', 'success');
                 document.getElementById('ann-msg').value = '';
@@ -281,11 +284,8 @@
         };
 
         const clearAnnouncements = async () => {
-            const code = await showCodeModal('STOP BROADCAST', 'Clear all global notifications?', false);
-            if(code) {
-                const res = await adminApi('/settings/announcement', 'DELETE', { actionCode: code });
-                if(res && res.success) showToast('Broadcast terminal cleared', 'info');
-            }
+            const res = await adminApi('/settings/announcement', 'DELETE');
+            if(res && res.success) showToast('Broadcast terminal cleared', 'info');
         };
 
         // Attach Event Listeners

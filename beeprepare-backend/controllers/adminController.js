@@ -1056,7 +1056,11 @@ const toggleMaintenance = async (req, res) => {
 };
 
 const setAnnouncement = async (req, res) => {
-  const { text, target, expiresAt } = req.body;
+  const { text, target, expiresAt, actionCode } = req.body;
+
+  if (!verifyActionCode('add_announcement', actionCode)) {
+    return error(res, 'Invalid action code', 'INVALID_CODE', 403);
+  }
 
   await Announcement.updateMany({}, { isActive: false });
   const a = await Announcement.create({

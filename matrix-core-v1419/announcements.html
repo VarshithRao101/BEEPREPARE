@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -122,8 +122,11 @@
 
             if (!text) return showToast("Enter message text", "warning");
 
+            const code = await showCodeModal("Push Announcement", "Enter action code to push global announcement:", false);
+            if (!code) return;
+
             const res = await adminApi('/settings/announcement', 'POST', {
-                text, target, expiresAt: expiry || null
+                text, target, expiresAt: expiry || null, actionCode: code
             });
 
             if (res && res.success) {
@@ -134,13 +137,10 @@
         };
 
         window.removeAnnouncement = async () => {
-            const code = await showCodeModal("Stop Broadcast", "Stop this announcement?", false);
-            if (code) {
-                const res = await adminApi('/settings/announcement', 'DELETE', { actionCode: code });
-                if (res && res.success) {
-                    showToast("Broadcast stopped", "info");
-                    fetchCurrent();
-                }
+            const res = await adminApi('/settings/announcement', 'DELETE');
+            if (res && res.success) {
+                showToast("Broadcast stopped", "info");
+                fetchCurrent();
             }
         };
 
