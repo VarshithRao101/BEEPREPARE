@@ -9,6 +9,7 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.2); /* Extremely subtle overlay */
+    -webkit-backdrop-filter: blur(4px); /* Safari support */
     backdrop-filter: blur(4px); /* Reduced blur to keep background clear */
     display: none;
     align-items: center;
@@ -59,6 +60,7 @@
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
     width: var(--size);
+    height: var(--size); /* Fallback for older mobile browsers */
 }
 
 .pl__dot {
@@ -82,6 +84,7 @@
     display: block;
     position: absolute;
     width: 100%;
+    height: 100%; /* Fallback for older mobile browsers */
     transition: background-color 0.3s;
 }
 

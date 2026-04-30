@@ -17,8 +17,8 @@ export const firebaseConfig = {
 };
 
 // Single source of truth for API URL
-export const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-  ? 'http://localhost:5000/api' 
+export const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.') || window.location.hostname.startsWith('10.')) 
+  ? `http://${window.location.hostname}:5000/api` 
   : '/api';
 
 // Globally initialize Firebase
@@ -517,20 +517,41 @@ export const BP = {
       BP.initLoader();
       loader = document.getElementById('bee-loader-overlay');
     }
+    
     BP._loaderCount = (BP._loaderCount || 0) + 1;
+    
+    // Safety check: if loader still doesn't exist (DOM not ready), try again shortly
+    if (!loader) {
+        setTimeout(() => BP.showLoader(), 100);
+        return;
+    }
+
+    // Update debug bar if it exists
+    const debug = document.getElementById('bee-debug-status');
+    if (debug) debug.innerText = `BEE CORE v2.3 [LOADER ACTIVE: ${BP._loaderCount}]`;
+
     loader.classList.add('active');
     document.body.style.overflow = 'hidden'; // Lock scroll
   },
 
   hideLoader: () => {
     let loader = document.getElementById('bee-loader-overlay');
-    if (!loader) return;
+    if (!loader) {
+        BP._loaderCount = Math.max(0, (BP._loaderCount || 1) - 1);
+        return;
+    }
+    
     BP._loaderCount = Math.max(0, (BP._loaderCount || 1) - 1);
+    
+    // Update debug bar
+    const debug = document.getElementById('bee-debug-status');
+    if (debug) debug.innerText = `BEE CORE v2.3 [LOADER IDLE: ${BP._loaderCount}]`;
+
     if (BP._loaderCount === 0) {
       setTimeout(() => {
         if (BP._loaderCount === 0) {
           loader.classList.remove('active');
-          document.body.style.overflow = ''; // Unlock scroll
+          if (document.body) document.body.style.overflow = ''; // Unlock scroll
         }
       }, 300); // Small grace period to prevent flickering
     }
@@ -539,7 +560,10 @@ export const BP = {
   initLoader: () => {
     if (document.getElementById('bee-loader-overlay')) return;
 
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isLocal = window.location.hostname === 'localhost' || 
+                    window.location.hostname === '127.0.0.1' || 
+                    window.location.hostname.startsWith('192.168.') || 
+                    window.location.hostname.startsWith('10.');
     let prefix = '';
     
     if (isLocal) {
@@ -576,7 +600,7 @@ export const BP = {
         style.textContent = `
             .bee-loader-overlay {
                 position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(5px);
+                background: rgba(0, 0, 0, 0.3); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
                 display: none; align-items: center; justify-content: center;
                 z-index: 999999; opacity: 0; transition: opacity 0.4s ease;
                 pointer-events: none;
@@ -625,6 +649,13 @@ export const BP = {
 
 // AUTO-INIT TASKS
 const initCore = () => {
+    // VISUAL DEBUGGER FOR MOBILE
+    const debug = document.createElement('div');
+    debug.id = 'bee-debug-status';
+    debug.style = 'position:fixed; top:0; left:0; width:100%; background:rgba(0,0,0,0.8); color:#FFD700; font-size:9px; padding:2px 10px; z-index:1000000; font-family:monospace; pointer-events:none; border-bottom:1px solid #FFD700;';
+    debug.innerText = 'BEE CORE v2.3 [READY]';
+    if (document.body) document.body.appendChild(debug);
+    
     BP.initLoader();
     BP.initMaintenanceCheck();
     BP.initAnnouncementBanner();
@@ -633,5 +664,7 @@ const initCore = () => {
 if (document.readyState === 'loading') {
     window.addEventListener('DOMContentLoaded', initCore);
 } else {
-    initCore();
+    // If body already exists, run immediately
+    if (document.body) initCore();
+    else window.addEventListener('DOMContentLoaded', initCore);
 }
