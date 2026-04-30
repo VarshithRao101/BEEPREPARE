@@ -455,7 +455,7 @@ app.get('/api/announcements/active', async (req, res) => {
         { expiresAt: { $gt: new Date() } }
       ]
     })
-    .select('text target createdAt')
+    .select('_id text target createdAt')
     .lean();
     res.json({
       success: true,

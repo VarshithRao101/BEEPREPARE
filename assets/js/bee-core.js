@@ -476,20 +476,77 @@ export const BP = {
           window.location.pathname === '/') return;
 
       const res = await fetch(API_BASE + '/announcements/active');
-      const data = await res.json();
+      const json = await res.json();
+      
+      const data = json.data?.announcement;
 
-      if (data && data.success && data.announcement) {
-        const banner = document.createElement('div');
-        banner.id = 'bee-announcement-banner';
-        banner.style.cssText = 'background:#FFD700;color:#000;padding:12px;text-align:center;font-weight:bold;position:sticky;top:0;z-index:10000;font-family:sans-serif;display:flex;justify-content:center;align-items:center;gap:15px;box-shadow:0 4px 10px rgba(0,0,0,0.2);';
-        banner.innerHTML = `
-          <span>📢 ${data.announcement.message}</span>
-          <button onclick="this.parentElement.remove()" style="background:transparent;border:none;font-size:20px;cursor:pointer;line-height:1;">✕</button>
+      if (json.success && data && data._id) {
+        // Check if user dismissed this specific announcement
+        const dismissKey = `BP_DISMISSED_ANNOUNCEMENT_${data._id}`;
+        if (localStorage.getItem(dismissKey) === 'true') return;
+
+        // Create the professional modal
+        const overlay = document.createElement('div');
+        overlay.id = 'bee-announcement-modal';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:999999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;';
+        
+        overlay.innerHTML = `
+          <div style="background:rgba(15,15,20,0.95);border:1px solid rgba(255,215,0,0.3);border-radius:24px;padding:30px;max-width:450px;width:90%;box-shadow:0 25px 50px rgba(0,0,0,0.5);transform:translateY(20px);transition:transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+              <div style="background:rgba(255,215,0,0.15);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFD700;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+              </div>
+              <h2 style="color:#fff;margin:0;font-size:20px;font-weight:700;letter-spacing:1px;font-family:sans-serif;">Admin Update</h2>
+            </div>
+            
+            <p style="color:#ccc;font-size:15px;line-height:1.6;margin-bottom:25px;font-family:sans-serif;">
+              ${data.text}
+            </p>
+
+            <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;margin-bottom:25px;border-left:3px solid #FFD700;">
+              <p style="margin:0;color:#aaa;font-size:12px;font-style:italic;font-family:sans-serif;">Note: This message will appear every time you visit the dashboard unless you dismiss it.</p>
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:flex-end;">
+              <button id="announcement-close-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 20px;border-radius:12px;cursor:pointer;font-weight:600;transition:0.3s;font-family:sans-serif;">Close for now</button>
+              <button id="announcement-dismiss-btn" style="background:#FFD700;border:none;color:#000;padding:10px 20px;border-radius:12px;cursor:pointer;font-weight:700;transition:0.3s;box-shadow:0 4px 15px rgba(255,215,0,0.3);font-family:sans-serif;">Don't remind me again</button>
+            </div>
+          </div>
         `;
-        document.body.prepend(banner);
+        
+        document.body.appendChild(overlay);
+
+        // Add hover effects dynamically
+        const closeBtn = document.getElementById('announcement-close-btn');
+        const dismissBtn = document.getElementById('announcement-dismiss-btn');
+        
+        closeBtn.onmouseenter = () => closeBtn.style.background = 'rgba(255,255,255,0.05)';
+        closeBtn.onmouseleave = () => closeBtn.style.background = 'transparent';
+        
+        dismissBtn.onmouseenter = () => dismissBtn.style.transform = 'translateY(-2px)';
+        dismissBtn.onmouseleave = () => dismissBtn.style.transform = 'translateY(0)';
+
+        // Animate in
+        requestAnimationFrame(() => {
+          overlay.style.opacity = '1';
+          overlay.children[0].style.transform = 'translateY(0)';
+        });
+
+        // Event listeners
+        const closeModal = () => {
+          overlay.style.opacity = '0';
+          overlay.children[0].style.transform = 'translateY(20px)';
+          setTimeout(() => overlay.remove(), 400);
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        dismissBtn.addEventListener('click', () => {
+          localStorage.setItem(dismissKey, 'true');
+          closeModal();
+        });
       }
     } catch (e) {
-      console.warn('Announcement fetch failed');
+      console.warn('Announcement fetch failed', e);
     }
   },
 
