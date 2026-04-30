@@ -526,9 +526,7 @@ export const BP = {
         return;
     }
 
-    // Update debug bar if it exists
-    const debug = document.getElementById('bee-debug-status');
-    if (debug) debug.innerText = `BEE CORE v2.3 [LOADER ACTIVE: ${BP._loaderCount}]`;
+
 
     loader.classList.add('active');
     document.body.style.overflow = 'hidden'; // Lock scroll
@@ -543,9 +541,7 @@ export const BP = {
     
     BP._loaderCount = Math.max(0, (BP._loaderCount || 1) - 1);
     
-    // Update debug bar
-    const debug = document.getElementById('bee-debug-status');
-    if (debug) debug.innerText = `BEE CORE v2.3 [LOADER IDLE: ${BP._loaderCount}]`;
+
 
     if (BP._loaderCount === 0) {
       setTimeout(() => {
@@ -649,12 +645,7 @@ export const BP = {
 
 // AUTO-INIT TASKS
 const initCore = () => {
-    // VISUAL DEBUGGER FOR MOBILE
-    const debug = document.createElement('div');
-    debug.id = 'bee-debug-status';
-    debug.style = 'position:fixed; top:0; left:0; width:100%; background:rgba(0,0,0,0.8); color:#FFD700; font-size:9px; padding:2px 10px; z-index:1000000; font-family:monospace; pointer-events:none; border-bottom:1px solid #FFD700;';
-    debug.innerText = 'BEE CORE v2.3 [READY]';
-    if (document.body) document.body.appendChild(debug);
+
     
     BP.initLoader();
     BP.initMaintenanceCheck();
