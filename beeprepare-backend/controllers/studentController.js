@@ -648,16 +648,22 @@ const generateTest = async (req, res) => {
       'Very Short': { key: 'Very Short', questions: [] },
       Short: { key: 'Short', questions: [] },
       Long: { key: 'Long', questions: [] },
-      Essay: { key: 'Essay', questions: [] }
+      Essay: { key: 'Essay', questions: [] },
+      'True or False': { key: 'True or False', questions: [] },
+      'Fill in the Blanks': { key: 'Fill in the Blanks', questions: [] },
+      'Simple Matching': { key: 'Simple Matching', questions: [] },
+      'Matrix Matching': { key: 'Matrix Matching', questions: [] },
+      'Reading Passage': { key: 'Reading Passage', questions: [] },
+      'Case Study': { key: 'Case Study', questions: [] },
+      'Data Interpretation': { key: 'Data Interpretation', questions: [] }
     };
 
     const normalizeType = (t) => {
-      const type = (t || '').toLowerCase();
-      if (type.includes('mcq') || type.includes('multiple choice')) return 'MCQ';
-      if (type.includes('very short')) return 'Very Short';
-      if (type.includes('short')) return 'Short';
-      if (type.includes('long')) return 'Long';
-      if (type.includes('essay')) return 'Essay';
+      const type = (t || '').trim();
+      if (pools[type]) return type;
+      // Fallbacks
+      if (type.toLowerCase().includes('mcq')) return 'MCQ';
+      if (type.toLowerCase().includes('very short')) return 'Very Short';
       return 'Short'; // Default
     };
 
@@ -772,7 +778,7 @@ const generateTest = async (req, res) => {
 
       paperHtml += `
       <div style="text-align: center; font-weight: bold; text-transform: uppercase; padding: 5px; background: #f2f2f2; border: 1px solid #ccc; margin: 20px 0 10px 0; font-family: sans-serif; font-size: 14px;">
-        SECTION - ${section.label} (${section.type})
+        SECTION ${section.label} — ${section.type}
       </div>
       <div style="text-align: right; font-style: italic; font-size: 12px; margin-bottom: 10px;">
         (${section.count} Questions × ${section.marksEach} Mark${section.marksEach > 1 ? 's' : ''} Each)
@@ -798,6 +804,52 @@ const generateTest = async (req, res) => {
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(C)</span> <span>${q.mcqOptions.C || ''}</span></div>
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(D)</span> <span>${q.mcqOptions.D || ''}</span></div>
           </div>`;
+        }
+
+        if (q.questionType === 'True or False') {
+          paperHtml += `<span style="float: right; margin-right: 15px; border-bottom: 1px dotted #999;">......................................... [ True / False ]</span>`;
+        }
+
+        if (q.questionType === 'Simple Matching' && q.pairs) {
+          paperHtml += `
+          <div style="margin: 1.5em 0 0 2.5em; display: flex; gap: 50px;">
+            <div style="flex: 1;">
+              ${q.pairs.map((p, i) => `<div style="margin-bottom: 8px;">${i+1}. ${p.left || ''}</div>`).join('')}
+            </div>
+            <div style="width: 50px; display: flex; flex-direction: column; gap: 8px;">
+              ${q.pairs.map(() => `<div>[ &nbsp; &nbsp; ]</div>`).join('')}
+            </div>
+            <div style="flex: 1;">
+              ${q.pairs.map((p, i) => `<div style="margin-bottom: 8px;">${String.fromCharCode(65+i)}. ${p.right || ''}</div>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        if (q.questionType === 'Matrix Matching' && q.rows && q.columns) {
+          paperHtml += `
+          <div style="margin: 1.5em 0 0 2.5em; display: flex; gap: 50px;">
+            <div style="flex: 1;">
+              ${q.rows.map((r, i) => `<div style="margin-bottom: 8px;">${i+1}. ${r}</div>`).join('')}
+            </div>
+            <div style="width: 50px; display: flex; flex-direction: column; gap: 8px;">
+              ${q.rows.map(() => `<div>[ &nbsp; &nbsp; ]</div>`).join('')}
+            </div>
+            <div style="flex: 1;">
+              ${q.columns.map((c, i) => `<div style="margin-bottom: 8px;">${String.fromCharCode(65+i)}. ${c}</div>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        if (['Reading Passage', 'Case Study', 'Data Interpretation'].includes(q.questionType) && q.subQuestions) {
+          paperHtml += `<div style="margin: 1em 0 0 2.5em;">`;
+          q.subQuestions.forEach((sq, idx) => {
+             paperHtml += `
+             <div style="margin-bottom: 0.8em; display: flex; justify-content: space-between;">
+               <div><strong>(${idx + 1})</strong> ${sq.questionText}</div>
+               <div>[${sq.marks || 1}]</div>
+             </div>`;
+          });
+          paperHtml += `</div>`;
         }
 
         paperHtml += `

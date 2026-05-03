@@ -351,6 +351,10 @@
                         <!-- Blueprint cards injected by JS -->
                     </div>
 
+                    <button class="cnt-btn" style="width: 100%; margin-top: 15px; border: 1px dashed var(--border); background: rgba(255,215,0,0.03); padding: 15px; border-radius: 12px; font-size: 13px; font-weight: 800;" onclick="window.addSection()">
+                        + Add Another Practice Category
+                    </button>
+
                     <button class="primary-action-btn" onclick="startGeneration()">
                         Generate Practice Paper →
                     </button>
@@ -413,10 +417,20 @@
         let blueprint = [
             { id: 'mcq', type: 'MCQ', marks: 1, count: 5 },
             { id: 'veryShort', type: 'Very Short', marks: 1, count: 4 },
-            { id: 'short', type: 'Short', marks: 2, count: 3 },
-            { id: 'long', type: 'Long', marks: 4, count: 2 },
-            { id: 'essay', type: 'Essay', marks: 8, count: 1 }
+            { id: 'short', type: 'Short', marks: 2, count: 3 }
         ];
+
+        window.addSection = () => {
+            blueprint.push({ id: 'custom-' + Date.now(), type: 'Short', marks: 2, count: 3 });
+            window.renderBlueprint();
+        };
+
+        window.removeSection = (idx) => {
+            if (blueprint.length > 1) {
+                blueprint.splice(idx, 1);
+                window.renderBlueprint();
+            }
+        };
 
         let availableChapters = [];
         let selectedChapters = [];
@@ -510,9 +524,12 @@
                         <button class="cnt-btn" onclick="window.updateQty(${idx}, 1)">+</button>
                     </div>
 
-                    <div class="section-header">
-                        <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Category ${idx + 1}</div>
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Question Configuration</div>
+                    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Category ${idx + 1}</div>
+                            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Question Configuration</div>
+                        </div>
+                        <button class="cnt-btn" style="color: #ff4d4d; font-size: 20px;" onclick="window.removeSection(${idx})">×</button>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -523,7 +540,13 @@
                                 <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
                                 <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
                                 <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
-                                <option value="Essay" ${sec.type === 'Essay' ? 'selected' : ''}>Essay</option>
+                                <option value="True or False" ${sec.type === 'True or False' ? 'selected' : ''}>True or False</option>
+                                <option value="Fill in the Blanks" ${sec.type === 'Fill in the Blanks' ? 'selected' : ''}>Fill in the Blanks</option>
+                                <option value="Simple Matching" ${sec.type === 'Simple Matching' ? 'selected' : ''}>Simple Matching</option>
+                                <option value="Matrix Matching" ${sec.type === 'Matrix Matching' ? 'selected' : ''}>Matrix Matching</option>
+                                <option value="Reading Passage" ${sec.type === 'Reading Passage' ? 'selected' : ''}>Reading Passage</option>
+                                <option value="Case Study" ${sec.type === 'Case Study' ? 'selected' : ''}>Case Study</option>
+                                <option value="Data Interpretation" ${sec.type === 'Data Interpretation' ? 'selected' : ''}>Data Interpretation</option>
                             </select>
                         </div>
                         <div>
