@@ -177,7 +177,7 @@
             <!-- Top Bar for Content -->
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
                 <div style="display: block;">
-                    <h2 class="welcome-title-styled">Welcome back, <span id="teacher-name-header">Professor</span></h2>
+                    <h2 class="welcome-title-styled">Welcome back</h2>
                     <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your digital ecosystem is
                         ready.</p>
                 </div>
@@ -316,12 +316,6 @@
         }
 
         async function loadDashboard(showOverlay = true) {
-            const teacherNameHeader = document.getElementById('teacher-name-header');
-            const cachedName = localStorage.getItem(BP.NAME) || 'Professor';
-
-            // Initial Sync (Optimistic)
-            if(teacherNameHeader) teacherNameHeader.textContent = cachedName.split(' ')[0];
-
             // Show skeletons only on initial load or if overlay is requested
             if (showOverlay) {
                 BP.showSkeleton('subjects-container', 'card', 2);
@@ -347,10 +341,8 @@
 
             const data = response.data;
             
-            // ── Update Identity (Name & Avatar) ───────────
-            const displayName = data.displayName || cachedName;
-            if (teacherNameHeader) teacherNameHeader.textContent = displayName.split(' ')[0];
-            
+            // ── Update Identity (Avatar) ───────────
+            const displayName = data.displayName || localStorage.getItem(BP.NAME) || 'Professor';
             const profileIcon = document.getElementById('profile-icon-btn');
             if (profileIcon) {
                 profileIcon.innerText = displayName[0].toUpperCase();
@@ -364,7 +356,7 @@
             }
 
             // Sync cache if name changed on server
-            if (data.displayName && data.displayName !== cachedName) {
+            if (data.displayName && data.displayName !== localStorage.getItem(BP.NAME)) {
                 localStorage.setItem(BP.NAME, data.displayName);
             }
 

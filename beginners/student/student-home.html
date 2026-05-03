@@ -197,7 +197,7 @@
         <main class="content-wrapper">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
                 <div style="display: block;">
-                    <h2 class="welcome-title-styled">Hello, <span id="student-name-header">Scholar</span></h2>
+                    <h2 class="welcome-title-styled">Welcome back</h2>
                     <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your learning environment is fully synchronized.</p>
                 </div>
                 <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
@@ -353,11 +353,6 @@
                 const logWrapper = document.getElementById('activity-log-wrapper');
                 if(logWrapper) BP.showSkeleton('activity-log-wrapper', 'list', 5);
             }
-
-            // Show name immediately
-            const studentNameHeader = document.getElementById('student-name-header');
-            const studentName = localStorage.getItem(BP.NAME) || 'Scholar';
-            if(studentNameHeader) studentNameHeader.textContent = studentName.split(' ')[0];
 
             // Show loading state
             if (showOverlay) {
