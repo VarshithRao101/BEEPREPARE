@@ -408,9 +408,14 @@ export const BP = {
   initStreakFlame: (canvasId = 'streak-canvas') => {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
+    
+    // Prevent multiple animation loops on the same canvas
+    if (canvas.dataset.streakActive === 'true') return;
+    canvas.dataset.streakActive = 'true';
+
     const ctx = canvas.getContext("2d");
-    ctx.translate(0, 16);
-    ctx.scale(1, -1);
+    // Idempotent transform: Reset to identity, then apply fixed flip
+    ctx.setTransform(1, 0, 0, -1, 0, 16);
     const fps = 8;
     const interval = 1000 / fps;
     let prev = Date.now();

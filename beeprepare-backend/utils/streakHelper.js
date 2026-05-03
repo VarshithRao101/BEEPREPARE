@@ -1,23 +1,57 @@
 const Streak = require('../models/Streak');
 
 /**
- * RULE 1: User activity recorded for TODAY
- * RULE 2: Next day activity -> streak increments (1 -> 2)
- * RULE 3: Miss a day -> streak resets to 0, then start fresh at 1
- * RULE 4: Based on calendar date (00:00:00) NOT 24hr rolling window
+ * Normalizes a date to midnight for calendar-day comparison
+ */
+const normalizeDate = (date) => {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+/**
+ * syncStreak: Checks if the streak has expired and resets it to 0 if necessary.
+ * This should be called whenever streak data is fetched.
+ */
+const syncStreak = async (userId) => {
+  try {
+    const streak = await Streak.findOne({ userId });
+    if (!streak || !streak.lastActiveDate) return streak;
+
+    const today = normalizeDate(new Date());
+    const lastActive = normalizeDate(streak.lastActiveDate);
+    
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // If last active was BEFORE yesterday, and NOT today, reset streak to 0
+    if (lastActive.getTime() < yesterday.getTime() && lastActive.getTime() !== today.getTime()) {
+      if (streak.currentStreak !== 0) {
+        streak.currentStreak = 0;
+        await streak.save();
+      }
+    }
+
+    return streak;
+  } catch (err) {
+    console.error('syncStreak error:', err.message);
+    return null;
+  }
+};
+
+/**
+ * updateStreak: Records activity and increments/starts the streak.
  */
 const updateStreak = async (userId) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    const today = normalizeDate(new Date());
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
 
     let streak = await Streak.findOne({ userId });
 
     if (!streak) {
-      // First time — create fresh streak
+      // First time — create fresh streak starting at 1
       streak = await Streak.create({
         userId,
         currentStreak: 1,
@@ -27,45 +61,41 @@ const updateStreak = async (userId) => {
         weeklyActivity: [false, false, false, false, false, false, false]
       });
       
-      // Update weekly activity (Monday-based indexing: 0=Mon, ... 6=Sun)
       const dayIndex = (today.getDay() + 6) % 7;
       streak.weeklyActivity[dayIndex] = true;
       await streak.save();
       return streak;
     }
 
-    // Parse last active date and normalize to midnight
-    const lastActive = streak.lastActiveDate ? new Date(streak.lastActiveDate) : null;
-    if (lastActive) lastActive.setHours(0, 0, 0, 0);
+    const lastActive = normalizeDate(streak.lastActiveDate);
 
     const todayTime = today.getTime();
-    const lastTime = lastActive ? lastActive.getTime() : 0;
+    const lastTime = lastActive.getTime();
     const yesterdayTime = yesterday.getTime();
 
     if (lastTime === todayTime) {
-      // RULE: Already active today - no change to count
+      // Already active today - just return
       return streak;
     }
 
     if (lastTime === yesterdayTime) {
-      // RULE 2: Consecutive day - increment
+      // Consecutive day - increment
       streak.currentStreak += 1;
-      streak.bestStreak = Math.max(streak.bestStreak, streak.currentStreak);
     } else {
-      // RULE 3: Missed day(s) - reset to 0 then start at 1
+      // Broken streak - start fresh at 1
       streak.currentStreak = 1;
     }
 
+    streak.bestStreak = Math.max(streak.bestStreak, streak.currentStreak);
     streak.totalActiveDays += 1;
     streak.lastActiveDate = today.toISOString();
     
-    // Update weekly activity
     const dayIndex = (today.getDay() + 6) % 7;
     streak.weeklyActivity[dayIndex] = true;
 
-    // Reset weekly activity if it's a new week (Monday)
-    // Actually, usually weeklyActivity is just for the current visual week.
-    // We'll keep it simple for now as the user didn't specify reset logic for this.
+    // Optional: Reset weekly activity if it's Monday? 
+    // Usually we'd want to see the last 7 days or the current week.
+    // For now, let's just save.
 
     await streak.save();
     return streak;
@@ -76,5 +106,8 @@ const updateStreak = async (userId) => {
   }
 };
 
-module.exports = updateStreak;
+module.exports = {
+  updateStreak,
+  syncStreak
+};
 

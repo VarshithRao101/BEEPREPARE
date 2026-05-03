@@ -11,7 +11,7 @@ const TestSession = require('../models/TestSession');
 const Streak = require('../models/Streak');
 const Bookmark = require('../models/Bookmark');
 const ActivityLog = require('../models/ActivityLog');
-const updateStreak = require('../utils/streakHelper');
+const { updateStreak, syncStreak } = require('../utils/streakHelper');
 const Note = require('../models/Note');
 const Quote = require('../models/Quote');
 const { success, error } = require('../utils/responseHelper');
@@ -80,7 +80,7 @@ const getDashboard = async (req, res) => {
     const studentId = req.user.googleUid;
 
     const [streak, testSessions, recentDoubts, activityLogs] = await Promise.all([
-      Streak.findOne({ userId: studentId }).lean(),
+      syncStreak(studentId),
       TestSession.find({ studentId, status: 'completed' }).select('subject scorePercent bankId createdAt').lean(),
       Doubt.find({ studentId }).sort({ createdAt: -1 }).limit(3).lean(),
       ActivityLog.find({ userId: studentId }).sort({ createdAt: -1 }).limit(10).lean()
@@ -167,7 +167,7 @@ const getProfile = async (req, res) => {
     const studentId = req.user.googleUid;
 
     const [streak, testAgg, queryCount] = await Promise.all([
-      Streak.findOne({ userId: studentId }).lean(),
+      syncStreak(studentId),
       TestSession.aggregate([
         { $match: { studentId, status: 'completed' } },
         { $group: { _id: null, count: { $sum: 1 }, avgScore: { $avg: '$scorePercent' } } }
@@ -1289,7 +1289,7 @@ const deleteBookmark = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getStreak = async (req, res) => {
   try {
-    const streak = await Streak.findOne({ userId: req.user.googleUid });
+    const streak = await syncStreak(req.user.googleUid);
 
     return success(res, 'Streak data fetched', {
       currentStreak: streak?.currentStreak || 0,
