@@ -90,6 +90,43 @@ button.primary {
   will-change: transform, box-shadow;
 }
 
+.btn-primary:after,
+.btn-adv:after,
+.btn-finish:after,
+.login-btn:after,
+.unlock-btn:after,
+.update-btn:after,
+.rename-confirm:after,
+button.primary:after {
+  content: "SYNC_PROTOCOL";
+  position: absolute;
+  top: 0;
+  right: -100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--gold);
+  font-size: 8px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  transition: right 0.3s var(--ease-smooth);
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  pointer-events: none;
+}
+
+.btn-primary:hover:after,
+.btn-adv:hover:after,
+.btn-finish:hover:after,
+.login-btn:hover:after,
+.unlock-btn:hover:after,
+.update-btn:hover:after,
+.rename-confirm:hover:after,
+button.primary:hover:after {
+  right: 0;
+}
+
 .btn-primary:hover,
 .btn-adv:hover,
 .btn-finish:hover,
@@ -99,11 +136,12 @@ button.primary {
 .update-btn:hover,
 .rename-confirm:hover,
 button.primary:hover {
-  transform: var(--hover-lift-md) scale(1.015) !important;
+  transform: var(--hover-lift-md) scale(1.02) !important;
   box-shadow:
-    0 12px 32px -4px var(--gold-glow),
-    0 0 0 1px rgba(255, 215, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    0 15px 35px -5px var(--gold-glow),
+    0 0 0 1px rgba(255, 215, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  background: linear-gradient(135deg, var(--gold), #e6c200) !important;
 }
 
 .btn-primary:active,
@@ -185,17 +223,50 @@ button.danger,
   will-change: transform;
 }
 
+/* Technical Purge Overlay */
+.logout-btn:after,
+.btn-logout:after,
+.btn-danger:after,
+[class*="purge"]:after,
+[class*="delete-btn"]:after {
+  content: "DATA_PURGE";
+  position: absolute;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--red-solid);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: bottom 0.25s var(--ease-smooth);
+  letter-spacing: 2px;
+  pointer-events: none;
+}
+
+.logout-btn:hover:after,
+.btn-logout:hover:after,
+.btn-danger:hover:after,
+[class*="purge"]:hover:after,
+[class*="delete-btn"]:hover:after {
+  bottom: 0;
+}
+
 .logout-btn:hover,
 .btn-logout:hover,
 .btn-danger:hover,
-button.danger:hover {
-  transform: var(--hover-lift-sm) scale(1.015) !important;
-  background: rgba(255, 60, 60, 0.14) !important;
+button.danger:hover,
+[class*="purge"]:hover {
+  transform: var(--hover-lift-sm) scale(1.03) !important;
+  background: rgba(255, 60, 60, 0.2) !important;
   border-color: var(--red-solid) !important;
   box-shadow:
-    0 8px 24px var(--red-glow),
-    0 0 0 1px rgba(255, 60, 60, 0.35) !important;
-  color: #ff6b6b !important;
+    0 12px 28px var(--red-glow),
+    0 0 0 1px rgba(255, 60, 60, 0.5) !important;
+  color: #fff !important;
 }
 
 .logout-btn:active,
@@ -225,9 +296,31 @@ input[type="submit"],
     box-shadow      var(--dur-base) var(--ease-smooth) !important;
 }
 
+.confirm-btn:before,
+.btn-confirm:before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translateY(-50%) scale(0);
+  transition: transform 0.3s var(--ease-spring);
+  box-shadow: 0 0 10px #fff;
+}
+
+.confirm-btn:hover:before,
+.btn-confirm:hover:before {
+  transform: translateY(-50%) scale(1);
+}
+
 .confirm-btn:hover,
 .btn-confirm:hover,
 .rename-confirm:hover {
+  padding-left: 28px !important;
+  transition: all 0.3s var(--ease-smooth) !important;
   animation: confirmPulse 600ms var(--ease-smooth) both !important;
 }
 
@@ -254,9 +347,26 @@ input[type="submit"],
   border-color: var(--gold) !important;
   background: rgba(255, 215, 0, 0.04) !important;
   box-shadow:
-    0 24px 48px -12px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(255, 215, 0, 0.22),
-    0 0 30px rgba(255, 215, 0, 0.07) !important;
+    0 24px 48px -12px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 215, 0, 0.3),
+    0 0 40px rgba(255, 215, 0, 0.1) !important;
+}
+
+.feature-card:after {
+  content: "CORE_ACCESS";
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 7px;
+  font-weight: 900;
+  color: var(--gold);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-smooth);
+  letter-spacing: 2px;
+}
+
+.feature-card:hover:after {
+  opacity: 0.6;
 }
 
 .feature-card:hover .feature-icon {
@@ -462,11 +572,29 @@ tbody tr:hover {
 }
 
 .sidebar-link:hover:not(.active) {
-  background: rgba(255, 215, 0, 0.07) !important;
+  background: rgba(255, 215, 0, 0.08) !important;
   color: #fff !important;
-  border-color: rgba(255, 215, 0, 0.18) !important;
-  padding-left: 26px !important;
-  box-shadow: inset 3px 0 0 var(--gold) !important;
+  border-color: rgba(255, 215, 0, 0.25) !important;
+  padding-left: 28px !important;
+  box-shadow: 
+    inset 4px 0 0 var(--gold),
+    0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.sidebar-link:after {
+  content: "»";
+  position: absolute;
+  right: 20px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s var(--ease-spring);
+  color: var(--gold);
+  font-weight: 900;
+}
+
+.sidebar-link:hover:after {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .sidebar-link:hover svg {
@@ -665,6 +793,11 @@ textarea:focus {
   50%       { box-shadow: 0 0 0 6px rgba(255, 60, 60, 0.18); }
 }
 
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
 .btn-purge,
 [onclick*="purge"],
 [onclick*="delete"],
@@ -687,6 +820,28 @@ textarea:focus {
   border-color: var(--red-solid) !important;
   box-shadow: 0 8px 20px var(--red-glow) !important;
   animation: dangerPulse 1.2s ease-in-out infinite !important;
+}
+
+.logout-btn:before,
+.btn-purge:before,
+[class*="purge"]:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.4);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.logout-btn:hover:before,
+.btn-purge:hover:before,
+[class*="purge"]:hover:before {
+  opacity: 1;
+  animation: scanline 1.5s linear infinite;
 }
 
 /* ─── 21. ACCESSIBILITY: RESPECT MOTION PREFERENCE ─────────── */
