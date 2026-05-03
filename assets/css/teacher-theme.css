@@ -683,3 +683,18 @@ header {
 .swal2-container {
     z-index: 10000 !important;
 }
+
+/* FIX: SweetAlert Sticky Hovers on Mobile Touch */
+.swal2-styled:focus {
+    box-shadow: none !important;
+}
+
+@media (hover: none) {
+    .swal2-styled:hover, 
+    .swal2-styled:focus, 
+    .swal2-styled:active {
+        background-image: none !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+}
