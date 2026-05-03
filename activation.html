@@ -282,6 +282,97 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Modal & T&C Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 650px;
+            max-height: 85vh;
+            background: rgba(15, 15, 15, 0.95);
+            border: 2px solid var(--primary);
+            border-radius: 30px;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.15);
+        }
+
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            position: sticky;
+            top: 0;
+            background: rgba(15, 15, 15, 0.98);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary);
+            font-size: 24px;
+            font-weight: 900;
+        }
+
+        .modal-body {
+            padding: 30px;
+            color: #ddd;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .modal-body h3 {
+            color: var(--primary);
+            margin-top: 25px;
+            font-size: 18px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 32px;
+            cursor: pointer;
+            line-height: 1;
+            opacity: 0.7;
+            transition: 0.3s;
+        }
+
+        .close-modal:hover { opacity: 1; transform: scale(1.1); }
+
+        .highlight { color: var(--primary); font-weight: 700; }
+        .warning-text { 
+            background: rgba(255, 68, 68, 0.1); 
+            border-left: 4px solid #ff4444; 
+            padding: 15px; 
+            margin: 20px 0;
+            color: #ff8888 !important;
+            font-weight: 600;
+        }
+
+        /* Custom Checkbox Animation */
+        #termsCheckbox:checked {
+            animation: pop 0.3s ease;
+        }
+
+        @keyframes pop {
+            50% { transform: scale(1.4); }
+        }
+
+        .modal-body b { color: var(--primary); }
+
         @media (max-width: 480px) {
             .activation-card {
                 padding: 40px 20px;
@@ -335,18 +426,19 @@
                     <input type="text" class="key-input key-segment" maxlength="4" placeholder="••••">
                 </div>
 
-                <div style="margin-bottom: 30px; text-align: left; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 20px; border: 1px solid rgba(255,255,255,0.05);">
-                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                        <span style="background: var(--primary); color: #000; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0;">1</span>
-                        <p style="margin: 0; font-size: 12px; color: #fff; line-height: 1.4;">Enter your 12-digit alphanumeric key precisely.</p>
-                    </div>
-                    <div style="display: flex; gap: 15px;">
-                        <span style="background: var(--primary); color: #000; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; flex-shrink: 0;">2</span>
-                        <p style="margin: 0; font-size: 12px; color: #fff; line-height: 1.4;">Verification takes <b style="color: var(--primary);">2-5 seconds</b>. Once synced, your dashboard will unlock.</p>
-                    </div>
+                <!-- T&C and Privacy Checkbox -->
+                <div style="margin: 25px 0; text-align: left; display: flex; align-items: flex-start; gap: 12px; padding: 0 5px;">
+                    <input type="checkbox" id="termsCheckbox" style="margin-top: 4px; cursor: pointer; accent-color: var(--primary); width: 18px; height: 18px;">
+                    <label for="termsCheckbox" style="font-size: 12px; color: var(--text-muted); line-height: 1.5; cursor: pointer;">
+                        I have read and agree to the 
+                        <a href="#" onclick="openModal('tcModal')" style="color: var(--primary); text-decoration: none; font-weight: 700;">Terms & Conditions</a> 
+                        and 
+                        <a href="#" onclick="openModal('ppModal')" style="color: var(--primary); text-decoration: none; font-weight: 700;">Privacy Policy</a>. 
+                        I understand that all payments are final and non-refundable.
+                    </label>
                 </div>
 
-                <button id="activateBtn" class="action-button activate-btn" onclick="activateKey()">
+                <button id="activateBtn" class="action-button activate-btn" onclick="activateKey()" disabled style="opacity: 0.5; cursor: not-allowed;">
                     Authenticate Terminal
                 </button>
 
@@ -355,6 +447,84 @@
                     <a href="beginners/payment-status.html" style="color: rgba(255,215,0,0.5); text-decoration: none; font-size: 11px; font-weight: 600; text-transform: uppercase;">Check Purchase Status</a>
                     <a href="#" onclick="signOutUser()" style="color: #ff4444; text-decoration: none; font-size: 10px; font-weight: 800; margin-top: 10px; opacity: 0.6; letter-spacing: 1px;">✕ TERMINATE SESSION</a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMS & CONDITIONS MODAL -->
+    <div id="tcModal" class="modal-overlay">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2>Terms & Conditions</h2>
+                <button onclick="closeModal('tcModal')" class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="highlight">Last Updated: May 2026</p>
+                <p>Welcome to BEEPREPARE. By accessing or using our services, you agree to be bound by these Terms and Conditions. Please read them carefully before proceeding with your activation.</p>
+                
+                <h3>1. User Identity & Authentication</h3>
+                <p>BEEPREPARE utilizes Google Authentication and a proprietary 12-digit license key system to verify user identities. You are solely responsible for maintaining the confidentiality of your account credentials and license key. Any activity performed under your account is your legal responsibility. You agree to notify BEEPREPARE immediately of any unauthorized use of your account.</p>
+
+                <h3>2. Usage Protocols & Restrictions</h3>
+                <p>Users are granted a limited, non-exclusive, non-transferable license to access the BEEPREPARE platform for educational purposes. You strictly agree NOT to: (a) Attempt to reverse engineer, decompile, or extract the source code of the application; (b) Use automated systems or "bots" to scrape data; (c) Share your license key with other individuals; or (d) Attempt to bypass security protocols including the "Fortress" layer.</p>
+
+                <h3>3. PAYMENT & REFUND POLICY (CRITICAL)</h3>
+                <p class="warning-text">ALL PAYMENTS MADE TO BEEPREPARE ARE FINAL AND PERMANENTLY NON-REFUNDABLE. This includes but is not limited to the Standard Activation fee (100 INR) and the Premium Access Tier (250 INR).</p>
+                <p>By proceeding with activation, you explicitly acknowledge and agree that:</p>
+                <ul>
+                    <li>Under no circumstances will a refund be issued once a license key has been generated or delivered.</li>
+                    <li>Technical malfunctions, temporary server downtime, or software "crashes" do NOT entitle the user to a refund of their 100 INR or 250 INR payment.</li>
+                    <li>The digital nature of our assets (Practice Papers, Question Banks, and Analytics) means that once access is granted, the value is considered fully delivered.</li>
+                    <li>If the application becomes inaccessible due to user-side device incompatibility or network failure, BEEPREPARE holds no liability for refunds.</li>
+                </ul>
+
+                <h3>4. Limitation of Liability</h3>
+                <p>BEEPREPARE is provided "AS IS" and "AS AVAILABLE" without warranties of any kind. In no event shall BEEPREPARE, its developers, or affiliates be liable for any direct, indirect, incidental, or consequential damages resulting from the use or inability to use the service. This includes data loss, academic performance issues, or financial loss related to the non-refundable fees mentioned in Section 3.</p>
+
+                <h3>5. Termination of Access</h3>
+                <p>We reserve the right to terminate or suspend your access to the platform immediately, without prior notice or liability, for any reason whatsoever, including without limitation if you breach the Terms. Upon termination, your right to use the Service will immediately cease, and no refunds for remaining subscription time or activation fees will be provided.</p>
+
+                <p style="margin-top: 30px; font-weight: 800; color: var(--primary);">By clicking "Authenticate Terminal", you confirm your absolute agreement to these terms.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIVACY POLICY MODAL -->
+    <div id="ppModal" class="modal-overlay">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h2>Privacy Policy</h2>
+                <button onclick="closeModal('ppModal')" class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="highlight">Protocol v2.2 - Data Privacy Standards</p>
+                <p>Your privacy is of paramount importance to the BEEPREPARE network. This policy outlines how we collect, process, and safeguard your data within our synchronized ecosystem.</p>
+
+                <h3>1. Data We Collect</h3>
+                <p>To provide a personalized learning experience, we collect the following data points:</p>
+                <ul>
+                    <li><b>Identity Data:</b> Your Google Display Name, Email Address, and Profile Photo (fetched via Google Auth).</li>
+                    <li><b>Activity Data:</b> Every interaction with the platform, including practice paper downloads, test session durations, and question attempt history.</li>
+                    <li><b>Streak & Progress:</b> Real-time tracking of your daily activity to maintain your study streaks and provide motivational feedback.</li>
+                    <li><b>Technical Logs:</b> Device IP addresses, browser types, and error logs are recorded to maintain system security and prevent unauthorized access.</li>
+                </ul>
+
+                <h3>2. How We Use Your Data</h3>
+                <p>The primary purpose of data collection is the optimization of your educational journey. We use your data to: (a) Generate detailed performance analytics; (b) Synchronize your progress across multiple devices; (c) Enforce security rules through our backend controllers; and (d) Provide personalized study recommendations based on your weak areas identified in test sessions.</p>
+
+                <h3>3. Data Security & Storage</h3>
+                <p>Your data is stored in encrypted MongoDB and Firebase clusters. We implement industry-standard security protocols to protect against unauthorized access. Our "Fortress" layer monitors all incoming requests to ensure that only authenticated and authorized users can access sensitive database nodes.</p>
+
+                <h3>4. Third-Party Integration</h3>
+                <p>BEEPREPARE utilizes external services for specific functions: Firebase (Authentication), Vercel (Hosting & Performance Insights), and Cloudinary (Image Storage for Doubts). These services have their own privacy policies, and your data is shared with them only to the extent necessary to provide the service.</p>
+
+                <h3>5. Retention Policy</h3>
+                <p>We retain your data as long as your account is active. You have the right to request a "Data Wipe" through your profile settings, which will permanently sanitize all your records from our primary database nodes, including test history and bookmarks. Note that payment transaction logs are retained for legal and accounting purposes.</p>
+
+                <h3>6. Consent & Updates</h3>
+                <p>By using BEEPREPARE, you consent to our data collection and processing as described in this policy. We may update this policy periodically. Continued use of the platform after updates constitutes acceptance of the revised privacy protocol.</p>
+                
+                <p style="margin-top: 30px; border-top: 1px solid rgba(255,215,0,0.2); padding-top: 20px; font-size: 11px; color: var(--text-muted);">© 2026 BEEPREPARE. All Rights Reserved. Data processed in compliance with international educational privacy standards.</p>
             </div>
         </div>
     </div>
@@ -411,6 +581,33 @@
                 const lastIdx = Math.min(Math.floor(cleanPaste.length / 4), userBoxes.length - 1);
                 userBoxes[lastIdx].focus();
             });
+        });
+
+        // MODAL LOGIC
+        window.openModal = (id) => {
+            const modal = document.getElementById(id);
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeModal = (id) => {
+            const modal = document.getElementById(id);
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        // TERMS CHECKBOX LOGIC
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        termsCheckbox.addEventListener('change', () => {
+            if (termsCheckbox.checked) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            }
         });
 
         let isChecking = false;
