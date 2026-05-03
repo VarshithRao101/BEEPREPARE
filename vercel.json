@@ -1,6 +1,12 @@
 {
   "version": 2,
   "name": "beeprepare",
+  "crons": [
+    {
+      "path": "/health",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "builds": [
     {
       "src": "beeprepare-backend/server.js",

@@ -11,6 +11,9 @@ const feedbackSchema = new Schema({
   status:        { type: String, enum: ['pending_review','reviewed'], default: 'pending_review' }
 }, { timestamps: true });
 
+feedbackSchema.index({ userId: 1 });
+feedbackSchema.index({ createdAt: -1 });
+
 let _Feedback = null;
 module.exports = new Proxy(function() {}, {
   get(_, prop) {

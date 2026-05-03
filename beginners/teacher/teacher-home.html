@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -316,8 +316,6 @@
         }
 
         async function loadDashboard() {
-            if (!(await guardTeacher())) return;
-
             const teacherNameHeader = document.getElementById('teacher-name-header');
             const teacherName = localStorage.getItem(BP.NAME) || 'Professor';
             if(teacherNameHeader) teacherNameHeader.textContent = teacherName.split(' ')[0];
@@ -341,7 +339,12 @@
                 }
             }
 
-            const response = await apiCall('/teacher/dashboard');
+            const [guardRes, response] = await Promise.all([
+                guardTeacher(),
+                apiCall('/teacher/dashboard').catch(()=>null)
+            ]);
+            
+            if (!guardRes) return;
             if (!response || !response.success) {
                 const container = document.getElementById('subjects-container');
                 if (container) {

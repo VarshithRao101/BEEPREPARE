@@ -88,6 +88,19 @@ export function getIndexPath() {
   return new URL('../../index.html', import.meta.url).href;
 }
 
+const CACHE_PREFIX = 'bp_cache_';
+const CACHE_TTL = {
+  '/auth/verify-session': 2 * 60 * 1000, // 2 mins (fixes guardTeacher page-load waterfall)
+  '/teacher/dashboard': 30 * 1000,       // 30 seconds
+  '/student/dashboard': 30 * 1000,       // 30 seconds
+  '/student/banks': 30 * 1000,           // 30 seconds
+  '/student/profile': 60 * 1000,         // 1 minute
+  '/circles': 30 * 1000,                 // 30 seconds
+  '/announcements/active': 5 * 60 * 1000, // 5 minutes
+  '/quotes': 10 * 60 * 1000,             // 10 minutes
+  '/system/maintenance': 30 * 1000,      // 30 seconds
+};
+
 // Standard API caller
 let firestoreCallCount = 0;
 const CALL_HISTORY = [];
@@ -102,6 +115,23 @@ export async function apiCall(
   isRetry = false, // Track retry attempts (Step 8 Seal)
   showOverlay = true // PREMIUM LOADER (Step 10)
 ) {
+  if (method === 'GET') {
+    const ttl = CACHE_TTL[endpoint] || 0;
+    if (ttl > 0) {
+      try {
+        const cachedStr = sessionStorage.getItem(CACHE_PREFIX + endpoint);
+        if (cachedStr) {
+          const cached = JSON.parse(cachedStr);
+          if (Date.now() - cached.at < ttl) {
+            return cached.data; // Return instantly from cross-page cache
+          }
+        }
+      } catch (e) {
+        console.warn('Cache parse error', e);
+      }
+    }
+  }
+
   if (showOverlay) BP.showLoader();
   // GLOBAL SAFETY (Step 1): Rate limiting in frontend
   const now = Date.now();
@@ -213,6 +243,21 @@ export async function apiCall(
     }
 
     if (showOverlay) BP.hideLoader();
+    
+    if (method === 'GET' && data?.success) {
+      const ttl = CACHE_TTL[endpoint] || 0;
+      if (ttl > 0) {
+        try {
+          sessionStorage.setItem(CACHE_PREFIX + endpoint, JSON.stringify({ data, at: Date.now() }));
+        } catch(e) {}
+      }
+    } else if (method !== 'GET' && data?.success) {
+      // Invalidate relevant caches automatically on mutations (POST/PUT/DELETE)
+      sessionStorage.removeItem(CACHE_PREFIX + '/teacher/dashboard');
+      sessionStorage.removeItem(CACHE_PREFIX + '/student/dashboard');
+      sessionStorage.removeItem(CACHE_PREFIX + '/student/banks');
+    }
+    
     return data;
   } catch (err) {
     if (showOverlay) BP.hideLoader();
@@ -681,7 +726,8 @@ export const BP = {
 
 // AUTO-INIT TASKS
 const initCore = () => {
-
+    // Silent warm-up ping — fires immediately, result ignored
+    fetch(API_BASE.replace('/api', '') + '/health', { method: 'GET' }).catch(() => {});
     
     BP.initLoader();
     BP.initMaintenanceCheck();

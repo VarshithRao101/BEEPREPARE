@@ -24,5 +24,6 @@ const blacklistSchema = new mongoose.Schema({
 
 // Auto-expire non-permanent bans after 24 hours
 blacklistSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 86400, partialFilterExpression: { isPermanentlyBanned: false } });
+blacklistSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model('Blacklist', blacklistSchema);

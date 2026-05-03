@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -422,16 +422,20 @@
         let selectedChapters = [];
 
         async function loadBanks() {
-            // Load streak
-            apiCall('/student/streak').then(res => {
-                if (res && res.success) {
-                    const streakVal = document.getElementById('streak-val-header');
-                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
-                    BP.initStreakFlame('streak-canvas');
-                }
-            });
+            const [guardRes, streakRes, result] = await Promise.all([
+                guardStudent(),
+                apiCall('/student/streak').catch(() => null),
+                apiCall('/student/banks').catch(() => null)
+            ]);
+            
+            if (!guardRes) return;
 
-            const result = await apiCall('/student/banks');
+            if (streakRes && streakRes.success) {
+                const streakVal = document.getElementById('streak-val-header');
+                if (streakVal) streakVal.textContent = streakRes.data.currentStreak || 0;
+                BP.initStreakFlame('streak-canvas');
+            }
+
             const bankSelect = document.getElementById('bank-select');
             bankSelect.innerHTML = '<option value="">Select a Bank</option>';
 
@@ -597,7 +601,6 @@
         };
 
         window.addEventListener('load', async () => {
-            if (!(await guardStudent())) return;
             loadBanks();
             window.renderBlueprint();
         });

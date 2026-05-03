@@ -46,7 +46,11 @@ const userSchema = new Schema({
   blockedReason: { type: String, default: null }
 }, { timestamps: true });
 
+userSchema.index({ googleUid: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ isActivated: 1 });
 userSchema.index({ role: 1 });
+userSchema.index({ createdAt: -1 });
 
 let _User = null;
 module.exports = new Proxy(function() {}, {

@@ -11,6 +11,8 @@ const adminSessionSchema = new Schema({
 }, { timestamps: true });
 
 adminSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+adminSessionSchema.index({ token: 1 });
+adminSessionSchema.index({ adminId: 1 });
 
 let _AdminSession = null;
 module.exports = new Proxy(function() {}, {

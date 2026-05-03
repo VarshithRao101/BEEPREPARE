@@ -80,6 +80,8 @@ studyCircleSchema.index(
   { circleCode: 1 }, { unique: true });
 studyCircleSchema.index(
   { 'members.userId': 1 });
+studyCircleSchema.index({ createdBy: 1 });
+studyCircleSchema.index({ createdAt: -1 });
 
 let _StudyCircle = null;
 const modelProxy = new Proxy(function() {}, {

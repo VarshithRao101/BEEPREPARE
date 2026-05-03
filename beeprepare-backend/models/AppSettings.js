@@ -8,6 +8,8 @@ const appSettingsSchema = new Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+appSettingsSchema.index({ key: 1 }, { unique: true });
+
 let _AppSettings = null;
 
 const getAppSettings = () => {

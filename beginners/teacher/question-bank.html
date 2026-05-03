@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -277,11 +277,6 @@
     <script type="module">
         import { apiCall, guardTeacher, BP } from '../../assets/js/bee-core.js';
 
-        // Guard Access
-        if (!(await guardTeacher())) {
-            throw new Error('Unauthorized');
-        }
-
         // Init Profile & Signals
         const name = localStorage.getItem(BP.NAME) || 'T';
         const profileIcon = document.querySelector('.profile-icon');
@@ -303,13 +298,16 @@
         let selectedClass = '';
 
         async function loadBanks() {
-            if (!(await guardTeacher())) return;
-
             const profileIcon = document.querySelector('.profile-icon');
             const name = localStorage.getItem(BP.NAME) || 'T';
             if (profileIcon) profileIcon.textContent = name[0].toUpperCase();
 
-            const res = await apiCall('/teacher/dashboard');
+            const [guardRes, res] = await Promise.all([
+                guardTeacher(),
+                apiCall('/teacher/dashboard').catch(()=>null)
+            ]);
+            
+            if (!guardRes) return;
             if (!res || !res.success) return;
 
 

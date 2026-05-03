@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -614,13 +614,30 @@
                 const cachedId = localStorage.getItem('bp_bee_id_teacher');
                 if (cachedId) document.getElementById('myBeeId').textContent = cachedId;
 
-                const profile = await apiCall('/teacher/profile');
-                if (profile.success) {
+                const [profile, circlesRes] = await Promise.allSettled([
+                    apiCall('/teacher/profile'),
+                    apiCall('/circles/my')
+                ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : null));
+
+                if (profile && profile.success) {
                     document.getElementById('myBeeId').textContent = profile.data.beeId || 'BEE-NODE-ERROR';
                     localStorage.setItem('bp_bee_id_teacher', profile.data.beeId);
                 }
 
-                await refreshCircles();
+                if (circlesRes && circlesRes.success) {
+                    myCircles = circlesRes.data;
+                    renderSidebar();
+                } else {
+                    const list = document.getElementById('circleList');
+                    list.innerHTML = `
+                        <div style="text-align:center; padding:60px 20px;">
+                            <div style="font-size:32px; margin-bottom:10px;">📡</div>
+                            <div style="font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#ff4444;">Signal Interruption</div>
+                            <p style="font-size:11px; color:#666; margin-top:10px;">We couldn't connect to the circle hub.</p>
+                            <button class="btn-action btn-gold" style="margin-top:15px; padding:8px 15px; font-size:9px;" onclick="location.reload()">Retry Connection</button>
+                        </div>
+                    `;
+                }
                 
                 if(window.innerWidth < 850 && !activeId) {
                     document.getElementById('mainSidebar').classList.remove('hidden');

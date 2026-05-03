@@ -20,7 +20,7 @@ const getHash = (str) => {
 // 1. GET /api/quotes/all
 const getAllQuotes = async (req, res) => {
     try {
-        const quotes = await Quote.find({});
+        const quotes = await Quote.find({}).lean();
         return success(res, 'All quotes fetched', quotes);
     } catch (err) {
         console.error('getAllQuotes error:', err);
@@ -31,7 +31,7 @@ const getAllQuotes = async (req, res) => {
 // 2. GET /api/quotes/today
 const getTodayQuote = async (req, res) => {
     try {
-        const quotes = await Quote.find({});
+        const quotes = await Quote.find({}).lean();
         if (!quotes || quotes.length === 0) {
             return success(res, 'No quotes found', {
                 text: "Keep the BEE matrix aligned with your goals.",

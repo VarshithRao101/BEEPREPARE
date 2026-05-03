@@ -34,7 +34,7 @@ const verifyKey = async (req, res) => {
     if (!key) {
       // Check why it failed
       const exists = await LicenseKey
-        .findOne({ key: keyTrimmed });
+        .findOne({ key: keyTrimmed }).select('_id usedBy').lean();
 
       if (!exists) {
         return error(res,

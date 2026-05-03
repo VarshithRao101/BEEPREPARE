@@ -32,14 +32,14 @@ const submitPayment = async (req, res) => {
     }
 
     // Check UTR not already used
-    const existing = await PaymentRequest.findOne({ utrNumber });
+    const existing = await PaymentRequest.findOne({ utrNumber }).select('_id').lean();
     if (existing) {
       return error(res, 'This UTR has already been submitted', 'UTR_EXISTS', 409);
     }
 
     // Get amount from AppSettings
     const settingKey = paymentType === 'activation' ? 'activation_price' : 'extra_slot_price';
-    const setting = await AppSettings.findOne({ key: settingKey });
+    const setting = await AppSettings.findOne({ key: settingKey }).lean();
     const amount = setting ? setting.value : (paymentType === 'activation' ? 250 : 100);
 
     // Create PaymentRequest
@@ -116,7 +116,7 @@ const resendApprovalEmail = async (req, res) => {
     const payment = await PaymentRequest.findOne({
       utrNumber,
       status: 'approved'
-    });
+    }).lean();
 
     if (!payment) {
       return error(res,

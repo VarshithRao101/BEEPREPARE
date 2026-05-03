@@ -43,7 +43,7 @@ const redeemCode = async (req, res) => {
         .findOne({
           key: codeTrimmed,
           type: 'redeem'
-        });
+        }).select('_id usedBy').lean();
 
       if (!exists) {
         return error(res,
@@ -71,7 +71,7 @@ const redeemCode = async (req, res) => {
     const updated = await User.findOne(
       { googleUid },
       'subjectLimit'
-    );
+    ).lean();
 
     return success(res,
       '+1 subject slot unlocked! 🎉', {

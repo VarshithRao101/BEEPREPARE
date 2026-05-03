@@ -31,6 +31,7 @@ licenseKeySchema.index(
 licenseKeySchema.index({ isUsed: 1 });
 licenseKeySchema.index({ type: 1 });
 licenseKeySchema.index({ type: 1, isUsed: 1 });
+licenseKeySchema.index({ usedBy: 1 });
 
 let _LicenseKey = null;
 const modelProxy = new Proxy(function() {}, {

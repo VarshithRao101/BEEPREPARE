@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -298,27 +298,25 @@
 
         document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleLogin);
 
-        // Auto redirect only if Firebase auth confirms we have a user
+        // Auto redirect instantly based on local cache. The destination page's guard will verify it.
         async function handleAutoRedirect() {
-          const auth = getAuth();
-          
-          // Wait for auth to initialize
-          await new Promise(resolve => {
-            const unsubscribe = onAuthStateChanged(auth, (user) => {
-              unsubscribe();
-              resolve(user);
-            });
-            setTimeout(resolve, 1500); // 1.5s max wait for auth
-          });
-
-          const user = auth.currentUser;
           const role = localStorage.getItem(BP.ROLE);
           const activated = localStorage.getItem(BP.ACTIVATED);
+          const hasToken = !!localStorage.getItem(BP.TOKEN);
 
-          if (user && activated === 'true' && role === 'teacher') {
+          if (hasToken && activated === 'true' && role === 'teacher') {
             window.location.replace('beginners/teacher/teacher-home.html');
-          } else if (user && activated === 'true' && role === 'student') {
+          } else if (hasToken && activated === 'true' && role === 'student') {
             window.location.replace('beginners/student/student-home.html');
+          } else {
+             // Let Firebase initialize in background if not instantly redirected
+             const auth = getAuth();
+             onAuthStateChanged(auth, (user) => {
+                 if (user && activated === 'true') {
+                     if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
+                     else if (role === 'student') window.location.replace('beginners/student/student-home.html');
+                 }
+             });
           }
         }
 

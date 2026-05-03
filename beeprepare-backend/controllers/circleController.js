@@ -45,7 +45,7 @@ const createCircle = async (req, res) => {
       circleCode = generateCircleCode();
       attempts++;
     } while (
-      await StudyCircle.findOne({ circleCode }) && attempts < 10
+      await StudyCircle.findOne({ circleCode }).select('_id').lean() && attempts < 10
     );
 
     const circle = await StudyCircle.create({
@@ -274,7 +274,8 @@ const getJoinRequests =
 
     const circle = await StudyCircle
       .findById(circleId)
-      .select('joinRequests createdBy name');
+      .select('joinRequests createdBy name')
+      .lean();
 
     if (!circle) {
       return error(res,
@@ -325,7 +326,7 @@ const getMessages = async (req, res) => {
     const { circleId } = req.params;
     const userId = req.user.googleUid;
 
-    const circle = await StudyCircle.findById(circleId).select('messages members');
+    const circle = await StudyCircle.findById(circleId).select('messages members').lean();
     if (!circle) return error(res, 'Circle not found', 'NOT_FOUND', 404);
 
     const isMember = circle.members.some(m => m.userId === userId);

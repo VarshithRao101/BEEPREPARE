@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -614,13 +614,29 @@
                 const cachedId = localStorage.getItem('bp_bee_id');
                 if (cachedId) document.getElementById('myBeeId').textContent = cachedId;
 
-                const profile = await apiCall('/student/profile');
-                if (profile.success) {
+                const [profile, circlesRes] = await Promise.allSettled([
+                    apiCall('/student/profile'),
+                    apiCall('/circles/my')
+                ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : null));
+
+                if (profile && profile.success) {
                     document.getElementById('myBeeId').textContent = profile.data.beeId || 'BEE-ID-ERROR';
                     localStorage.setItem('bp_bee_id', profile.data.beeId);
                 }
 
-                await refreshCircles();
+                if (circlesRes && circlesRes.success) {
+                    myCircles = circlesRes.data;
+                    renderSidebar();
+                } else {
+                    document.getElementById('circleList').innerHTML = `
+                        <div style="text-align:center; padding:60px 20px;">
+                            <div style="font-size:32px; margin-bottom:10px;">📡</div>
+                            <div style="font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:#ff4444;">Signal Interruption</div>
+                            <p style="font-size:11px; color:#666; margin-top:10px;">We couldn't connect to the circle hub.</p>
+                            <button class="btn-action btn-gold" style="margin-top:15px; padding:8px 15px; font-size:9px;" onclick="location.reload()">Retry Connection</button>
+                        </div>
+                    `;
+                }
                 
                 // On mobile, if no circle is active, hide workspace initially
                 if(window.innerWidth < 850 && !activeId) {

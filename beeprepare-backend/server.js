@@ -352,6 +352,9 @@ app.use('/gate/:code', (req, res, next) => {
   res.status(404).send('<h1>🔍 Node Not Found</h1><p>Expired or invalid path.</p>');
 }, express.static(path.resolve(__dirname, `../${process.env.ADMIN_FOLDER_NAME || 'matrix-core-v1419'}`)));
 
+let _maintenanceCache = { value: false, cachedAt: 0 };
+const MAINTENANCE_CACHE_TTL = 30 * 1000; // 30 seconds
+
 // === MAINTENANCE MODE CHECK ===
 app.use(async (req, res, next) => {
   if (req.path.startsWith('/api/admin') ||
@@ -360,9 +363,13 @@ app.use(async (req, res, next) => {
     return next();
   }
   try {
-    const AppSettings = require('./models/AppSettings');
-    const setting = await AppSettings.findOne({ key: 'maintenance_mode' }).lean().catch(() => null);
-    if (setting?.value === true) {
+    const now = Date.now();
+    if (now - _maintenanceCache.cachedAt > MAINTENANCE_CACHE_TTL) {
+      const AppSettings = require('./models/AppSettings');
+      const setting = await AppSettings.findOne({ key: 'maintenance_mode' }).select('value').lean().catch(() => null);
+      _maintenanceCache = { value: setting?.value === true, cachedAt: now };
+    }
+    if (_maintenanceCache.value) {
       return res.status(503).json({
         success: false,
         message: 'Under maintenance.',

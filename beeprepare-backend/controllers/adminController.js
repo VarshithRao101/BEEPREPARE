@@ -283,14 +283,14 @@ const getUsers = async (req, res) => {
 const getUserDetail = async (req, res) => {
   try {
     const { googleUid } = req.params;
-    const user = await User.findOne({ googleUid });
+    const user = await User.findOne({ googleUid }).lean();
     if (!user) return error(res, 'User not found', 'NOT_FOUND', 404);
 
     const [banks, activity, tests, doubts] = await Promise.all([
-      Bank.find({ teacherId: googleUid }),
-      ActivityLog.find({ userId: googleUid }).sort({ createdAt: -1 }).limit(50),
-      TestSession.find({ userId: googleUid }).sort({ createdAt: -1 }),
-      Doubt.find({ userId: googleUid }).sort({ createdAt: -1 })
+      Bank.find({ teacherId: googleUid }).lean(),
+      ActivityLog.find({ userId: googleUid }).sort({ createdAt: -1 }).limit(50).lean(),
+      TestSession.find({ userId: googleUid }).sort({ createdAt: -1 }).lean(),
+      Doubt.find({ userId: googleUid }).sort({ createdAt: -1 }).lean()
     ]);
 
     return success(res, 'User detail fetched', {

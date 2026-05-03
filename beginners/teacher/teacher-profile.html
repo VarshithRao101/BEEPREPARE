@@ -1169,7 +1169,12 @@
         async function initProfile() {
             try {
                 console.log('[INIT] Starting profile sync...');
-                const res = await apiCall('/teacher/profile');
+                
+                const [res, dash] = await Promise.allSettled([
+                    apiCall('/teacher/profile'),
+                    apiCall('/teacher/dashboard')
+                ]).then(results => results.map(r => r.status === 'fulfilled' ? r.value : null));
+
                 if (res && res.success) {
                     appState = { ...appState, ...res.data };
                     appState.subjects = Array.isArray(appState.subjects) ? appState.subjects : [];
@@ -1178,7 +1183,6 @@
                     localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 1);
                     
                     // Fetch dashboard data once for BOTH banks list and signal dots
-                    const dash = await apiCall('/teacher/dashboard');
                     if(dash && dash.success) {
                         appState.ownBanks = dash.data.subjects;
                         

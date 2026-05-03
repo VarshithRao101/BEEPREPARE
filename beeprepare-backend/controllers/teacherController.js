@@ -160,7 +160,7 @@ const getProfile = async (req, res) => {
         let attempts = 0;
         do {
             newId = generateBeeId();
-            const exists = await User.findOne({ beeId: newId });
+            const exists = await User.findOne({ beeId: newId }).select('_id').lean();
             if (!exists) break;
             attempts++;
         } while (attempts < 10);
@@ -516,7 +516,7 @@ const addSubject = async (req, res) => {
     }
 
     // Check duplicate
-    const existing = await Bank.findOne({ teacherId, subject, class: className });
+    const existing = await Bank.findOne({ teacherId, subject, class: className }).select('_id').lean();
     if (existing) {
       return error(res, `You already have a ${subject} bank for ${className}`, 'DUPLICATE_BANK', 409);
     }
@@ -728,7 +728,7 @@ const deleteChapter = async (req, res) => {
     const normalizedClass = bank.class.startsWith('Class ') ? bank.class : `Class ${bank.class}`;
     const chapterKey = `${normalizedClass}-${bank.subject}`;
     
-    const user = await User.findOne({ googleUid: teacherId });
+    const user = await User.findOne({ googleUid: teacherId }).lean();
     if (user && user.chapters && user.chapters[chapterKey]) {
       const updatedList = user.chapters[chapterKey].filter(c => c !== chapterName);
       const updates = {};
@@ -1300,7 +1300,7 @@ const uploadNote = async (req, res) => {
       return error(res, 'Access denied. You do not own this syllabus node.', 'FORBIDDEN', 403);
     }
 
-    const existingNote = await Note.findOne({ bankId, chapterId, noteType });
+    const existingNote = await Note.findOne({ bankId, chapterId, noteType }).select('_id public_id fileUrl').lean();
     if (existingNote) {
       await deleteFromStorage(existingNote.public_id || existingNote.fileUrl);
       await Note.findByIdAndDelete(existingNote._id);

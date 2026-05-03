@@ -80,10 +80,10 @@ const getDashboard = async (req, res) => {
     const studentId = req.user.googleUid;
 
     const [streak, testSessions, recentDoubts, activityLogs] = await Promise.all([
-      Streak.findOne({ userId: studentId }),
-      TestSession.find({ studentId, status: 'completed' }).select('subject scorePercent bankId createdAt'),
+      Streak.findOne({ userId: studentId }).lean(),
+      TestSession.find({ studentId, status: 'completed' }).select('subject scorePercent bankId createdAt').lean(),
       Doubt.find({ studentId }).sort({ createdAt: -1 }).limit(3).lean(),
-      ActivityLog.find({ userId: studentId }).sort({ createdAt: -1 }).limit(10)
+      ActivityLog.find({ userId: studentId }).sort({ createdAt: -1 }).limit(10).lean()
     ]);
 
     const activeBanks = req.user.activeBanks || [];
@@ -94,7 +94,7 @@ const getDashboard = async (req, res) => {
 
     // Build subjects from active banks
     const bankIds = activeBanks.map(b => b.bankId);
-    const banks = bankIds.length > 0 ? await Bank.find({ _id: { $in: bankIds } }).select('subject class totalQuestions') : [];
+    const banks = bankIds.length > 0 ? await Bank.find({ _id: { $in: bankIds } }).select('subject class totalQuestions').lean() : [];
 
     const subjects = banks.map(bank => {
       const bankTests = testSessions.filter(t => t.bankId?.toString() === bank._id.toString());
@@ -167,7 +167,7 @@ const getProfile = async (req, res) => {
     const studentId = req.user.googleUid;
 
     const [streak, testAgg, queryCount] = await Promise.all([
-      Streak.findOne({ userId: studentId }),
+      Streak.findOne({ userId: studentId }).lean(),
       TestSession.aggregate([
         { $match: { studentId, status: 'completed' } },
         { $group: { _id: null, count: { $sum: 1 }, avgScore: { $avg: '$scorePercent' } } }
@@ -190,7 +190,7 @@ const getProfile = async (req, res) => {
         let attempts = 0;
         do {
             newId = generateBeeId();
-            const exists = await User.findOne({ beeId: newId });
+            const exists = await User.findOne({ beeId: newId }).select('_id').lean();
             if (!exists) break;
             attempts++;
         } while (attempts < 10);
@@ -283,12 +283,12 @@ const searchBank = async (req, res) => {
     }
 
     const bank = await Bank.findOne({ bankCode: bankCode.trim().toUpperCase() })
-      .select('-approvedStudents'); // Never return this list to students
+      .select('-approvedStudents').lean(); // Never return this list to students
 
     if (!bank) return error(res, 'Bank not found. Check the code and try again.', 'BANK_NOT_FOUND', 404);
 
     const studentId = req.user.googleUid;
-    const existingRequest = await AccessRequest.findOne({ bankId: bank._id, studentId });
+    const existingRequest = await AccessRequest.findOne({ bankId: bank._id, studentId }).select('status').lean();
 
     return success(res, 'Bank found', {
       bankId: bank._id,
@@ -323,7 +323,7 @@ const requestAccess = async (req, res) => {
     const bank = await Bank.findById(bankId);
     if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
 
-    const existing = await AccessRequest.findOne({ bankId, studentId });
+    const existing = await AccessRequest.findOne({ bankId, studentId }).select('status').lean();
     if (existing) {
       return error(res, `You already have a ${existing.status} request for this bank`, 'DUPLICATE_REQUEST', 409);
     }

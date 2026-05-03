@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -347,8 +347,6 @@
         }
 
         async function loadDashboard() {
-            if (!(await guardStudent())) return;
-
             // Show skeletons immediately
             BP.showSkeleton('subject-container', 'card', 4);
             const logWrapper = document.getElementById('activity-log-wrapper');
@@ -362,8 +360,15 @@
             // Show loading state
             document.querySelectorAll('.adv-card').forEach(card => card.classList.add('loading'));
 
-            const result = await apiCall('/student/dashboard');
+            const [guardRes, result, doubtsResult] = await Promise.all([
+                guardStudent(),
+                apiCall('/student/dashboard').catch(()=>null),
+                apiCall('/student/doubts').catch(()=>null)
+            ]);
             
+            if (!guardRes) return;
+            
+            document.querySelectorAll('.adv-card').forEach(card => card.classList.remove('loading'));
             document.querySelectorAll('.adv-card').forEach(card => card.classList.remove('loading'));
 
             if (result && result.success) {
@@ -466,7 +471,7 @@
                 if (notesSignal) notesSignal.style.display = hasNewNotes ? 'block' : 'none';
 
                 // Load recent doubts
-                loadRecentDoubts();
+                loadRecentDoubts(doubtsResult);
 
             } else {
                 Swal.fire({
@@ -481,8 +486,7 @@
             }
         }
 
-        async function loadRecentDoubts() {
-            const result = await apiCall('/student/doubts');
+        function loadRecentDoubts(result) {
             if (!result || !result.success || !result.data.chats) return;
 
             const doubts = result.data.chats.slice(0, 3);

@@ -103,7 +103,7 @@ const submitFeedback = async (req, res) => {
 const getMyFeedback = async (req, res) => {
   try {
     const userId = req.user.googleUid;
-    const items = await Feedback.find({ userId }).sort({ createdAt: -1 });
+    const items = await Feedback.find({ userId }).sort({ createdAt: -1 }).lean();
 
     return success(res, 'Feedback history fetched', {
       feedbacks: items.map(f => ({

@@ -17,10 +17,12 @@ const connectDB = async () => {
   if (cached.promise) return cached.promise;
 
   const opts = {
-    serverSelectionTimeoutMS: 10000,
-    socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 30000,
     bufferCommands: false,
     maxPoolSize: 10,
+    minPoolSize: 2,
+    compressors: 'zlib',
   };
 
   cached.promise = (async () => {

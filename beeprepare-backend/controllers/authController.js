@@ -51,7 +51,7 @@ const googleLogin = async (req, res) => {
     const { uid, email, name, picture } = decoded;
 
     // --- BLACKLIST ENFORCEMENT ---
-    const isBlacklisted = await Blacklist.findOne({ email: email.toLowerCase().trim() });
+    const isBlacklisted = await Blacklist.findOne({ email: email.toLowerCase().trim() }).select('_id').lean();
     if (isBlacklisted) {
       return error(res, 'Your account has been permanently restricted from BEEPREPARE.', 'ACCOUNT_BLACK_LISTED', 403);
     }
@@ -61,11 +61,11 @@ const googleLogin = async (req, res) => {
 
     try {
       // First, try to find by googleUid
-      user = await User.findOne({ googleUid: uid });
+      user = await User.findOne({ googleUid: uid }).lean();
 
       // If not found, try by email (in case Firebase UID changed or sync issue)
       if (!user) {
-        user = await User.findOne({ email: email });
+        user = await User.findOne({ email: email }).lean();
         if (user) {
           // Sync UID to existing email record
           await User.updateOne({ _id: user._id }, { googleUid: uid });
@@ -177,7 +177,7 @@ const setRole = async (req, res) => {
       let attempts = 0;
       do {
         beeId = generateBeeId(role);
-        const exists = await User.findOne({ beeId });
+        const exists = await User.findOne({ beeId }).select('_id').lean();
         if (!exists) break;
         attempts++;
       } while (attempts < 10);
@@ -223,11 +223,11 @@ const wipeData = async (req, res) => {
   try {
     await connectDB();
     const googleUid = req.user.googleUid;
-    const user = await User.findOne({ googleUid });
+    const user = await User.findOne({ googleUid }).select('_id').lean();
     if (!user) return error(res, 'User not found', 'NOT_FOUND', 404);
 
     // Get all banks
-    const banks = await Bank.find({ teacherId: googleUid });
+    const banks = await Bank.find({ teacherId: googleUid }).select('_id').lean();
     const bankIds = banks.map(b => b._id.toString());
 
     // Delete from Questions DB (Cluster 1)

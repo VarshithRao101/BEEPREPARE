@@ -6,7 +6,7 @@ const { success, error } = require('../utils/responseHelper');
 const getMaintenanceStatus = async (req, res) => {
   try {
     await connectDB();
-    const config = await SystemConfig.findOne({ key: 'maintenance_mode' });
+    const config = await SystemConfig.findOne({ key: 'maintenance_mode' }).lean();
     return success(res, 'Maintenance status fetched', { 
       isMaintenance: config ? config.value : false 
     });

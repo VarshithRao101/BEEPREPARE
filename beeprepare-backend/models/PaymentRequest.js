@@ -21,6 +21,8 @@ const paymentRequestSchema = new Schema({
 paymentRequestSchema.index({ utrNumber: 1 }, { unique: true });
 paymentRequestSchema.index({ status: 1 });
 paymentRequestSchema.index({ email: 1 });
+paymentRequestSchema.index({ createdAt: -1 });
+paymentRequestSchema.index({ status: 1, createdAt: -1 });
 paymentRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, partialFilterExpression: { status: 'pending' } });
 
 let _PaymentRequest = null;
