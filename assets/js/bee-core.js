@@ -532,72 +532,125 @@ export const BP = {
       const res = await fetch(API_BASE + '/announcements/active');
       const json = await res.json();
       
-      const data = json.data?.announcement;
+      const data = json.data?.announcement || json.data?.activeAnnouncement;
 
       if (json.success && data && data._id) {
-        // Check if user dismissed this specific announcement
-        const dismissKey = `BP_DISMISSED_ANNOUNCEMENT_${data._id}`;
-        if (localStorage.getItem(dismissKey) === 'true') return;
+        // Check if user dismissed this specific announcement for 24 hours
+        const dismissKey = `BP_DISMISS_24H_${data._id}`;
+        const dismissUntil = localStorage.getItem(dismissKey);
+        
+        if (dismissUntil && Date.now() < parseInt(dismissUntil)) {
+            return; // Still in 24h cooldown
+        }
 
         // Create the professional modal
         const overlay = document.createElement('div');
         overlay.id = 'bee-announcement-modal';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:999999;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.4s ease;';
+        overlay.style.cssText = `
+          position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+          backdrop-filter: blur(15px); z-index: 999999;
+          display: flex; align-items: center; justify-content: center;
+          opacity: 0; transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        `;
         
         overlay.innerHTML = `
-          <div style="background:rgba(15,15,20,0.95);border:1px solid rgba(255,215,0,0.3);border-radius:24px;padding:30px;max-width:450px;width:90%;box-shadow:0 25px 50px rgba(0,0,0,0.5);transform:translateY(20px);transition:transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-              <div style="background:rgba(255,215,0,0.15);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFD700;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <div style="
+            background: linear-gradient(145deg, rgba(20,20,30,0.95), rgba(10,10,15,0.95));
+            border: 1px solid rgba(255,215,0,0.2); border-radius: 24px;
+            padding: 40px; max-width: 500px; width: 90%;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.1);
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; overflow: hidden;
+          ">
+            <!-- Decorative Glow -->
+            <div style="position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle at top right, rgba(255,215,0,0.1), transparent 50%); pointer-events:none;"></div>
+            
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 25px; position:relative; z-index:1;">
+              <div style="
+                background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05));
+                width: 48px; height: 48px; border-radius: 14px;
+                display: flex; align-items: center; justify-content: center;
+                color: #FFD700; border: 1px solid rgba(255,215,0,0.3);
+                box-shadow: 0 0 20px rgba(255,215,0,0.1);
+              ">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
               </div>
-              <h2 style="color:#fff;margin:0;font-size:20px;font-weight:700;letter-spacing:1px;font-family:sans-serif;">Admin Update</h2>
+              <h2 style="color: #fff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif;">
+                Important Update
+              </h2>
             </div>
             
-            <p style="color:#ccc;font-size:15px;line-height:1.6;margin-bottom:25px;font-family:sans-serif;">
+            <p style="
+              color: #d1d1d1; font-size: 16px; line-height: 1.7;
+              margin-bottom: 30px; font-family: 'Outfit', sans-serif;
+              font-weight: 400; position:relative; z-index:1;
+            ">
               ${data.text}
             </p>
 
-            <div style="background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;margin-bottom:25px;border-left:3px solid #FFD700;">
-              <p style="margin:0;color:#aaa;font-size:12px;font-style:italic;font-family:sans-serif;">Note: This message will appear every time you visit the dashboard unless you dismiss it.</p>
+            <div style="
+              display: flex; align-items: center; gap: 12px; margin-bottom: 30px;
+              padding: 12px 16px; background: rgba(0,0,0,0.3); border-radius: 12px;
+              border: 1px solid rgba(255,255,255,0.05); position:relative; z-index:1;
+            ">
+              <input type="checkbox" id="ann-24h-cb" style="
+                width: 18px; height: 18px; accent-color: #FFD700; cursor: pointer;
+              ">
+              <label for="ann-24h-cb" style="
+                color: #aaa; font-size: 14px; font-family: 'Outfit', sans-serif; cursor: pointer;
+                user-select: none;
+              ">Do not show again for 24 hours</label>
             </div>
 
-            <div style="display:flex;gap:12px;justify-content:flex-end;">
-              <button id="announcement-close-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:#fff;padding:10px 20px;border-radius:12px;cursor:pointer;font-weight:600;transition:0.3s;font-family:sans-serif;">Close for now</button>
-              <button id="announcement-dismiss-btn" style="background:#FFD700;border:none;color:#000;padding:10px 20px;border-radius:12px;cursor:pointer;font-weight:700;transition:0.3s;box-shadow:0 4px 15px rgba(255,215,0,0.3);font-family:sans-serif;">Don't remind me again</button>
+            <div style="display: flex; gap: 15px; position:relative; z-index:1;">
+              <button id="ann-continue-btn" style="
+                flex: 1; background: linear-gradient(135deg, #FFD700, #F39C12);
+                color: #000; border: none; padding: 16px; border-radius: 14px;
+                font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 800;
+                text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+                box-shadow: 0 10px 20px rgba(255,215,0,0.2);
+                transition: all 0.3s ease;
+              ">Acknowledge</button>
             </div>
           </div>
         `;
         
         document.body.appendChild(overlay);
 
-        // Add hover effects dynamically
-        const closeBtn = document.getElementById('announcement-close-btn');
-        const dismissBtn = document.getElementById('announcement-dismiss-btn');
+        const continueBtn = document.getElementById('ann-continue-btn');
+        const checkbox = document.getElementById('ann-24h-cb');
         
-        closeBtn.onmouseenter = () => closeBtn.style.background = 'rgba(255,255,255,0.05)';
-        closeBtn.onmouseleave = () => closeBtn.style.background = 'transparent';
-        
-        dismissBtn.onmouseenter = () => dismissBtn.style.transform = 'translateY(-2px)';
-        dismissBtn.onmouseleave = () => dismissBtn.style.transform = 'translateY(0)';
+        // Hover effects
+        continueBtn.onmouseenter = () => {
+          continueBtn.style.transform = 'translateY(-2px)';
+          continueBtn.style.boxShadow = '0 15px 25px rgba(255,215,0,0.3)';
+        };
+        continueBtn.onmouseleave = () => {
+          continueBtn.style.transform = 'translateY(0)';
+          continueBtn.style.boxShadow = '0 10px 20px rgba(255,215,0,0.2)';
+        };
 
         // Animate in
         requestAnimationFrame(() => {
           overlay.style.opacity = '1';
-          overlay.children[0].style.transform = 'translateY(0)';
+          overlay.children[0].style.transform = 'translateY(0) scale(1)';
         });
 
-        // Event listeners
         const closeModal = () => {
+          if (checkbox.checked) {
+             // Set 24 hour expiry (24 * 60 * 60 * 1000)
+             localStorage.setItem(dismissKey, (Date.now() + 86400000).toString());
+          }
           overlay.style.opacity = '0';
-          overlay.children[0].style.transform = 'translateY(20px)';
-          setTimeout(() => overlay.remove(), 400);
+          overlay.children[0].style.transform = 'translateY(20px) scale(0.95)';
+          setTimeout(() => overlay.remove(), 500);
         };
 
-        closeBtn.addEventListener('click', closeModal);
-        dismissBtn.addEventListener('click', () => {
-          localStorage.setItem(dismissKey, 'true');
-          closeModal();
-        });
+        continueBtn.addEventListener('click', closeModal);
       }
     } catch (e) {
       console.warn('Announcement fetch failed', e);

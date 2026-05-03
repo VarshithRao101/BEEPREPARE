@@ -7,45 +7,105 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a1a; --surface: #111128; --surface2: #1a1a3a;
+            --bg: #05050a; --surface: #0a0a14; --surface2: #111122;
             --gold: #FFD700; --gold-dim: rgba(255,215,0,0.15);
+            --gold-glow: rgba(255,215,0,0.4);
             --success: #4CAF50; --danger: #ff4444; --warning: #FFA500;
             --text: #ffffff; --muted: #888888;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background: transparent; color: var(--text); padding-top: 90px; }
+        body { 
+            background: var(--bg); color: var(--text); padding-top: 100px; 
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(255,215,0,0.03), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255,215,0,0.03), transparent 25%);
+            min-height: 100vh;
+        }
 
-        .glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 24px; }
+        .glass { 
+            background: linear-gradient(145deg, rgba(20,20,30,0.6), rgba(10,10,15,0.6));
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 20px; 
+            padding: 32px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        .glass::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent);
+        }
         
         header {
-            position: fixed; top: 0; left: 0; right: 0; height: 70px;
-            background: var(--surface); border-bottom: 1px solid var(--gold-dim);
-            display: flex; align-items: center; padding: 0 24px; z-index: 1000;
+            position: fixed; top: 0; left: 0; right: 0; height: 75px;
+            background: rgba(10,10,20,0.8); backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; padding: 0 32px; z-index: 1000;
             justify-content: space-between;
         }
-        .header-left { display: flex; align-items: center; gap: 20px; }
-        .back-btn { cursor: pointer; font-size: 20px; color: var(--gold); text-decoration: none; }
-        .header-title { font-weight: 900; color: var(--gold); }
-        .header-right { display: flex; align-items: center; gap: 20px; }
-        .admin-id { font-size: 12px; color: var(--muted); }
-        .logout-btn { background: var(--surface2); color: var(--danger); border: 1px solid #333; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .header-left { display: flex; align-items: center; gap: 24px; }
+        .back-btn { 
+            cursor: pointer; font-size: 24px; color: var(--text); text-decoration: none; 
+            transition: all 0.3s; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+        }
+        .back-btn:hover { background: var(--gold); color: #000; border-color: var(--gold); transform: translateX(-3px); }
+        .header-title { font-weight: 900; color: #fff; font-size: 20px; letter-spacing: 1px; }
+        .header-title span { color: var(--gold); }
+        .header-right { display: flex; align-items: center; gap: 24px; }
+        .admin-id { font-size: 13px; color: var(--gold); background: rgba(255,215,0,0.1); padding: 6px 12px; border-radius: 8px; font-weight: 700; border: 1px solid rgba(255,215,0,0.2); }
+        .logout-btn { background: transparent; color: var(--danger); border: 1px solid rgba(255,68,68,0.3); padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.3s; }
+        .logout-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); box-shadow: 0 0 15px rgba(255,68,68,0.4); }
 
-        .container { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px 60px; }
         
-        .section-title { font-size: 18px; font-weight: 900; margin-bottom: 20px; color: var(--gold); display: flex; align-items: center; gap: 10px; }
+        .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+        .section-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05)); display: flex; align-items: center; justify-content: center; color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
+        .section-title { font-size: 22px; font-weight: 800; color: #fff; margin: 0; }
         
-        .current-ann { margin-bottom: 40px; border-left: 4px solid var(--success); }
-        .ann-text { font-size: 15px; line-height: 1.6; margin-bottom: 15px; }
-        .ann-meta { font-size: 12px; color: var(--muted); display: flex; gap: 20px; }
-        .remove-btn { background: var(--danger); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; margin-top: 15px; font-size: 12px; }
+        .current-ann { 
+            border: 1px solid rgba(76, 175, 80, 0.3); 
+            background: linear-gradient(145deg, rgba(76, 175, 80, 0.05), transparent);
+        }
+        .current-ann::before { background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.5), transparent); }
+        .ann-text { font-size: 18px; line-height: 1.6; margin-bottom: 20px; color: #fff; font-weight: 500; }
+        .ann-meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 24px; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 12px; }
+        .ann-meta span { display: flex; align-items: center; gap: 6px; }
+        .remove-btn { 
+            background: rgba(255,68,68,0.1); color: var(--danger); border: 1px solid rgba(255,68,68,0.3); 
+            padding: 10px 20px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 20px; font-size: 13px; transition: all 0.3s;
+        }
+        .remove-btn:hover { background: var(--danger); color: #fff; box-shadow: 0 5px 15px rgba(255,68,68,0.3); }
 
-        .create-form { display: flex; flex-direction: column; gap: 20px; }
-        textarea { width: 100%; height: 120px; background: transparent; border: 1px solid var(--gold-dim); border-radius: 8px; color: #fff; padding: 15px; font-size: 14px; resize: none; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .input-group label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
-        select, input[type="date"] { width: 100%; padding: 12px; background: transparent; border: 1px solid #333; border-radius: 8px; color: #fff; outline: none; }
+        .create-form { display: flex; flex-direction: column; gap: 24px; margin-top: 40px; }
+        .input-wrapper { position: relative; }
+        textarea { 
+            width: 100%; height: 160px; background: rgba(0,0,0,0.3); 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; 
+            color: #fff; padding: 20px; font-size: 16px; resize: none; transition: all 0.3s;
+        }
+        textarea:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 4px rgba(255,215,0,0.1); background: rgba(0,0,0,0.5); }
+        textarea::placeholder { color: rgba(255,255,255,0.2); }
         
-        .push-btn { background: var(--gold); color: #000; border: none; padding: 16px; border-radius: 8px; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .input-group label { display: block; font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        select, input[type="date"] { 
+            width: 100%; padding: 16px; background: rgba(0,0,0,0.3); 
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; 
+            color: #fff; outline: none; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;
+        }
+        select:focus, input[type="date"]:focus { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(255,215,0,0.1); }
+        select option { background: var(--surface); color: #fff; }
+        
+        .push-btn { 
+            background: linear-gradient(135deg, #FFD700, #F39C12); color: #000; 
+            border: none; padding: 20px; border-radius: 14px; font-weight: 900; 
+            cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-size: 15px;
+            transition: all 0.3s; box-shadow: 0 10px 20px rgba(255,215,0,0.2); margin-top: 10px;
+        }
+        .push-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(255,215,0,0.4); }
+        .push-btn:active { transform: translateY(1px); }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
@@ -53,8 +113,10 @@
 
     <header>
         <div class="header-left">
-            <a href="index.html" class="back-btn">←</a>
-            <span class="header-title">System Broadcaster</span>
+            <a href="index.html" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </a>
+            <span class="header-title">System <span>Broadcaster</span></span>
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin ID</span>
@@ -63,31 +125,48 @@
     </header>
 
     <div class="container">
-        <h2 class="section-title">Active Announcement</h2>
+        
+        <div class="section-header">
+            <div class="section-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+            </div>
+            <h2 class="section-title">Active Broadcast</h2>
+        </div>
+        
         <div id="currentAnnContainer">
             <!-- Populated by JS -->
         </div>
 
-        <h2 class="section-title">Push New Message</h2>
-        <div class="glass create-form">
-            <textarea id="annText" placeholder="Write announcement message here..."></textarea>
-            
-            <div class="form-row">
-                <div class="input-group">
-                    <label>Target Audience</label>
-                    <select id="annTarget">
-                        <option value="all">All Users</option>
-                        <option value="teacher">Teachers Only</option>
-                        <option value="student">Students Only</option>
-                    </select>
+        <div class="create-form">
+            <div class="section-header" style="margin-bottom:0;">
+                <div class="section-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </div>
-                <div class="input-group">
-                    <label>Expiry Date (Optional)</label>
-                    <input type="date" id="annExpiry">
-                </div>
+                <h2 class="section-title">Push New Message</h2>
             </div>
+            
+            <div class="glass">
+                <div class="input-wrapper" style="margin-bottom:24px;">
+                    <textarea id="annText" placeholder="Write your broadcast message here...&#10;Supports multiple lines and basic formatting."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Target Audience</label>
+                        <select id="annTarget">
+                            <option value="all">🌐 All Users</option>
+                            <option value="teacher">👨‍🏫 Teachers Only</option>
+                            <option value="student">👨‍🎓 Students Only</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Auto-Expire Date (Optional)</label>
+                        <input type="date" id="annExpiry">
+                    </div>
+                </div>
 
-            <button class="push-btn" onclick="pushAnnouncement()">Push Global Announcement</button>
+                <button class="push-btn" style="width:100%;" onclick="pushAnnouncement()">Push Global Broadcast</button>
+            </div>
         </div>
     </div>
 
@@ -103,15 +182,30 @@
                     <div class="glass current-ann">
                         <p class="ann-text">${a.text}</p>
                         <div class="ann-meta">
-                            <span>Target: <strong style="color:var(--gold); text-transform:uppercase;">${a.target}</strong></span>
-                            <span>Created: ${new Date(a.createdAt).toLocaleDateString()}</span>
-                            ${a.expiresAt ? `<span>Expires: ${new Date(a.expiresAt).toLocaleDateString()}</span>` : ''}
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                Target: <strong style="color:var(--gold); text-transform:uppercase;">${a.target}</strong>
+                            </span>
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                Created: ${new Date(a.createdAt).toLocaleDateString()}
+                            </span>
+                            ${a.expiresAt ? `
+                            <span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                Expires: ${new Date(a.expiresAt).toLocaleDateString()}
+                            </span>` : ''}
                         </div>
                         <button class="remove-btn" onclick="removeAnnouncement()">Stop Broadcast</button>
                     </div>
                 `;
             } else {
-                container.innerHTML = '<div class="glass" style="text-align:center; color:var(--muted); margin-bottom:40px;">No active system announcements.</div>';
+                container.innerHTML = `
+                    <div class="glass" style="text-align:center; padding:40px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2" style="margin-bottom:16px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <div style="color:var(--muted); font-size:16px; font-weight:500;">No active system announcements.</div>
+                    </div>
+                `;
             }
         }
 
@@ -133,6 +227,8 @@
                 showToast("Announcement pushed live!", "success");
                 document.getElementById('annText').value = '';
                 fetchCurrent();
+            } else if (res) {
+                showToast(res.message || "Failed to push announcement", "error");
             }
         };
 
@@ -141,6 +237,8 @@
             if (res && res.success) {
                 showToast("Broadcast stopped", "info");
                 fetchCurrent();
+            } else if (res) {
+                showToast(res.message || "Failed to stop broadcast", "error");
             }
         };
 

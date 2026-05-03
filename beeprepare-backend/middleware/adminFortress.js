@@ -174,7 +174,7 @@ const ACTION_CODES = {
   FORCE_RESET:       process.env.CODE_FORCE_RESET,
   DELETE_KEY:        process.env.CODE_DELETE_KEY,
   DELETE_PAYMENT:    process.env.CODE_DELETE_PAYMENT,
-  ADD_ANNOUNCEMENT:  process.env.CODE_ADD_ANNOUNCEMENT,  // ← Global announcement push
+  ADD_ANNOUNCEMENT:  process.env.CODE_ADD_ANNOUNCEMENT || 'BEEAA592810',  // ← Global announcement push
 };
 
 // Track action code usage (rate limit per admin session)
