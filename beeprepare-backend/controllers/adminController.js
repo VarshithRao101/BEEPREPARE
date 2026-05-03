@@ -824,7 +824,7 @@ const getFeedback = async (req, res) => {
   const limit = 20;
   const query = {};
 
-  if (type) query.type = type;
+  if (type) query.feedbackType = type;
   if (context) query.context = context;
 
   // Warm up User model for population
@@ -836,7 +836,18 @@ const getFeedback = async (req, res) => {
     .limit(limit)
     .populate('userId', 'displayName email role');
 
-  return success(res, 'Feedback fetched', feedbacks);
+  // Map to include 'type' field for frontend compatibility (some pages expect .type)
+  const mapped = feedbacks.map(f => {
+    const obj = f.toObject ? f.toObject() : f;
+    return {
+      ...obj,
+      type: obj.feedbackType,
+      userEmail: obj.userId?.email || 'Anonymous',
+      userRole: obj.userId?.role || 'User'
+    };
+  });
+
+  return success(res, 'Feedback fetched', mapped);
 };
 
 const markFeedbackReviewed = async (req, res) => {
