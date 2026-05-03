@@ -684,7 +684,7 @@ export const BP = {
         style.textContent = `
             .bee-loader-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(0, 0, 0, 0.4); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+                background: #000;
                 display: none; align-items: center; justify-content: center;
                 z-index: 999999; opacity: 0; transition: opacity 0.4s ease;
                 pointer-events: none;
