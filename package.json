@@ -23,6 +23,8 @@
   "homepage": "https://github.com/VarshithRao101/BEEPREPARE#readme",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@vercel/analytics": "^1.5.0",
+    "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
     "compression": "^1.8.1",
@@ -48,8 +50,7 @@
     "uuid": "^13.0.0",
     "winston": "^3.19.0",
     "xss-clean": "^0.1.4",
-    "zod": "^4.3.6",
-    "@vercel/analytics": "^1.5.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

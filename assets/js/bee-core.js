@@ -2,9 +2,12 @@
 // BEE CORE — Shared utilities for BEEPREPARE
 // ============================================
 
-// Vercel Analytics Injection
+// Vercel Analytics & Speed Insights Injection
 import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics/+esm';
+import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights/dist/index.mjs';
+
 inject();
+injectSpeedInsights();
 
 // Firebase Config
 export const firebaseConfig = {
