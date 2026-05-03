@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -296,10 +296,36 @@
 
         /* Mobile Progress */
         @media (max-width: 850px) {
-            .resolution-hub { grid-template-columns: 100vw 100vw; width: 200vw; transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
-            .resolution-hub.chat-active { transform: translateX(-100vw); }
-            .logs-sidebar { width: 100vw; height: 100dvh; }
-            .interaction-hub { width: 100vw; height: 100dvh; }
+            .resolution-hub { 
+                display: block;
+                width: 100vw;
+                height: 100dvh;
+                position: relative;
+            }
+            
+            .logs-sidebar { 
+                width: 100vw; 
+                height: 100dvh;
+                display: flex;
+            }
+
+            .interaction-hub { 
+                width: 100vw; 
+                height: 100dvh;
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .resolution-hub.chat-active .logs-sidebar {
+                display: none;
+            }
+
+            .resolution-hub.chat-active .interaction-hub {
+                display: flex;
+            }
+
             .btn-return { display: flex; }
             .response-console { padding: 12px; margin-bottom: 5px; }
             .composer { font-size: 16px; min-height: 40px; }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -244,14 +244,34 @@
         /* Mobile Slide Navigation — BEE COMMAND Protocol */
         @media (max-width: 850px) {
             .academic-lab { 
-                grid-template-columns: 100vw 100vw; 
-                width: 200vw; 
-                transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                display: block;
+                width: 100vw;
+                height: 100dvh;
+                position: relative;
             }
-            .academic-lab.chat-open { transform: translateX(-100vw); }
             
-            .bank-sidebar { width: 100vw; height: 100dvh; }
-            .interaction-hub { width: 100vw; height: 100dvh; }
+            .bank-sidebar { 
+                width: 100vw; 
+                height: 100dvh;
+                display: flex;
+            }
+
+            .interaction-hub { 
+                width: 100vw; 
+                height: 100dvh;
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            .academic-lab.chat-open .bank-sidebar {
+                display: none;
+            }
+
+            .academic-lab.chat-open .interaction-hub {
+                display: flex;
+            }
 
             .btn-back { display: flex; }
             .hub-header { padding: 12px 15px; }

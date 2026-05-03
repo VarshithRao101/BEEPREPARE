@@ -468,6 +468,15 @@
             .workspace { width: 100%; }
             .workspace.hidden { display: none; }
             
+            .portal-symbol { 
+                width: 140px; 
+                height: 140px; 
+                margin-bottom: 20px; 
+            }
+            
+            .empty-portal h1 { font-size: 24px; }
+            .empty-portal p { font-size: 13px; padding: 0 20px; }
+
             .chat-header { padding: 15px 20px; }
             .message-stream { padding: 20px; }
             .chat-footer { padding: 20px; }
@@ -483,6 +492,20 @@
             .interface-title h2 { font-size: 18px; }
             
             .modal-body { padding: 25px; width: 95%; }
+
+            .sidebar-actions {
+                padding: 15px;
+                background: rgba(10, 10, 10, 0.95);
+                position: sticky;
+                bottom: 0;
+                backdrop-filter: blur(10px);
+            }
+
+            .empty-portal .sidebar-actions {
+                width: 100%;
+                max-width: 300px;
+                margin-top: 15px;
+            }
         }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
