@@ -190,7 +190,7 @@
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                         </svg>
                     </button>
-                    <div class="profile-icon has-signal" onclick="window.location.href='teacher-profile.html'">
+                    <div class="profile-icon has-signal" id="profile-icon-btn" onclick="window.location.href='teacher-profile.html'">
                         T
                         <div id="profile-signal" class="signal-dot"></div>
                     </div>
@@ -317,28 +317,16 @@
 
         async function loadDashboard(showOverlay = true) {
             const teacherNameHeader = document.getElementById('teacher-name-header');
-            const teacherName = localStorage.getItem(BP.NAME) || 'Professor';
-            if(teacherNameHeader) teacherNameHeader.textContent = teacherName.split(' ')[0];
+            const cachedName = localStorage.getItem(BP.NAME) || 'Professor';
+
+            // Initial Sync (Optimistic)
+            if(teacherNameHeader) teacherNameHeader.textContent = cachedName.split(' ')[0];
 
             // Show skeletons only on initial load or if overlay is requested
             if (showOverlay) {
                 BP.showSkeleton('subjects-container', 'card', 2);
                 BP.showSkeleton('grades-container', 'card', 3);
                 BP.showSkeleton('activity-container', 'list', 5);
-            }
-
-            // Init Header Profile
-            const profileIcon = document.getElementById('profile-icon-btn');
-            if (profileIcon) {
-                profileIcon.innerText = teacherName[0].toUpperCase();
-                profileIcon.onclick = () => window.location.href = 'teacher-profile.html';
-                profileIcon.classList.add('has-signal');
-                if (!document.getElementById('profile-signal')) {
-                    const dot = document.createElement('div');
-                    dot.id = 'profile-signal';
-                    dot.className = 'signal-dot';
-                    profileIcon.appendChild(dot);
-                }
             }
 
             const [guardRes, response] = await Promise.all([
@@ -358,6 +346,27 @@
             }
 
             const data = response.data;
+            
+            // ── Update Identity (Name & Avatar) ───────────
+            const displayName = data.displayName || cachedName;
+            if (teacherNameHeader) teacherNameHeader.textContent = displayName.split(' ')[0];
+            
+            const profileIcon = document.getElementById('profile-icon-btn');
+            if (profileIcon) {
+                profileIcon.innerText = displayName[0].toUpperCase();
+                // Ensure dot exists if needed
+                if (!document.getElementById('profile-signal')) {
+                    const dot = document.createElement('div');
+                    dot.id = 'profile-signal';
+                    dot.className = 'signal-dot';
+                    profileIcon.appendChild(dot);
+                }
+            }
+
+            // Sync cache if name changed on server
+            if (data.displayName && data.displayName !== cachedName) {
+                localStorage.setItem(BP.NAME, data.displayName);
+            }
 
             // ── Update Notification Signals ───────────────
             const signalDot = document.getElementById('profile-signal');

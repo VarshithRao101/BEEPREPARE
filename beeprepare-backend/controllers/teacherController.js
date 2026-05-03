@@ -100,6 +100,7 @@ const getDashboard = async (req, res) => {
     }
 
     return success(res, 'Dashboard data fetched', {
+      displayName: user.displayName,
       subjects: banks.map(b => ({
         bankId: b._id,
         subject: b.subject,
