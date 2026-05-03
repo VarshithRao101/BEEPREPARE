@@ -30,6 +30,22 @@ let lastToken = null;
 let lastFetchTime = 0;
 
 export async function getFreshToken() {
+  const now = Date.now();
+  
+  // 1. Check persistent cache first (instant return, zero network latency)
+  const cachedToken = localStorage.getItem(BP.TOKEN);
+  const cachedTime = localStorage.getItem('bp_token_time');
+  
+  if (cachedToken && cachedTime && (now - parseInt(cachedTime) < 45 * 60 * 1000)) {
+    // If not logging out, we can safely use the hot cache
+    if (!localStorage.getItem(BP.LOGGING_OUT)) {
+      lastToken = cachedToken;
+      lastFetchTime = parseInt(cachedTime);
+      return cachedToken;
+    }
+  }
+
+  // 2. Load Firebase Auth only if cache is missed or expired
   const { getAuth, onAuthStateChanged } = await import(
     'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
   );
@@ -50,16 +66,8 @@ export async function getFreshToken() {
   }
 
   if (!user) {
-    // Return cached token if available, otherwise null
-    // DO NOT REDIRECT HERE - Page Guards handle redirects
     if (localStorage.getItem(BP.LOGGING_OUT)) return null;
-    return localStorage.getItem(BP.TOKEN);
-  }
-
-  // Rate limit refreshes to every 45 mins
-  const now = Date.now();
-  if (lastToken && (now - lastFetchTime < 45 * 60 * 1000)) {
-    return lastToken;
+    return cachedToken; // Fallback to whatever is in cache
   }
 
   try {
@@ -67,10 +75,11 @@ export async function getFreshToken() {
     lastToken = token;
     lastFetchTime = now;
     localStorage.setItem(BP.TOKEN, token);
+    localStorage.setItem('bp_token_time', now.toString());
     return token;
   } catch (err) {
     console.error('Token fetch failed:', err);
-    return localStorage.getItem(BP.TOKEN);
+    return cachedToken;
   }
 }
 
