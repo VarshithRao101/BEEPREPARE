@@ -600,6 +600,21 @@
                     const r = row.querySelector('.match-right').value.trim();
                     if (l || r) pairs.push({ left: l, right: r });
                 });
+
+                if (pairs.length === 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Empty Matching',
+                        text: 'Please add at least one matching pair.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        background: '#1a1a2e',
+                        color: '#ffffff'
+                    });
+                    return;
+                }
             } else if (questionType === 'Matrix Matching') {
                 document.querySelectorAll('.matrix-row-input').forEach(inp => {
                     if (inp.value.trim()) rows.push(inp.value.trim());
@@ -650,8 +665,10 @@
 
             const saveBtn = document.querySelector('.save-btn');
             const originalText = saveBtn.textContent;
-            saveBtn.textContent = 'Saving...';
+            saveBtn.textContent = '🚀 SYNCHRONIZING...';
             saveBtn.disabled = true;
+            saveBtn.style.opacity = '0.7';
+            saveBtn.style.cursor = 'wait';
 
             try {
                 const result = await apiCall('/teacher/questions', 'POST', {

@@ -926,7 +926,7 @@ const addQuestion = async (req, res) => {
       User.updateOne({ googleUid: teacherId }, { $inc: { totalQuestions: 1 } })
     ]);
 
-    await logActivity(
+    logActivity(
       teacherId,
       'question_added',
       'Question Added',

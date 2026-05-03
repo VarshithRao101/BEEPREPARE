@@ -36,8 +36,8 @@ const questionSchema = new Schema({
 
   // ── New Question Types Fields ──────────────────────────────────────────
   pairs:         [{ left: String, right: String }], // For Simple Matching
-  rows:          [{ type: String }], // For Matrix Matching
-  columns:       [{ type: String }], // For Matrix Matching
+  rows:          [String], // For Matrix Matching
+  columns:       [String], // For Matrix Matching
   subQuestions:  [{ 
     questionText: String,
     marks: Number
