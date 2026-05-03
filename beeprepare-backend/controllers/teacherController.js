@@ -856,9 +856,6 @@ const addQuestion = async (req, res) => {
       if (!mcqOptions || !mcqOptions.A || !mcqOptions.B || !mcqOptions.C || !mcqOptions.D) {
         return error(res, 'MCQ questions require options A, B, C, and D', 'MCQ_OPTIONS_REQUIRED', 400);
       }
-      if (!correctOption || !['A', 'B', 'C', 'D'].includes(correctOption)) {
-        return error(res, 'MCQ questions require a correctOption (A, B, C, or D)', 'CORRECT_OPTION_REQUIRED', 400);
-      }
     }
 
     // Determine isImportant

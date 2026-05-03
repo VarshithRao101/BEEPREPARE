@@ -212,7 +212,6 @@
             animation: fadeInUpAdv 0.5s both 1s;
         }
     </style>
-<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 
 <body>
@@ -325,19 +324,9 @@
                         <div class="mcq-label">D</div>
                         <input type="text" class="glass-input" placeholder="Option D content...">
                     </div>
-                    
-                    <div class="field-group" style="margin-top: 20px;">
-                        <label class="field-label">Correct Answer</label>
-                        <select class="glass-select" id="q-correct-op">
-                            <option value="A">Option A</option>
-                            <option value="B">Option B</option>
-                            <option value="C">Option C</option>
-                            <option value="D">Option D</option>
-                        </select>
-                    </div>
                 </div>
 
-                <div id="hintContainer" style="display: none; padding: 15px; background: rgba(255, 215, 0, 0.1); border: 1px dashed var(--primary); border-radius: 12px; margin-top: 15px; color: var(--primary); font-size: 13px;">
+                <div id="hintContainer" style="display: none; padding: 15px; background: rgba(255, 215, 0, 0.1); border: 1px dashed var(--primary); border-radius: 12px; margin-top: 15px; color: var(--primary); font-size: 13px; align-items: center; justify-content: center; text-align: center;">
                     <strong id="hintText">Note:</strong>
                 </div>
 
@@ -520,10 +509,10 @@
             const hintCont = document.getElementById('hintContainer');
             if (val === 'Fill in the Blanks') {
                 document.getElementById('hintText').innerHTML = "You have to put the blanks accordingly by typing underscores (e.g. The capital of France is ___).";
-                hintCont.style.display = 'block';
+                hintCont.style.display = 'flex';
             } else if (val === 'True or False') {
                 document.getElementById('hintText').innerHTML = "The output will automatically format the question with a [ True / False ] option at the end.";
-                hintCont.style.display = 'block';
+                hintCont.style.display = 'flex';
             } else {
                 hintCont.style.display = 'none';
             }
@@ -677,8 +666,7 @@
                     rows,
                     columns,
                     subQuestions,
-                    imageUrl: diagramBase64,
-                    correctOption: (questionType === 'MCQ') ? document.getElementById('q-correct-op').value : null,
+                    imageUrl: diagramBase64
                 });
 
                 if (result && result.success) {
@@ -730,6 +718,5 @@
             subTitle.innerHTML = `${subject} (Class ${cls}) • <span style="color: var(--primary)">${chapterName}</span>`;
         }
     </script>
-<script src="/assets/js/ripple.js"></script>
 </body>
 </html>
