@@ -801,7 +801,7 @@ const addQuestion = async (req, res) => {
       bankId, chapterId, chapterName,
       questionText, questionType, marks,
       difficulty, tags, mcqOptions, correctOption,
-      imageUrl
+      imageUrl, pairs, rows, columns, subQuestions
     } = req.body;
 
     const teacherId = req.user.googleUid;
@@ -823,7 +823,7 @@ const addQuestion = async (req, res) => {
     // Normalize difficulty casing
     const normalizedDifficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
 
-    const validTypes = ['MCQ', 'Very Short', 'Short', 'Long', 'Essay'];
+    const validTypes = ['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'];
     if (!validTypes.includes(questionType)) {
       return error(res, `Invalid question type. Must be one of: ${validTypes.join(', ')}`, 'INVALID_TYPE', 400);
     }
@@ -833,8 +833,8 @@ const addQuestion = async (req, res) => {
       return error(res, 'Marks must be between 1 and 10', 'INVALID_MARKS', 400);
     }
 
-    if (questionText.length < 10 || questionText.length > 2000) {
-      return error(res, 'Question text must be between 10 and 2000 characters', 'INVALID_LENGTH', 400);
+    if (questionText.length < 5 || questionText.length > 5000) {
+      return error(res, 'Question text must be between 5 and 5000 characters', 'INVALID_LENGTH', 400);
     }
 
     // Validate bank ownership
@@ -901,6 +901,10 @@ const addQuestion = async (req, res) => {
       difficulty: normalizedDifficulty,
       mcqOptions: questionType === 'MCQ' ? mcqOptions : undefined,
       correctOption: questionType === 'MCQ' ? correctOption : undefined,
+      pairs: ['Simple Matching', 'Matrix Matching'].includes(questionType) ? pairs : undefined,
+      rows: questionType === 'Matrix Matching' ? rows : undefined,
+      columns: ['Simple Matching', 'Matrix Matching'].includes(questionType) ? columns : undefined,
+      subQuestions: ['Reading Passage', 'Case Study', 'Data Interpretation'].includes(questionType) ? subQuestions : undefined,
       isImportant,
       tags: tagsArr,
       chapterId,
@@ -1025,7 +1029,14 @@ const generatePaper = async (req, res) => {
       'Very Short': { key: 'veryShort', questions: [] },
       Short: { key: 'short', questions: [] },
       Long: { key: 'long', questions: [] },
-      Essay: { key: 'essay', questions: [] }
+      Essay: { key: 'essay', questions: [] },
+      'True or False': { key: 'trueFalse', questions: [] },
+      'Fill in the Blanks': { key: 'fillBlanks', questions: [] },
+      'Simple Matching': { key: 'simpleMatch', questions: [] },
+      'Matrix Matching': { key: 'matrixMatch', questions: [] },
+      'Reading Passage': { key: 'readingPassage', questions: [] },
+      'Case Study': { key: 'caseStudy', questions: [] },
+      'Data Interpretation': { key: 'dataInterp', questions: [] }
     };
 
     for (const q of allQuestions) {
@@ -1167,6 +1178,10 @@ const generatePaper = async (req, res) => {
             </div>
           </div>`;
 
+        if (q.questionType === 'True or False') {
+          paperHtml += `<span style="float: right; margin-right: 15px; border-bottom: 1px dotted #999;">......................................... [ True / False ]</span>`;
+        }
+
         if (q.questionType === 'MCQ' && q.mcqOptions) {
           paperHtml += `
           <div class="mcq-options-grid" style="margin: 0.8em 0 0 2.5em; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5em 1.5em; font-size: 0.95em;">
@@ -1182,6 +1197,48 @@ const generatePaper = async (req, res) => {
           <div style="margin: 1em 0 0 2.5em; text-align: left;">
             <img src="${q.imageUrl}" alt="Diagram" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #ccc;">
           </div>`;
+        }
+
+        if (q.questionType === 'Simple Matching' && q.pairs) {
+          paperHtml += `
+          <div style="margin: 1.5em 0 0 2.5em; display: flex; gap: 50px;">
+            <div style="flex: 1;">
+              ${q.pairs.map((p, i) => `<div style="margin-bottom: 8px;">${i+1}. ${p.left || ''}</div>`).join('')}
+            </div>
+            <div style="width: 50px; display: flex; flex-direction: column; gap: 8px;">
+              ${q.pairs.map(() => `<div>[ &nbsp; &nbsp; ]</div>`).join('')}
+            </div>
+            <div style="flex: 1;">
+              ${q.pairs.map((p, i) => `<div style="margin-bottom: 8px;">${String.fromCharCode(65+i)}. ${p.right || ''}</div>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        if (q.questionType === 'Matrix Matching' && q.rows && q.columns) {
+          paperHtml += `
+          <div style="margin: 1.5em 0 0 2.5em; display: flex; gap: 50px;">
+            <div style="flex: 1;">
+              ${q.rows.map((r, i) => `<div style="margin-bottom: 8px;">${i+1}. ${r}</div>`).join('')}
+            </div>
+            <div style="width: 50px; display: flex; flex-direction: column; gap: 8px;">
+              ${q.rows.map(() => `<div>[ &nbsp; &nbsp; ]</div>`).join('')}
+            </div>
+            <div style="flex: 1;">
+              ${q.columns.map((c, i) => `<div style="margin-bottom: 8px;">${String.fromCharCode(65+i)}. ${c}</div>`).join('')}
+            </div>
+          </div>`;
+        }
+
+        if (['Reading Passage', 'Case Study', 'Data Interpretation'].includes(q.questionType) && q.subQuestions) {
+          paperHtml += `<div style="margin: 1em 0 0 2.5em;">`;
+          q.subQuestions.forEach((sq, idx) => {
+             paperHtml += `
+             <div style="margin-bottom: 0.8em; display: flex; justify-content: space-between;">
+               <div><strong>(${idx + 1})</strong> ${sq.questionText}</div>
+               <div>[${sq.marks || 1}]</div>
+             </div>`;
+          });
+          paperHtml += `</div>`;
         }
 
         paperHtml += `

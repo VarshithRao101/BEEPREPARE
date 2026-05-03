@@ -16,10 +16,10 @@ const questionSchema = new Schema({
   teacherId:    { type: String, required: true, index: true },
   class:        { type: String, required: true, index: true },   
   subject:      { type: String, required: true, index: true },   
-  questionType: { type: String, required: true, enum: ['MCQ', 'Very Short', 'Short', 'Long', 'Essay'], index: true },
+  questionType: { type: String, required: true, enum: ['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'], index: true },
 
   // ── Question Content ────────────────────────────────────────────────────
-  questionText:  { type: String, required: true, minlength: 10, maxlength: 80 },
+  questionText:  { type: String, required: true, minlength: 10, maxlength: 5000 },
   imageUrl:      { type: String }, // For diagram uploads
   imagePublicId: { type: String }, // For Cloudinary persistent storage
   marks:         { type: Number, required: true },
@@ -33,6 +33,16 @@ const questionSchema = new Schema({
   correctOption: { type: String, enum: ['A', 'B', 'C', 'D'] },
   isImportant:   { type: Boolean, required: true, default: false },
   tags:          [{ type: String, enum: ['Important', 'Repeated', 'Exam Focus', 'Formula', 'Conceptual', 'Formula Based'] }],
+
+  // ── New Question Types Fields ──────────────────────────────────────────
+  pairs:         [{ left: String, right: String }], // For Simple Matching
+  rows:          [{ type: String }], // For Matrix Matching
+  columns:       [{ type: String }], // For Matrix Matching
+  subQuestions:  [{ 
+    questionText: String,
+    marks: Number
+  }], // For Reading Passage, Case Study, Data Interpretation
+
 
   // ── Metadata & Cross-refs ───────────────────────────────────────────────
   chapterId:     { type: String }, 

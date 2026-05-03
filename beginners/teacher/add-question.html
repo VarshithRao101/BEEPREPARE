@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -276,11 +276,18 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="field-group">
                         <label class="field-label">Complexity Type</label>
-                        <select class="glass-select" id="complexitySelect" onchange="toggleMCQ(this.value)">
+                        <select class="glass-select" id="complexitySelect" onchange="toggleType(this.value)">
                             <option value="Very Short">Very Short</option>
                             <option value="Short">Short</option>
                             <option value="Long">Long</option>
                             <option value="MCQ">MCQ</option>
+                            <option value="True or False">True or False</option>
+                            <option value="Fill in the Blanks">Fill in the Blanks</option>
+                            <option value="Simple Matching">Simple Matching</option>
+                            <option value="Matrix Matching">Matrix Matching</option>
+                            <option value="Reading Passage">Reading Passage</option>
+                            <option value="Case Study">Case Study</option>
+                            <option value="Data Interpretation">Data Interpretation</option>
                         </select>
                     </div>
                     <div class="field-group">
@@ -328,6 +335,53 @@
                             <option value="D">Option D</option>
                         </select>
                     </div>
+                </div>
+
+                <div id="hintContainer" style="display: none; padding: 15px; background: rgba(255, 215, 0, 0.1); border: 1px dashed var(--primary); border-radius: 12px; margin-top: 15px; color: var(--primary); font-size: 13px;">
+                    <strong id="hintText">Note:</strong>
+                </div>
+
+                <div id="matchingContainer" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border); border-radius: 15px;">
+                    <label class="field-label" style="margin-bottom: 15px;">Matching Pairs (Max 10)</label>
+                    <div id="matchingRows">
+                        <div class="matching-row" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" class="glass-input match-left" placeholder="Left Column Item">
+                            <input type="text" class="glass-input match-right" placeholder="Right Column Item">
+                        </div>
+                    </div>
+                    <button class="diff-btn" onclick="addMatchingRow()" style="margin-top: 10px;">+ Add Box</button>
+                </div>
+
+                <div id="matrixContainer" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border); border-radius: 15px;">
+                    <label class="field-label" style="margin-bottom: 15px;">Matrix Items (Rows vs Columns)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label class="field-label">Rows</label>
+                            <div id="matrixRows">
+                                <input type="text" class="glass-input matrix-row-input" placeholder="Row Item" style="margin-bottom: 10px;">
+                            </div>
+                            <button class="diff-btn" onclick="addMatrixItem('Row')" style="font-size: 11px;">+ Add Row Box</button>
+                        </div>
+                        <div>
+                            <label class="field-label">Columns</label>
+                            <div id="matrixCols">
+                                <input type="text" class="glass-input matrix-col-input" placeholder="Column Item" style="margin-bottom: 10px;">
+                            </div>
+                            <button class="diff-btn" onclick="addMatrixItem('Col')" style="font-size: 11px;">+ Add Column Box</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="subQuestionsContainer" style="display: none; margin-top: 20px; padding: 20px; background: rgba(255, 255, 255, 0.02); border: 1px dashed var(--border); border-radius: 15px;">
+                    <label class="field-label" style="margin-bottom: 15px;">Sub Questions</label>
+                    <div id="subQuestionsList">
+                        <div class="sub-q-row" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                            <span style="font-weight: bold; color: var(--primary);" class="sub-q-idx">1.</span>
+                            <input type="text" class="glass-input sub-q-text" placeholder="Sub-question text...">
+                            <input type="number" class="glass-input sub-q-marks" placeholder="Marks" value="1" style="width: 80px;" min="1" max="10">
+                        </div>
+                    </div>
+                    <button class="diff-btn" onclick="addSubQuestion()" style="margin-top: 10px; width: 40px; height: 40px; border-radius: 50%; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 20px;">+</button>
                 </div>
 
                 <div class="field-group">
@@ -455,9 +509,58 @@
             document.getElementById('diagramPreviewContainer').style.display = 'none';
         };
 
-        window.toggleMCQ = function(val) {
-            const container = document.getElementById('mcqContainer');
-            container.style.display = (val === 'MCQ') ? 'block' : 'none';
+        window.toggleType = function(val) {
+            document.getElementById('mcqContainer').style.display = (val === 'MCQ') ? 'block' : 'none';
+            document.getElementById('matchingContainer').style.display = (val === 'Simple Matching') ? 'block' : 'none';
+            document.getElementById('matrixContainer').style.display = (val === 'Matrix Matching') ? 'block' : 'none';
+            
+            const showSubQs = ['Reading Passage', 'Case Study', 'Data Interpretation'].includes(val);
+            document.getElementById('subQuestionsContainer').style.display = showSubQs ? 'block' : 'none';
+
+            const hintCont = document.getElementById('hintContainer');
+            if (val === 'Fill in the Blanks') {
+                document.getElementById('hintText').innerHTML = "You have to put the blanks accordingly by typing underscores (e.g. The capital of France is ___).";
+                hintCont.style.display = 'block';
+            } else if (val === 'True or False') {
+                document.getElementById('hintText').innerHTML = "The output will automatically format the question with a [ True / False ] option at the end.";
+                hintCont.style.display = 'block';
+            } else {
+                hintCont.style.display = 'none';
+            }
+        }
+
+        window.addMatchingRow = function() {
+            const container = document.getElementById('matchingRows');
+            if (container.children.length >= 10) return;
+            const div = document.createElement('div');
+            div.className = 'matching-row';
+            div.style = 'display: flex; gap: 10px; margin-bottom: 10px;';
+            div.innerHTML = `<input type="text" class="glass-input match-left" placeholder="Left Column Item">
+                             <input type="text" class="glass-input match-right" placeholder="Right Column Item">`;
+            container.appendChild(div);
+        }
+
+        window.addMatrixItem = function(type) {
+            const container = document.getElementById(`matrix${type}s`); // matrixRows or matrixCols
+            if (container.children.length >= 10) return;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = `glass-input matrix-${type.toLowerCase()}-input`;
+            input.placeholder = `${type} Item`;
+            input.style = 'margin-bottom: 10px;';
+            container.appendChild(input);
+        }
+
+        window.addSubQuestion = function() {
+            const container = document.getElementById('subQuestionsList');
+            const idx = container.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'sub-q-row';
+            div.style = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: center;';
+            div.innerHTML = `<span style="font-weight: bold; color: var(--primary);" class="sub-q-idx">${idx}.</span>
+                             <input type="text" class="glass-input sub-q-text" placeholder="Sub-question text...">
+                             <input type="number" class="glass-input sub-q-marks" placeholder="Marks" value="1" style="width: 80px;" min="1" max="10">`;
+            container.appendChild(div);
         }
 
         window.selectDiff = function(el) {
@@ -487,6 +590,11 @@
                 .map(c => c.textContent.trim());
 
             let mcqOptions = null;
+            let pairs = [];
+            let rows = [];
+            let columns = [];
+            let subQuestions = [];
+
             if (questionType === 'MCQ') {
                 const optionInputs = document.querySelectorAll('#mcqContainer .glass-input');
                 mcqOptions = {
@@ -495,6 +603,25 @@
                     C: optionInputs[2]?.value.trim(),
                     D: optionInputs[3]?.value.trim()
                 };
+            } else if (questionType === 'Simple Matching') {
+                document.querySelectorAll('.matching-row').forEach(row => {
+                    const l = row.querySelector('.match-left').value.trim();
+                    const r = row.querySelector('.match-right').value.trim();
+                    if (l || r) pairs.push({ left: l, right: r });
+                });
+            } else if (questionType === 'Matrix Matching') {
+                document.querySelectorAll('.matrix-row-input').forEach(inp => {
+                    if (inp.value.trim()) rows.push(inp.value.trim());
+                });
+                document.querySelectorAll('.matrix-col-input').forEach(inp => {
+                    if (inp.value.trim()) columns.push(inp.value.trim());
+                });
+            } else if (['Reading Passage', 'Case Study', 'Data Interpretation'].includes(questionType)) {
+                document.querySelectorAll('.sub-q-row').forEach(row => {
+                    const t = row.querySelector('.sub-q-text').value.trim();
+                    const m = parseInt(row.querySelector('.sub-q-marks').value) || 1;
+                    if (t) subQuestions.push({ questionText: t, marks: m });
+                });
             }
 
             // Validation
@@ -546,6 +673,10 @@
                     difficulty,
                     tags: activeTags,
                     mcqOptions,
+                    pairs,
+                    rows,
+                    columns,
+                    subQuestions,
                     imageUrl: diagramBase64,
                     correctOption: (questionType === 'MCQ') ? document.getElementById('q-correct-op').value : null,
                 });
