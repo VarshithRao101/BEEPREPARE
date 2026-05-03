@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -390,6 +390,10 @@
                         <!-- Blueprint cards injected by JS -->
                     </div>
 
+                    <button class="diff-btn" style="width: 100%; margin-top: 15px; border-style: dashed; background: rgba(255,215,0,0.03);" onclick="addSection()">
+                        + Add Another Section
+                    </button>
+
                     <button class="primary-action-btn" onclick="startGeneration()">
                         Generate Paper →
                     </button>
@@ -478,6 +482,18 @@
             renderBlueprint();
         };
 
+        window.addSection = function() {
+            blueprint.push({ id: 'custom-' + Date.now(), type: 'Short', marks: 2, qty: 3 });
+            renderBlueprint();
+        };
+
+        window.removeSection = function(idx) {
+            if (blueprint.length > 1) {
+                blueprint.splice(idx, 1);
+                renderBlueprint();
+            }
+        };
+
         function renderBlueprint() {
             const container = document.getElementById('blueprint-container');
             container.innerHTML = blueprint.map((sec, idx) => `
@@ -488,9 +504,12 @@
                         <button class="cnt-btn" onclick="updateQty(${idx}, 1)">+</button>
                     </div>
 
-                    <div class="section-header">
-                        <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Type ${idx + 1}</div>
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Configuration Node</div>
+                    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section ${idx + 1}</div>
+                            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Configuration Node</div>
+                        </div>
+                        <button class="cnt-btn" style="color: #ff4d4d; font-size: 20px;" onclick="removeSection(${idx})">×</button>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -501,6 +520,13 @@
                                 <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
                                 <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
                                 <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
+                                <option value="True or False" ${sec.type === 'True or False' ? 'selected' : ''}>True or False</option>
+                                <option value="Fill in the Blanks" ${sec.type === 'Fill in the Blanks' ? 'selected' : ''}>Fill in the Blanks</option>
+                                <option value="Simple Matching" ${sec.type === 'Simple Matching' ? 'selected' : ''}>Simple Matching</option>
+                                <option value="Matrix Matching" ${sec.type === 'Matrix Matching' ? 'selected' : ''}>Matrix Matching</option>
+                                <option value="Reading Passage" ${sec.type === 'Reading Passage' ? 'selected' : ''}>Reading Passage</option>
+                                <option value="Case Study" ${sec.type === 'Case Study' ? 'selected' : ''}>Case Study</option>
+                                <option value="Data Interpretation" ${sec.type === 'Data Interpretation' ? 'selected' : ''}>Data Interpretation</option>
                             </select>
                         </div>
                         <div>

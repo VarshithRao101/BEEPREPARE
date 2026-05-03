@@ -1055,13 +1055,7 @@ const generatePaper = async (req, res) => {
       if (needed === 0) return;
 
       // Find identifying pool for this question type
-      let foundPool = null;
-      for (const poolEntry of Object.values(pools)) {
-        if (poolEntry.key === blueprintKey) {
-          foundPool = poolEntry;
-          break;
-        }
-      }
+      let foundPool = pools[typeName];
 
       if (!foundPool || foundPool.questions.length === 0) return;
 
@@ -1157,7 +1151,7 @@ const generatePaper = async (req, res) => {
 
       paperHtml += `
       <div style="text-align: center; font-weight: bold; text-transform: uppercase; padding: 0.5em; background: #f2f2f2; border: 1px solid #ccc; margin: 2em 0 1em 0; font-size: 1.1em;">
-        SECTION - ${section.label}
+        SECTION ${section.label} — ${section.type}
       </div>
       <div style="text-align: right; font-style: italic; font-size: 0.9em; margin-bottom: 0.8em;">
         (${sectionQs.length} questions × ${marksEach} mark${marksEach > 1 ? 's' : ''} each)
