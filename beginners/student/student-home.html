@@ -346,11 +346,13 @@
             return Math.floor(seconds) + " seconds ago";
         }
 
-        async function loadDashboard() {
-            // Show skeletons immediately
-            BP.showSkeleton('subject-container', 'card', 4);
-            const logWrapper = document.getElementById('activity-log-wrapper');
-            if(logWrapper) BP.showSkeleton('activity-log-wrapper', 'list', 5);
+        async function loadDashboard(showOverlay = true) {
+            // Show skeletons immediately only if overlay is requested
+            if (showOverlay) {
+                BP.showSkeleton('subject-container', 'card', 4);
+                const logWrapper = document.getElementById('activity-log-wrapper');
+                if(logWrapper) BP.showSkeleton('activity-log-wrapper', 'list', 5);
+            }
 
             // Show name immediately
             const studentNameHeader = document.getElementById('student-name-header');
@@ -358,18 +360,21 @@
             if(studentNameHeader) studentNameHeader.textContent = studentName.split(' ')[0];
 
             // Show loading state
-            document.querySelectorAll('.adv-card').forEach(card => card.classList.add('loading'));
+            if (showOverlay) {
+                document.querySelectorAll('.adv-card').forEach(card => card.classList.add('loading'));
+            }
 
             const [guardRes, result, doubtsResult] = await Promise.all([
                 guardStudent(),
-                apiCall('/student/dashboard').catch(()=>null),
-                apiCall('/student/doubts').catch(()=>null)
+                apiCall('/student/dashboard', 'GET', null, true, false, showOverlay).catch(()=>null),
+                apiCall('/student/doubts', 'GET', null, true, false, showOverlay).catch(()=>null)
             ]);
             
             if (!guardRes) return;
             
-            document.querySelectorAll('.adv-card').forEach(card => card.classList.remove('loading'));
-            document.querySelectorAll('.adv-card').forEach(card => card.classList.remove('loading'));
+            if (showOverlay) {
+                document.querySelectorAll('.adv-card').forEach(card => card.classList.remove('loading'));
+            }
 
             if (result && result.success) {
                 const d = result.data;
@@ -400,8 +405,6 @@
                         ? `🔥 ${d.streak.current} Day Streak • Active Session Sync`
                         : `Start your daily streak today!`;
                 }
-
-
 
                 // Sync subjects
                 const subjectContainer = document.getElementById('subject-container');
@@ -436,7 +439,6 @@
 
                 // Activity Log
                 const logWrapper = document.getElementById('activity-log-wrapper');
-                const historyBtn = document.querySelector('button[onclick*="profile.html"]');
                 
                 if (logWrapper && d.activityLog && d.activityLog.length > 0) {
                     logWrapper.innerHTML = '';
@@ -473,7 +475,7 @@
                 // Load recent doubts
                 loadRecentDoubts(doubtsResult);
 
-            } else {
+            } else if (showOverlay) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Sync Failed',
@@ -520,7 +522,8 @@
         }
 
         window.addEventListener('load', () => {
-             loadDashboard();
+             loadDashboard(true);
+             setInterval(() => loadDashboard(false), 30000); // Silent refresh every 30s
         });
 
 

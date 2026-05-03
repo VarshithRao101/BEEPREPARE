@@ -428,8 +428,8 @@
         const refreshData = async () => {
             try {
                 const [banksRes, doubtsRes] = await Promise.all([
-                    apiCall('/student/banks'),
-                    apiCall('/student/doubts')
+                    apiCall('/student/banks', 'GET', null, true, false, false),
+                    apiCall('/student/doubts', 'GET', null, true, false, false)
                 ]);
 
                 if (banksRes?.success) allBanks = banksRes.data.filter(b => b.status === 'active');
@@ -498,7 +498,7 @@
                 return;
             }
 
-            const res = await apiCall(`/student/doubts/${currentChatId}/messages`);
+            const res = await apiCall(`/student/doubts/${currentChatId}/messages`, 'GET', null, true, false, false);
             if (res?.success) {
                 renderMessages(res.data.messages);
             }

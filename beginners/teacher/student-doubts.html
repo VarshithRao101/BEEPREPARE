@@ -427,7 +427,7 @@
 
         const refreshData = async () => {
             try {
-                const res = await apiCall('/teacher/doubts');
+                const res = await apiCall('/teacher/doubts', 'GET', null, true, false, false);
                 if (res?.success) {
                     allLogs = res.data.doubts || [];
                     renderSidebar();
@@ -490,7 +490,7 @@
         async function fetchMessages() {
             if (!currentChatId) return;
 
-            const res = await apiCall(`/teacher/doubts/${currentChatId}/messages`);
+            const res = await apiCall(`/teacher/doubts/${currentChatId}/messages`, 'GET', null, true, false, false);
             if (res?.success) {
                 renderMessages(res.data.messages);
             }

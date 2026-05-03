@@ -315,15 +315,17 @@
             return Math.floor(seconds) + " seconds ago";
         }
 
-        async function loadDashboard() {
+        async function loadDashboard(showOverlay = true) {
             const teacherNameHeader = document.getElementById('teacher-name-header');
             const teacherName = localStorage.getItem(BP.NAME) || 'Professor';
             if(teacherNameHeader) teacherNameHeader.textContent = teacherName.split(' ')[0];
 
-            // Show skeletons immediately
-            BP.showSkeleton('subjects-container', 'card', 2);
-            BP.showSkeleton('grades-container', 'card', 3);
-            BP.showSkeleton('activity-container', 'list', 5);
+            // Show skeletons only on initial load or if overlay is requested
+            if (showOverlay) {
+                BP.showSkeleton('subjects-container', 'card', 2);
+                BP.showSkeleton('grades-container', 'card', 3);
+                BP.showSkeleton('activity-container', 'list', 5);
+            }
 
             // Init Header Profile
             const profileIcon = document.getElementById('profile-icon-btn');
@@ -341,14 +343,16 @@
 
             const [guardRes, response] = await Promise.all([
                 guardTeacher(),
-                apiCall('/teacher/dashboard').catch(()=>null)
+                apiCall('/teacher/dashboard', 'GET', null, true, false, showOverlay).catch(()=>null)
             ]);
             
             if (!guardRes) return;
             if (!response || !response.success) {
-                const container = document.getElementById('subjects-container');
-                if (container) {
-                    container.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #ff4d4d; padding: 20px; font-weight: 800; border: 1px dashed #ff4d4d; border-radius: 12px;">SIGNAL DROPPED (SYNC ERROR)</div>`;
+                if (showOverlay) {
+                    const container = document.getElementById('subjects-container');
+                    if (container) {
+                        container.innerHTML = `<div style="grid-column: span 2; text-align: center; color: #ff4d4d; padding: 20px; font-weight: 800; border: 1px dashed #ff4d4d; border-radius: 12px;">SIGNAL DROPPED (SYNC ERROR)</div>`;
+                    }
                 }
                 return;
             }
@@ -450,8 +454,8 @@
         }
 
         // Initialize
-        loadDashboard();
-        setInterval(loadDashboard, 15000); // Pulse every 15 seconds to refresh stats/signals
+        loadDashboard(true);
+        setInterval(() => loadDashboard(false), 15000); // Pulse every 15 seconds silently refreshes stats/signals
     </script>
 <script src="/assets/js/ripple.js"></script>
 </body>

@@ -607,7 +607,7 @@ export const BP = {
 
   syncTeacherSignals: async () => {
     try {
-      const res = await apiCall('/teacher/dashboard');
+      const res = await apiCall('/teacher/dashboard', 'GET', null, true, false, false);
       if (res && res.success) {
         const hasReq = res.data.pendingRequestsCount > 0;
         const hasDoubt = res.data.pendingDoubtsCount > 0;

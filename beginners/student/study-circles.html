@@ -670,7 +670,7 @@
 
             async function refreshCircles() {
                 try {
-                    const res = await apiCall('/circles/my');
+                    const res = await apiCall('/circles/my', 'GET', null, true, false, false);
                     if (res && res.success) {
                         myCircles = res.data;
                         renderSidebar();
@@ -809,7 +809,7 @@
             async function pollMessages() {
                 if (!activeId) return;
                 const endpoint = lastMsgTime ? `/circles/${activeId}/messages?after=${lastMsgTime}` : `/circles/${activeId}/messages`;
-                const res = await apiCall(endpoint);
+                const res = await apiCall(endpoint, 'GET', null, true, false, false);
                 
                 // BACKEND FIX: Circle messages normally come as an array directly or inside res.data.messages
                 if (res && res.success) {
