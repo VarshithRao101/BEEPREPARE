@@ -28,6 +28,7 @@
             background: #000 url('../../assets/images/abstract-bg.png') no-repeat center center fixed;
             background-size: cover;
         }
+        body {
             color: var(--text-main);
             height: 100vh;
             overflow: hidden;
@@ -772,6 +773,13 @@
                 const input = document.getElementById('msgInput');
                 const content = input.value.trim();
                 if (!content || !activeId) return;
+                const btn = document.getElementById('btn-send-circle');
+                const btnIcon = btn.querySelector('#btn-icon');
+                const btnSpinner = btn.querySelector('#btn-spinner');
+
+                btn.disabled = true;
+                btnIcon.style.display = 'none';
+                btnSpinner.style.display = 'block';
                 input.value = '';
 
                 // Optimistic UI: Pre-render message
@@ -797,21 +805,13 @@
                     lastMsgTime = res.data.createdAt;
                     scrollToBottom();
                 } else if (res.error?.code === 'EXPLICIT_CONTENT') {
-                    const tempEl = document.getElementById(`msg-${tempId}`);
-                    if (tempEl) tempEl.remove();
-                    
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'BEE SHIELD ACTIVE',
-                        text: res.message,
-                        background: '#0a0a0a',
-                        color: '#fff',
-                        confirmButtonColor: '#FFD700'
-                    });
+                     const tempEl = document.getElementById(`msg-${tempId}`);
+                     if (tempEl) tempEl.remove();
+                     openModal('shield');
                 } else {
-                    const tempEl = document.getElementById(`msg-${tempId}`);
-                    if (tempEl) tempEl.style.opacity = '0.3'; // Indicate failure
-                    BP.showPulse('Signal Transmission Failed');
+                     const tempEl = document.getElementById(`msg-${tempId}`);
+                     if (tempEl) tempEl.style.opacity = '0.3';
+                     alert(res.message);
                 }
 
                 btn.disabled = false;
