@@ -74,16 +74,9 @@ export async function getFreshToken() {
   }
 }
 
-// Smart path to index.html from any subfolder
+// Smart path to index.html from any subfolder using import.meta.url
 export function getIndexPath() {
-  const depth = window.location.pathname
-    .split('/').filter(Boolean).length;
-  // Note: This logic assumes the environment base path. 
-  // In many local setups, it might need adjustment if served from a subfolder.
-  // But we will follow the user's logic provided.
-  if (depth <= 1) return 'index.html';
-  if (depth === 2) return '../index.html';
-  return '../../index.html';
+  return new URL('../../index.html', import.meta.url).href;
 }
 
 // Standard API caller
@@ -613,35 +606,12 @@ export const BP = {
   initLoader: () => {
     if (document.getElementById('bee-loader-overlay')) return;
 
-    const isLocal = window.location.hostname === 'localhost' || 
-                    window.location.hostname === '127.0.0.1' || 
-                    window.location.hostname.startsWith('192.168.') || 
-                    window.location.hostname.startsWith('10.');
-    let prefix = '';
-    
-    if (isLocal) {
-        if (window.location.pathname.includes('BEEPREPARE-main')) {
-            const parts = window.location.pathname.split('/');
-            const idx = parts.indexOf('BEEPREPARE-main');
-            if (idx !== -1) {
-                const dist = parts.length - idx - 2;
-                for(let i=0; i<dist; i++) prefix += '../';
-            }
-        } else {
-            const depth = window.location.pathname.split('/').filter(Boolean).length;
-            if (depth === 2) prefix = '../';
-            else if (depth >= 3) prefix = '../../';
-        }
-    } else {
-        prefix = '/';
-    }
-    
-    // Inject CSS Link with Cache Buster (v2.2)
+    // Inject CSS Link with Cache Buster (v2.3) using robust import.meta.url
     if (!document.getElementById('bee-loader-css')) {
       const link = document.createElement('link');
       link.id = 'bee-loader-css';
       link.rel = 'stylesheet';
-      link.href = prefix + 'assets/css/loader.css?v=2.2';
+      link.href = new URL('../../assets/css/loader.css?v=2.3', import.meta.url).href;
       document.head.appendChild(link);
     }
 
@@ -652,13 +622,13 @@ export const BP = {
         style.id = 'bee-loader-style-inline';
         style.textContent = `
             .bee-loader-overlay {
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0, 0, 0, 0.3); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background: rgba(0, 0, 0, 0.4); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
                 display: none; align-items: center; justify-content: center;
                 z-index: 999999; opacity: 0; transition: opacity 0.4s ease;
                 pointer-events: none;
             }
-            .bee-loader-overlay.active { display: flex; opacity: 1; pointer-events: all; }
+            .bee-loader-overlay.active { display: flex; opacity: 1; pointer-events: all; visibility: visible; }
             .loader-container { 
                 background: rgba(15, 15, 20, 0.95); padding: 40px; border-radius: 30px;
                 border: 1px solid rgba(255, 215, 0, 0.3); display: flex; flex-direction: column;

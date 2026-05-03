@@ -1056,15 +1056,16 @@ const toggleMaintenance = async (req, res) => {
 };
 
 const setAnnouncement = async (req, res) => {
-  const { text, target, expiresAt, actionCode } = req.body;
+  // Note: action code already verified by requireActionCode('ADD_ANNOUNCEMENT') middleware
+  const { text, target, expiresAt } = req.body;
 
-  if (!verifyActionCode('add_announcement', actionCode)) {
-    return error(res, 'Invalid action code', 'INVALID_CODE', 403);
+  if (!text || !text.trim()) {
+    return error(res, 'Announcement text is required', 'MISSING_TEXT', 400);
   }
 
   await Announcement.updateMany({}, { isActive: false });
   const a = await Announcement.create({
-    text,
+    text: text.trim(),
     target: target || 'all',
     expiresAt: expiresAt ? new Date(expiresAt) : null,
     createdBy: req.admin.adminId,

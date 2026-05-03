@@ -40,6 +40,7 @@ const required = [
   'CODE_DELETE_FEEDBACK',
   'CODE_DEACTIVATE_BANK',
   'CODE_DELETE_BANK',
+  'CODE_ADD_ANNOUNCEMENT',
   // NEW — Fortress security layer
   'ENCRYPTION_SECRET',
   'LOOKUP_HMAC_SECRET',
