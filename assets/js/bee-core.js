@@ -2,12 +2,11 @@
 // BEE CORE — Shared utilities for BEEPREPARE
 // ============================================
 
-// Vercel Analytics & Speed Insights Injection
-import { inject } from 'https://cdn.jsdelivr.net/npm/@vercel/analytics/+esm';
-import { injectSpeedInsights } from 'https://cdn.jsdelivr.net/npm/@vercel/speed-insights/dist/index.mjs';
-
-inject();
-injectSpeedInsights();
+// Vercel Analytics & Speed Insights Injection (Suppress on localhost)
+if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  import('https://cdn.jsdelivr.net/npm/@vercel/analytics/+esm').then(mod => mod.inject());
+  import('https://cdn.jsdelivr.net/npm/@vercel/speed-insights/dist/index.mjs').then(mod => mod.injectSpeedInsights());
+}
 
 // Firebase Config
 export const firebaseConfig = {

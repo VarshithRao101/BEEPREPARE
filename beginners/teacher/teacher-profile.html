@@ -673,15 +673,6 @@
     }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        window.onerror = function(msg, url, line, col, error) {
-            alert("JS Error: " + msg + "\nAt: " + url + ":" + line + ":" + col);
-            return false;
-        };
-        window.onunhandledrejection = function(event) {
-            alert("Unhandled Rejection: " + event.reason);
-        };
-    </script>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 
