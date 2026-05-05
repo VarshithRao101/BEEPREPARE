@@ -44,14 +44,54 @@ const questionSchema = new Schema({
   }], // For Reading Passage, Case Study, Data Interpretation
 
 
-  // ── Metadata & Cross-refs ───────────────────────────────────────────────
+  // Metadata & Cross-refs ───────────────────────────────────────────────
   chapterId:     { type: String }, 
   chapterName:   { type: String }, 
   bankId:        { type: String }, // Cross-ref to Bank on Main DB
-  createdBy:     { type: String, required: true }
+  createdBy:     { type: String, required: true },
+
+  // Matrix Engine Fields ──────────────────────────────────────────────────
+  metaTags: {
+    type: [String],
+    enum: ['important', 'repeated', 'formula', 'conceptual', 'pyqs', 'tricky', 'standard'],
+    default: []
+  },
+  subtopicBitmask: {
+    type: Number,   // stored as regular Number, BigInt conversion in bridge
+    default: 0
+  },
+  chapterIndex: {
+    type: Number,   // numeric index for fast WASM lookup
+    default: 0
+  },
+  numericId: {
+    type: Number,
+    unique: true,
+    sparse: true
+  },
+  examFrequency: {
+    type: Number,
+    min: 1,
+    max: 10,
+    default: 5
+  },
+  importance: {
+    type: Number,
+    min: 1,
+    max: 10,
+    default: 5
+  },
+  lastUsed: {
+    type: Date,
+    default: null
+  }
 }, { timestamps: true });
 
 // ── Compound indexes for all common query patterns ──────────────────────────
+questionSchema.index({ metaTags: 1 });
+questionSchema.index({ chapterIndex: 1 });
+questionSchema.index({ numericId: 1 }, { unique: true, sparse: true });
+questionSchema.index({ metaTags: 1, difficulty: 1 });
 questionSchema.index({ teacherId: 1, class: 1, subject: 1, questionType: 1 });
 questionSchema.index({ bankId: 1, questionType: 1, isImportant: 1 });
 questionSchema.index({ bankId: 1, chapterId: 1, questionType: 1, isImportant: 1 });

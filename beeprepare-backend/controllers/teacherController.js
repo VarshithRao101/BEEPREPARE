@@ -17,6 +17,10 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const getChapterId = require('../utils/getChapterId');
+const { 
+  generatePaper: engineGeneratePaper,
+  initEngine 
+} = require('../matrix-engine/js/matrix_bridge');
 
 
 // ─── Multer Setup (memory storage — buffer uploaded to Firebase) ───────────
@@ -1014,96 +1018,76 @@ const generatePaper = async (req, res) => {
     if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
     if (bank.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
 
-    // Step 2: Query all questions from selected chapters
-    const allQuestions = await Question.find({
-      bankId: String(bankId), // String — cross-DB safe (questions on Cluster 2)
-      chapterId: { $in: selectedChapters }
-    });
+    // Step 2: Map selectedChapters to indices for the engine
+    const chapterIndices = selectedChapters.map(cid => {
+      return bank.chapters.findIndex(c => c.chapterId === cid);
+    }).filter(idx => idx !== -1);
 
-    // Step 3: Group into type pools
-    const pools = {
-      MCQ: { key: 'mcq', questions: [] },
-      'Very Short': { key: 'veryShort', questions: [] },
-      Short: { key: 'short', questions: [] },
-      Long: { key: 'long', questions: [] },
-      Essay: { key: 'essay', questions: [] },
-      'True or False': { key: 'trueFalse', questions: [] },
-      'Fill in the Blanks': { key: 'fillBlanks', questions: [] },
-      'Simple Matching': { key: 'simpleMatch', questions: [] },
-      'Matrix Matching': { key: 'matrixMatch', questions: [] },
-      'Reading Passage': { key: 'readingPassage', questions: [] },
-      'Case Study': { key: 'caseStudy', questions: [] },
-      'Data Interpretation': { key: 'dataInterp', questions: [] }
+    const TYPE_MAP = {
+      'MCQ': 0, 'Very Short': 1, 'Short': 2, 'Long': 3, 'Essay': 4,
+      'True or False': 5, 'Fill in the Blanks': 6, 'Simple Matching': 7,
+      'Matrix Matching': 8, 'Reading Passage': 9, 'Case Study': 10,
+      'Data Interpretation': 11
     };
 
-    for (const q of allQuestions) {
-      if (pools[q.questionType]) pools[q.questionType].questions.push(q);
-    }
-
-    // Step 4: 70/30 selection per pool with dynamic marks from user blueprint
     const selected = [];
     const sectionDefs = [];
-    const labels = ['A', 'B', 'C', 'D', 'E', 'F'];
+    const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-    // blueprint is now an array: [{ id: 'mcq', type: 'MCQ', marks: 1, qty: 5 }, ...]
-    blueprint.forEach((sectionReq, idx) => {
-      const typeName = sectionReq.type;
-      const blueprintKey = sectionReq.id;
-      const needed = parseInt(sectionReq.qty) || 0;
-      const requestedMarks = parseInt(sectionReq.marks) || 1;
+    // Step 3: Use Matrix Engine for sectional selection
+    for (let i = 0; i < blueprint.length; i++) {
+        const sectionReq = blueprint[i];
+        const needed = parseInt(sectionReq.qty) || 0;
+        const requestedMarks = parseInt(sectionReq.marks) || 1;
+        if (needed === 0) continue;
 
-      if (needed === 0) return;
+        try {
+            const engineResult = await engineGeneratePaper({
+                totalQuestions: needed,
+                totalMarks: needed * requestedMarks,
+                easyPct: 30, mediumPct: 50, hardPct: 20,
+                tagDistribution: [
+                    { tag: 'important', pct: 40 },
+                    { tag: 'repeated',  pct: 30 },
+                    { tag: 'conceptual',pct: 20 },
+                    { tag: 'standard',  pct: 10 }
+                ],
+                chapterIndices,
+                typeFilter: TYPE_MAP[sectionReq.type] ?? 2,
+                seed: Math.floor(Math.random() * 0xFFFFFFFF)
+            });
 
-      // Find identifying pool for this question type
-      let foundPool = pools[typeName];
+            if (engineResult.questionIds.length > 0) {
+                // Fetch full docs from Cluster 2
+                const sectionQuestions = await Question.find({ 
+                    numericId: { $in: engineResult.questionIds } 
+                }).lean();
 
-      if (!foundPool || foundPool.questions.length === 0) return;
+                // Apply requested marks (override bank defaults for this blueprint)
+                const mappedQs = sectionQuestions.map(q => ({ ...q, marks: requestedMarks }));
+                selected.push(...mappedQs);
 
-      const importantPool = foundPool.questions.filter(q => q.isImportant);
-      const normalPool = foundPool.questions.filter(q => !q.isImportant);
+                sectionDefs.push({
+                    label: labels[sectionDefs.length] || '?',
+                    type: sectionReq.type,
+                    key: sectionReq.id,
+                    marksEach: requestedMarks,
+                    count: mappedQs.length,
+                    total: mappedQs.length * requestedMarks,
+                    questions: mappedQs
+                });
+            }
+        } catch (engineErr) {
+            console.error(`[Matrix Engine] Section ${sectionReq.type} failed:`, engineErr.message);
+            // Fallback to old logic or skip? Let's skip and log.
+        }
+    }
 
-      const importantNeeded = Math.ceil(needed * 0.70);
-      const normalNeeded = needed - importantNeeded;
+    if (selected.length === 0) {
+        return error(res, 'Matrix Engine failed to select any questions for these parameters.', 'ENGINE_FAILURE', 500);
+    }
 
-      let fromImportant, fromNormal;
-
-      if (importantPool.length < importantNeeded) {
-        const deficit = importantNeeded - importantPool.length;
-        fromImportant = importantPool;
-        fromNormal = shuffleArray(normalPool).slice(0, normalNeeded + deficit);
-      } else {
-        fromImportant = shuffleArray(importantPool).slice(0, importantNeeded);
-        fromNormal = shuffleArray(normalPool).slice(0, normalNeeded);
-      }
-
-      let typeSelected = [...fromImportant, ...fromNormal].slice(0, needed);
-
-      // IMPORTANT: Override marks based on user's architectural requirement for this paper
-      typeSelected = typeSelected.map(q => {
-        const qObj = q.toObject ? q.toObject() : { ...q };
-        return {
-          ...qObj,
-          marks: requestedMarks // Apply user's requested marks
-        };
-      });
-
-      if (typeSelected.length > 0) {
-        selected.push(...typeSelected);
-
-        // Add to our dynamic layout
-        sectionDefs.push({
-          label: labels[sectionDefs.length] || String.fromCharCode(65 + sectionDefs.length),
-          type: typeName,
-          key: blueprintKey,
-          marksEach: requestedMarks,
-          count: typeSelected.length,
-          total: typeSelected.length * requestedMarks,
-          questions: typeSelected // Store questions directly to avoid filter bugs
-        });
-      }
-    });
-
-    // Step 5 & 6: Calculate total marks based on ACTUAL selected questions and user requested marks
+    // Step 4: Calculate total marks
     const totalMarks = selected.reduce((sum, q) => sum + (q.marks || 0), 0);
 
     // Step 8: Construct REAL PROFESSIONAL paperHtml (Optimized for Scaling)

@@ -40,6 +40,7 @@ require('./config/firebase');
 const logger = require('./utils/logger');
 const requireAuth = require('./middleware/requireAuth');
 const mongoose = require('mongoose');
+const { bootMatrixEngine } = require('./controllers/matrixController');
 
 // Apply global mongoose settings
 // Note: We removed global bufferCommands: false here to avoid Blacklist crash
@@ -438,6 +439,8 @@ app.get('/api/admin-security/captcha', (req, res) => {
   });
 });
 
+app.use('/api/matrix', require('./routes/matrix'));
+
 // Other routes
 app.use('/api/quotes', requireAuth, require('./routes/quotes'));
 app.use('/api/system', require('./routes/system'));
@@ -517,7 +520,9 @@ const startApp = async () => {
   try {
     // Only block startup on DB failure if NOT on Vercel
     // On Vercel, we want the function to stay alive to report errors
-    await connectDB().catch(err => {
+    await connectDB().then(() => {
+        bootMatrixEngine();
+    }).catch(err => {
         logger.error('DB CONNECTION DELAYED OR FAILED:', err);
     });
 

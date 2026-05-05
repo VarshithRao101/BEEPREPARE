@@ -12,6 +12,7 @@ package-lock.json
 *.tmp
 dist/
 build/
+!beeprepare-backend/matrix-engine/build/
 firebase-admin.json
 beeprepare_keys.json
 *.json.bak
