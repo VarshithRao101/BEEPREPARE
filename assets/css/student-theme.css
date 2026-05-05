@@ -73,21 +73,23 @@ body {
     border-color: rgba(255, 207, 0, 0.5) !important;
 }
 
-.adv-card:hover,
-.subject-card:hover,
-.class-card:hover,
-.dash-card:hover,
-.role-card:hover,
-.list-item:hover,
-.action-card:hover,
-.subject-mini-card:hover,
-.bank-card:hover,
-.test-card:hover,
-.menu-item:not(.no-hover):hover,
-.profile-card:hover {
-    transform: translateY(-4px) !important;
-    border-color: rgba(255, 207, 0, 0.8) !important;
-    box-shadow: 0 10px 30px rgba(255, 207, 0, 0.15) !important;
+@media (hover: hover) {
+    .adv-card:hover,
+    .subject-card:hover,
+    .class-card:hover,
+    .dash-card:hover,
+    .role-card:hover,
+    .list-item:hover,
+    .action-card:hover,
+    .subject-mini-card:hover,
+    .bank-card:hover,
+    .test-card:hover,
+    .menu-item:not(.no-hover):hover,
+    .profile-card:hover {
+        transform: translateY(-4px) !important;
+        border-color: rgba(255, 207, 0, 0.8) !important;
+        box-shadow: 0 10px 30px rgba(255, 207, 0, 0.15) !important;
+    }
 }
 
 /* Menu Item Specifics */
@@ -114,12 +116,14 @@ body {
     border-radius: 0 4px 0 0;
 }
 
-.subject-card:hover::after,
-.class-card:hover::after,
-.dash-card:hover::after,
-.action-card:hover::after,
-.bank-card:hover::after {
-    width: 100%;
+@media (hover: hover) {
+    .subject-card:hover::after,
+    .class-card:hover::after,
+    .dash-card:hover::after,
+    .action-card:hover::after,
+    .bank-card:hover::after {
+        width: 100%;
+    }
 }
 
 /* Override dark text inside cards */
@@ -184,25 +188,29 @@ button.primary::after {
     transition: 0.4s ease;
 }
 
-.btn:hover,
-.btn-primary:hover,
-.btn-adv:hover,
-.ac-btn:hover,
-.action-btn-lg:hover,
-button.primary:hover {
-    color: #000 !important;
-    border-color: var(--adv-yellow) !important;
-    box-shadow: 0 10px 30px rgba(255, 207, 0, 0.4), 0 0 20px rgba(255, 207, 0, 0.2) !important;
-    transform: translateY(-4px) !important;
+@media (hover: hover) {
+    .btn:hover,
+    .btn-primary:hover,
+    .btn-adv:hover,
+    .ac-btn:hover,
+    .action-btn-lg:hover,
+    button.primary:hover {
+        color: #000 !important;
+        border-color: var(--adv-yellow) !important;
+        box-shadow: 0 10px 30px rgba(255, 207, 0, 0.4), 0 0 20px rgba(255, 207, 0, 0.2) !important;
+        transform: translateY(-4px) !important;
+    }
 }
 
-.btn:hover::after,
-.btn-primary:hover::after,
-.btn-adv:hover::after,
-.ac-btn:hover::after,
-.action-btn-lg:hover::after,
-button.primary:hover::after {
-    opacity: 1;
+@media (hover: hover) {
+    .btn:hover::after,
+    .btn-primary:hover::after,
+    .btn-adv:hover::after,
+    .ac-btn:hover::after,
+    .action-btn-lg:hover::after,
+    button.primary:hover::after {
+        opacity: 1;
+    }
 }
 
 /* Special Button (Logout) */

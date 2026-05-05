@@ -116,32 +116,36 @@ button.primary:after {
   pointer-events: none;
 }
 
-.btn-primary:hover:after,
-.btn-adv:hover:after,
-.btn-finish:hover:after,
-.login-btn:hover:after,
-.unlock-btn:hover:after,
-.update-btn:hover:after,
-.rename-confirm:hover:after,
-button.primary:hover:after {
-  right: 0;
+@media (hover: hover) {
+  .btn-primary:hover:after,
+  .btn-adv:hover:after,
+  .btn-finish:hover:after,
+  .login-btn:hover:after,
+  .unlock-btn:hover:after,
+  .update-btn:hover:after,
+  .rename-confirm:hover:after,
+  button.primary:hover:after {
+    right: 0;
+  }
 }
 
-.btn-primary:hover,
-.btn-adv:hover,
-.btn-finish:hover,
-.login-btn:hover,
-.unlock-btn:hover,
-.btn-enter-otp:hover,
-.update-btn:hover,
-.rename-confirm:hover,
-button.primary:hover {
-  transform: var(--hover-lift-md) scale(1.02) !important;
-  box-shadow:
-    0 15px 35px -5px var(--gold-glow),
-    0 0 0 1px rgba(255, 215, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-  background: linear-gradient(135deg, var(--gold), #e6c200) !important;
+@media (hover: hover) {
+  .btn-primary:hover,
+  .btn-adv:hover,
+  .btn-finish:hover,
+  .login-btn:hover,
+  .unlock-btn:hover,
+  .btn-enter-otp:hover,
+  .update-btn:hover,
+  .rename-confirm:hover,
+  button.primary:hover {
+    transform: var(--hover-lift-md) scale(1.02) !important;
+    box-shadow:
+      0 15px 35px -5px var(--gold-glow),
+      0 0 0 1px rgba(255, 215, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    background: linear-gradient(135deg, var(--gold), #e6c200) !important;
+  }
 }
 
 .btn-primary:active,
@@ -174,14 +178,16 @@ button.primary:active {
   will-change: transform;
 }
 
-.btn-outline:hover,
-.rename-cancel:hover,
-.refresh-btn:hover,
-.page-btn:not([disabled]):hover {
-  transform: var(--hover-lift-sm) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
-  background: rgba(255, 255, 255, 0.07) !important;
+@media (hover: hover) {
+  .btn-outline:hover,
+  .rename-cancel:hover,
+  .refresh-btn:hover,
+  .page-btn:not([disabled]):hover {
+    transform: var(--hover-lift-sm) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+  }
 }
 
 .btn-outline:active,
@@ -192,11 +198,13 @@ button.primary:active {
 }
 
 /* Pills (filter tabs) */
-.pill:hover {
-  border-color: var(--gold) !important;
-  color: var(--gold) !important;
-  transform: var(--hover-lift-sm) !important;
-  box-shadow: 0 6px 18px rgba(255, 215, 0, 0.12) !important;
+@media (hover: hover) {
+  .pill:hover {
+    border-color: var(--gold) !important;
+    color: var(--gold) !important;
+    transform: var(--hover-lift-sm) !important;
+    box-shadow: 0 6px 18px rgba(255, 215, 0, 0.12) !important;
+  }
 }
 
 .pill.active {
@@ -255,18 +263,20 @@ button.danger,
   bottom: 0;
 }
 
-.logout-btn:hover,
-.btn-logout:hover,
-.btn-danger:hover,
-button.danger:hover,
-[class*="purge"]:hover {
-  transform: var(--hover-lift-sm) scale(1.03) !important;
-  background: rgba(255, 60, 60, 0.2) !important;
-  border-color: var(--red-solid) !important;
-  box-shadow:
-    0 12px 28px var(--red-glow),
-    0 0 0 1px rgba(255, 60, 60, 0.5) !important;
-  color: #fff !important;
+@media (hover: hover) {
+  .logout-btn:hover,
+  .btn-logout:hover,
+  .btn-danger:hover,
+  button.danger:hover,
+  [class*="purge"]:hover {
+    transform: var(--hover-lift-sm) scale(1.03) !important;
+    background: rgba(255, 60, 60, 0.2) !important;
+    border-color: var(--red-solid) !important;
+    box-shadow:
+      0 12px 28px var(--red-glow),
+      0 0 0 1px rgba(255, 60, 60, 0.5) !important;
+    color: #fff !important;
+  }
 }
 
 .logout-btn:active,

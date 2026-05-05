@@ -260,8 +260,10 @@ body {
     transform: scale(0.98);
 }
 
-.btn-primary:hover {
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+@media (hover: hover) {
+    .btn-primary:hover {
+        box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+    }
 }
 
 .btn-outline {
@@ -270,9 +272,11 @@ body {
     color: var(--text-main);
 }
 
-.btn-outline:hover {
-    border-color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
+@media (hover: hover) {
+    .btn-outline:hover {
+        border-color: var(--text-main);
+        background: rgba(255, 255, 255, 0.05);
+    }
 }
 
 .btn:disabled {
@@ -319,9 +323,11 @@ body {
     backdrop-filter: blur(8px);
 }
 
-.role-card:hover {
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) {
+    .role-card:hover {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.08);
+    }
 }
 
 .role-card.selected {
@@ -416,9 +422,11 @@ input[type="checkbox"]:checked+.checkbox-wrapper .custom-checkbox {
     backdrop-filter: blur(8px);
 }
 
-.dash-card:hover {
-    border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) {
+    .dash-card:hover {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.08);
+    }
 }
 
 .nav-bottom {
@@ -521,9 +529,11 @@ input[type="checkbox"]:checked+.checkbox-wrapper .custom-checkbox {
     backdrop-filter: blur(6px);
 }
 
-.list-item:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.2);
+@media (hover: hover) {
+    .list-item:hover {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
 }
 
 .badge {

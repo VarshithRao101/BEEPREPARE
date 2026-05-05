@@ -13,8 +13,10 @@
     border-radius: 24px !important;
     transition: all 0.2s ease !important;
 }
-.action-card:hover {
-    border-color: #FFD700 !important;
+@media (hover: hover) {
+    .action-card:hover {
+        border-color: #FFD700 !important;
+    }
 }
 
 /* Subject Mini Cards */
@@ -24,9 +26,11 @@
     border-radius: 16px !important;
     transition: all 0.2s ease !important;
 }
-.subject-mini-card:hover {
-    background: rgba(30, 30, 30, 0.9) !important;
-    border-color: #FFD700 !important;
+@media (hover: hover) {
+    .subject-mini-card:hover {
+        background: rgba(30, 30, 30, 0.9) !important;
+        border-color: #FFD700 !important;
+    }
 }
 
 /* Document & Chapter Boxes (Notes) */
@@ -36,8 +40,10 @@
     border-radius: 22px !important;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
 }
-.document-item:hover {
-    border-color: rgba(255, 215, 0, 0.4) !important;
+@media (hover: hover) {
+    .document-item:hover {
+        border-color: rgba(255, 215, 0, 0.4) !important;
+    }
 }
 
 /* Timeline Cards */
@@ -46,8 +52,10 @@
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     border-radius: 20px !important;
 }
-.timeline-card:hover {
-    border-color: rgba(255, 215, 0, 0.3) !important;
+@media (hover: hover) {
+    .timeline-card:hover {
+        border-color: rgba(255, 215, 0, 0.3) !important;
+    }
 }
 
 /* Test Area (Test) */
@@ -62,10 +70,12 @@
     border: 1px solid var(--border) !important;
     border-radius: 18px !important;
 }
-.option-item:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: rgba(255, 215, 0, 0.5) !important;
-    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1) !important;
+@media (hover: hover) {
+    .option-item:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 215, 0, 0.5) !important;
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.1) !important;
+    }
 }
 .option-item.selected {
     background: rgba(255, 215, 0, 0.08) !important;
@@ -91,8 +101,10 @@
     border: 1px solid var(--border) !important;
     border-radius: 20px !important;
 }
-.request-card:hover {
-    border-color: #FFD700 !important;
+@media (hover: hover) {
+    .request-card:hover {
+        border-color: #FFD700 !important;
+    }
 }
 
 /* Auth / Validation */
@@ -122,9 +134,11 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
     transition: transform 220ms cubic-bezier(0.175,0.885,0.32,1.275),
                 box-shadow 220ms cubic-bezier(0.25,0.8,0.25,1) !important;
 }
-.btn-adv:hover, .btn-primary:hover, .btn-finish:hover, .unlock-btn:hover, .btn-enter-otp:hover {
-    box-shadow: 0 12px 32px rgba(255, 215, 0, 0.35),
-                0 0 0 1px rgba(255, 215, 0, 0.5) !important;
+@media (hover: hover) {
+    .btn-adv:hover, .btn-primary:hover, .btn-finish:hover, .unlock-btn:hover, .btn-enter-otp:hover {
+        box-shadow: 0 12px 32px rgba(255, 215, 0, 0.35),
+                    0 0 0 1px rgba(255, 215, 0, 0.5) !important;
+    }
 }
 
 /* SweetAlert Glassmorphism (Overriding defaults) */

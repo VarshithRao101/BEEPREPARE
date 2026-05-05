@@ -56,17 +56,19 @@ body {
     backdrop-filter: blur(20px) !important;
 }
 
-.adv-card:hover,
-.subject-card:hover,
-.class-card:hover,
-.dash-card:hover,
-.role-card:hover,
-.list-item:hover,
-.insight-card:hover {
-    transform: translateY(-5px) scale(1.01) !important;
-    border-color: var(--primary) !important;
-    background: rgba(25, 25, 28, 0.8) !important;
-    box-shadow: 0 20px 40px rgba(255, 215, 0, 0.1), 0 0 0 1px var(--primary) !important;
+@media (hover: hover) {
+    .adv-card:hover,
+    .subject-card:hover,
+    .class-card:hover,
+    .dash-card:hover,
+    .role-card:hover,
+    .list-item:hover,
+    .insight-card:hover {
+        transform: translateY(-5px) scale(1.01) !important;
+        border-color: var(--primary) !important;
+        background: rgba(25, 25, 28, 0.8) !important;
+        box-shadow: 0 20px 40px rgba(255, 215, 0, 0.1), 0 0 0 1px var(--primary) !important;
+    }
 }
 
 /* Iconic Glow Accents */
@@ -84,10 +86,12 @@ body {
     transition: 0.4s;
 }
 
-.subject-card:hover::after,
-.class-card:hover::after,
-.dash-card:hover::after {
-    opacity: 1;
+@media (hover: hover) {
+    .subject-card:hover::after,
+    .class-card:hover::after,
+    .dash-card:hover::after {
+        opacity: 1;
+    }
 }
 
 /* Advanced Text Gradients */
@@ -156,19 +160,23 @@ h3,
     transition: 0.4s ease;
 }
 
-.btn:hover,
-.btn-primary:hover,
-.btn-adv:hover {
-    color: #000 !important;
-    border-color: var(--adv-yellow) !important;
-    box-shadow: 0 10px 30px rgba(255, 207, 0, 0.4), 0 0 20px rgba(255, 207, 0, 0.2) !important;
-    transform: translateY(-4px) !important;
+@media (hover: hover) {
+    .btn:hover,
+    .btn-primary:hover,
+    .btn-adv:hover {
+        color: #000 !important;
+        border-color: var(--adv-yellow) !important;
+        box-shadow: 0 10px 30px rgba(255, 207, 0, 0.4), 0 0 20px rgba(255, 207, 0, 0.2) !important;
+        transform: translateY(-4px) !important;
+    }
 }
 
-.btn:hover::after,
-.btn-primary:hover::after,
-.btn-adv:hover::after {
-    opacity: 1;
+@media (hover: hover) {
+    .btn:hover::after,
+    .btn-primary:hover::after,
+    .btn-adv:hover::after {
+        opacity: 1;
+    }
 }
 
 /* Inputs and Forms */
