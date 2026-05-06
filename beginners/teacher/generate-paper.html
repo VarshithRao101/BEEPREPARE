@@ -672,14 +672,7 @@
                 const result = await apiCall('/teacher/generate-paper', 'POST', {
                     bankId: selectedBankId,
                     selectedChapters,
-                    blueprint: bpData,
-                    layout: {
-                        sectionA: blueprint[0].qty > 0 ? 'mcq' : null,
-                        sectionB: blueprint[1].qty > 0 ? 'veryShort' : null,
-                        sectionC: blueprint[2].qty > 0 ? 'short' : null,
-                        sectionD: blueprint[3].qty > 0 ? 'long' : null,
-                        sectionE: blueprint[4].qty > 0 ? 'essay' : null
-                    }
+                    blueprint: bpData
                 });
 
                 if (result && result.success) {
