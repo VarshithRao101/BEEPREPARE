@@ -30,38 +30,40 @@ const connectDB = async () => {
       if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI missing');
       if (!process.env.MONGODB_QUESTIONS_URI) throw new Error('MONGODB_QUESTIONS_URI missing');
 
-      console.log('Connecting to Main and Questions DB concurrently...');
-      const [mainConnMongoose, questionsConn] = await Promise.all([
-        mongoose.connect(process.env.MONGODB_URI, opts),
-        mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts).asPromise()
-      ]);
-      
+      console.log('[Database] Connecting to Main DB...');
+      const mainConnMongoose = await mongoose.connect(process.env.MONGODB_URI, opts);
       cached.mainConn = mongoose.connection;
-      cached.questionsConn = questionsConn;
-      console.log('Both DBs connected successfully.');
+      console.log('[Database] Main DB connected.');
+
+      console.log('[Database] Connecting to Questions DB (Auxiliary)...');
+      // Use a separate connection for questions — non-blocking for the main app startup
+      mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts).asPromise()
+        .then(qConn => {
+          cached.questionsConn = qConn;
+          console.log('[Database] Questions DB connected.');
+          qConn.on('disconnected', () => {
+            console.error('[Database] Questions DB disconnected');
+            cached.questionsConn = null;
+          });
+          qConn.on('error', (err) => console.error('[Database] Questions DB error:', err.message));
+        })
+        .catch(err => {
+          console.error('[Database] Questions DB connection failed (Non-critical for startup):', err.message);
+        });
 
       cached.mainConn.on('disconnected', () => {
-        console.error('Main DB disconnected');
+        console.error('[Database] Main DB disconnected');
         cached.mainConn = null;
         cached.promise = null;
       });
 
-      cached.questionsConn.on('disconnected', () => {
-        console.error('Questions DB disconnected');
-        cached.questionsConn = null;
-        cached.promise = null;
-      });
+      cached.mainConn.on('error', (err) => console.error('[Database] Main DB error:', err.message));
 
-      cached.mainConn.on('error', (err) => console.error('Main DB error:', err.message));
-      cached.questionsConn.on('error', (err) => console.error('Questions DB error:', err.message));
-
-      return { mainConn: cached.mainConn, questionsConn: cached.questionsConn };
-
+      return { mainConn: cached.mainConn, questionsConn: null }; 
     } catch (err) {
       cached.promise = null;
       cached.mainConn = null;
-      cached.questionsConn = null;
-      console.error('MongoDB connection failed:', err.message);
+      console.error('[Database] MongoDB main connection failed:', err.message);
       throw err;
     }
   })();

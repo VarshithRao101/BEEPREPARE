@@ -57,7 +57,25 @@ const bootMatrixEngine = async () => {
         const ready = await initEngine();
         if (!ready) return;
 
-        const Question = getQuestionsConn().model('Question');
+        // Wait for questionsConn to be available (async from db.js)
+        let Question;
+        let retries = 0;
+        while (retries < 10) {
+            try {
+                Question = getQuestionsConn().model('Question');
+                if (Question) break;
+            } catch (e) {
+                retries++;
+                console.log(`[Matrix Engine] Waiting for Questions DB... (Attempt ${retries}/10)`);
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        }
+
+        if (!Question) {
+            console.error('[Matrix Engine] Questions DB connection timed out. Engine offline.');
+            return;
+        }
+
         // Optional: Run a light sync if needed
         // await syncQuestions(); 
 

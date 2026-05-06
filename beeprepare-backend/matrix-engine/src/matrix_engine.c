@@ -108,7 +108,9 @@ void engine_generate_into_ptr(
     tag_quota_select(filtered, filtered_count, &bp, g_current_time, result);
 
     // STAGE 4 — Knapsack mark verification
-    knapsack_verify_and_fix(result, g_bank.pool, g_bank.count, total_marks);
+    if (total_marks > 0) {
+        knapsack_verify_and_fix(result, g_bank.pool, g_bank.count, total_marks);
+    }
 
     // STAGE 5 — Fisher-Yates shuffle
     Question* final_ptrs[500];

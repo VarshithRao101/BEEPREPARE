@@ -66,6 +66,7 @@ const questionSchema = new Schema({
   },
   numericId: {
     type: Number,
+    index: true,
     unique: true,
     sparse: true
   },
@@ -103,7 +104,6 @@ questionSchema.pre('save', async function(next) {
 // ── Compound indexes for all common query patterns ──────────────────────────
 questionSchema.index({ metaTags: 1 });
 questionSchema.index({ chapterIndex: 1 });
-questionSchema.index({ numericId: 1 }, { unique: true, sparse: true });
 questionSchema.index({ metaTags: 1, difficulty: 1 });
 questionSchema.index({ teacherId: 1, class: 1, subject: 1, questionType: 1 });
 questionSchema.index({ bankId: 1, questionType: 1, isImportant: 1 });

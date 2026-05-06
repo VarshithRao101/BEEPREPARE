@@ -9,10 +9,42 @@ async function initEngine() {
       console.warn('[Matrix Engine] build/matrix_engine.js not found. Run build.sh first.');
       return false;
   }
-  const MatrixEngine = require(wasmPath);
-  Module = await MatrixEngine();
-  console.log('[Matrix Engine] WASM loaded');
-  return true;
+  
+  try {
+      const MatrixEngine = require(wasmPath);
+      
+      // If it's a factory function (modularized)
+      if (typeof MatrixEngine === 'function') {
+          Module = await MatrixEngine();
+          console.log('[Matrix Engine] WASM factory loaded');
+          return true;
+      } 
+      
+      // If it's the Module object (standard)
+      Module = MatrixEngine;
+      return new Promise((resolve) => {
+          if (Module.calledRun || Module._engine_load) {
+              console.log('[Matrix Engine] WASM already ready');
+              resolve(true);
+          } else {
+              Module.onRuntimeInitialized = () => {
+                  console.log('[Matrix Engine] WASM runtime initialized');
+                  resolve(true);
+              };
+              // Safety timeout
+              setTimeout(() => {
+                if (Module._engine_load) resolve(true);
+                else {
+                    console.warn('[Matrix Engine] Init timeout - check WASM integrity');
+                    resolve(false);
+                }
+              }, 10000);
+          }
+      });
+  } catch (err) {
+      console.error('[Matrix Engine] Failed to require or init WASM glue:', err.message);
+      return false;
+  }
 }
 
 async function loadQuestions(questions) {
@@ -50,15 +82,19 @@ async function loadQuestions(questions) {
 
   questions.forEach((q, i) => {
     ids.view[i]   = q.numericId || (i + 1);
-    marks.view[i] = q.marks || 1;
-    diff.view[i]  = q.difficulty === 'easy' ? 1 : q.difficulty === 'medium' ? 2 : 3;
+    marks.view[i] = 1; // Force 1 mark to allow arbitrary selection (overridden in controller)
+    const d = (q.difficulty || '').toLowerCase();
+    diff.view[i]  = d === 'easy' ? 1 : d === 'medium' ? 2 : 3;
     imp.view[i]   = q.importance || 5;
     freq.view[i]  = q.examFrequency || 5;
     ts.view[i]    = q.lastUsed ? Math.floor(new Date(q.lastUsed)/1000) : 0;
     subs.view[i]  = BigInt(q.subtopicBitmask || 0);
     
     let tagBits = 0;
-    (q.metaTags || []).forEach(t => {
+    const combinedTags = [...(q.metaTags || []), ...(q.tags || [])];
+    if (q.isImportant) combinedTags.push('important');
+    
+    combinedTags.forEach(t => {
       const idx = TAG_MAP[t.toLowerCase()];
       if (idx !== undefined) tagBits |= (1 << idx);
     });

@@ -1051,7 +1051,7 @@ const generatePaper = async (req, res) => {
         try {
             const engineResult = await engineGeneratePaper({
                 totalQuestions: needed,
-                totalMarks: needed * requestedMarks,
+                totalMarks: needed, // Using 1-mark-per-question normalization
                 easyPct: 30, mediumPct: 50, hardPct: 20,
                 tagDistribution: [
                     { tag: 'important', pct: 40 },
