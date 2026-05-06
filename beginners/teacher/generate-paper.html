@@ -514,12 +514,12 @@
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div>
-                            <label class="field-label">Complexity Type</label>
+                            <label class="field-label">Question Type</label>
                             <select class="glass-select" onchange="updateBlueprint(${idx}, 'type', this.value)">
+                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
                                 <option value="Very Short" ${sec.type === 'Very Short' ? 'selected' : ''}>Very Short</option>
                                 <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
                                 <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
-                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
                                 <option value="True or False" ${sec.type === 'True or False' ? 'selected' : ''}>True or False</option>
                                 <option value="Fill in the Blanks" ${sec.type === 'Fill in the Blanks' ? 'selected' : ''}>Fill in the Blanks</option>
                                 <option value="Simple Matching" ${sec.type === 'Simple Matching' ? 'selected' : ''}>Simple Matching</option>

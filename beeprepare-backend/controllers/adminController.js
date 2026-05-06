@@ -1322,7 +1322,7 @@ const bulkUploadQuestions = async (req, res) => {
     }
 
     // Parse questions from text format
-    const parseQuestions = (text) => {
+    const parseQuestions = async (text) => {
       const blocks = text.split('---')
         .map(b => b.trim())
         .filter(b => b.length > 0);
@@ -1330,6 +1330,9 @@ const bulkUploadQuestions = async (req, res) => {
       if (blocks.length > 100) {
         throw new Error('Maximum 100 questions per upload');
       }
+
+      const lastQ = await Question.findOne({}, { numericId: 1 }).sort({ numericId: -1 }).lean();
+      let nextId = (lastQ && lastQ.numericId) ? lastQ.numericId + 1 : 1;
 
       return blocks.map((block, idx) => {
         const lines = block.split('\n')
@@ -1343,8 +1346,11 @@ const bulkUploadQuestions = async (req, res) => {
           class: bank.class,         // Required by model
           subject: bank.subject,     // Required by model
           createdBy: teacherUid || bank.teacherId,
-          isImportant: false
+          isImportant: false,
+          numericId: nextId++,
+          chapterIndex: bank.chapters.findIndex(c => c.chapterId === chapterId)
         };
+        if (q.chapterIndex < 0) q.chapterIndex = 0;
 
         const options = {};
         let correctOption = null;
@@ -1358,8 +1364,21 @@ const bulkUploadQuestions = async (req, res) => {
               'mcq': 'MCQ',
               'short': 'Short',
               'very_short': 'Very Short',
+              'very short': 'Very Short',
               'long': 'Long',
-              'essay': 'Essay'
+              'essay': 'Essay',
+              'true_false': 'True or False',
+              'true or false': 'True or False',
+              'fill_blanks': 'Fill in the Blanks',
+              'fill in the blanks': 'Fill in the Blanks',
+              'simple_matching': 'Simple Matching',
+              'matrix_matching': 'Matrix Matching',
+              'reading_passage': 'Reading Passage',
+              'reading passage': 'Reading Passage',
+              'case_study': 'Case Study',
+              'case study': 'Case Study',
+              'data_interpretation': 'Data Interpretation',
+              'data interpretation': 'Data Interpretation'
             };
             q.questionType = typeMap[rawType] || 'Short';
           } else if (line.startsWith('MARKS:')) {
@@ -1400,7 +1419,7 @@ const bulkUploadQuestions = async (req, res) => {
 
     let parsed;
     try {
-      parsed = parseQuestions(questionsText);
+      parsed = await parseQuestions(questionsText);
     } catch (parseErr) {
       return error(res,
         parseErr.message,
@@ -1433,6 +1452,10 @@ const bulkUploadQuestions = async (req, res) => {
       { googleUid: teacherUid },
       { $inc: { totalQuestions: saved.length } }
     );
+
+    // Refresh Matrix Engine pool
+    const { bootMatrixEngine } = require('./matrixController');
+    bootMatrixEngine().catch(err => console.warn('[Matrix Engine] Post-upload boot failed:', err.message));
 
     return success(res,
       `${saved.length} questions uploaded`, {

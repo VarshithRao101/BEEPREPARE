@@ -21,6 +21,7 @@ const {
   generatePaper: engineGeneratePaper,
   initEngine 
 } = require('../matrix-engine/js/matrix_bridge');
+const { bootMatrixEngine } = require('./matrixController');
 
 
 // ─── Multer Setup (memory storage — buffer uploaded to Firebase) ───────────
@@ -888,6 +889,8 @@ const addQuestion = async (req, res) => {
       }
     }
 
+    const chapterIndex = bank.chapters.findIndex(c => c.chapterId === chapterId);
+
     // Create optimized question — includes full hierarchy for Cluster 2 schema
     const question = await Question.create({
       // ── Hierarchy (new fields for Cluster 2 schema) ───────────────────────
@@ -895,6 +898,7 @@ const addQuestion = async (req, res) => {
       class: bank.class,
       subject: bank.subject,
       chapterName: chapter.chapterName,
+      chapterIndex: chapterIndex >= 0 ? chapterIndex : 0,
       // ── Question content ──────────────────────────────────────────────────
       questionText,
       questionType,
@@ -930,11 +934,14 @@ const addQuestion = async (req, res) => {
       User.updateOne({ googleUid: teacherId }, { $inc: { totalQuestions: 1 } })
     ]);
 
+    // Hot-reload Matrix Engine pool
+    bootMatrixEngine().catch(err => console.warn('[Matrix Engine] Hot-reload failed:', err.message));
+
     logActivity(
       teacherId,
       'question_added',
       'Question Added',
-      `Added ${questionType} question to ${chapterName}`,
+      `Added ${questionType} question to ${chapter.chapterName}`,
       '#4CAF50'
     );
 

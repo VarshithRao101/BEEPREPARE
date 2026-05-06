@@ -9,6 +9,48 @@ const {
 let engineReady = false;
 let questionsLoadedCount = 0;
 
+const syncQuestions = async () => {
+    try {
+        const Question = getQuestionsConn().model('Question');
+        const Bank = require('../models/Bank');
+        const banks = await Bank.find({}).lean();
+        
+        let totalUpdated = 0;
+        for (const bank of banks) {
+            const questions = await Question.find({ bankId: String(bank._id) });
+            for (const q of questions) {
+                let updated = false;
+                
+                // 1. Sync chapterIndex
+                if (q.chapterId) {
+                    const idx = bank.chapters.findIndex(c => c.chapterId === q.chapterId);
+                    if (idx !== -1 && q.chapterIndex !== idx) {
+                        q.chapterIndex = idx;
+                        updated = true;
+                    }
+                }
+
+                // 2. Sync numericId (pre-save hook will handle new ones, but for existing:)
+                if (!q.numericId) {
+                    const lastQ = await Question.findOne({}, { numericId: 1 }).sort({ numericId: -1 });
+                    q.numericId = (lastQ && lastQ.numericId) ? lastQ.numericId + 1 : 1;
+                    updated = true;
+                }
+
+                if (updated) {
+                    await q.save();
+                    totalUpdated++;
+                }
+            }
+        }
+        console.log(`[Matrix Engine] Synchronization complete. ${totalUpdated} questions updated with metadata.`);
+        return totalUpdated;
+    } catch (err) {
+        console.error('[Matrix Engine] Sync failed:', err.message);
+        throw err;
+    }
+};
+
 const bootMatrixEngine = async () => {
     try {
         console.log('[Matrix Engine] Initializing boot sequence...');
@@ -16,6 +58,9 @@ const bootMatrixEngine = async () => {
         if (!ready) return;
 
         const Question = getQuestionsConn().model('Question');
+        // Optional: Run a light sync if needed
+        // await syncQuestions(); 
+
         const questions = await Question.find({}).lean();
         
         questionsLoadedCount = await loadQuestions(questions);
@@ -79,9 +124,14 @@ const getPresetsCtrl = (req, res) => {
 };
 
 const reloadEngine = async (req, res) => {
-    engineReady = false;
-    await bootMatrixEngine();
-    res.json({ success: true, data: { questionsLoaded: questionsLoadedCount } });
+    try {
+        engineReady = false;
+        const syncCount = await syncQuestions();
+        await bootMatrixEngine();
+        res.json({ success: true, data: { questionsLoaded: questionsLoadedCount, syncCount } });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Reload failed: ' + err.message });
+    }
 };
 
 const getStatus = (req, res) => {

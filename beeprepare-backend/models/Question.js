@@ -87,6 +87,19 @@ const questionSchema = new Schema({
   }
 }, { timestamps: true });
 
+// ── Auto-assign numericId for Matrix Engine ───────────────────────────────
+questionSchema.pre('save', async function(next) {
+  if (this.isNew && !this.numericId) {
+    try {
+      const lastQ = await this.constructor.findOne({}, { numericId: 1 }).sort({ numericId: -1 });
+      this.numericId = (lastQ && lastQ.numericId) ? lastQ.numericId + 1 : 1;
+    } catch (err) {
+      console.warn('[Question Model] Failed to auto-assign numericId:', err.message);
+    }
+  }
+  next();
+});
+
 // ── Compound indexes for all common query patterns ──────────────────────────
 questionSchema.index({ metaTags: 1 });
 questionSchema.index({ chapterIndex: 1 });
