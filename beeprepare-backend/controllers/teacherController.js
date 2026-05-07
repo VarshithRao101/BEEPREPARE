@@ -999,9 +999,21 @@ const generatePaper = async (req, res) => {
       'Data Interpretation': 11
     };
 
+    // Step 3: Iterate through blueprint sections and generate
     const selected = [];
     const sectionDefs = [];
-    const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+    // ── INFRASTRUCTURE CHECK ──
+    // Before starting, ensure the Questions DB is actually reachable
+    try {
+        const { questionsConn } = require('../config/db');
+        if (!questionsConn()) {
+            return error(res, 'The Questions Database is currently offline. Please check your MongoDB connection or IP whitelist.', 'DB_OFFLINE', 503);
+        }
+    } catch (dbCheckErr) {
+        return error(res, 'Critical database infrastructure failure: ' + dbCheckErr.message, 'DB_FAILURE', 500);
+    }
 
     // Step 3: Use Matrix Engine for sectional selection
     for (let i = 0; i < blueprint.length; i++) {
