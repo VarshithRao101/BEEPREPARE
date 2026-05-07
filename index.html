@@ -304,20 +304,35 @@
           const activated = localStorage.getItem(BP.ACTIVATED);
           const hasToken = !!localStorage.getItem(BP.TOKEN);
 
-          if (hasToken && activated === 'true' && role === 'teacher') {
-            window.location.replace('beginners/teacher/teacher-home.html');
-          } else if (hasToken && activated === 'true' && role === 'student') {
-            window.location.replace('beginners/student/student-home.html');
-          } else {
-             // Let Firebase initialize in background if not instantly redirected
-             const auth = getAuth();
-             onAuthStateChanged(auth, (user) => {
-                 if (user && activated === 'true') {
-                     if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
-                     else if (role === 'student') window.location.replace('beginners/student/student-home.html');
-                 }
-             });
+          // If we have data in cache, we CAN redirect, but let's wait a split second for Firebase 
+          // to avoid the "bounce" if the token is actually expired.
+          const auth = getAuth();
+          
+          // If Firebase is already ready, use it definitively
+          if (auth.currentUser) {
+              const u = auth.currentUser;
+              if (activated === 'true') {
+                  if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
+                  else if (role === 'student') window.location.replace('beginners/student/student-home.html');
+                  return;
+              }
           }
+
+          // If not ready, wait for ONE state change
+          const unsubscribe = onAuthStateChanged(auth, (user) => {
+              if (unsubscribe) unsubscribe();
+              if (user && activated === 'true') {
+                  if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
+                  else if (role === 'student') window.location.replace('beginners/student/student-home.html');
+              } else if (hasToken && !user) {
+                  // Token in cache but Firebase says NO USER. Clear cache to stop loops.
+                  console.warn("Token exists but no Firebase user. Cleaning up.");
+                  localStorage.removeItem(BP.TOKEN);
+              }
+          });
+          
+          // Max wait 1.5s for auto-redirect
+          setTimeout(() => { if (unsubscribe) unsubscribe(); }, 1500);
         }
 
         window.addEventListener('load', handleAutoRedirect);

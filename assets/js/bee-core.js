@@ -285,7 +285,23 @@ export async function apiCall(
     }
 
     if (res.status === 401 && isRetry) {
+      // 🕵️ DOUBLE CHECK: Before booting the user, check if Firebase still has a session.
+      // This prevents the "Redirect Loop" if Firebase is slow to initialize or in a transition state.
+      const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+      const auth = getAuth();
+      
+      if (auth.currentUser) {
+        console.warn('⚠️ [API] 401 received but Firebase user still active. Attempting last-stand refresh...');
+        const forceToken = await auth.currentUser.getIdToken(true);
+        localStorage.setItem(BP.TOKEN, forceToken);
+        localStorage.setItem('bp_token_time', Date.now().toString());
+        // Try one last time WITHOUT the "isRetry" flag to allow one more refresh attempt
+        return await apiCall(endpoint, method, body, needsAuth, false, showOverlay);
+      }
+
+      console.error('🔴 [API] Session definitive failure. Redirecting to index.');
       localStorage.clear();
+      clearSessionCache();
       window.location.href = getIndexPath();
       return { success: false, message: 'Session expired' };
     }
