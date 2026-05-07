@@ -131,6 +131,19 @@ export async function verifySession(token) {
   try {
     const result = await apiCall('/auth/verify-session', 'POST', { token });
     if (result?.success) {
+      const u = result.data;
+      
+      // AUTO-HEAL: Sync localStorage with server definitive state
+      if (u.role && u.role !== localStorage.getItem(BP.ROLE)) {
+          console.log("[SYNC] Updating role:", u.role);
+          localStorage.setItem(BP.ROLE, u.role);
+      }
+      const serverActivated = u.isActivated ? 'true' : 'false';
+      if (serverActivated !== localStorage.getItem(BP.ACTIVATED)) {
+          console.log("[SYNC] Updating activation:", serverActivated);
+          localStorage.setItem(BP.ACTIVATED, serverActivated);
+      }
+
       _sessionCache = result;
       _sessionCachedAt = now;
     }
