@@ -35,14 +35,14 @@ const app = initializeApp(firebaseConfig);
 let lastToken = null;
 let lastFetchTime = 0;
 
-export async function getFreshToken() {
+export async function getFreshToken(forceRefresh = false) {
   const now = Date.now();
   
   // 1. Check persistent cache first (instant return, zero network latency)
   const cachedToken = localStorage.getItem(BP.TOKEN);
   const cachedTime = localStorage.getItem('bp_token_time');
   
-  if (cachedToken && cachedTime && (now - parseInt(cachedTime) < 45 * 60 * 1000)) {
+  if (!forceRefresh && cachedToken && cachedTime && (now - parseInt(cachedTime) < 45 * 60 * 1000)) {
     // If not logging out, we can safely use the hot cache
     if (!localStorage.getItem(BP.LOGGING_OUT)) {
       lastToken = cachedToken;
@@ -67,17 +67,18 @@ export async function getFreshToken() {
         if (unsubscribe) unsubscribe();
         resolve();
       });
-      setTimeout(() => { if (unsubscribe) unsubscribe(); resolve(); }, 800); // 800ms max wait for auth state
+      setTimeout(() => { if (unsubscribe) unsubscribe(); resolve(); }, 5000); // 5s max wait for auth state
     });
   }
 
   if (!user) {
     if (localStorage.getItem(BP.LOGGING_OUT)) return null;
-    return cachedToken; // Fallback to whatever is in cache
+    // Only fallback if we're not forcing a refresh
+    return forceRefresh ? null : cachedToken; 
   }
 
   try {
-    const token = await user.getIdToken();
+    const token = await user.getIdToken(forceRefresh);
     lastToken = token;
     lastFetchTime = now;
     localStorage.setItem(BP.TOKEN, token);
@@ -85,7 +86,7 @@ export async function getFreshToken() {
     return token;
   } catch (err) {
     console.error('Token fetch failed:', err);
-    return cachedToken;
+    return forceRefresh ? null : cachedToken;
   }
 }
 
@@ -179,13 +180,11 @@ export async function initPage(guardFn, dataFetchFn) {
     dataFetchFn ? dataFetchFn(token) : Promise.resolve(null)
   ]);
 
-  // 4. Handle session failure (already handled in guardFn usually, but double check)
-  if (!sessionRes?.success || (sessionRes.valid === false)) {
-    console.warn("[INIT_PAGE] Session invalid, redirecting to index.");
-    localStorage.clear();
-    clearSessionCache();
-    window.location.href = getIndexPath();
-    return null;
+  // 4. Handle session failure
+  // Note: apiCall already handles 401 redirects. 
+  // We only redirect here if the guard explicitly failed or role mismatch occurred.
+  if (sessionRes && sessionRes.success === false && sessionRes.message === 'Session expired') {
+    return null; // apiCall already redirected
   }
 
   // 5. Return the data result
@@ -252,7 +251,7 @@ export async function apiCall(
     // 3. Prep Request
     const headers = { 'Content-Type': 'application/json' };
     if (needsAuth) {
-      const token = await getFreshToken();
+      const token = await getFreshToken(isRetry);
       if (!token) throw new Error('AUTH_TOKEN_MISSING');
       headers['Authorization'] = 'Bearer ' + token;
     }
@@ -344,12 +343,19 @@ export async function guardTeacher() {
   // Cross-verify with server session
   const token = await getFreshToken();
   const res = await verifySession(token);
-  if (!res.success || res.data.role !== 'teacher') {
+  
+  // Only redirect if we got a successful response that EXPLICITLY says the role is wrong
+  // or if apiCall already handled a 401.
+  if (res.success && res.data.role !== 'teacher') {
+    console.error("[GUARD] Role mismatch. Expected teacher, got:", res.data.role);
     localStorage.clear();
     clearSessionCache();
     window.location.href = base;
     return false;
   }
+  
+  // If it's a network error (success: false), we let the page load anyway 
+  // to prevent locking out users on minor flickers. apiCall will show errors later if needed.
   return true;
 }
 
@@ -373,12 +379,15 @@ export async function guardStudent() {
   // Cross-verify with server session
   const token = await getFreshToken();
   const res = await verifySession(token);
-  if (!res.success || res.data.role !== 'student') {
+  
+  if (res.success && res.data.role !== 'student') {
+    console.error("[GUARD] Role mismatch. Expected student, got:", res.data.role);
     localStorage.clear();
     clearSessionCache();
     window.location.href = base;
     return false;
   }
+  
   return true;
 }
 
