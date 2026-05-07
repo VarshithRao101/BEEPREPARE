@@ -674,8 +674,7 @@
         }
 
         window.addEventListener('load', async () => {
-            if (!(await guardStudent())) return;
-            loadProfile();
+            initPage(guardStudent, loadProfile);
         });
     </script>
     <script src="../../assets/js/customer-care.js"></script>

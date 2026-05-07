@@ -160,20 +160,36 @@ export async function getAnnouncements() {
 }
 
 export async function initPage(guardFn, dataFetchFn) {
+  // 1. First, run the guard if provided (local checks + initial state)
+  if (guardFn) {
+    const isAllowed = await guardFn();
+    if (!isAllowed) return null;
+  }
+
+  // 2. Parallel start: get token and check maintenance
   const tokenPromise = getFreshToken();
-  let dataPromise = null;
-  tokenPromise.then(token => {
-    if (token) dataPromise = dataFetchFn(token);
-  });
+  const maintenancePromise = getMaintenanceStatus().catch(() => null);
+
   const token = await tokenPromise;
-  const [sessionResult] = await Promise.allSettled([verifySession(token)]);
-  if (sessionResult.status === 'rejected' || !sessionResult.value?.valid && !sessionResult.value?.success) {
+  
+  // 3. Parallel data fetch & session verification
+  // We use Promise.all to ensure both finish (or fail) before we proceed
+  const [sessionRes, dataRes] = await Promise.all([
+    verifySession(token).catch(e => ({ success: false, error: e })),
+    dataFetchFn ? dataFetchFn(token) : Promise.resolve(null)
+  ]);
+
+  // 4. Handle session failure (already handled in guardFn usually, but double check)
+  if (!sessionRes?.success || (sessionRes.valid === false)) {
+    console.warn("[INIT_PAGE] Session invalid, redirecting to index.");
     localStorage.clear();
     clearSessionCache();
     window.location.href = getIndexPath();
-    return;
+    return null;
   }
-  return await dataPromise;
+
+  // 5. Return the data result
+  return dataRes;
 }
 
 // Standard API caller
@@ -187,9 +203,10 @@ export async function apiCall(
   method = 'GET',
   body = null,
   needsAuth = true,
-  isRetry = false, // Track retry attempts (Step 8 Seal)
-  showOverlay = true // PREMIUM LOADER (Step 10)
+  isRetry = false,
+  showOverlay = true
 ) {
+  // 1. Cache Check (Immediate return, no loader)
   if (method === 'GET') {
     const ttl = CACHE_TTL[endpoint] || 0;
     if (ttl > 0) {
@@ -197,159 +214,113 @@ export async function apiCall(
         const cachedStr = sessionStorage.getItem(CACHE_PREFIX + endpoint);
         if (cachedStr) {
           const cached = JSON.parse(cachedStr);
-          if (Date.now() - cached.at < ttl) {
-            return cached.data; // Return instantly from cross-page cache
-          }
+          if (Date.now() - cached.at < ttl) return cached.data;
         }
-      } catch (e) {
-        console.warn('Cache parse error', e);
-      }
+      } catch (e) { console.warn('Cache error', e); }
     }
   }
 
-  if (showOverlay) BP.showLoader();
-  // GLOBAL SAFETY (Step 1): Rate limiting in frontend
-  const now = Date.now();
-
-  // Filter history to keep only last 10s
-  while (CALL_HISTORY.length > 0 && CALL_HISTORY[0] < now - CALL_LIMIT_MS) {
-    CALL_HISTORY.shift();
+  let loaderShown = false;
+  if (showOverlay) {
+    BP.showLoader();
+    loaderShown = true;
   }
-
-  if (CALL_HISTORY.length >= MAX_CALLS_WINDOW) {
-    console.warn('%c[KILL SWITCH] Too many requests! Please wait 10s.', 'color: #FF5555; font-weight: 900;');
-    if (window.Swal) {
-      Swal.fire({
-        icon: 'error',
-        title: 'System Busy',
-        text: 'Too many requests. Please wait a few seconds before trying again.',
-        timer: 3000,
-        showConfirmButton: false,
-        background: '#1a1a2e',
-        color: '#fff'
-      });
-    }
-    return { success: false, message: 'Too many requests', error: { code: 'CLIENT_RATE_LIMIT' } };
-  }
-
-  CALL_HISTORY.push(now);
 
   try {
-    // TRACKING (Step 7)
-    if (endpoint.includes('verify') || endpoint.includes('redeem')) {
-      firestoreCallCount++;
-      console.log(`%c[FIRESTORE TRACKER] Verification Call #${firestoreCallCount}`, 'color: #FFD700; font-weight: bold;');
+    // 2. Rate Limiting (Client Side)
+    const now = Date.now();
+    while (CALL_HISTORY.length > 0 && CALL_HISTORY[0] < now - CALL_LIMIT_MS) {
+      CALL_HISTORY.shift();
     }
 
-    const headers = {
-      'Content-Type': 'application/json'
-    };
+    if (CALL_HISTORY.length >= MAX_CALLS_WINDOW) {
+      console.error('[BP_SAFETY] Rate limit reached');
+      if (window.Swal) {
+        Swal.fire({
+          icon: 'error',
+          title: 'System Busy',
+          text: 'Too many requests. Please wait 10s.',
+          timer: 3000,
+          showConfirmButton: false,
+          background: '#1a1a2e', color: '#fff'
+        });
+      }
+      return { success: false, message: 'Too many requests' };
+    }
+    CALL_HISTORY.push(now);
+
+    // 3. Prep Request
+    const headers = { 'Content-Type': 'application/json' };
     if (needsAuth) {
       const token = await getFreshToken();
-      if (!token) return { success: false, message: 'Auth token missing' };
+      if (!token) throw new Error('AUTH_TOKEN_MISSING');
       headers['Authorization'] = 'Bearer ' + token;
     }
+
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
 
+    // 4. Execute Fetch
     const res = await fetch(API_BASE + endpoint, options);
 
-    // ERROR HANDLING (Step 8): Handle Firestore exhaustion specifically
-    if (res.status === 429) {
-      console.error('[CRITICAL] Firestore Quota Exhausted or Server Rate Limited');
-      throw new Error('SERVER_BUSY');
-    }
-
-    // AUTH RETRY LOGIC (Step 8 SEAL): If 401 and haven't retried yet, force token refresh
+    // 5. Handle Status Codes
+    if (res.status === 429) throw new Error('SERVER_BUSY');
+    
     if (res.status === 401 && !isRetry) {
-      console.log('[API_RECOVERY] Received 401. Refreshing architectural token and retrying...');
+      console.log('[API_RECOVERY] 401 Unauthorized. Retrying with fresh token...');
+      localStorage.removeItem(BP.TOKEN);
       lastToken = null;
-      lastFetchTime = 0;
-      localStorage.removeItem(BP.TOKEN); // Clean cached token
-
-      // Wait a tiny bit for Firebase to sync if it's lagging
-      await new Promise(r => setTimeout(r, 400));
-
-      // Recursive retry
-      return await apiCall(endpoint, method, body, needsAuth, true);
+      // Recursion will handle loader correctly via finally blocks
+      return await apiCall(endpoint, method, body, needsAuth, true, showOverlay);
     }
 
-    // FINAL AUTH FAIL (Step 8 SEAL): Even after retry, we got 401. User is likely not in DB.
     if (res.status === 401 && isRetry) {
-      console.error('[CRITICAL AUTH FAIL] Persistent 401. Redirecting to login for re-sync.');
-      localStorage.clear(); // Wipe everything
+      localStorage.clear();
       window.location.href = getIndexPath();
-      return { success: false, message: 'Session invalid. Please login again.' };
+      return { success: false, message: 'Session expired' };
     }
 
-    let data;
+    // 6. Parse JSON
     const text = await res.text();
+    let data;
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error('JSON Parse Error. Server returned:', text);
-      return { success: false, message: 'Server synchronization failed. Please try again later.' };
+      console.error('JSON Parse Error:', text);
+      throw new Error('SERVER_INVALID_JSON');
     }
 
-    // MAINTENANCE CHECK (Step 9): If maintenance mode is active, block everything
+    // 7. Global Checks (Maintenance, Blocked)
     if (data.code === 'MAINTENANCE_MODE' || data.maintenance === true) {
       BP.showMaintenanceOverlay(data.message);
       return data;
     }
 
-    // GLOBAL BLOCKED/BLACKLISTED HANDLING
     if (res.status === 403 && (data.error?.code === 'ACCOUNT_BLOCKED' || data.error?.code === 'ACCOUNT_BLACKLISTED')) {
       localStorage.clear();
-      sessionStorage.clear();
-      document.body.innerHTML = `
-        <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a1a;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:Arial,sans-serif;z-index:999999;">
-          <h1 style="color:#ff4444;font-size:48px;">🚫</h1>
-          <h2 style="color:#fff;margin:16px 0 8px;">Account Suspended</h2>
-          <p style="color:#888;max-width:400px;text-align:center;">Your account has been suspended. Contact support for assistance.</p>
-          <p style="color:#FFD700;margin-top:24px;">support@beeprepare.com</p>
-          <a href="/index.html" style="color:#555;margin-top:16px;font-size:14px;">Return to Home</a>
-        </div>
-      `;
+      document.body.innerHTML = `<div style="position:fixed;inset:0;background:#0a0a1a;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;"><div><h1 style="color:#ff4444;font-size:48px;">🚫</h1><h2>Account Suspended</h2><p>Contact support@beeprepare.com</p></div></div>`;
       return data;
     }
 
-    if (data?.data?.isActivated !== undefined && !localStorage.getItem(BP.LOGGING_OUT)) {
-      localStorage.setItem(BP.ACTIVATED, data.data.isActivated ? 'true' : 'false');
-    }
-
-    if (showOverlay) BP.hideLoader();
-    
+    // 8. Success: Update Cache
     if (method === 'GET' && data?.success) {
       const ttl = CACHE_TTL[endpoint] || 0;
-      if (ttl > 0) {
-        try {
-          sessionStorage.setItem(CACHE_PREFIX + endpoint, JSON.stringify({ data, at: Date.now() }));
-        } catch(e) {}
-      }
+      if (ttl > 0) sessionStorage.setItem(CACHE_PREFIX + endpoint, JSON.stringify({ data, at: Date.now() }));
     } else if (method !== 'GET' && data?.success) {
-      // Invalidate relevant caches automatically on mutations (POST/PUT/DELETE)
-      sessionStorage.removeItem(CACHE_PREFIX + '/teacher/dashboard');
-      sessionStorage.removeItem(CACHE_PREFIX + '/student/dashboard');
-      sessionStorage.removeItem(CACHE_PREFIX + '/student/banks');
+      // Invalidate relevant caches
+      ['/teacher/dashboard', '/student/dashboard', '/student/banks'].forEach(k => sessionStorage.removeItem(CACHE_PREFIX + k));
     }
-    
+
     return data;
+
   } catch (err) {
-    if (showOverlay) BP.hideLoader();
-    console.error('API Error:', err);
-    if (err.message === 'SERVER_BUSY') {
-      if (window.Swal) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Server Busy',
-          text: 'The server is currently under high load. Please try again later.',
-          confirmButtonColor: '#FFD700',
-          background: '#1a1a2e',
-          color: '#fff'
-        });
-      }
+    console.error('API Error:', endpoint, err);
+    if (window.Swal && err.message === 'SERVER_BUSY') {
+        Swal.fire({ icon: 'warning', title: 'Server Busy', text: 'High load detected. Try again later.', background: '#1a1a2e', color: '#fff' });
     }
     return { success: false, message: err.message || 'Network error' };
+  } finally {
+    if (loaderShown) BP.hideLoader();
   }
 }
 
@@ -753,44 +724,36 @@ export const BP = {
   },
 
   showLoader: () => {
+    BP._loaderCount = (BP._loaderCount || 0) + 1;
+    
     let loader = document.getElementById('bee-loader-overlay');
     if (!loader) {
       BP.initLoader();
       loader = document.getElementById('bee-loader-overlay');
     }
     
-    BP._loaderCount = (BP._loaderCount || 0) + 1;
-    
-    // Safety check: if loader still doesn't exist (DOM not ready), try again shortly
     if (!loader) {
-        setTimeout(() => BP.showLoader(), 100);
+        // Still not in DOM? Wait for body to be ready.
         return;
     }
 
-
-
     loader.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Lock scroll
+    document.body.style.overflow = 'hidden'; 
   },
 
   hideLoader: () => {
-    let loader = document.getElementById('bee-loader-overlay');
-    if (!loader) {
-        BP._loaderCount = Math.max(0, (BP._loaderCount || 1) - 1);
-        return;
-    }
-    
     BP._loaderCount = Math.max(0, (BP._loaderCount || 1) - 1);
     
-
-
     if (BP._loaderCount === 0) {
-      setTimeout(() => {
-        if (BP._loaderCount === 0) {
-          loader.classList.remove('active');
-          if (document.body) document.body.style.overflow = ''; // Unlock scroll
-        }
-      }, 300); // Small grace period to prevent flickering
+      const loader = document.getElementById('bee-loader-overlay');
+      if (loader) {
+        setTimeout(() => {
+          if (BP._loaderCount === 0) {
+            loader.classList.remove('active');
+            if (document.body) document.body.style.overflow = '';
+          }
+        }, 300);
+      }
     }
   },
 
@@ -814,19 +777,44 @@ export const BP = {
         style.textContent = `
             .bee-loader-overlay {
                 position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: #000;
+                background: rgba(5, 5, 5, 0.95);
                 display: none; align-items: center; justify-content: center;
                 z-index: 999999; opacity: 0; transition: opacity 0.4s ease;
-                pointer-events: none;
+                pointer-events: none; backdrop-filter: blur(10px);
             }
             .bee-loader-overlay.active { display: flex; opacity: 1; pointer-events: all; visibility: visible; }
             .loader-container { 
-                background: rgba(15, 15, 20, 0.95); padding: 40px; border-radius: 30px;
+                background: rgba(15, 15, 20, 0.98); padding: 50px; border-radius: 40px;
                 border: 1px solid rgba(255, 215, 0, 0.3); display: flex; flex-direction: column;
-                align-items: center; gap: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+                align-items: center; gap: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+                transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             }
-            .loader-main-text { color: #FFD700; font-size: 13px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; margin-top: 15px; }
-            @media (max-width: 480px) { .loader-container { padding: 25px; width: 80%; } .loader-main-text { font-size: 10px; letter-spacing: 2px; } }
+            .bee-loader-overlay.active .loader-container { transform: scale(1); }
+            .loader-main-text { 
+                color: #FFD700; font-size: 14px; font-weight: 900; letter-spacing: 6px; 
+                text-transform: uppercase; margin-top: 15px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+                animation: loaderPulse 2s infinite ease-in-out;
+            }
+            
+            /* PREMIUM INLINE ANIMATION */
+            .pl { width: 6em; height: 6em; display: grid; gap: 0.8em; grid-template-columns: repeat(3, 1fr); }
+            .pl__dot { position: relative; animation: dot-rotate 2s linear infinite; }
+            .pl__dot::before { 
+                content: ""; display: block; width: 100%; height: 100%; 
+                background: #fff; border-radius: 50%; animation: dot-scale 2s infinite ease-in-out;
+            }
+            .pl__dot--yellow::before { background: #FFD700; }
+            .pl__dot--gold::before { background: #FFC107; }
+            
+            @keyframes dot-rotate { from, 20% { transform: rotate(-45deg); } 40%, to { transform: rotate(0); } }
+            @keyframes dot-scale { 0%, 100% { transform: scale(0.3); opacity: 0.3; } 50% { transform: scale(1); opacity: 1; } }
+            @keyframes loaderPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; transform: scale(1.05); } }
+            
+            @media (max-width: 480px) { 
+                .loader-container { padding: 30px; width: 85%; } 
+                .loader-main-text { font-size: 11px; letter-spacing: 3px; } 
+                .pl { width: 4.5em; height: 4.5em; } 
+            }
         `;
         document.head.appendChild(style);
     }
