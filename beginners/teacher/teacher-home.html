@@ -463,19 +463,17 @@
             BP.syncTeacherSignals();
         }
 
-        // Initialize
-        window.addEventListener('load', () => {
-            const subCont = document.getElementById('subjects-container');
-            const gradeCont = document.getElementById('grades-container');
-            const actCont = document.getElementById('activity-container');
+        // Initialize immediately (no wait for 'load' event)
+        const subCont = document.getElementById('subjects-container');
+        const gradeCont = document.getElementById('grades-container');
+        const actCont = document.getElementById('activity-container');
 
-            if (subCont) subCont.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
-            if (gradeCont) gradeCont.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
-            if (actCont) actCont.innerHTML = `<div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line"></div>`;
+        if (subCont) subCont.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
+        if (gradeCont) gradeCont.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
+        if (actCont) actCont.innerHTML = `<div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line"></div>`;
 
-            initPage(guardTeacher, loadDashboard);
-            setInterval(() => loadDashboard(false), 15000); // Pulse every 15 seconds silently refreshes stats/signals
-        });
+        initPage(guardTeacher, loadDashboard);
+        setInterval(() => loadDashboard(false), 15000); // Pulse every 15 seconds silently refreshes stats/signals
     </script>
 <script src="/assets/js/ripple.js"></script>
 </body>

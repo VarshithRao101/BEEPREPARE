@@ -184,7 +184,10 @@ export async function getAnnouncements() {
 }
 
 export async function initPage(guardFn, dataFetchFn) {
-  // 1. First, run the guard if provided (local checks + initial state)
+  // 0. Force immediate loader visibility
+  BP.showLoader();
+
+  // 1. First, run the guard if provided
   if (guardFn) {
     const isAllowed = await guardFn();
     if (!isAllowed) return null;
@@ -898,16 +901,9 @@ export const BP = {
 };
 
 // AUTO-INIT TASKS
-const initCore = () => {
-    BP.initLoader();
-    BP.initMaintenanceCheck();
-    BP.initAnnouncementBanner();
-};
+// Auto-initialize core on load
+BP.initLoader();
+BP.initMaintenanceCheck();
+BP.initAnnouncementBanner();
 
-if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', initCore);
-} else {
-    // If body already exists, run immediately
-    if (document.body) initCore();
-    else window.addEventListener('DOMContentLoaded', initCore);
-}
+export default BP;
