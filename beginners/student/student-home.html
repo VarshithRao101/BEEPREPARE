@@ -159,6 +159,27 @@
         .has-signal {
             position: relative !important;
         }
+
+        /* Fix 9: Skeleton UI Styles */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.03) 25%,
+                rgba(255,255,255,0.08) 50%,
+                rgba(255,255,255,0.03) 75%
+            );
+            background-size: 200% 100%;
+            animation: bee-shimmer 1.4s infinite;
+            border-radius: 10px;
+        }
+        @keyframes bee-shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .sk-line  { height: 14px; margin-bottom: 10px; width: 100%; }
+        .sk-line.short { width: 55%; }
+        .sk-card  { height: 90px; margin-bottom: 14px; border-radius: 14px; }
+        .sk-circle{ width: 48px; height: 48px; border-radius: 50%; }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
@@ -325,6 +346,7 @@
             apiCall, 
             getFreshToken, 
             guardStudent, 
+            initPage,
             BP 
         } from '/assets/js/bee-core.js';
 
@@ -347,25 +369,10 @@
         }
 
         async function loadDashboard(showOverlay = true) {
-            // Show skeletons immediately only if overlay is requested
-            if (showOverlay) {
-                BP.showSkeleton('subject-container', 'card', 4);
-                const logWrapper = document.getElementById('activity-log-wrapper');
-                if(logWrapper) BP.showSkeleton('activity-log-wrapper', 'list', 5);
-            }
-
-            // Show loading state
-            if (showOverlay) {
-                document.querySelectorAll('.adv-card').forEach(card => card.classList.add('loading'));
-            }
-
-            const [guardRes, result, doubtsResult] = await Promise.all([
-                guardStudent(),
+            const [result, doubtsResult] = await Promise.all([
                 apiCall('/student/dashboard', 'GET', null, true, false, showOverlay).catch(()=>null),
                 apiCall('/student/doubts', 'GET', null, true, false, showOverlay).catch(()=>null)
             ]);
-            
-            if (!guardRes) return;
             
             if (showOverlay) {
                 document.querySelectorAll('.adv-card').forEach(card => card.classList.remove('loading'));
@@ -517,8 +524,30 @@
         }
 
         window.addEventListener('load', () => {
-             loadDashboard(true);
-             setInterval(() => loadDashboard(false), 30000); // Silent refresh every 30s
+            // Fix 1 & 9: Show skeleton and initPage
+            const subjectContainer = document.getElementById('subject-container');
+            const logWrapper = document.getElementById('activity-log-wrapper');
+            
+            if (subjectContainer) {
+                subjectContainer.innerHTML = `
+                    <div class="skeleton sk-circle" style="margin-bottom:16px"></div>
+                    <div class="skeleton sk-line"></div>
+                    <div class="skeleton sk-line short"></div>
+                    <div class="skeleton sk-card"></div>
+                    <div class="skeleton sk-card"></div>
+                    <div class="skeleton sk-card"></div>
+                `;
+            }
+            if (logWrapper) {
+                logWrapper.innerHTML = `
+                    <div class="skeleton sk-line"></div>
+                    <div class="skeleton sk-line short"></div>
+                    <div class="skeleton sk-line"></div>
+                `;
+            }
+
+            initPage(guardStudent, loadDashboard);
+            setInterval(() => loadDashboard(false), 30000); // Silent refresh
         });
 
 

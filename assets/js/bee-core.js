@@ -2,6 +2,10 @@
 // BEE CORE — Shared utilities for BEEPREPARE
 // ============================================
 
+// Silent warmup — fires before user does anything
+fetch('/health', { method: 'GET', cache: 'no-store' }).catch(() => {});
+
+
 // Vercel Analytics & Speed Insights Injection (Suppress on localhost)
 if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
   import('https://cdn.jsdelivr.net/npm/@vercel/analytics/+esm').then(mod => mod.inject());
@@ -102,6 +106,75 @@ const CACHE_TTL = {
   '/quotes': 10 * 60 * 1000,             // 10 minutes
   '/system/maintenance': 30 * 1000,      // 30 seconds
 };
+
+// Session cache — lives in memory for the browser session
+let _sessionCache = null;
+let _sessionCachedAt = 0;
+const SESSION_CACHE_TTL = 4 * 60 * 1000; // 4 minutes
+
+export async function verifySession(token) {
+  const now = Date.now();
+  if (_sessionCache && (now - _sessionCachedAt) < SESSION_CACHE_TTL) {
+    return _sessionCache;
+  }
+  try {
+    const result = await apiCall('/auth/verify-session', 'POST', { token });
+    if (result?.success) {
+      _sessionCache = result;
+      _sessionCachedAt = now;
+    }
+    return result;
+  } catch (err) {
+    _sessionCache = null;
+    throw err;
+  }
+}
+
+export function clearSessionCache() {
+  _sessionCache = null;
+  _sessionCachedAt = 0;
+}
+
+export async function getMaintenanceStatus() {
+  const STATIC_CACHE_TTL = 5 * 60 * 1000;
+  const cached = sessionStorage.getItem('_maintenance');
+  if (cached) {
+    const { data, at } = JSON.parse(cached);
+    if (Date.now() - at < STATIC_CACHE_TTL) return data;
+  }
+  const result = await apiCall('/system/maintenance', 'GET', null, false);
+  sessionStorage.setItem('_maintenance', JSON.stringify({ data: result, at: Date.now() }));
+  return result;
+}
+
+export async function getAnnouncements() {
+  const STATIC_CACHE_TTL = 5 * 60 * 1000;
+  const cached = sessionStorage.getItem('_announcements');
+  if (cached) {
+    const { data, at } = JSON.parse(cached);
+    if (Date.now() - at < STATIC_CACHE_TTL) return data;
+  }
+  const result = await apiCall('/announcements/active', 'GET', null, false);
+  sessionStorage.setItem('_announcements', JSON.stringify({ data: result, at: Date.now() }));
+  return result;
+}
+
+export async function initPage(guardFn, dataFetchFn) {
+  const tokenPromise = getFreshToken();
+  let dataPromise = null;
+  tokenPromise.then(token => {
+    if (token) dataPromise = dataFetchFn(token);
+  });
+  const token = await tokenPromise;
+  const [sessionResult] = await Promise.allSettled([verifySession(token)]);
+  if (sessionResult.status === 'rejected' || !sessionResult.value?.valid && !sessionResult.value?.success) {
+    localStorage.clear();
+    clearSessionCache();
+    window.location.href = getIndexPath();
+    return;
+  }
+  return await dataPromise;
+}
 
 // Standard API caller
 let firestoreCallCount = 0;
@@ -298,9 +371,11 @@ export async function guardTeacher() {
   }
 
   // Cross-verify with server session
-  const res = await apiCall('/auth/verify-session', 'GET', null, true);
+  const token = await getFreshToken();
+  const res = await verifySession(token);
   if (!res.success || res.data.role !== 'teacher') {
     localStorage.clear();
+    clearSessionCache();
     window.location.href = base;
     return false;
   }
@@ -325,9 +400,11 @@ export async function guardStudent() {
   }
 
   // Cross-verify with server session
-  const res = await apiCall('/auth/verify-session', 'GET', null, true);
+  const token = await getFreshToken();
+  const res = await verifySession(token);
   if (!res.success || res.data.role !== 'student') {
     localStorage.clear();
+    clearSessionCache();
     window.location.href = base;
     return false;
   }
@@ -485,7 +562,7 @@ export const BP = {
   initMaintenanceCheck: async () => {
     try {
       if (window.location.pathname.includes('matrix-core-v1419')) return;
-      const res = await apiCall('/system/maintenance', 'GET', null, false);
+      const res = await getMaintenanceStatus();
       if (res && res.success && res.data.isMaintenance) {
         BP.showMaintenanceOverlay(res.data.message);
         window.stop();
@@ -529,8 +606,8 @@ export const BP = {
           window.location.pathname.endsWith('index.html') || 
           window.location.pathname === '/') return;
 
-      const res = await fetch(API_BASE + '/announcements/active');
-      const json = await res.json();
+      const res = await getAnnouncements();
+      const json = res;
       
       const data = json.data?.announcement || json.data?.activeAnnouncement;
 
@@ -786,9 +863,6 @@ export const BP = {
 
 // AUTO-INIT TASKS
 const initCore = () => {
-    // Silent warm-up ping — fires immediately, result ignored
-    fetch(API_BASE.replace('/api', '') + '/health', { method: 'GET' }).catch(() => {});
-    
     BP.initLoader();
     BP.initMaintenanceCheck();
     BP.initAnnouncementBanner();

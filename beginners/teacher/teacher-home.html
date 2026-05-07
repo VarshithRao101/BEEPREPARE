@@ -138,6 +138,27 @@
         .has-signal {
             position: relative !important;
         }
+
+        /* Fix 9: Skeleton UI Styles */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.03) 25%,
+                rgba(255,255,255,0.08) 50%,
+                rgba(255,255,255,0.03) 75%
+            );
+            background-size: 200% 100%;
+            animation: bee-shimmer 1.4s infinite;
+            border-radius: 10px;
+        }
+        @keyframes bee-shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .sk-line  { height: 14px; margin-bottom: 10px; width: 100%; }
+        .sk-line.short { width: 55%; }
+        .sk-card  { height: 90px; margin-bottom: 14px; border-radius: 14px; }
+        .sk-circle{ width: 48px; height: 48px; border-radius: 50%; }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
@@ -298,7 +319,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
-        import { apiCall, guardTeacher, BP } from '../../assets/js/bee-core.js';
+        import { apiCall, guardTeacher, initPage, BP } from '../../assets/js/bee-core.js';
 
         function timeAgo(date) {
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
@@ -316,19 +337,7 @@
         }
 
         async function loadDashboard(showOverlay = true) {
-            // Show skeletons only on initial load or if overlay is requested
-            if (showOverlay) {
-                BP.showSkeleton('subjects-container', 'card', 2);
-                BP.showSkeleton('grades-container', 'card', 3);
-                BP.showSkeleton('activity-container', 'list', 5);
-            }
-
-            const [guardRes, response] = await Promise.all([
-                guardTeacher(),
-                apiCall('/teacher/dashboard', 'GET', null, true, false, showOverlay).catch(()=>null)
-            ]);
-            
-            if (!guardRes) return;
+            const response = await apiCall('/teacher/dashboard', 'GET', null, true, false, showOverlay).catch(()=>null);
             if (!response || !response.success) {
                 if (showOverlay) {
                     const container = document.getElementById('subjects-container');
@@ -455,8 +464,18 @@
         }
 
         // Initialize
-        loadDashboard(true);
-        setInterval(() => loadDashboard(false), 15000); // Pulse every 15 seconds silently refreshes stats/signals
+        window.addEventListener('load', () => {
+            const subCont = document.getElementById('subjects-container');
+            const gradeCont = document.getElementById('grades-container');
+            const actCont = document.getElementById('activity-container');
+
+            if (subCont) subCont.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
+            if (gradeCont) gradeCont.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
+            if (actCont) actCont.innerHTML = `<div class="skeleton sk-line"></div><div class="skeleton sk-line short"></div><div class="skeleton sk-line"></div>`;
+
+            initPage(guardTeacher, loadDashboard);
+            setInterval(() => loadDashboard(false), 15000); // Pulse every 15 seconds silently refreshes stats/signals
+        });
     </script>
 <script src="/assets/js/ripple.js"></script>
 </body>

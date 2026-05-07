@@ -668,9 +668,31 @@
     }
 
     /* FIX: SweetAlert MUST be above the 2500 z-index modal */
+    /* FIX: SweetAlert MUST be above the 2500 z-index modal */
     .swal2-container {
         z-index: 10000 !important;
     }
+
+    /* Fix 9: Skeleton UI Styles */
+    .skeleton {
+        background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0.03) 25%,
+            rgba(255,255,255,0.08) 50%,
+            rgba(255,255,255,0.03) 75%
+        );
+        background-size: 200% 100%;
+        animation: bee-shimmer 1.4s infinite;
+        border-radius: 10px;
+    }
+    @keyframes bee-shimmer {
+        0%   { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .sk-line  { height: 14px; margin-bottom: 10px; width: 100%; }
+    .sk-line.short { width: 55%; }
+    .sk-card  { height: 90px; margin-bottom: 14px; border-radius: 14px; }
+    .sk-circle{ width: 48px; height: 48px; border-radius: 50%; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
@@ -1069,15 +1091,13 @@
             apiCall,
             guardTeacher,
             getIndexPath,
+            initPage,
             BP
         } from '../../assets/js/bee-core.js';
 
         import { getAuth, signOut } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 
-        // Guard
-        if (!(await guardTeacher())) {
-            window.location.href = getIndexPath();
-        }
+        // Guard is now handled by initPage
 
         let appState = {
             name: localStorage.getItem(BP.NAME) || 'Teacher',
@@ -1718,7 +1738,17 @@
 
 
         // Initialize
-        initProfile();
+        window.addEventListener('load', () => {
+            const profileCard = document.querySelector('.profile-card');
+            if (profileCard) {
+                profileCard.innerHTML = `
+                    <div class="skeleton sk-circle" style="margin-bottom:16px"></div>
+                    <div class="skeleton sk-line" style="width:150px"></div>
+                    <div class="skeleton sk-line short" style="width:100px"></div>
+                `;
+            }
+            initPage(guardTeacher, initProfile);
+        });
     </script>
     <script src="../../assets/js/customer-care.js"></script>
 <script src="/assets/js/ripple.js"></script>

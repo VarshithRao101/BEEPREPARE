@@ -79,11 +79,12 @@ const getDashboard = async (req, res) => {
     await connectDB();
     const studentId = req.user.googleUid;
 
-    const [streak, testSessions, recentDoubts, activityLogs] = await Promise.all([
+    const [streak, testSessions, recentDoubts, activityLogs, quoteCount] = await Promise.all([
       syncStreak(studentId),
       TestSession.find({ studentId, status: 'completed' }).select('subject scorePercent bankId createdAt').lean(),
       Doubt.find({ studentId }).sort({ createdAt: -1 }).limit(3).lean(),
-      ActivityLog.find({ userId: studentId }).sort({ createdAt: -1 }).limit(10).lean()
+      ActivityLog.find({ userId: studentId }).sort({ createdAt: -1 }).limit(10).lean(),
+      Quote.countDocuments()
     ]);
 
     const activeBanks = req.user.activeBanks || [];
@@ -94,7 +95,24 @@ const getDashboard = async (req, res) => {
 
     // Build subjects from active banks
     const bankIds = activeBanks.map(b => b.bankId);
-    const banks = bankIds.length > 0 ? await Bank.find({ _id: { $in: bankIds } }).select('subject class totalQuestions').lean() : [];
+    
+    // Fix 3: Parallelize bank fetching and quote selection if possible
+    const [banks, dailyQuoteRes] = await Promise.all([
+      bankIds.length > 0 ? Bank.find({ _id: { $in: bankIds } }).select('subject class totalQuestions').lean() : Promise.resolve([]),
+      (async () => {
+        if (quoteCount > 0) {
+          const todayString = new Date().toISOString().split('T')[0];
+          let hash = 0;
+          for (let i = 0; i < todayString.length; i++) {
+            hash = ((hash << 5) - hash) + todayString.charCodeAt(i);
+            hash |= 0;
+          }
+          const index = Math.abs(hash) % quoteCount;
+          return Quote.findOne().skip(index).lean();
+        }
+        return null;
+      })()
+    ]);
 
     const subjects = banks.map(bank => {
       const bankTests = testSessions.filter(t => t.bankId?.toString() === bank._id.toString());
@@ -111,21 +129,8 @@ const getDashboard = async (req, res) => {
     });
 
     let dailyQuote = { text: "Keep the BEE matrix aligned with your goals.", author: "BEE Team", category: "academic" };
-    try {
-      const quoteCount = await Quote.countDocuments();
-      if (quoteCount > 0) {
-        const todayString = new Date().toISOString().split('T')[0];
-        let hash = 0;
-        for (let i = 0; i < todayString.length; i++) {
-          hash = ((hash << 5) - hash) + todayString.charCodeAt(i);
-          hash |= 0;
-        }
-        const index = Math.abs(hash) % quoteCount;
-        const q = await Quote.findOne().skip(index).lean();
-        if (q) dailyQuote = { text: q.text, author: q.author || 'Be Prepare', category: q.category };
-      }
-    } catch (quoteErr) {
-      console.warn('Quote fetch failed:', quoteErr.message);
+    if (dailyQuoteRes) {
+      dailyQuote = { text: dailyQuoteRes.text, author: dailyQuoteRes.author || 'Be Prepare', category: dailyQuoteRes.category };
     }
 
     return success(res, 'Dashboard data fetched', {

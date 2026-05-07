@@ -145,39 +145,7 @@ const getProfile = async (req, res) => {
     const teacherId = req.user.googleUid;
     const user = req.user;
 
-    let totalNotes = 0;
-    try {
-      totalNotes = await Note.countDocuments({ teacherId });
-    } catch (e) {
-      console.warn('Note count failed in getProfile:', e.message);
-    }
-
     console.log(`[PROFILE] Fetching data for teacher ${teacherId}...`);
-    
-    // Self-healing: Assign beeId if missing
-    if (!user.beeId) {
-        const generateBeeId = () => {
-            const chars = '0123456789';
-            let num = '';
-            for (let i = 0; i < 4; i++) num += chars[Math.floor(Math.random() * chars.length)];
-            return `TEA-${num}`;
-        };
-        let newId;
-        let attempts = 0;
-        do {
-            newId = generateBeeId();
-            const exists = await User.findOne({ beeId: newId }).select('_id').lean();
-            if (!exists) break;
-            attempts++;
-        } while (attempts < 10);
-        
-        await User.updateOne({ googleUid: teacherId }, { beeId: newId });
-        user.beeId = newId;
-    }
-
-    // Split queries to handle Cluster 1 (Questions) and Cluster 2 (App Data) separately
-    const banksPromise = Bank.find({ teacherId }).lean();
-    const activityPromise = ActivityLog.countDocuments({ userId: teacherId, type: 'paper_generated' });
     
     // Cluster 1 can be slow or unstable — wrap in 5s timeout and fallback to user.totalQuestions
     const questionCountPromise = Promise.race([
@@ -188,10 +156,11 @@ const getProfile = async (req, res) => {
       return user.totalQuestions || 0;
     });
 
-    const [banks, totalQuestions, papersGenerated] = await Promise.all([
-      banksPromise,
+    const [banks, totalQuestions, papersGenerated, totalNotes] = await Promise.all([
+      Bank.find({ teacherId }).lean(),
       questionCountPromise,
-      activityPromise
+      ActivityLog.countDocuments({ userId: teacherId, type: 'paper_generated' }),
+      Note.countDocuments({ teacherId }).catch(() => 0)
     ]);
     console.log(`[PROFILE] DB Queries complete: ${banks.length} banks, ${totalQuestions} questions.`);
 
@@ -199,36 +168,27 @@ const getProfile = async (req, res) => {
     const bankSubjects = [...new Set(banks.map(b => b.subject))];
     const bankClasses = [...new Set(banks.map(b => b.class))];
     
-    // Map existing bank chapters back to the user's chapter template
-    const bankChaptersMap = {};
-    banks.forEach(b => {
-      const key = `${b.class}-${b.subject}`;
-      bankChaptersMap[key] = b.chapters.map(c => c.chapterName);
-    });
-
-    let needsUserUpdate = false;
-    const updateOps = {};
-
-    if (JSON.stringify(user.subjects || []) !== JSON.stringify(bankSubjects)) {
-      updateOps.subjects = bankSubjects;
-      needsUserUpdate = true;
-    }
-    if (JSON.stringify(user.classes || []) !== JSON.stringify(bankClasses)) {
-      updateOps.classes = bankClasses;
-      needsUserUpdate = true;
-    }
-    // Deep compare chapters map
-    if (JSON.stringify(user.chapters || {}) !== JSON.stringify(bankChaptersMap)) {
-      updateOps.chapters = bankChaptersMap;
-      needsUserUpdate = true;
-    }
-
-    if (needsUserUpdate) {
-      console.log(`[PROFILE] Syncing drifted user state (subjects/classes/chapters) for ${teacherId}`);
-      await User.updateOne({ googleUid: teacherId }, { $set: updateOps });
-      user.subjects = bankSubjects;
-      user.classes = bankClasses;
-      user.chapters = bankChaptersMap;
+    // Self-healing: Assign beeId if missing (Non-blocking check)
+    if (!user.beeId) {
+        (async () => {
+            const generateBeeId = () => {
+                const chars = '0123456789';
+                let num = '';
+                for (let i = 0; i < 4; i++) num += chars[Math.floor(Math.random() * chars.length)];
+                return `TEA-${num}`;
+            };
+            let newId;
+            let attempts = 0;
+            do {
+                newId = generateBeeId();
+                const exists = await User.findOne({ beeId: newId }).select('_id').lean();
+                if (!exists) break;
+                attempts++;
+            } while (attempts < 10);
+            
+            await User.updateOne({ googleUid: teacherId }, { beeId: newId });
+        })();
+        user.beeId = 'STAGING...'; // Placeholder until next sync
     }
 
     console.log(`[PROFILE] Returning success for ${teacherId}`);
