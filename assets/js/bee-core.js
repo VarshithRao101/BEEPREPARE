@@ -73,8 +73,18 @@ export async function getFreshToken(forceRefresh = false) {
 
   if (!user) {
     if (localStorage.getItem(BP.LOGGING_OUT)) return null;
-    // Only fallback if we're not forcing a refresh
-    return forceRefresh ? null : cachedToken; 
+    
+    // If we're forcing a refresh, we should wait a bit longer to be sure
+    if (forceRefresh) {
+        console.warn("[AUTH] Refresh forced but no user found yet. Waiting...");
+        await new Promise(r => setTimeout(r, 1000));
+        user = auth.currentUser;
+    }
+    
+    if (!user) {
+        console.warn("[AUTH] No user detected after wait. Using fallback?", !forceRefresh);
+        return forceRefresh ? null : cachedToken; 
+    }
   }
 
   try {
@@ -225,6 +235,7 @@ export async function apiCall(
     loaderShown = true;
   }
 
+  console.groupCollapsed(`📡 API: ${method} ${endpoint}`);
   try {
     // 2. Rate Limiting (Client Side)
     const now = Date.now();
@@ -313,12 +324,14 @@ export async function apiCall(
     return data;
 
   } catch (err) {
-    console.error('API Error:', endpoint, err);
+    console.groupEnd();
+    console.error('❌ API Failure:', endpoint, err);
     if (window.Swal && err.message === 'SERVER_BUSY') {
         Swal.fire({ icon: 'warning', title: 'Server Busy', text: 'High load detected. Try again later.', background: '#1a1a2e', color: '#fff' });
     }
     return { success: false, message: err.message || 'Network error' };
   } finally {
+    console.groupEnd();
     if (loaderShown) BP.hideLoader();
   }
 }
