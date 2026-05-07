@@ -3,8 +3,10 @@ const {
   initEngine, 
   loadQuestions, 
   generatePaper,
-  getPresets 
+  getPresets,
+  isReady: isEngineReady
 } = require('../matrix-engine/js/matrix_bridge');
+const { generatePaperJS } = require('../utils/matrixJS');
 
 let engineReady = false;
 let questionsLoadedCount = 0;
@@ -90,34 +92,53 @@ const bootMatrixEngine = async () => {
 };
 
 const generatePaperCtrl = async (req, res) => {
-    if (!engineReady) return res.status(503).json({ success: false, message: 'Engine offline' });
-
-    try {
-        const result = await generatePaper(req.body);
-        
-        // Fetch full docs
-        const Question = getQuestionsConn().model('Question');
-        const questions = await Question.find({ numericId: { $in: result.questionIds } }).lean();
-
-        // Update lastUsed
-        await Question.updateMany(
-            { numericId: { $in: result.questionIds } },
-            { $set: { lastUsed: new Date() } }
-        );
-
-        res.json({
-            success: true,
-            data: {
-                questions,
-                report: result.report,
-                satisfaction: result.tagSatisfaction,
-                totalMarks: result.totalMarksAchieved,
-                engineSuccess: result.success
-            }
-        });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
+  try {
+    await connectDB();
+    
+    let result;
+    if (isEngineReady()) {
+      result = await generatePaper(req.body);
+    } else {
+      console.log('[Matrix Engine] WASM offline, using JS Fallback');
+      result = await generatePaperJS(req.body);
     }
+
+    if (!result.success) {
+      return res.status(404).json({
+        success: false,
+        message: result.error || 'Paper generation failed.',
+        error: { code: 'GENERATION_FAILED' }
+      });
+    }
+
+    // Fetch full docs if not already provided by JS fallback
+    let fullQuestions = result.questions;
+    if (!fullQuestions) {
+       const Question = getQuestionsConn().model('Question');
+       fullQuestions = await Question.find({ numericId: { $in: result.questionIds } }).lean();
+    }
+
+    // Mark questions as lastUsed (fire and forget)
+    const Question = getQuestionsConn().model('Question');
+    Question.updateMany(
+      { _id: { $in: fullQuestions.map(q => q._id) } },
+      { $set: { lastUsed: new Date() } }
+    ).catch(err => console.error('lastUsed update failed:', err.message));
+
+    res.json({
+      success: true,
+      data: {
+        questions: fullQuestions,
+        report: result.report,
+        satisfaction: result.tagSatisfaction,
+        totalMarks: result.totalMarksAchieved || fullQuestions.reduce((s, q) => s + (q.marks || 1), 0),
+        engineSuccess: result.success
+      }
+    });
+  } catch (err) {
+    console.error('[PAPER GENERATION ERROR]', err);
+    res.status(500).json({ success: false, message: 'Paper generation failed: ' + err.message });
+  }
 };
 
 const validateDistribution = (req, res) => {

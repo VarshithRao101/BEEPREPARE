@@ -1220,8 +1220,15 @@
                 updateUI();
             } catch (err) {
                 console.error('[INIT] Critical failure in initProfile:', err);
-                // Even on error, try to update UI with what we have (initial state)
+                showError('Failed to load profile data. Some statistics might be incomplete.');
                 updateUI();
+            }
+        }
+
+        function showError(msg) {
+            const container = document.getElementById('subject-pills-container');
+            if (container) {
+                container.innerHTML = `<div style="color:#ff4d4d; font-size:12px; font-weight:800; padding:10px; background:rgba(255,77,77,0.05); border-radius:10px; border:1px solid rgba(255,77,77,0.2);">${msg}</div>`;
             }
         }
 
@@ -1327,10 +1334,10 @@
 
             try {
                 // Try to notify backend but don't hang if it fails
-                apiCall('/auth/logout', 'POST').catch(() => { });
+                apiCall('/auth/logout', 'POST').catch(e => console.warn('Backend logout failed:', e));
 
                 const auth = getAuth();
-                await signOut(auth).catch(() => { });
+                await signOut(auth).catch(e => console.warn('Firebase signout failed:', e));
 
                 // Scorched earth clear
                 Object.values(BP).forEach(k => localStorage.removeItem(k));
@@ -1739,14 +1746,8 @@
 
         // Initialize
         window.addEventListener('load', () => {
-            const profileCard = document.querySelector('.profile-card');
-            if (profileCard) {
-                profileCard.innerHTML = `
-                    <div class="skeleton sk-circle" style="margin-bottom:16px"></div>
-                    <div class="skeleton sk-line" style="width:150px"></div>
-                    <div class="skeleton sk-line short" style="width:100px"></div>
-                `;
-            }
+            // Skeleton UI should NOT replace the entire card as it destroys IDs needed for data injection
+            // Instead, we just call initPage
             initPage(guardTeacher, initProfile);
         });
     </script>

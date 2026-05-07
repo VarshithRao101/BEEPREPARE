@@ -222,4 +222,6 @@ function getPresets() {
   }));
 }
 
-module.exports = { initEngine, loadQuestions, generatePaper, getPresets };
+const isReady = () => Module !== null && (Module.calledRun || Module._engine_load);
+
+module.exports = { initEngine, loadQuestions, generatePaper, getPresets, isReady };

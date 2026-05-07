@@ -654,11 +654,11 @@
 
                 try {
                     // Try to notify backend but don't hang if it fails
-                    apiCall('/auth/logout', 'POST').catch(() => {});
+                    apiCall('/auth/logout', 'POST').catch(e => console.warn('Backend logout failed:', e));
                     
                     const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
                     const auth = getAuth();
-                    await signOut(auth).catch(() => {});
+                    await signOut(auth).catch(e => console.warn('Firebase signout failed:', e));
                     
                     // Scorched earth clear
                     Object.values(BP).forEach(k => localStorage.removeItem(k));

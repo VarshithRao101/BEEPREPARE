@@ -19,8 +19,10 @@ const os = require('os');
 const getChapterId = require('../utils/getChapterId');
 const { 
   generatePaper: engineGeneratePaper,
-  initEngine 
+  initEngine,
+  isReady: isEngineReady
 } = require('../matrix-engine/js/matrix_bridge');
+const { generatePaperJS } = require('../utils/matrixJS');
 const { bootMatrixEngine } = require('./matrixController');
 
 
@@ -1009,9 +1011,9 @@ const generatePaper = async (req, res) => {
         if (needed === 0) continue;
 
         try {
-            const engineResult = await engineGeneratePaper({
+            const engineParams = {
                 totalQuestions: needed,
-                totalMarks: needed, // Using 1-mark-per-question normalization
+                totalMarks: needed, 
                 easyPct: 30, mediumPct: 50, hardPct: 20,
                 tagDistribution: [
                     { tag: 'important', pct: 40 },
@@ -1021,8 +1023,17 @@ const generatePaper = async (req, res) => {
                 ],
                 chapterIndices,
                 typeFilter: TYPE_MAP[sectionReq.type] ?? 2,
-                seed: Math.floor(Math.random() * 0xFFFFFFFF)
-            });
+                seed: Math.floor(Math.random() * 0xFFFFFFFF),
+                bank // Pass bank for JS fallback to resolve chapter IDs
+            };
+
+            let engineResult;
+            if (isEngineReady()) {
+                engineResult = await engineGeneratePaper(engineParams);
+            } else {
+                console.log(`[Matrix Engine] WASM offline, using JS Fallback for section ${sectionReq.type}`);
+                engineResult = await generatePaperJS(engineParams);
+            }
 
             if (engineResult.questionIds.length > 0) {
                 // Fetch full docs from Cluster 2
@@ -1046,7 +1057,8 @@ const generatePaper = async (req, res) => {
             }
         } catch (engineErr) {
             console.error(`[Matrix Engine] Section ${sectionReq.type} failed:`, engineErr.message);
-            // Fallback to old logic or skip? Let's skip and log.
+            // Fallback for empty results/engine errors to prevent 500
+            continue; 
         }
     }
 
@@ -1616,7 +1628,7 @@ const getDoubtMessages = async (req, res) => {
                  const { cloudinary } = require('../utils/cloudinaryHelper');
                  await cloudinary.uploader.destroy(fullPublicId);
              }
-           } catch(e) { console.error('Cloudinary cleanup error (teacher):', e); }
+           } catch(e) { console.error('Cloudinary cleanup error (teacher):', e.message); }
          }
          msg.imageUrl = 'EXPIRED';
          modified = true;

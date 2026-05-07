@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1024,7 +1024,7 @@
                     loadChapters(selectedBankId);
                 } catch(e) {
                     clearInterval(pctTimer);
-                    console.warn("Delete API error:", e);
+                    console.warn("Delete API error:", e.message);
                     Swal.fire({ icon: "success", title: "DELETED", text: "File removed from library.", timer: 1500, showConfirmButton: false, background: "#0a0a1a", color: "#fff" });
                     loadChapters(selectedBankId);
                 }
