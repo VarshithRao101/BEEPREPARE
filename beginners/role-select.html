@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -374,26 +374,36 @@
             window.location.href = selectedRoleLocal === 'teacher' ? 'teacher/teacher-home.html' : 'student/student-home.html';
           }
         }
-        window.confirmRole = confirmRole;
-
+        
         // Page guard
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
           const uid = localStorage.getItem(BP.UID);
           if (!uid) {
             window.location.href = '../index.html';
             return;
           }
+          
+          // Force a server-side sync for role-select (no initPage here)
+          const token = await getFreshToken();
+          const res = await verifySession(token);
+          
+          if (res.success) {
+            const u = res.data;
+            if (u.isActivated && u.role) {
+                localStorage.setItem(BP.ROLE, u.role);
+                localStorage.setItem(BP.ACTIVATED, 'true');
+                window.location.replace(u.role === 'teacher' ? 'teacher/teacher-home.html' : 'student/student-home.html');
+                return;
+            }
+          }
+
           if (localStorage.getItem(BP.ACTIVATED) !== 'true') {
             window.location.href = '../activation.html';
             return;
           }
-          const role = localStorage.getItem(BP.ROLE);
-          if (role === 'teacher') {
-            window.location.href = 'teacher/teacher-home.html';
-          } else if (role === 'student') {
-            window.location.href = 'student/student-home.html';
-          }
         });
+        window.confirmRole = confirmRole;
+
     </script>
 <script src="/assets/js/ripple.js"></script>
 </body>
