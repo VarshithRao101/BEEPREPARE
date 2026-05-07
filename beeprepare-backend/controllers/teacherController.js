@@ -1012,6 +1012,7 @@ const generatePaper = async (req, res) => {
 
         try {
             const engineParams = {
+                bankId,
                 totalQuestions: needed,
                 totalMarks: needed, 
                 easyPct: 30, mediumPct: 50, hardPct: 20,
@@ -1036,10 +1037,20 @@ const generatePaper = async (req, res) => {
             }
 
             if (engineResult.questionIds.length > 0) {
-                // Fetch full docs from Cluster 2
-                const sectionQuestions = await Question.find({ 
-                    numericId: { $in: engineResult.questionIds } 
-                }).lean();
+                // Fetch full docs or use results from JS fallback
+                let sectionQuestions;
+                if (engineResult.questions && engineResult.questions.length > 0) {
+                    sectionQuestions = engineResult.questions;
+                } else {
+                    sectionQuestions = await Question.find({ 
+                        numericId: { $in: engineResult.questionIds } 
+                    }).lean();
+                }
+
+                if (!sectionQuestions || sectionQuestions.length === 0) {
+                    console.warn(`[Matrix Engine] Found numericIds but docs missing in DB for section ${sectionReq.type}`);
+                    continue;
+                }
 
                 // Apply requested marks (override bank defaults for this blueprint)
                 const mappedQs = sectionQuestions.map(q => ({ ...q, marks: requestedMarks }));

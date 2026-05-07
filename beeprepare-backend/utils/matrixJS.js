@@ -68,10 +68,11 @@ async function generatePaperJS(options) {
       ? (now - new Date(q.lastUsed).getTime()/1000) / 86400 
       : 999;
     const recencyBonus = daysSince > 30 ? 15 : daysSince * 0.5;
+    const diff = (q.difficulty || 'easy').toLowerCase();
     q._priority = (q.importance || 5) * 10
                 + (q.examFrequency || 5) * 5
                 + recencyBonus
-                - (q.difficulty === 'hard' ? 3 : q.difficulty === 'medium' ? 2 : 1) * 2;
+                - (diff === 'hard' ? 3 : diff === 'medium' ? 2 : 1) * 2;
   });
 
   allQuestions.sort((a, b) => b._priority - a._priority);
@@ -147,9 +148,9 @@ async function generatePaperJS(options) {
   const easyTarget   = Math.round(selected.length * easyPct   / 100);
   const mediumTarget = Math.round(selected.length * mediumPct / 100);
 
-  const easyQs   = selected.filter(q => q.difficulty === 'easy');
-  const mediumQs = selected.filter(q => q.difficulty === 'medium');
-  const hardQs   = selected.filter(q => q.difficulty === 'hard');
+  const easyQs   = selected.filter(q => (q.difficulty || '').toLowerCase() === 'easy');
+  const mediumQs = selected.filter(q => (q.difficulty || '').toLowerCase() === 'medium');
+  const hardQs   = selected.filter(q => (q.difficulty || '').toLowerCase() === 'hard');
 
   const finalPool = [
     ...easyQs.slice(0, easyTarget),
