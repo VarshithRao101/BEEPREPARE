@@ -248,19 +248,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
-        import { 
-            firebaseConfig,
-            apiCall, 
-            getFreshToken, 
-            guardStudent, 
-            initPage,
-            BP 
-        } from '../../assets/js/bee-core.js';
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        import { apiCall, guardStudent, initPage, BP } from '../../assets/js/bee-core.js';
 
         function timeAgo(date) {
             const seconds = Math.floor((new Date() - new Date(date)) / 1000);
