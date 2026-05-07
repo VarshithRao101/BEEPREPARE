@@ -78,8 +78,9 @@ const bootMatrixEngine = async () => {
             return;
         }
 
-        // Optional: Run a light sync if needed
-        // await syncQuestions(); 
+        // ── SYNC LAYER ──
+        // Ensures chapterIndex and numericId are aligned before loading into WASM heap
+        await syncQuestions(); 
 
         const questions = await Question.find({}).lean();
         

@@ -1023,20 +1023,35 @@ const generatePaper = async (req, res) => {
                     { tag: 'standard',  pct: 10 }
                 ],
                 chapterIndices,
+                chapterIds: selectedChapters,
                 typeFilter: TYPE_MAP[sectionReq.type] ?? 2,
                 seed: Math.floor(Math.random() * 0xFFFFFFFF),
                 bank // Pass bank for JS fallback to resolve chapter IDs
             };
 
-            let engineResult;
+            let engineResult = null;
+            let usedWasm = false;
+
             if (isEngineReady()) {
-                engineResult = await engineGeneratePaper(engineParams);
-            } else {
-                console.log(`[Matrix Engine] WASM offline, using JS Fallback for section ${sectionReq.type}`);
+                try {
+                    engineResult = await engineGeneratePaper(engineParams);
+                    usedWasm = true;
+                } catch (wasmErr) {
+                    console.warn(`[Matrix Engine] WASM execution failed for ${sectionReq.type}:`, wasmErr.message);
+                }
+            }
+
+            // Fallback: If WASM is offline OR WASM returned 0 questions OR WASM threw an error
+            if (!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) {
+                if (usedWasm && engineResult?.questionIds?.length === 0) {
+                    console.log(`[Matrix Engine] WASM returned 0 questions for ${sectionReq.type}. Activating JS Fallback...`);
+                } else if (!usedWasm) {
+                    console.log(`[Matrix Engine] WASM node offline. Using JS Fallback for ${sectionReq.type}...`);
+                }
                 engineResult = await generatePaperJS(engineParams);
             }
 
-            if (engineResult.questionIds.length > 0) {
+            if (engineResult && engineResult.questionIds && engineResult.questionIds.length > 0) {
                 // Fetch full docs or use results from JS fallback
                 let sectionQuestions;
                 if (engineResult.questions && engineResult.questions.length > 0) {
@@ -1067,14 +1082,18 @@ const generatePaper = async (req, res) => {
                 });
             }
         } catch (engineErr) {
-            console.error(`[Matrix Engine] Section ${sectionReq.type} failed:`, engineErr.message);
-            // Fallback for empty results/engine errors to prevent 500
+            console.error(`[Matrix Engine] Critical Fault in section ${sectionReq.type}:`, engineErr.message);
             continue; 
         }
     }
 
     if (selected.length === 0) {
-        return error(res, 'Matrix Engine failed to select any questions for these parameters.', 'ENGINE_FAILURE', 500);
+        // Diagnostic check: is the bank actually empty?
+        const qCount = await Question.countDocuments({ bankId: String(bankId) });
+        if (qCount === 0) {
+            return error(res, 'This question bank is empty. Please add questions before generating papers.', 'EMPTY_BANK', 400);
+        }
+        return error(res, 'Matrix Engine failed to select any questions for these parameters. Try selecting more chapters or reducing constraints.', 'ENGINE_FAILURE', 422);
     }
 
     // Step 4: Calculate total marks

@@ -47,9 +47,12 @@ async function initEngine() {
   }
 }
 
+let questionsLoaded = false;
+
 async function loadQuestions(questions) {
   if (!Module) throw new Error('Engine not initialized');
   const n = questions.length;
+  if (n === 0) return 0;
 
   const alloc = (TypedArray, n) => {
     const bytes = new TypedArray(n);
@@ -98,6 +101,13 @@ async function loadQuestions(questions) {
       const idx = TAG_MAP[t.toLowerCase()];
       if (idx !== undefined) tagBits |= (1 << idx);
     });
+    combinedTags.forEach(t => {
+      if (t === 'Formula' || t === 'Formula Based') tagBits |= (1 << 2);
+      if (t === 'Conceptual') tagBits |= (1 << 3);
+      if (t === 'Important') tagBits |= (1 << 0);
+      if (t === 'Repeated') tagBits |= (1 << 1);
+    });
+
     mtags.view[i] = tagBits;
     chaps.view[i] = q.chapterIndex || 0;
     qtypes.view[i] = TYPE_MAP[q.questionType] ?? 2; // Default to Short if unknown
@@ -109,6 +119,7 @@ async function loadQuestions(questions) {
     ts.ptr, subs.ptr, mtags.ptr, chaps.ptr, qtypes.ptr, n, now
   );
 
+  if (loaded > 0) questionsLoaded = true;
   [ids,marks,diff,imp,freq,ts,subs,mtags,chaps,qtypes].forEach(a => Module._free(a.ptr));
   return loaded;
 }
@@ -222,6 +233,6 @@ function getPresets() {
   }));
 }
 
-const isReady = () => Module !== null && (Module.calledRun || Module._engine_load);
+const isReady = () => Module !== null && (Module.calledRun || Module._engine_load) && questionsLoaded;
 
 module.exports = { initEngine, loadQuestions, generatePaper, getPresets, isReady };
