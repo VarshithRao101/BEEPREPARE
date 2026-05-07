@@ -1068,6 +1068,13 @@ const generatePaper = async (req, res) => {
                     const broaderParams = { ...engineParams, chapterIds: [], chapterIndices: [] };
                     engineResult = await generatePaperJS(broaderParams);
                 }
+
+                // TERTIARY FALLBACK (RESCUE): If still 0, ignore type constraints as a last resort
+                if (engineResult?.questionIds?.length === 0) {
+                    console.warn(`[Matrix Engine] Section ${sectionReq.type} still empty. Performing RESCUE fallback (ignoring all filters)...`);
+                    const rescueParams = { ...engineParams, chapterIds: [], chapterIndices: [], typeFilter: -1 };
+                    engineResult = await generatePaperJS(rescueParams);
+                }
             }
 
             if (engineResult && engineResult.questionIds && engineResult.questionIds.length > 0) {

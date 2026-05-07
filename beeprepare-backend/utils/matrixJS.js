@@ -31,7 +31,14 @@ async function generatePaperJS(options) {
 
   // Build filter query
   const filter = {};
-  if (bankId)     filter.bankId     = bankId;
+  if (bankId) {
+    const mongoose = require('mongoose');
+    // Resilient lookup: handle both stored String and ObjectId formats
+    filter.$or = [
+      { bankId: String(bankId) },
+      { bankId: mongoose.Types.ObjectId.isValid(bankId) ? new mongoose.Types.ObjectId(bankId) : null }
+    ].filter(c => c.bankId !== null);
+  }
   if (subjectId)  filter.subjectId  = subjectId;
   
   if (chapterIds?.length) {
