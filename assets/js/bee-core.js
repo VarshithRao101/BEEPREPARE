@@ -355,66 +355,63 @@ export async function apiCall(
 // Page guard for teacher pages
 export async function guardTeacher() {
   const uid = localStorage.getItem(BP.UID);
-  const activated = localStorage.getItem(BP.ACTIVATED);
-  const role = localStorage.getItem(BP.ROLE);
+  let role = localStorage.getItem(BP.ROLE);
   const base = getIndexPath();
 
-  if (!uid || role !== 'teacher') {
+  // 1. If we have NO UID or NO TOKEN, definitely redirect.
+  if (!uid || !localStorage.getItem(BP.TOKEN)) {
+    console.warn("[GUARD] No session found. Redirecting...");
     window.location.href = base;
-    return false;
-  }
-  
-  if (activated !== 'true') {
-    window.location.href = base.replace('index.html', 'activation.html');
     return false;
   }
 
-  // Cross-verify with server session
-  const token = await getFreshToken();
-  const res = await verifySession(token);
-  
-  // Only redirect if we got a successful response that EXPLICITLY says the role is wrong
-  // or if apiCall already handled a 401.
-  if (res.success && res.data.role !== 'teacher') {
-    console.error("[GUARD] Role mismatch. Expected teacher, got:", res.data.role);
-    localStorage.clear();
-    clearSessionCache();
-    window.location.href = base;
-    return false;
+  // 2. If role is conflicting or missing, RECONCILE with server before booting.
+  if (role !== 'teacher') {
+    console.warn("[GUARD] Role conflict (Local:", role, "). Reconciling with server...");
+    const token = await getFreshToken();
+    const res = await verifySession(token);
+    
+    if (res.success && res.data.role === 'teacher') {
+      console.log("[GUARD] Reconciliation success. Updating role.");
+      localStorage.setItem(BP.ROLE, 'teacher');
+      role = 'teacher';
+    } else {
+      console.error("[GUARD] Reconciliation failed. Definitive unauthorized.");
+      localStorage.clear();
+      clearSessionCache();
+      window.location.href = base;
+      return false;
+    }
   }
   
-  // If it's a network error (success: false), we let the page load anyway 
-  // to prevent locking out users on minor flickers. apiCall will show errors later if needed.
   return true;
 }
 
 // Page guard for student pages
 export async function guardStudent() {
   const uid = localStorage.getItem(BP.UID);
-  const activated = localStorage.getItem(BP.ACTIVATED);
-  const role = localStorage.getItem(BP.ROLE);
+  let role = localStorage.getItem(BP.ROLE);
   const base = getIndexPath();
 
-  if (!uid || role !== 'student') {
+  if (!uid || !localStorage.getItem(BP.TOKEN)) {
     window.location.href = base;
     return false;
   }
 
-  if (activated !== 'true') {
-    window.location.href = base.replace('index.html', 'activation.html');
-    return false;
-  }
-
-  // Cross-verify with server session
-  const token = await getFreshToken();
-  const res = await verifySession(token);
-  
-  if (res.success && res.data.role !== 'student') {
-    console.error("[GUARD] Role mismatch. Expected student, got:", res.data.role);
-    localStorage.clear();
-    clearSessionCache();
-    window.location.href = base;
-    return false;
+  if (role !== 'student') {
+    console.warn("[GUARD] Role conflict. Reconciling...");
+    const token = await getFreshToken();
+    const res = await verifySession(token);
+    
+    if (res.success && res.data.role === 'student') {
+      localStorage.setItem(BP.ROLE, 'student');
+      role = 'student';
+    } else {
+      localStorage.clear();
+      clearSessionCache();
+      window.location.href = base;
+      return false;
+    }
   }
   
   return true;
