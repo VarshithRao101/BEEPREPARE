@@ -53,9 +53,13 @@ async function generatePaperJS(options) {
   }
 
   // Fetch all candidate questions
+  console.log(`[Matrix Engine JS] Searching for: bankId=${bankId}, type=${filter.questionType}, chapters=${JSON.stringify(filter.chapterId || 'all')}`);
+  
   const allQuestions = await Question.find(filter)
     .select('_id numericId marks difficulty importance examFrequency lastUsed metaTags chapterId subtopicBitmask questionText questionType mcqOptions imageUrl pairs rows columns subQuestions')
     .lean();
+
+  console.log(`[Matrix Engine JS] Found ${allQuestions?.length || 0} candidate questions.`);
 
   if (!allQuestions || allQuestions.length === 0) {
     return { questionIds: [], success: false, error: 'NO_QUESTIONS' };

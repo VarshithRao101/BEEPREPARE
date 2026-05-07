@@ -1061,6 +1061,13 @@ const generatePaper = async (req, res) => {
                     console.log(`[Matrix Engine] WASM node offline. Using JS Fallback for ${sectionReq.type}...`);
                 }
                 engineResult = await generatePaperJS(engineParams);
+                
+                // SECOND FALLBACK: If JS failed because of chapter constraints, try again across the WHOLE BANK
+                if (engineResult?.error === 'NO_QUESTIONS' && (engineParams.chapterIds?.length || engineParams.chapterIndices?.length)) {
+                    console.log(`[Matrix Engine] Section ${sectionReq.type} empty in chapters. Retrying across ALL chapters...`);
+                    const broaderParams = { ...engineParams, chapterIds: [], chapterIndices: [] };
+                    engineResult = await generatePaperJS(broaderParams);
+                }
             }
 
             if (engineResult && engineResult.questionIds && engineResult.questionIds.length > 0) {
