@@ -384,8 +384,7 @@
           }
           
           // Force a server-side sync for role-select (no initPage here)
-          const token = await getFreshToken();
-          const res = await verifySession(token);
+          const res = await verifySession();
           
           if (res.success) {
             const u = res.data;

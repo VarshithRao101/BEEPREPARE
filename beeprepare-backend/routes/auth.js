@@ -26,7 +26,7 @@ router.post('/set-role', requireAuth, validateSetRole, setRole);
  */
 router.post('/wipe-data', requireAuth, wipeData);
 
-router.get('/verify-session', requireAuth, verifySession);
+router.all('/verify-session', requireAuth, verifySession);
 router.post('/logout', requireAuth, logout);
 
 module.exports = router;

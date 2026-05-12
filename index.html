@@ -335,8 +335,14 @@
         checkRedirectResult();
 
         async function handleAutoRedirect() {
+          // 1. Loop Protection — if we just came from a redirect, don't auto-redirect back
+          const lastRedirect = parseInt(sessionStorage.getItem('_lastRedirectAt') || '0');
+          if (Date.now() - lastRedirect < 3000) {
+            console.warn('[AUTO] Loop protection active. Staying on login page.');
+            return;
+          }
+
           const auth = getAuth();
-          
           const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (unsubscribe) unsubscribe();
 
@@ -353,26 +359,16 @@
                 localStorage.removeItem(BP.ROLE);
                 sessionStorage.clear();
               }
-              return; // Stay on login page
+              return;
             }
 
             // User exists in Firebase — but VERIFY with server before redirecting
-            // This prevents redirecting when the server-side session is invalid
             if (user && activated === 'true' && role && hasToken) {
               try {
-                // Get a fresh token and do a quick server check
-                const freshToken = await user.getIdToken(false);
-                const resp = await fetch('/api/auth/verify-session', {
-                  method: 'GET',
-                  headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + freshToken
-                  }
-                });
-                const data = await resp.json();
+                // Use unified apiCall for verification (handles maintenance, block, etc)
+                const data = await apiCall('/auth/verify-session', 'GET', null, true, false, false);
 
                 if (data?.success) {
-                  // Server confirmed valid — safe to redirect
                   console.log('[AUTO] Session confirmed, redirecting to', role);
                   if (role === 'teacher') {
                     window.location.replace('/beginners/teacher/teacher-home.html');
@@ -380,24 +376,17 @@
                     window.location.replace('/beginners/student/student-home.html');
                   }
                 } else {
-                  // Server says invalid — clear everything, stay on login
                   console.warn('[AUTO] Server rejected session. Clearing.');
                   localStorage.removeItem(BP.TOKEN);
                   localStorage.removeItem(BP.ACTIVATED);
                   localStorage.removeItem(BP.ROLE);
                   sessionStorage.clear();
-                  // Sign out of Firebase too so loop cannot restart
                   await auth.signOut();
                 }
               } catch (err) {
-                // Network error — don't redirect, don't clear, just wait
                 console.warn('[AUTO] Could not verify session, staying on login.', err.message);
               }
-              return;
             }
-
-            // User in Firebase but no localStorage flags — they need to complete login
-            // This is a fresh login, not a loop — do nothing, let login flow handle it
           });
           
           setTimeout(() => { if (unsubscribe) unsubscribe(); }, 2000);

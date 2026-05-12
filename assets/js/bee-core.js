@@ -120,13 +120,13 @@ let _sessionCache = null;
 let _sessionCachedAt = 0;
 const SESSION_CACHE_TTL = 4 * 60 * 1000; // 4 minutes
 
-export async function verifySession(token) {
+export async function verifySession() {
   const now = Date.now();
   if (_sessionCache && (now - _sessionCachedAt) < SESSION_CACHE_TTL) {
     return _sessionCache;
   }
   try {
-    const result = await apiCall('/auth/verify-session', 'POST', { token });
+    const result = await apiCall('/auth/verify-session', 'GET');
     if (result?.success) {
       const u = result.data;
       
@@ -231,7 +231,7 @@ export async function initPage(guardFn, dataFetchFn) {
     }
 
     const dataPromise = dataFetchFn ? dataFetchFn(token) : Promise.resolve(null);
-    const sessionResult = await verifySession(token);
+    const sessionResult = await verifySession();
 
     if (!sessionResult?.success) {
       sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
@@ -448,8 +448,7 @@ export async function guardTeacher() {
   // 2. If role is conflicting or missing, RECONCILE with server before booting.
   if (role !== 'teacher') {
     console.warn("[GUARD] Role conflict (Local:", role, "). Reconciling with server...");
-    const token = await getFreshToken();
-    const res = await verifySession(token);
+    const res = await verifySession();
     
     if (res.success && res.data.role === 'teacher') {
       console.log("[GUARD] Reconciliation success. Updating role.");
@@ -495,8 +494,7 @@ export async function guardStudent() {
 
   if (role !== 'student') {
     console.warn("[GUARD] Role conflict. Reconciling...");
-    const token = await getFreshToken();
-    const res = await verifySession(token);
+    const res = await verifySession();
     
     if (res.success && res.data.role === 'student') {
       localStorage.setItem(BP.ROLE, 'student');
