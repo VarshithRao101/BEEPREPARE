@@ -47,7 +47,7 @@ export async function getFreshToken(forceRefresh = false) {
   
   if (!forceRefresh && cachedToken && cachedTime && (now - parseInt(cachedTime) < 45 * 60 * 1000)) {
     // If not logging out, we can safely use the hot cache
-    if (!localStorage.getItem(BP.LOGGING_OUT)) {
+    if (!localStorage.getItem(BP.LOGGING_OUT) && !sessionStorage.getItem('_loginInProgress')) {
       lastToken = cachedToken;
       lastFetchTime = parseInt(cachedTime);
       return cachedToken;
@@ -326,43 +326,36 @@ export async function apiCall(
     // 5. Handle Status Codes
     if (res.status === 429) throw new Error('SERVER_BUSY');
     
-    if (res.status === 401 && !isRetry) {
-      console.log('[API_RECOVERY] 401 Unauthorized. Retrying with fresh token...');
-      localStorage.removeItem(BP.TOKEN);
-      lastToken = null;
-      // Recursion will handle loader correctly via finally blocks
-      return await apiCall(endpoint, method, body, needsAuth, true, showOverlay);
-    }
-
-    if (res.status === 401 && isRetry) {
-      // 🕵️ DOUBLE CHECK: Before booting the user, check if Firebase still has a session.
-      // This prevents the "Redirect Loop" if Firebase is slow to initialize or in a transition state.
-      const { getAuth } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
-      const auth = getAuth();
-      
-      if (auth.currentUser) {
-        console.warn('⚠️ [API] 401 received but Firebase user still active. Attempting last-stand refresh...');
-        const forceToken = await auth.currentUser.getIdToken(true);
-        localStorage.setItem(BP.TOKEN, forceToken);
-        localStorage.setItem('bp_token_time', Date.now().toString());
-        // Try one last time WITHOUT the "isRetry" flag to allow one more refresh attempt
-        return await apiCall(endpoint, method, body, needsAuth, false, showOverlay);
+    if (res.status === 401) {
+      // If this is the login endpoint itself — do NOT redirect
+      // Just return the failure so handleAuthResult can handle it
+      if (endpoint.includes('google-login') || 
+          endpoint.includes('login') ||
+          endpoint.includes('verify-session')) {
+        const text2 = await res.text().catch(() => '{}');
+        try { return JSON.parse(text2); } catch { return { success: false, message: 'Auth failed' }; }
       }
 
-      console.error('🔴 [API] Session definitive failure. Redirecting to index.');
-      // Clear ONLY auth-related keys — not the entire localStorage
-      // Full clear causes race condition where index.html reads
-      // stale values before the clear completes
+      if (!isRetry) {
+        // First 401 — try once with a fresh token
+        console.log('[API] 401 on first try — refreshing token once');
+        localStorage.removeItem(BP.TOKEN);
+        localStorage.removeItem('bp_token_time');
+        lastToken = null;
+        return await apiCall(endpoint, method, body, needsAuth, true, showOverlay);
+      }
+
+      // Second 401 — definitive failure, clear and redirect
+      console.error('[API] 401 after retry — session expired');
       localStorage.removeItem(BP.TOKEN);
       localStorage.removeItem(BP.ROLE);
       localStorage.removeItem(BP.ACTIVATED);
-      localStorage.removeItem(BP.USER_UID);
-      localStorage.removeItem(BP.USER_DATA);
+      localStorage.removeItem(BP.UID);
+      localStorage.removeItem('bp_token_time');
       sessionStorage.clear();
       _sessionCache    = null;
       _sessionCachedAt = 0;
 
-      // Small delay before redirect so storage ops complete
       setTimeout(() => {
         window.location.href = getIndexPath();
       }, 50);
@@ -412,8 +405,17 @@ export async function apiCall(
   } catch (err) {
     console.groupEnd();
     console.error('❌ API Failure:', endpoint, err);
-    if (window.Swal && err.message === 'SERVER_BUSY') {
-        Swal.fire({ icon: 'warning', title: 'Server Busy', text: 'High load detected. Try again later.', background: '#1a1a2e', color: '#fff' });
+    
+    // Don't show error popups on the login page itself
+    const onLoginPage = window.location.pathname === '/' || 
+                        window.location.pathname.includes('index.html');
+    
+    if (!onLoginPage && window.Swal && err.message === 'SERVER_BUSY') {
+      Swal.fire({
+        icon: 'warning', title: 'Server Busy',
+        text: 'High load detected. Try again later.',
+        background: '#1a1a2e', color: '#fff'
+      });
     }
     return { success: false, message: err.message || 'Network error' };
   } finally {

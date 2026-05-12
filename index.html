@@ -248,10 +248,11 @@
             '/auth/google-login',
             'POST',
             { idToken },
-            false
+            false   // ← needsAuth=false, so 401 handler won't fire for login
           );
 
           if (!response || !response.success) {
+            sessionStorage.removeItem('_loginInProgress');
             throw new Error(response?.message || 'Login failed');
           }
 
@@ -264,6 +265,8 @@
           localStorage.setItem(BP.ROLE, u.role || '');
           localStorage.setItem(BP.ACTIVATED, u.isActivated ? 'true' : 'false');
           localStorage.setItem(BP.PLAN, u.planType || 'free');
+
+          sessionStorage.removeItem('_loginInProgress');
 
           const redirect = response.data.redirectTo;
           if (redirect === 'activation') {
@@ -292,6 +295,7 @@
                         || window.innerWidth < 768;
 
           try {
+            sessionStorage.setItem('_loginInProgress', '1');
             if (isMobile) {
               sessionStorage.setItem('_loginRedirectPending', '1');
               await signInWithRedirect(auth, provider);
