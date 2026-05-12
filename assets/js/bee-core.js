@@ -378,6 +378,8 @@ export async function guardTeacher() {
   // 1. If we have NO UID or NO TOKEN, definitely redirect.
   if (!uid || !localStorage.getItem(BP.TOKEN)) {
     console.warn("[GUARD] No session found. Redirecting...");
+    localStorage.clear();
+    clearSessionCache();
     window.location.href = base;
     return false;
   }
@@ -411,6 +413,9 @@ export async function guardStudent() {
   const base = getIndexPath();
 
   if (!uid || !localStorage.getItem(BP.TOKEN)) {
+    console.warn("[GUARD] No session found. Redirecting...");
+    localStorage.clear();
+    clearSessionCache();
     window.location.href = base;
     return false;
   }

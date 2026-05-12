@@ -331,31 +331,43 @@
         checkRedirectResult();
 
         async function handleAutoRedirect() {
-          const role = localStorage.getItem(BP.ROLE);
-          const activated = localStorage.getItem(BP.ACTIVATED);
-          const hasToken = !!localStorage.getItem(BP.TOKEN);
           const auth = getAuth();
           
+          // 1. Instant check if Firebase is already initialized
           if (auth.currentUser) {
-              const u = auth.currentUser;
-              if (activated === 'true') {
+              const role = localStorage.getItem(BP.ROLE);
+              const activated = localStorage.getItem(BP.ACTIVATED);
+              if (activated === 'true' && role) {
+                  console.log("[AUTO] Firebase active, redirecting to", role);
                   if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
                   else if (role === 'student') window.location.replace('beginners/student/student-home.html');
                   return;
               }
           }
 
+          // 2. Otherwise wait for state change
           const unsubscribe = onAuthStateChanged(auth, (user) => {
               if (unsubscribe) unsubscribe();
-              if (user && activated === 'true') {
+              
+              // ALWAYS read from localStorage FRESH inside the callback to avoid closure staleness
+              const role = localStorage.getItem(BP.ROLE);
+              const activated = localStorage.getItem(BP.ACTIVATED);
+              const hasToken = !!localStorage.getItem(BP.TOKEN);
+
+              if (user && activated === 'true' && role) {
+                  console.log("[AUTO] Auth state changed, redirecting to", role);
                   if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
                   else if (role === 'student') window.location.replace('beginners/student/student-home.html');
               } else if (hasToken && !user) {
+                  // Token exists but Firebase says NO USER. Definitive cleanup to stop loops.
+                  console.warn("[AUTO] Token present but no Firebase user. Clearing session.");
                   localStorage.removeItem(BP.TOKEN);
+                  localStorage.removeItem(BP.ACTIVATED);
+                  localStorage.removeItem(BP.ROLE);
               }
           });
           
-          setTimeout(() => { if (unsubscribe) unsubscribe(); }, 1500);
+          setTimeout(() => { if (unsubscribe) unsubscribe(); }, 2000);
         }
 
         window.addEventListener('load', handleAutoRedirect);
