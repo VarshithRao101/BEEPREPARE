@@ -29,7 +29,10 @@ export const API_BASE = (window.location.hostname === 'localhost' || window.loca
 
 // Globally initialize Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 // Get fresh Firebase token
 let lastToken = null;
@@ -51,13 +54,7 @@ export async function getFreshToken(forceRefresh = false) {
     }
   }
 
-  // 2. Load Firebase Auth only if cache is missed or expired
-  const { getAuth, onAuthStateChanged } = await import(
-    'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
-  );
-  const auth = getAuth();
-
-  // Strategy: Wait for status if currently null on page load
+  // 2. Auth state check
   let user = auth.currentUser;
   if (!user) {
     await new Promise(resolve => {

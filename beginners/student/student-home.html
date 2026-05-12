@@ -371,7 +371,14 @@
 
         // Initialize IMMEDIATELY
         initPage(guardStudent, loadDashboard);
-        setInterval(() => loadDashboard(false), 30000);
+        
+        async function pulse() {
+            try {
+                await loadDashboard(false);
+            } catch(e) {}
+            setTimeout(pulse, 30000);
+        }
+        setTimeout(pulse, 30000);
     </script>
     <script src="../../assets/js/ripple.js"></script>
 </body>
