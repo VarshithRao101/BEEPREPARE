@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -9,6 +9,32 @@
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        @media (max-width: 768px) {
+            .intervention-bar {
+                padding: 15px !important;
+                gap: 12px !important;
+            }
+            .intervention-bar div[style*="font-weight: 900"] {
+                font-size: 14px !important;
+            }
+            .material-grid {
+                grid-template-columns: 1fr !important;
+                padding: 15px !important;
+            }
+            .material-item {
+                padding: 15px !important;
+                gap: 12px !important;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 20px;
+            }
+            .vault-tab {
+                padding: 10px 18px !important;
+                font-size: 11px !important;
+            }
+        }
         .section-divider {
             display: flex;
             align-items: center;

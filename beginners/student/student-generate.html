@@ -9,6 +9,31 @@
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        @media (max-width: 991px) {
+            .paper-layout {
+                padding-bottom: 80px;
+            }
+            .scope-grid {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+            .total-badge {
+                padding: 15px !important;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 20px;
+            }
+        }
+
+        .scope-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
         .section-divider {
             display: flex;
             align-items: center;
@@ -225,7 +250,7 @@
                         <div class="divider-line"></div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 30px;">
+                    <div class="scope-grid">
                         <div class="bp-card" style="margin: 0; display: flex; align-items: center;">
                             <select id="bank-select" class="glass-select" style="background: none; border: none; padding: 0;">
                                 <option value="">Select Target Matrix</option>

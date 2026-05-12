@@ -66,10 +66,34 @@
             font-weight: 800;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 991px) {
             .welcome-title-styled {
                 font-size: 24px !important;
             }
+            .dashboard-sections {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 20px;
+            }
+            .quick-actions-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        .dashboard-sections {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
         /* Activity Styling */
@@ -171,7 +195,7 @@
                 <p id="quote-author" style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">Be Prepare</p>
             </div>
 
-            <div class="dashboard-sections" style="display: grid; grid-template-columns: 1fr 350px; gap: 30px;">
+            <div class="dashboard-sections">
                 <!-- Left Column -->
                 <div>
                     <div class="section-divider">
@@ -189,7 +213,7 @@
                         <span class="section-label">Quick Actions</span>
                         <div class="divider-line"></div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="quick-actions-grid">
                         <div class="adv-card" onclick="window.location.href='student-generate.html'" style="padding: 20px; cursor: pointer; display: flex; align-items: center; gap: 15px;">
                             <div style="width: 40px; height: 40px; background: rgba(255, 215, 0, 0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary);">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>

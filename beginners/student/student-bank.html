@@ -9,6 +9,34 @@
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        @media (max-width: 991px) {
+            .inventory-hero {
+                padding: 25px 15px !important;
+                border-radius: 20px !important;
+            }
+            .inventory-title {
+                font-size: 22px !important;
+            }
+            .profile-layout {
+                grid-template-columns: 1fr !important;
+                gap: 20px !important;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 20px;
+            }
+            .notebook-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 40px;
+        }
+
         .section-divider {
             display: flex;
             align-items: center;
@@ -393,7 +421,7 @@
 
             <!-- Detailed Repository View -->
             <div id="bank-detail-view" style="display:none;">
-                <div class="profile-layout" style="display: grid; grid-template-columns: 1fr 320px; gap: 40px;">
+                <div class="profile-layout">
                     <div>
                         <div id="chapter-nodes-container">
                             <!-- Chapter nodes injected by JS -->
