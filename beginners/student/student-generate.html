@@ -11,7 +11,12 @@
     <style>
         @media (max-width: 991px) {
             .paper-layout {
-                padding-bottom: 80px;
+                padding-bottom: 120px;
+            }
+            header {
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
             }
             .scope-grid {
                 grid-template-columns: 1fr !important;
@@ -19,11 +24,6 @@
             }
             .total-badge {
                 padding: 15px !important;
-            }
-            header {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 20px;
             }
         }
 
@@ -229,17 +229,20 @@
         </aside>
 
         <main class="content-wrapper">
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <div>
-                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Practice Node</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Blueprint Configuration</p>
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 15px;">
+                <div style="flex: 1;">
+                    <h2 class="welcome-title-styled" style="background: linear-gradient(135deg, #fff, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0; font-size: 28px;">Practice Hub</h2>
+                    <p style="color: var(--text-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px;">Test Matrix Configuration</p>
                 </div>
-                <div style="display: flex; gap: 20px; align-items: center;">
-                    <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
-                        <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
-                        <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
+                <div style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
+                    <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
+                        <canvas id="streak-canvas" width="16" height="16" style="width: 20px; height: 20px;"></canvas>
+                        <span id="streak-val-header" style="font-weight: 950; color: #FF4500; font-size: 14px;">0</span>
                     </div>
-                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">--</div>
+                    <div class="profile-icon" id="profile-icon-btn" onclick="window.location.href='student-profile.html'" style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; position: relative; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 0 20px rgba(255,215,0,0.2);">
+                        S
+                        <div id="profile-signal" class="signal-dot"></div>
+                    </div>
                 </div>
             </header>
 
@@ -290,6 +293,30 @@
             </div>
         </main>
     </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav-bottom">
+        <a href="student-home.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+            <span>Home</span>
+        </a>
+        <a href="student-bank.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            <span>Bank</span>
+        </a>
+        <a href="student-generate.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+            <span>Practice</span>
+        </a>
+        <a href="../ai-chat.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
+            <span>AI</span>
+        </a>
+        <a href="student-profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
+            <span>Profile</span>
+        </a>
+    </nav>
 
     <div class="gen-overlay" id="genOverlay">
         <div style="width: 80px; height: 80px; border: 4px solid var(--primary); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
@@ -383,27 +410,42 @@
         function renderBlueprint() {
             const container = document.getElementById('blueprint-container');
             container.innerHTML = blueprint.map((sec, idx) => `
-                <div class="bp-card">
-                    <div class="counter-overlay">
-                        <button class="cnt-btn" onclick="window.updateQty(${idx}, -1)">−</button>
-                        <span style="min-width: 20px; text-align: center; font-weight: 900; color: var(--primary);">${sec.count}</span>
-                        <button class="cnt-btn" onclick="window.updateQty(${idx}, 1)">+</button>
+                <div class="bp-card" style="padding: 20px; border: 1px solid var(--border); border-radius: 20px; background: rgba(15,15,15,0.4); margin-bottom: 20px; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 10px; font-weight: 950; color: var(--primary); text-transform: uppercase; letter-spacing: 1.5px;">Section ${idx + 1}</span>
+                        </div>
+                        <button onclick="window.removeSection(${idx})" style="background: rgba(255,77,77,0.1); border: 1px solid rgba(255,77,77,0.2); color: #ff4d4d; font-size: 9px; font-weight: 900; padding: 6px 12px; border-radius: 8px; cursor: pointer; text-transform: uppercase;">Remove</button>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                        <span style="font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase;">Section ${idx + 1}</span>
-                        <button onclick="window.removeSection(${idx})" style="background:none; border:none; color:#ff4d4d; font-weight:900; cursor:pointer;">REMOVE</button>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <div>
+                            <label style="display: block; font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Question Type</label>
+                            <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'type', this.value)" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #fff; font-size: 13px; font-weight: 700;">
+                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
+                                <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
+                                <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Marks / Question</label>
+                            <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'marks', this.value)" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #fff; font-size: 13px; font-weight: 700;">
+                                <option value="1" ${sec.marks == 1 ? 'selected' : ''}>1 Mark</option>
+                                <option value="2" ${sec.marks == 2 ? 'selected' : ''}>2 Marks</option>
+                                <option value="3" ${sec.marks == 3 ? 'selected' : ''}>3 Marks</option>
+                                <option value="4" ${sec.marks == 4 ? 'selected' : ''}>4 Marks</option>
+                                <option value="5" ${sec.marks == 5 ? 'selected' : ''}>5 Marks</option>
+                            </select>
+                        </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'type', this.value)">
-                            <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
-                            <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
-                            <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
-                        </select>
-                        <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'marks', this.value)">
-                            <option value="1" ${sec.marks == 1 ? 'selected' : ''}>1 Mark</option>
-                            <option value="2" ${sec.marks == 2 ? 'selected' : ''}>2 Marks</option>
-                            <option value="5" ${sec.marks == 5 ? 'selected' : ''}>5 Marks</option>
-                        </select>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.03);">
+                        <span style="font-size: 11px; font-weight: 800; color: #fff;">Quantity Selection</span>
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <button class="cnt-btn" onclick="window.updateQty(${idx}, -1)" style="width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--primary); cursor: pointer; font-weight: 900;">−</button>
+                            <span style="min-width: 25px; text-align: center; font-weight: 950; color: var(--primary); font-size: 16px;">${sec.count}</span>
+                            <button class="cnt-btn" onclick="window.updateQty(${idx}, 1)" style="width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--primary); cursor: pointer; font-weight: 900;">+</button>
+                        </div>
                     </div>
                 </div>
             `).join('');

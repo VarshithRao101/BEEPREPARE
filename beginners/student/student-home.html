@@ -68,16 +68,16 @@
 
         @media (max-width: 991px) {
             .welcome-title-styled {
-                font-size: 24px !important;
+                font-size: 26px !important;
+            }
+            header {
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
             }
             .dashboard-sections {
                 grid-template-columns: 1fr !important;
                 gap: 20px !important;
-            }
-            header {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 20px;
             }
             .quick-actions-grid {
                 grid-template-columns: 1fr !important;
@@ -172,17 +172,17 @@
 
         <main class="content-wrapper">
             <!-- Top Bar -->
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
-                <div style="display: block;">
-                    <h2 class="welcome-title-styled">Student Hub</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your academic repository is active.</p>
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 15px;">
+                <div style="flex: 1;">
+                    <h2 class="welcome-title-styled" style="background: linear-gradient(135deg, #fff, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0;">Student Hub</h2>
+                    <p style="color: var(--text-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px;">Academic Repository Active</p>
                 </div>
-                <div style="display: flex; gap: 20px; align-items: center;">
-                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(255, 215, 0, 0.1); padding: 6px 15px; border-radius: 20px; border: 1px solid rgba(255, 215, 0, 0.2);">
+                <div style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
+                    <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
                         <canvas id="streak-canvas" width="16" height="16" style="width: 20px; height: 20px;"></canvas>
-                        <span id="streak-val-header" style="font-weight: 900; font-size: 14px; color: var(--primary);">0</span>
+                        <span id="streak-val-header" style="font-weight: 950; color: #FF4500; font-size: 14px;">0</span>
                     </div>
-                    <div class="profile-icon" id="profile-icon-btn" onclick="window.location.href='student-profile.html'" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; position: relative;">
+                    <div class="profile-icon" id="profile-icon-btn" onclick="window.location.href='student-profile.html'" style="width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: #000; display: flex; align-items: center; justify-content: center; font-weight: 900; cursor: pointer; position: relative; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 0 20px rgba(255,215,0,0.2);">
                         S
                         <div id="profile-signal" class="signal-dot"></div>
                     </div>
