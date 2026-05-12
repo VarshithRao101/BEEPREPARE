@@ -152,21 +152,6 @@
             box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
         }
 
-        .redeem-input {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            color: #fff;
-            font-weight: 900;
-            text-align: center;
-            letter-spacing: 4px;
-            font-size: 18px;
-            margin-bottom: 15px;
-            outline: none;
-        }
-
         /* Terminate Protocol */
         .terminate-btn {
             width: 100%;
@@ -196,14 +181,14 @@
             }
         }
     </style>
-<link rel="stylesheet" href="/assets/css/hover-interactions.css">
+    <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 
 <body>
     <div class="main-layout">
         <!-- Persistent Sidebar -->
         <aside class="pc-sidebar">
-            <div class="sidebar-brand">BEE COMMAND</div>
+            <div class="sidebar-brand"><span style="color: var(--primary);">BEE</span>COMMAND</div>
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
@@ -217,8 +202,13 @@
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                     <span>Practice</span>
                 </a>
+                <a href="student-doubts.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                    <span>My Doubts</span>
+                    <div id="sidebar-doubt-signal" class="signal-dot" style="display: none;"></div>
+                </a>
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="student-profile.html" class="sidebar-link active">
@@ -379,51 +369,13 @@
     </nav>
 
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
         import { 
-          firebaseConfig, 
           apiCall, 
           guardStudent, 
+          initPage,
           BP,
           getIndexPath
         } from '../../assets/js/bee-core.js';
-
-        const app = initializeApp(firebaseConfig);
-
-        window.handleUpdateName = async function() {
-            const input = document.getElementById('edit-name-input');
-            const newName = input?.value?.trim();
-
-            if (!newName || newName.length < 2) {
-                return Swal.fire({ icon: 'warning', title: 'Invalid Name', text: 'Identity string must be at least 2 characters.', background: '#0a0a1a', color: '#fff' });
-            }
-
-            const btn = document.getElementById('save-name-btn');
-            btn.disabled = true;
-            btn.textContent = 'SYNCING...';
-
-            try {
-                const res = await apiCall('/student/profile', 'PUT', { displayName: newName });
-                if (res && res.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Identity Synchronized',
-                        text: 'Your new name has been propagated across all academic nodes.',
-                        background: '#0a0a1a', color: '#fff',
-                        confirmButtonColor: '#FFD700'
-                    });
-                    localStorage.setItem(BP.NAME, newName);
-                    loadProfile();
-                } else {
-                    Swal.fire({ icon: 'error', title: 'Update Failed', text: res.message || 'Transmission error.', background: '#0a0a1a', color: '#fff' });
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Update Protocol Identity';
-            }
-        }
 
         async function loadProfile() {
             // Stats skeletons
@@ -444,18 +396,22 @@
             if (avatarEl) avatarEl.textContent = localName.substring(0, 2).toUpperCase();
 
             const idEl = document.getElementById('node-id-display');
-            if (idEl) idEl.textContent = `IDENTIFIER: ${localUid.substring(0, 10).toUpperCase()}`;
+            if (idEl) {
+                const bval = document.getElementById('bee-id-val');
+                if (bval) bval.textContent = localUid.substring(0, 15).toUpperCase();
+            }
 
             // Load profile and streak from backend simultaneously
             const [profileResult, streakResult] = await Promise.all([
-                apiCall('/student/profile'),
-                apiCall('/student/streak')
+                apiCall('/student/profile').catch(()=>null),
+                apiCall('/student/streak').catch(()=>null)
             ]);
 
             if (profileResult && profileResult.success) {
                 const p = profileResult.data;
 
                 if (nameEl) nameEl.textContent = p.displayName;
+                if (avatarEl) avatarEl.textContent = p.displayName.substring(0, 2).toUpperCase();
                 
                 // Update local cache for true real-time consistency
                 localStorage.setItem(BP.NAME, p.displayName);
@@ -484,32 +440,8 @@
                 if (testsEl) testsEl.textContent = p.stats?.testsTaken || 0;
                 if (queriesEl) queriesEl.textContent = p.stats?.queryCount || 0;
 
-                if (idEl) {
-                    const bval = document.getElementById('bee-id-val');
-                    if(bval) bval.textContent = p.beeId || 'BEE-NODE-ERROR';
-                }
-
-                // Name Change Lock Logic
-                const identityLabel = document.getElementById('identity-sect-label');
-                const editInput = document.getElementById('edit-name-input');
-                const saveBtn = document.getElementById('save-name-btn');
-
-                if (p.nameChanged) {
-                    if (identityLabel) identityLabel.innerHTML = 'Primary Identity <span style="color:var(--primary); font-size:14px;" title="Action Locked">🔒</span>';
-                    if (editInput) {
-                        editInput.disabled = true;
-                        editInput.style.opacity = '0.5';
-                        editInput.style.cursor = 'not-allowed';
-                    }
-                    if (saveBtn) {
-                        saveBtn.disabled = true;
-                        saveBtn.style.opacity = '0.5';
-                        saveBtn.style.cursor = 'not-allowed';
-                        saveBtn.textContent = 'IDENTITY LOCKED';
-                    }
-                } else if (editInput) {
-                    editInput.value = p.displayName;
-                }
+                const bval = document.getElementById('bee-id-val');
+                if(bval) bval.textContent = p.beeId || localUid.substring(0,15).toUpperCase();
             }
 
             if (streakResult && streakResult.success) {
@@ -538,50 +470,7 @@
             });
         };
 
-        window.executeRedemption = async function() {
-            const codeInput = document.querySelector('#redeem-input, .redeem-input, input[placeholder*="redeem"]');
-            const code = codeInput?.value?.trim()?.toUpperCase();
-
-            if (!code) {
-                return Swal.fire({
-                    icon: 'warning',
-                    title: 'Enter Code',
-                    text: 'Please enter a valid BEE-XXXXXX protocol key.',
-                    toast: true, position: 'top-end',
-                    showConfirmButton: false, timer: 2000,
-                    background: '#0a0a1a', color: '#fff'
-                });
-            }
-
-            const result = await apiCall('/auth/redeem-code', 'POST', { code });
-
-            if (result && result.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Knowledge Unlocked',
-                    text: result.data?.message || 'New subject repository synchronized.',
-                    background: '#0a0a1a', color: '#fff',
-                    confirmButtonColor: '#FFD700'
-                });
-                if (codeInput) codeInput.value = '';
-                loadProfile(); // Reload with new data
-            } else {
-                const errCode = result?.error?.code;
-                let msg = 'Invalid or expired code.';
-                if (errCode === 'CODE_ALREADY_USED') msg = 'This code has already been used.';
-                else if (errCode === 'CODE_EXPIRED') msg = 'This code has expired.';
-                
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Sync Failed',
-                    text: msg,
-                    background: '#0a0a1a', color: '#fff'
-                });
-            }
-        }
-
         window.handleWipeData = async function() {
-            // Layer 1: Warning
             const firstControl = await Swal.fire({
                 title: 'CRITICAL WARNING',
                 text: 'This will permanently ERASE all your banks, history, and practice logs. This is irreversible.',
@@ -594,7 +483,6 @@
 
             if (!firstControl.isConfirmed) return;
 
-            // Layer 2: Confirmation Input
             const { value: confirmInput } = await Swal.fire({
                 title: 'TOTAL DATA PURGE',
                 text: 'Type "CONFIRM" to permanently sanitize your data matrix.',
@@ -649,36 +537,28 @@
             });
 
             if (result.isConfirmed) {
-                // Set lockout flag BEFORE anything else
                 localStorage.setItem('bp_logging_out', 'true');
-
                 try {
-                    // Try to notify backend but don't hang if it fails
-                    apiCall('/auth/logout', 'POST').catch(e => console.warn('Backend logout failed:', e));
+                    apiCall('/auth/logout', 'POST').catch(() => {});
                     
                     const { getAuth, signOut } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
                     const auth = getAuth();
-                    await signOut(auth).catch(e => console.warn('Firebase signout failed:', e));
+                    await signOut(auth).catch(() => {});
                     
-                    // Scorched earth clear
-                    Object.values(BP).forEach(k => localStorage.removeItem(k));
                     localStorage.clear();
-                    
-                    // Force redirect to landing
+                    sessionStorage.clear();
                     window.location.replace('../../index.html');
                 } catch (err) {
-                    console.error('Logout sequence failed:', err);
                     window.location.replace('../../index.html');
                 }
             }
         }
 
-        window.addEventListener('load', async () => {
-            initPage(guardStudent, loadProfile);
-        });
+        // Initialize immediately
+        initPage(guardStudent, loadProfile);
     </script>
     <script src="../../assets/js/customer-care.js"></script>
-<script src="/assets/js/ripple.js"></script>
+    <script src="/assets/js/ripple.js"></script>
 </body>
 
 </html>

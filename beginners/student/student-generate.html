@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setup Practice Paper - BEEPREPARE</title>
+    <title>Practice Paper - BEEPREPARE</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .section-divider {
             display: flex;
@@ -30,20 +31,16 @@
             text-transform: uppercase;
         }
 
-        .context-card {
-            padding: 25px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
         .total-badge {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background: linear-gradient(135deg, var(--primary), #ffa000);
             border-radius: 24px;
             padding: 25px;
             text-align: center;
             color: #000;
             box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .chapter-row {
@@ -72,6 +69,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            color: transparent;
         }
 
         .chapter-row.selected .chk-visual {
@@ -88,56 +86,27 @@
             border-radius: 20px;
             color: #000;
             font-size: 16px;
-            font-weight: 900;
+            font-weight: 950;
             text-transform: uppercase;
             letter-spacing: 2px;
             cursor: pointer;
             margin-top: 40px;
             box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
             transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
         }
 
         .primary-action-btn:hover {
-            transform: translateY(-5px) scale(1.02);
+            transform: translateY(-5px);
             box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);
         }
 
-        @media (min-width: 769px) {
-            .paper-layout {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 40px;
-            }
-        }
-
-        /* COMPACT DESIGN SYSTEM */
         .bp-card {
             padding: 25px;
             margin-bottom: 25px;
-            position: relative;
             border: 1px solid var(--border);
             border-radius: 20px;
             background: rgba(15, 15, 15, 0.4);
-            transition: 0.3s;
-        }
-
-        .bp-card:hover {
-            border-color: var(--primary);
-            background: rgba(15, 15, 15, 0.6);
-        }
-
-        .field-label {
-            display: block;
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            position: relative;
         }
 
         .glass-select {
@@ -150,24 +119,7 @@
             font-size: 14px;
             font-weight: 700;
             outline: none;
-            appearance: none;
             cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23FFD700' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .glass-select:hover {
-            border-color: var(--primary);
-            background: rgba(255, 215, 0, 0.05);
-            transform: translateY(-1px);
-        }
-
-        .glass-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
         }
 
         .counter-overlay {
@@ -190,28 +142,8 @@
             font-size: 18px;
             font-weight: 900;
             cursor: pointer;
-            width: 25px;
-            height: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 6px;
-            transition: 0.2s;
-        }
-        .cnt-btn:hover { background: rgba(255, 215, 0, 0.1); }
-
-        .section-header {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        @media screen and (max-width: 768px) {
-            .paper-layout { padding-bottom: 50px; }
-            .counter-overlay { position: static; margin-bottom: 20px; justify-content: center; }
-        }
-
-        /* GENERATION ANIMATION OVERLAY */
         .gen-overlay {
             position: fixed;
             inset: 0;
@@ -226,49 +158,22 @@
 
         .gen-overlay.active { display: flex; }
 
-        .scanner-beam {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 5px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            box-shadow: 0 0 30px var(--primary);
-            animation: scannLoop 2s infinite ease-in-out;
-            z-index: 2;
-        }
-
-        @keyframes scannLoop { 0% { top: 0%; opacity: 0; } 50% { top: 50%; opacity: 1; } 100% { top: 100%; opacity: 0; } }
-
-        .assembly-container {
-            position: relative;
-            width: 120px; height: 160px;
-            border: 2px solid rgba(255, 215, 0, 0.2);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            margin-bottom: 40px;
-            overflow: hidden;
-        }
-
-        .data-fill {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%;
-            background: linear-gradient(to top, var(--primary), #FFD700);
-            opacity: 0.4;
-            animation: fillPaperData 2.5s forwards ease-in-out;
-        }
-
-        @keyframes fillPaperData { 100% { height: 100%; } }
-
-        .gen-status {
-            font-size: 13px; font-weight: 900; color: var(--primary); letter-spacing: 4px;
-            text-transform: uppercase; text-align: center;
+        @media (min-width: 769px) {
+            .paper-layout {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
         }
     </style>
-<link rel="stylesheet" href="/assets/css/hover-interactions.css">
+    <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 
 <body>
     <div class="main-layout">
-        <!-- Lean Student Sidebar -->
+        <!-- Persistent Sidebar -->
         <aside class="pc-sidebar">
-            <div class="sidebar-brand">BEE COMMAND</div>
+            <div class="sidebar-brand"><span style="color: var(--primary);">BEE</span>COMMAND</div>
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
@@ -282,8 +187,13 @@
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                     <span>Practice</span>
                 </a>
+                <a href="student-doubts.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                    <span>My Doubts</span>
+                    <div id="sidebar-doubt-signal" class="signal-dot" style="display: none;"></div>
+                </a>
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="student-profile.html" class="sidebar-link">
@@ -296,195 +206,129 @@
         <main class="content-wrapper">
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
-                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Practice Paper</h2>
-                    <p style="color: var(--text-muted); font-size: 14px;">Configure your practice paper structure.</p>
+                    <h2 style="font-size: 28px; font-weight: 800; color: #fff;">Practice Node</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Blueprint Configuration</p>
                 </div>
                 <div style="display: flex; gap: 20px; align-items: center;">
                     <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
                         <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
                         <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
                     </div>
-                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">--</div>
                 </div>
             </header>
 
             <div class="paper-layout">
-                <!-- Left: Configuration & Chapters -->
                 <div>
                     <div class="section-divider">
-                        <span class="section-label">1. Context & Scope</span>
+                        <span class="section-label">1. Scope Selection</span>
                         <div class="divider-line"></div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 30px;">
-                        <div class="context-card adv-card">
-                            <div style="margin-right: 15px; grid-column: 1 / -1;">
-                                <div style="font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Target Bank</div>
-                                <select id="bank-select" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: #fff; font-weight: 600; outline: none;">
-                                    <option value="">Select Target Bank</option>
-                                </select>
-                            </div>
+                        <div class="bp-card" style="margin: 0; display: flex; align-items: center;">
+                            <select id="bank-select" class="glass-select" style="background: none; border: none; padding: 0;">
+                                <option value="">Select Target Matrix</option>
+                            </select>
                         </div>
-                        <div class="total-badge" style="display:flex; flex-direction:column; justify-content:center;">
-                            <div style="font-size: 28px; font-weight: 900; line-height: 1;" id="total-marks">0</div>
-                            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase;">Marks</div>
+                        <div class="total-badge">
+                            <div style="font-size: 28px; font-weight: 950;" id="total-marks">0</div>
+                            <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Total Marks</div>
                         </div>
                     </div>
 
                     <div class="section-divider">
-                        <span class="section-label">2. Select Chapters</span>
+                        <span class="section-label">2. Target Chapters</span>
                         <div class="divider-line"></div>
                     </div>
                     <div id="chapters-list">
-                        <div style="color:var(--text-muted); font-size:12px; padding:20px; text-align:center; border: 1px dashed var(--border); border-radius: 15px;">Select a bank to load chapters</div>
+                        <div style="color:var(--text-muted); font-size:12px; padding:40px; text-align:center; border: 1px dashed var(--border); border-radius: 20px;">Synchronize a matrix to load modules.</div>
                     </div>
                 </div>
 
-                <!-- Right: Blueprint -->
                 <div>
                     <div class="section-divider">
-                        <span class="section-label">3. Paper Structure</span>
+                        <span class="section-label">3. Protocol Structure</span>
                         <div class="divider-line"></div>
                     </div>
 
-                    <div id="blueprint-container">
-                        <!-- Blueprint cards injected by JS -->
-                    </div>
+                    <div id="blueprint-container"></div>
 
-                    <button class="cnt-btn" style="width: 100%; margin-top: 15px; border: 1px dashed var(--border); background: rgba(255,215,0,0.03); padding: 15px; border-radius: 12px; font-size: 13px; font-weight: 800;" onclick="window.addSection()">
-                        + Add Another Practice Category
+                    <button class="act-btn" style="width: 100%; margin-top: 15px; border-style: dashed; padding: 18px;" onclick="window.addSection()">
+                        + APPEND CATEGORY
                     </button>
 
                     <button class="primary-action-btn" onclick="startGeneration()">
-                        Generate Practice Paper →
+                        GENERATE PRACTICE MATRIX →
                     </button>
                 </div>
-            </div>
-
-            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin: 60px 0 20px 0; opacity: 0.6;">
-                <div style="height: 1px; flex: 1; background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3));"></div>
-                <div style="font-size: 11px; font-weight: 900; color: var(--primary); letter-spacing: 4px; text-transform: uppercase;">BS</div>
-                <div style="height: 1px; flex: 1; background: linear-gradient(270deg, transparent, rgba(255, 215, 0, 0.3));"></div>
             </div>
         </main>
     </div>
 
-    <!-- Generation Animation Overlay -->
     <div class="gen-overlay" id="genOverlay">
-        <div class="scanner-beam"></div>
-        <div class="assembly-container">
-            <div class="data-fill"></div>
-        </div>
-        <div class="gen-status">Preparing Practice Paper...</div>
+        <div style="width: 80px; height: 80px; border: 4px solid var(--primary); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div style="margin-top: 30px; font-weight: 900; color: var(--primary); letter-spacing: 4px; text-transform: uppercase;">Assembling Paper...</div>
     </div>
 
-    <!-- Bottom Nav -->
-    <nav class="nav-bottom">
-        <a href="student-home.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
-            <span>Home</span>
-        </a>
-        <a href="student-bank.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-            <span>Bank</span>
-        </a>
-        <a href="student-generate.html" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-            <span>Practice</span>
-        </a>
-        <a href="../ai-chat.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
-            <span>AI</span>
-        </a>
-        <a href="student-profile.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" /></svg>
-            <span>Profile</span>
-        </a>
-    </nav>
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { 
-          firebaseConfig, 
           apiCall, 
           guardStudent, 
+          initPage,
           BP 
         } from '../../assets/js/bee-core.js';
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-
         let blueprint = [
             { id: 'mcq', type: 'MCQ', marks: 1, count: 5 },
-            { id: 'veryShort', type: 'Very Short', marks: 1, count: 4 },
-            { id: 'short', type: 'Short', marks: 2, count: 3 }
+            { id: 'short', type: 'Short', marks: 2, count: 5 }
         ];
 
+        let availableChapters = [];
+        let selectedChapters = [];
+
         window.addSection = () => {
-            blueprint.push({ id: 'custom-' + Date.now(), type: 'Short', marks: 2, count: 3 });
-            window.renderBlueprint();
+            blueprint.push({ id: 'custom-' + Date.now(), type: 'Short', marks: 2, count: 5 });
+            renderBlueprint();
         };
 
         window.removeSection = (idx) => {
             if (blueprint.length > 1) {
                 blueprint.splice(idx, 1);
-                window.renderBlueprint();
+                renderBlueprint();
             }
         };
 
-        let availableChapters = [];
-        let selectedChapters = [];
+        window.updateQty = (idx, diff) => {
+            blueprint[idx].count = Math.max(0, blueprint[idx].count + diff);
+            renderBlueprint();
+        };
+
+        window.updateBlueprint = (idx, key, val) => {
+            blueprint[idx][key] = (key === 'marks') ? parseInt(val) : val;
+            renderBlueprint();
+        };
 
         async function loadBanks() {
-            const [guardRes, streakRes, result] = await Promise.all([
-                guardStudent(),
-                apiCall('/student/streak').catch(() => null),
-                apiCall('/student/banks').catch(() => null)
-            ]);
-            
-            if (!guardRes) return;
-
-            if (streakRes && streakRes.success) {
-                const streakVal = document.getElementById('streak-val-header');
-                if (streakVal) streakVal.textContent = streakRes.data.currentStreak || 0;
-                BP.initStreakFlame('streak-canvas');
-            }
-
+            const result = await apiCall('/student/banks');
             const bankSelect = document.getElementById('bank-select');
-            bankSelect.innerHTML = '<option value="">Select a Bank</option>';
-
             if (result && result.success) {
-                const activeBanks = result.data.filter(b => b.status === 'active');
-                activeBanks.forEach(b => {
+                const active = result.data.filter(b => b.status === 'active');
+                active.forEach(b => {
                     const opt = document.createElement('option');
                     opt.value = b.bankId;
-                    opt.textContent = `${b.subject} - Class ${b.class}`;
+                    opt.textContent = `${b.subject} - ${b.class}`;
                     bankSelect.appendChild(opt);
                 });
-
                 bankSelect.onchange = (e) => loadChapters(e.target.value);
-                
-                // If subject in URL, pre-select
-                const urlParams = new URLSearchParams(window.location.search);
-                const sub = urlParams.get('subject');
-                if (sub) {
-                    const target = activeBanks.find(b => b.subject === sub);
-                    if (target) {
-                        bankSelect.value = target.bankId;
-                        loadChapters(target.bankId);
-                    }
-                }
             }
         }
 
         async function loadChapters(bankId) {
-            if (!bankId) {
-                document.getElementById('chapters-list').innerHTML = '<div style="color:var(--text-muted); font-size:12px; padding:20px;">Select a bank first.</div>';
-                return;
-            }
-            const result = await apiCall(`/student/banks/${bankId}/chapters`);
-            if (result && result.success) {
-                availableChapters = result.data.chapters;
+            if (!bankId) return;
+            const res = await apiCall(`/student/banks/${bankId}/chapters`);
+            if (res.success) {
+                availableChapters = res.data.chapters;
                 renderChapters();
             }
         }
@@ -492,13 +336,13 @@
         function renderChapters() {
             const list = document.getElementById('chapters-list');
             list.innerHTML = availableChapters.map(chap => {
-                const isSelected = selectedChapters.includes(chap.chapterId);
+                const sel = selectedChapters.includes(chap.chapterId);
                 return `
-                    <div class="chapter-row adv-card ${isSelected ? 'selected' : ''}" onclick="window.toggleChapter('${chap.chapterId}')">
-                        <div class="chk-visual">${isSelected ? '✓' : ''}</div>
+                    <div class="chapter-row adv-card ${sel ? 'selected' : ''}" onclick="window.toggleChapter('${chap.chapterId}')">
+                        <div class="chk-visual">${sel ? '✓' : ''}</div>
                         <div style="flex: 1;">
-                            <div style="font-weight: 800; font-size: 14px;">${chap.chapterName}</div>
-                            <div style="font-size: 11px; color: var(--text-muted);">${chap.questionCount} Questions Available</div>
+                            <div style="font-weight: 800; font-size: 14px; color: #fff;">${chap.chapterName}</div>
+                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700;">${chap.questionCount || 0} Questions Available</div>
                         </div>
                     </div>
                 `;
@@ -506,128 +350,82 @@
         }
 
         window.toggleChapter = (id) => {
-            if (selectedChapters.includes(id)) {
-                selectedChapters = selectedChapters.filter(cid => cid !== id);
-            } else {
-                selectedChapters.push(id);
-            }
+            if (selectedChapters.includes(id)) selectedChapters = selectedChapters.filter(c => c !== id);
+            else selectedChapters.push(id);
             renderChapters();
         };
 
-        window.renderBlueprint = () => {
+        function renderBlueprint() {
             const container = document.getElementById('blueprint-container');
             container.innerHTML = blueprint.map((sec, idx) => `
-                <div class="bp-card" data-section="${sec.id}">
+                <div class="bp-card">
                     <div class="counter-overlay">
                         <button class="cnt-btn" onclick="window.updateQty(${idx}, -1)">−</button>
-                        <span id="qty-${idx}" class="qty-value" style="min-width: 20px; text-align: center; font-weight: 950; color: var(--primary); font-size: 16px;">${sec.count}</span>
+                        <span style="min-width: 20px; text-align: center; font-weight: 900; color: var(--primary);">${sec.count}</span>
                         <button class="cnt-btn" onclick="window.updateQty(${idx}, 1)">+</button>
                     </div>
-
-                    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 900; font-size: 14px; text-transform: uppercase; color: #fff;">Section Category ${idx + 1}</div>
-                            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">Question Configuration</div>
-                        </div>
-                        <button class="cnt-btn" style="color: #ff4d4d; font-size: 20px;" onclick="window.removeSection(${idx})">×</button>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <span style="font-size: 11px; font-weight: 900; color: #fff; text-transform: uppercase;">Section ${idx + 1}</span>
+                        <button onclick="window.removeSection(${idx})" style="background:none; border:none; color:#ff4d4d; font-weight:900; cursor:pointer;">REMOVE</button>
                     </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <label class="field-label">Question Type</label>
-                            <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'type', this.value)">
-                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
-                                <option value="Very Short" ${sec.type === 'Very Short' ? 'selected' : ''}>Very Short</option>
-                                <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
-                                <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
-                                <option value="True or False" ${sec.type === 'True or False' ? 'selected' : ''}>True or False</option>
-                                <option value="Fill in the Blanks" ${sec.type === 'Fill in the Blanks' ? 'selected' : ''}>Fill in the Blanks</option>
-                                <option value="Simple Matching" ${sec.type === 'Simple Matching' ? 'selected' : ''}>Simple Matching</option>
-                                <option value="Matrix Matching" ${sec.type === 'Matrix Matching' ? 'selected' : ''}>Matrix Matching</option>
-                                <option value="Reading Passage" ${sec.type === 'Reading Passage' ? 'selected' : ''}>Reading Passage</option>
-                                <option value="Case Study" ${sec.type === 'Case Study' ? 'selected' : ''}>Case Study</option>
-                                <option value="Data Interpretation" ${sec.type === 'Data Interpretation' ? 'selected' : ''}>Data Interpretation</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="field-label">Credit Value (Marks)</label>
-                            <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'marks', this.value)">
-                                ${Array.from({length: 10}, (_, m) => `<option value="${m+1}" ${sec.marks == m+1 ? 'selected' : ''}>${m+1} Mark${m > 0 ? 's' : ''}</option>`).join('')}
-                            </select>
-                        </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'type', this.value)">
+                            <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
+                            <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
+                            <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
+                        </select>
+                        <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'marks', this.value)">
+                            <option value="1" ${sec.marks == 1 ? 'selected' : ''}>1 Mark</option>
+                            <option value="2" ${sec.marks == 2 ? 'selected' : ''}>2 Marks</option>
+                            <option value="5" ${sec.marks == 5 ? 'selected' : ''}>5 Marks</option>
+                        </select>
                     </div>
                 </div>
             `).join('');
-            calcTotal();
-        };
-
-        window.updateBlueprint = (idx, key, val) => {
-            blueprint[idx][key] = (key === 'marks') ? parseInt(val) : val;
-            window.renderBlueprint();
-        };
-
-        window.updateQty = (idx, diff) => {
-            blueprint[idx].count = Math.max(0, blueprint[idx].count + diff);
-            window.renderBlueprint();
-        };
-
-        function calcTotal() {
             let t = 0;
             blueprint.forEach(s => t += s.count * s.marks);
             document.getElementById('total-marks').innerText = t;
         }
 
         window.startGeneration = async function() {
-            const bankSelect = document.querySelectorAll('select')[0];
-            const bankId = bankSelect.value;
-            const selectedSubject = bankSelect.options[bankSelect.selectedIndex]?.text.split(' - ')[0];
-
-            if (!bankId) return Swal.fire({ icon: 'warning', title: 'Bank Missing', text: 'Select a target subject bank first.', background: '#0a0a1a', color: '#fff' });
-            if (selectedChapters.length === 0) return Swal.fire({ icon: 'warning', title: 'Chapters Missing', text: 'Select at least one chapter to include.', background: '#0a0a1a', color: '#fff' });
+            const bankId = document.getElementById('bank-select').value;
+            if (!bankId || selectedChapters.length === 0) {
+                return Swal.fire({ icon: 'warning', title: 'Incomplete Config', text: 'Select a matrix and at least one chapter.', background: '#0a0a1a', color: '#fff' });
+            }
 
             document.getElementById('genOverlay').classList.add('active');
+            const res = await apiCall('/student/tests/generate', 'POST', {
+                bankId, selectedChapters, blueprint: blueprint.filter(s => s.count > 0)
+            });
 
-            const payload = {
-                bankId,
-                selectedChapters, // Match Fix 4 naming
-                blueprint: blueprint.filter(s => s.count > 0),
-                layout: {}
-            };
-
-            const result = await apiCall('/student/tests/generate', 'POST', payload);
-
-            if (result && result.success) {
-                // Save paperHtml
-                localStorage.setItem('bp_paper_html', result.data.paperHtml);
-                
-                // ADDED - Persistence forsessionId and meta
-                localStorage.setItem('bp_session_id', result.data.sessionId);
-                localStorage.setItem('bp_paper_marks', result.data.totalMarks);
-                localStorage.setItem('bp_paper_subject', selectedSubject || '');
-                localStorage.setItem('bp_paper_meta', JSON.stringify(result.data.meta || {}));
-
-                setTimeout(() => {
-                    window.location.href = 'student-edit-paper.html';
-                }, 2500);
+            if (res.success) {
+                localStorage.setItem('bp_paper_html', res.data.paperHtml);
+                localStorage.setItem('bp_session_id', res.data.sessionId);
+                setTimeout(() => window.location.href = 'student-edit-paper.html', 1500);
             } else {
-                setTimeout(() => {
-                    document.getElementById('genOverlay').classList.remove('active');
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Generation Failed',
-                        text: result?.error?.message || result?.message || 'Insufficient questions in node for this blueprint.',
-                        background: '#0a0a1a',
-                        color: '#fff'
-                    });
-                }, 500);
+                document.getElementById('genOverlay').classList.remove('active');
+                Swal.fire({ icon: 'error', title: 'Generation Failed', text: res.message, background: '#0a0a1a', color: '#fff' });
             }
         };
 
-        window.addEventListener('load', async () => {
+        async function init() {
+            const name = localStorage.getItem(BP.NAME) || 'Student';
+            const icon = document.querySelector('.profile-icon');
+            if (icon) icon.textContent = name.substring(0, 2).toUpperCase();
+
+            const streakRes = await apiCall('/student/streak');
+            if (streakRes.success) {
+                document.getElementById('streak-val-header').textContent = streakRes.data.currentStreak || 0;
+                BP.initStreakFlame('streak-canvas');
+            }
             loadBanks();
-            window.renderBlueprint();
-        });
+            renderBlueprint();
+        }
+
+        initPage(guardStudent, init);
     </script>
-<script src="/assets/js/ripple.js"></script>
+    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+    <script src="/assets/js/ripple.js"></script>
 </body>
+
 </html>

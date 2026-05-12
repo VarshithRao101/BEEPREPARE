@@ -31,7 +31,7 @@
             text-transform: uppercase;
         }
 
-        /* Hero - Match Teacher Header Styles but for Inventory */
+        /* Hero */
         .inventory-hero {
             background: rgba(18, 18, 18, 0.8);
             border: 1px solid var(--border);
@@ -84,7 +84,7 @@
             color: #000; 
         }
 
-        /* Bank Cards - Match Teacher Subject Cards */
+        /* Bank Cards */
         .banks-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -140,26 +140,6 @@
         }
 
         /* Detail View Styles */
-        .chapter-node {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .chapter-node-header {
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.02);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            /* Premium Notes Architecture (Synced from Notebook Hub) */
-            --primary-glow: rgba(255, 215, 0, 0.15);
-            --card-bg: rgba(15, 15, 15, 0.7);
-        }
-
         .chapter-node {
             background: rgba(15, 15, 15, 0.6);
             backdrop-filter: blur(30px);
@@ -258,7 +238,6 @@
             transform: scale(1.05) rotate(3deg);
         }
 
-        /* Documentation & Action */
         .document-item {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border);
@@ -267,13 +246,6 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-bottom: 5px;
-        }
-
-        .doc-actions {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
         }
 
         .act-btn {
@@ -297,7 +269,6 @@
             background: var(--primary);
             color: #000;
             border-color: var(--primary);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
         }
 
         .empty-zone {
@@ -309,42 +280,8 @@
             color: rgba(255,255,255,0.2);
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 1px;
         }
 
-        .material-item {
-            background: rgba(0,0,0,0.1);
-            border: 1px solid transparent;
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .material-item:hover {
-            border-color: var(--primary);
-            background: rgba(255, 215, 0, 0.05);
-        }
-
-        .dl-btn {
-            width: 34px;
-            height: 34px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            transition: 0.2s;
-        }
-
-        .dl-btn:hover { background: var(--primary); color: #000; }
-
-        /* Raise Doubt Button - Match Teacher Action Style */
         .doubt-btn {
             width: 100%;
             padding: 16px;
@@ -362,38 +299,25 @@
         .doubt-btn:hover {
             background: #ff6d00;
             color: #000;
-            box-shadow: 0 5px 15px rgba(255, 109, 0, 0.2);
         }
 
-        /* Fix 9: Skeleton UI Styles */
         .skeleton {
-            background: linear-gradient(
-                90deg,
-                rgba(255,255,255,0.03) 25%,
-                rgba(255,255,255,0.08) 50%,
-                rgba(255,255,255,0.03) 75%
-            );
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
             background-size: 200% 100%;
             animation: bee-shimmer 1.4s infinite;
             border-radius: 10px;
         }
-        @keyframes bee-shimmer {
-            0%   { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        .sk-line  { height: 14px; margin-bottom: 10px; width: 100%; }
-        .sk-line.short { width: 55%; }
-        .sk-card  { height: 90px; margin-bottom: 14px; border-radius: 14px; }
-        .sk-circle{ width: 48px; height: 48px; border-radius: 50%; }
+        @keyframes bee-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .sk-card { height: 180px; border-radius: 24px; }
     </style>
-<link rel="stylesheet" href="/assets/css/hover-interactions.css">
+    <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 
 <body>
     <div class="main-layout">
-        <!-- Lean Student Sidebar -->
+        <!-- Persistent Sidebar -->
         <aside class="pc-sidebar">
-            <div class="sidebar-brand">BEE COMMAND</div>
+            <div class="sidebar-brand"><span style="color: var(--primary);">BEE</span>COMMAND</div>
             <nav class="sidebar-nav">
                 <a href="student-home.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
@@ -407,8 +331,13 @@
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                     <span>Practice</span>
                 </a>
+                <a href="student-doubts.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                    <span>My Doubts</span>
+                    <div id="sidebar-doubt-signal" class="signal-dot" style="display: none;"></div>
+                </a>
                 <a href="../ai-chat.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
                     <span>BEE AI Assistant</span>
                 </a>
                 <a href="student-profile.html" class="sidebar-link">
@@ -422,55 +351,70 @@
             <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <button id="back-btn" onclick="showBankList()" style="background: none; border: 1px solid var(--border); border-radius: 12px; width: 40px; height: 40px; color: #fff; cursor: pointer; display: none; align-items: center; justify-content: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                    <h2 style="font-size: 28px; font-weight: 800; color:#fff;" id="page-title">Bank Inventory</h2>
+                    <div>
+                        <h2 style="font-size: 28px; font-weight: 800; color:#fff;" id="page-title">Bank Inventory</h2>
+                        <p style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;" id="page-subtitle">Academic Repositories</p>
+                    </div>
                 </div>
                 <div style="display: flex; gap: 20px; align-items: center;">
                     <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
                         <canvas id="streak-canvas" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
                         <span id="streak-val-header" style="font-weight: 900; color: #FF4500; font-size: 14px;">0</span>
                     </div>
-                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">ST</div>
+                    <div class="profile-icon" onclick="window.location.href='student-profile.html'">--</div>
                 </div>
             </header>
 
             <!-- Inventory Layout (Banks List) -->
             <div id="bank-list-view">
-                <div class="inventory-hero">
-                    <div class="inventory-title">Unlock Knowledge</div>
-                    <p style="color: var(--text-muted); font-size:14px;">Synchronize with a teacher's academic node.</p>
+                <div class="inventory-hero adv-card">
+                    <div class="inventory-title">Unlock Knowledge Hubs</div>
+                    <p style="color: var(--text-muted); font-size:14px;">Synchronize with a teacher's academic node using their protocol key.</p>
                     <div class="search-box">
-                        <input type="text" id="bank-id-input" class="search-input" placeholder="Enter Protocol Key..." autocomplete="off">
-                        <button class="search-btn" onclick="openAuthenticationModal()">
+                        <input type="text" id="bank-id-input" class="search-input" placeholder="Enter Protocol Key (e.g. TRNT-XXXX)..." autocomplete="off">
+                        <button class="search-btn" onclick="searchBank()">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                         </button>
                     </div>
                 </div>
 
                 <div class="section-divider">
-                    <span class="section-label">Active Banks</span>
+                    <span class="section-label">Active Matrix Nodes</span>
                     <div class="divider-line"></div>
                 </div>
 
                 <div id="joined-banks-list" class="banks-grid">
-                    <!-- Cards injected by JS -->
+                    <!-- Skeleton UI -->
+                    <div class="skeleton sk-card"></div>
+                    <div class="skeleton sk-card"></div>
+                    <div class="skeleton sk-card"></div>
                 </div>
             </div>
 
             <!-- Detailed Repository View -->
             <div id="bank-detail-view" style="display:none;">
-                <div style="display: grid; grid-template-columns: 1fr 320px; gap: 40px;">
+                <div class="profile-layout" style="display: grid; grid-template-columns: 1fr 320px; gap: 40px;">
                     <div>
-                        <!-- Real Numbers Node -->
                         <div id="chapter-nodes-container">
-                            <!-- Chapter nodes and notes injected by JS -->
+                            <!-- Chapter nodes injected by JS -->
                         </div>
                     </div>
 
                     <aside>
-                        <div class="adv-card" style="padding: 24px;">
-                            <div style="font-weight: 900; color: #fff; font-size: 11px; text-transform: uppercase;">Node Assistance</div>
-                            <p style="font-size: 12px; color: var(--text-muted); margin: 15px 0;">Request technical or academic clarification from the teacher.</p>
-                            <button onclick="window.location.href='student-doubts.html'" class="doubt-btn">RAISE DOUBT</button>
+                        <div class="adv-card" style="padding: 24px; position: sticky; top: 20px;">
+                            <div style="font-weight: 900; color: #fff; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Node Assistance</div>
+                            <p style="font-size: 12px; color: var(--text-muted); margin: 15px 0; line-height: 1.6;">Request technical or academic clarification from the teacher of this matrix.</p>
+                            <button onclick="window.location.href='student-doubts.html'" class="doubt-btn">RAISE DOUBT PROTOCOL</button>
+                            
+                            <div class="section-divider" style="margin-top: 30px;">
+                                <span class="section-label">Quick Actions</span>
+                                <div class="divider-line"></div>
+                            </div>
+                            
+                            <button onclick="window.location.href='student-generate.html'" class="act-btn" style="width: 100%; padding: 15px; margin-bottom: 10px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                                Generate Practice
+                            </button>
                         </div>
                     </aside>
                 </div>
@@ -493,7 +437,7 @@
             <span>Practice</span>
         </a>
         <a href="../ai-chat.html" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L15.09 7.26L22 8.27L17 13.14L18.18 20.02L12 16.77L5.82 20.02L7 14.14L2 9.27L8.91 7.26L12 1Z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
             <span>AI</span>
         </a>
         <a href="student-profile.html" class="nav-item">
@@ -502,20 +446,13 @@
         </a>
     </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { 
-          firebaseConfig, 
           apiCall, 
           guardStudent, 
           initPage,
           BP 
         } from '../../assets/js/bee-core.js';
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
 
         async function loadMyBanks() {
             try {
@@ -527,49 +464,38 @@
                 }
             } catch (err) {
                 console.error('[Banks load failed]', err);
-                const grid = document.querySelector('.banks-grid');
+                const grid = document.getElementById('joined-banks-list');
                 if (grid) {
-                    grid.innerHTML = `
-                        <div style="grid-column: 1/-1; background: rgba(255,68,68,0.05); border: 1px solid rgba(255,68,68,0.2); border-radius: 16px; padding: 30px; text-align: center; color: #ff6b6b;">
-                            <div style="font-size: 24px; margin-bottom: 10px;">📡</div>
-                            <div style="font-weight: 700; margin-bottom: 5px;">Hub Sync Failed</div>
-                            <div style="font-size: 13px; opacity: 0.7; margin-bottom: 15px;">We couldn't connect to your academic nodes.</div>
-                            <button onclick="location.reload()" style="background:#FFD700; color:#000; border:none; padding:8px 20px; border-radius:8px; font-weight:700; cursor:pointer;">Retry Connection</button>
-                        </div>`;
+                    grid.innerHTML = `<div style="grid-column: 1/-1; background: rgba(255,68,68,0.05); border: 1px solid rgba(255,68,68,0.2); border-radius: 16px; padding: 30px; text-align: center; color: #ff6b6b;"><div style="font-size: 24px; margin-bottom: 10px;">📡</div><div style="font-weight: 700; margin-bottom: 5px;">Hub Sync Failed</div><button onclick="location.reload()" style="background:#FFD700; color:#000; border:none; padding:8px 20px; border-radius:8px; font-weight:700; cursor:pointer; margin-top:10px;">Retry Connection</button></div>`;
                 }
             }
         }
 
         function renderBankCards(banks) {
-            const grid = document.querySelector('.banks-grid');
+            const grid = document.getElementById('joined-banks-list');
             grid.innerHTML = '';
 
             if (banks.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 40px;">No synced hubs yet. Enter a teacher protocol key above.</div>';
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 60px; background: rgba(0,0,0,0.2); border: 1px dashed var(--border); border-radius: 24px;"><div style="font-size: 32px; margin-bottom: 15px;">🔍</div><div style="font-weight: 700;">No active matrix nodes.</div><div style="font-size: 12px; margin-top: 5px;">Enter a protocol key above to synchronize.</div></div>';
                 return;
             }
 
             banks.forEach(bank => {
                 const card = document.createElement('div');
                 card.className = 'bank-card adv-card';
-                card.dataset.bankId = bank.bankId;
-
-                let statusColor = '#00E676'; // Active
+                
+                let statusColor = '#00E676';
                 let statusBg = 'rgba(0,230,118,0.1)';
-                let statusLabel = 'Active';
+                let statusLabel = 'Synchronized';
 
                 if (bank.status === 'pending') {
                     statusColor = '#FFB300';
                     statusBg = 'rgba(255,179,0,0.1)';
-                    statusLabel = 'Awaiting Teacher';
+                    statusLabel = 'Pending Auth';
                 } else if (bank.status === 'approved') {
                     statusColor = '#FFD700';
                     statusBg = 'rgba(255,215,0,0.2)';
-                    statusLabel = 'Authorization Ready';
-                } else if (bank.status === 'rejected') {
-                    statusColor = '#FF5252';
-                    statusBg = 'rgba(255,82,82,0.1)';
-                    statusLabel = 'Rejected';
+                    statusLabel = 'Ready to Unlock';
                 }
 
                 card.innerHTML = `
@@ -577,18 +503,15 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </div>
                     <div class="bank-icon-box">
-                        <img src="../../assets/images/subjects/${bank.subject.toLowerCase()}.svg" width="25" onerror="this.src='../../assets/images/subjects/default.svg'">
+                        <img src="../../assets/images/subjects/${bank.subject?.toLowerCase() || 'default'}.svg" width="25" onerror="this.src='../../assets/images/subjects/default.svg'">
                     </div>
-                    <div class="bank-name">${bank.subject} Matrix</div>
-                    <div class="bank-meta">Class ${bank.class} • ${bank.teacherName}</div>
+                    <div class="bank-name">${bank.subject} Hub</div>
+                    <div class="bank-meta">Level ${bank.class} • ${bank.teacherName}</div>
                     <div class="bank-status">
                         <span class="status-pill" style="background:${statusBg}; color:${statusColor};">${statusLabel}</span>
                         <span style="font-size: 10px; font-weight: 800; color: var(--text-muted);">${bank.totalQuestions || 0} Qs</span>
                     </div>
-                    ${bank.status === 'approved' ? `
-                    <button class="unlock-btn" style="width:100%; margin-top:15px; padding:12px; background:var(--primary); border:none; border-radius:12px; color:#000; font-weight:900; font-size:11px; cursor:pointer; text-transform:uppercase; letter-spacing:1px;">
-                        Unlock Hub &rarr;
-                    </button>` : ''}
+                    ${bank.status === 'approved' ? `<button class="auth-btn" style="width:100%; margin-top:15px; padding:10px; font-size:10px;">UNLOCK NOW</button>` : ''}
                 `;
 
                 card.onclick = () => {
@@ -598,14 +521,8 @@
                     } else if (bank.status === 'approved') {
                         localStorage.setItem('bp_otp_request_id', bank.requestId);
                         window.location.href = 'student-bank-auth.html';
-                    } else if (bank.status === 'pending') {
-                        Swal.fire({
-                            icon: 'info',
-                            title: 'Authorization Pending',
-                            text: 'Ask your teacher to approve your terminal entry in their Command Center.',
-                            background: '#0a0a1a',
-                            color: '#ffffff'
-                        });
+                    } else {
+                        Swal.fire({ icon: 'info', title: 'Node Restricted', text: 'Waiting for teacher authorization.', background: '#0a0a1a', color: '#fff' });
                     }
                 };
                 grid.appendChild(card);
@@ -613,193 +530,64 @@
         }
 
         window.searchBank = async function() {
-            const bankCode = document.querySelector('#bank-id-input').value.trim().toUpperCase();
-
-            if (!bankCode || bankCode.length < 3) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Enter a Bank Code',
-                    text: 'Please enter a valid TRNT- sync code.',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2500,
-                    background: '#0a0a1a',
-                    color: '#ffffff'
-                });
-                return;
-            }
+            const bankCode = document.getElementById('bank-id-input').value.trim().toUpperCase();
+            if (!bankCode) return;
 
             const result = await apiCall('/student/banks/search', 'POST', { bankCode });
-
             if (result && result.success) {
                 const bank = result.data;
-                localStorage.setItem('bp_search_bank_id', bank.bankId);
-
-                let btnText = 'REQUEST ACCESS';
-                let btnDisabled = false;
-
-                if (bank.alreadyActive) {
-                    btnText = 'ALREADY ACTIVE';
-                    btnDisabled = true;
-                } else if (bank.alreadyRequested) {
-                    btnText = 'PENDING APPROVAL';
-                    btnDisabled = true;
-                }
-
                 Swal.fire({
-                    html: `
-                        <div style="padding: 20px 0;">
-                            <div style="width: 80px; height: 80px; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; color: var(--primary);">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                            </div>
-                            <h2 style="color: #fff; font-size: 24px; font-weight: 800; margin-bottom: 8px;">${bank.subject} Hub</h2>
-                            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Academic node identified successfully.</p>
-                            
-                            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; text-align: left; margin-bottom: 24px;">
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                                    <span style="color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase;">Teacher</span>
-                                    <span style="color: #fff; font-size: 13px; font-weight: 700;">${bank.teacherName}</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
-                                    <span style="color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase;">Class Level</span>
-                                    <span style="color: #fff; font-size: 13px; font-weight: 700;">${bank.class}</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span style="color: #888; font-size: 12px; font-weight: 600; text-transform: uppercase;">Stored Data</span>
-                                    <span style="color: var(--primary); font-size: 13px; font-weight: 800;">${bank.totalQuestions || 0} Questions</span>
-                                </div>
-                            </div>
-                            <p style="color: #555; font-size: 11px; font-weight: 600; font-style: italic;">Node last synchronized ${timeAgo(bank.updatedAt)}</p>
-                        </div>
-                    `,
-                    showCancelButton: !btnDisabled,
-                    cancelButtonText: 'ABORT',
-                    confirmButtonText: btnText === 'REQUEST ACCESS' ? 'SEND ACCESS REQUEST' : btnText,
-                    confirmButtonColor: '#FFD700',
-                    background: '#0a0a1a',
-                    color: '#ffffff',
-                    padding: '2rem',
-                    width: '400px',
-                    customClass: {
-                        popup: 'adv-card',
-                        confirmButton: 'unlock-btn',
-                        cancelButton: 'dl-btn'
-                    },
-                    preConfirm: () => {
-                        if (btnDisabled) return false;
-                        return requestBankAccess();
-                    }
+                    title: bank.subject + ' Node',
+                    html: `<div style="text-align: left; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-top: 15px;"><div style="margin-bottom: 8px;"><b>Teacher:</b> ${bank.teacherName}</div><div><b>Class:</b> ${bank.class}</div></div>`,
+                    showCancelButton: true,
+                    confirmButtonText: 'REQUEST ACCESS',
+                    background: '#0a0a1a', color: '#fff',
+                    confirmButtonColor: '#FFD700'
+                }).then(res => {
+                    if (res.isConfirmed) requestAccess(bank.bankId);
                 });
-
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Node Not Found',
-                    text: 'No academic node found with that sync code.',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 2500,
-                    background: '#0a0a1a',
-                    color: '#ffffff'
-                });
+                Swal.fire({ icon: 'error', title: 'Node Not Found', text: 'Invalid protocol key.', background: '#0a0a1a', color: '#fff' });
             }
         };
 
-        async function requestBankAccess() {
-            const bankId = localStorage.getItem('bp_search_bank_id');
-            if (!bankId) return;
-
-            const result = await apiCall('/student/banks/request', 'POST', { bankId });
-
-            if (result && result.success) {
-                Swal.fire({
-                    html: `
-                        <div style="padding: 20px 0;">
-                            <div style="width: 80px; height: 80px; background: rgba(0, 230, 118, 0.1); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px auto; color: #00E676;">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                            </div>
-                            <h2 style="color: #fff; font-size: 24px; font-weight: 800; margin-bottom: 8px;">Request Sent</h2>
-                            <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6;">Your authorization request is now in the teacher's <b style="color: #fff;">Command Center</b>. Once approved, you can activate this node using the OTP in your profile.</p>
-                        </div>
-                    `,
-                    background: '#0a0a1a',
-                    color: '#ffffff',
-                    confirmButtonText: 'PROCEED',
-                    confirmButtonColor: '#FFD700',
-                    customClass: {
-                        popup: 'adv-card',
-                        confirmButton: 'unlock-btn'
-                    }
-                });
-                localStorage.setItem('bp_pending_otp', 'true');
-                setTimeout(() => loadMyBanks(), 1500);
-            } else if (result?.error?.code === 'ALREADY_REQUESTED') {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Already Requested',
-                    text: 'You have already requested this bank.',
-                    background: '#0a0a1a',
-                    color: '#ffffff'
-                });
+        async function requestAccess(bankId) {
+            const res = await apiCall('/student/banks/request', 'POST', { bankId });
+            if (res.success) {
+                Swal.fire({ icon: 'success', title: 'Request Sent', background: '#0a0a1a', color: '#fff' });
+                loadMyBanks();
             }
         }
 
         window.deleteBank = async function(bankId) {
-            const confirm = await Swal.fire({
-                title: 'Remove Hub?',
-                text: 'You will lose access to all repository content.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Remove',
-                cancelButtonText: 'Cancel',
-                background: '#0a0a1a',
-                color: '#ffffff',
-                confirmButtonColor: '#ff4444'
-            });
-
-            if (confirm.isConfirmed) {
-                const result = await apiCall('/student/banks/' + bankId, 'DELETE');
-                if (result && result.success) {
-                    loadMyBanks();
-                }
+            const res = await Swal.fire({ title: 'Disconnect Node?', text: 'Access will be revoked.', showCancelButton: true, confirmButtonColor: '#ff4d4d', background: '#0a0a1a', color: '#fff' });
+            if (res.isConfirmed) {
+                await apiCall('/student/banks/' + bankId, 'DELETE');
+                loadMyBanks();
             }
         };
-
-        function timeAgo(date) {
-            if (!date) return 'Recently';
-            const parsedDate = new Date(date);
-            if (isNaN(parsedDate.getTime())) return 'Recently';
-            const seconds = Math.floor((new Date() - parsedDate) / 1000);
-            if (seconds < 10) return 'Just now';
-            let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + "y ago";
-            interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + "mo ago";
-            interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + "d ago";
-            interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + "h ago";
-            interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + "m ago";
-            return Math.floor(seconds) + "s ago";
-        }
 
         window.openBank = function(name) {
             document.getElementById('bank-list-view').style.display = 'none';
             document.getElementById('bank-detail-view').style.display = 'block';
             document.getElementById('back-btn').style.display = 'flex';
             document.getElementById('page-title').innerText = name;
+            document.getElementById('page-subtitle').innerText = 'Syllabus Repository';
             loadBankData();
+        }
+
+        window.showBankList = function() {
+            document.getElementById('bank-list-view').style.display = 'block';
+            document.getElementById('bank-detail-view').style.display = 'none';
+            document.getElementById('back-btn').style.display = 'none';
+            document.getElementById('page-title').innerText = 'Bank Inventory';
+            document.getElementById('page-subtitle').innerText = 'Academic Repositories';
         }
 
         async function loadBankData() {
             const bankId = localStorage.getItem('bp_current_bank_id');
             const container = document.getElementById('chapter-nodes-container');
-            if (container) {
-                container.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
-            }
+            container.innerHTML = '<div class="skeleton sk-card"></div>';
 
             const [chaptersRes, notesRes] = await Promise.allSettled([
                 apiCall(`/student/banks/${bankId}/chapters`),
@@ -810,149 +598,62 @@
                 const chapters = chaptersRes.value.data.chapters;
                 const notesData = (notesRes.status === 'fulfilled' && notesRes.value.success) ? notesRes.value.data.chapters : [];
                 
-                if (container) {
-                    container.innerHTML = '';
-                    chapters.forEach(chap => {
-                        const chapterData = notesData.find(n => n.chapterId === chap.chapterId);
-                        const chapterNotes = chapterData?.notes || [];
-                        const node = document.createElement('div');
-                        node.className = 'chapter-node';
-                        const completeNotes = chapterNotes.filter(n => n.noteType === 'complete');
-                        const flashNotes = chapterNotes.filter(n => n.noteType === 'flash');
-                        node.innerHTML = `
-                            <div class="chapter-title-row">
-                                <div style="display:flex; align-items:center;">
-                                    <div class="chapter-indicator"></div>
-                                    <span>${chap.chapterName}</span>
-                                </div>
-                                <span style="font-size: 10px; font-weight: 900; color: var(--primary); opacity:0.6;">${chapterNotes.length} RESOURCES</span>
-                            </div>
-                            <div class="notebook-grid">
-                                ${renderNoteNode(completeNotes, 'complete', 'Master Blueprint', 'DETAILED NOTES')}
-                                ${renderNoteNode(flashNotes, 'flash', 'Short Memo', 'QUICK REVISION')}
-                            </div>
-                        `;
-                        container.appendChild(node);
-                    });
-                }
-            } else {
-                console.error('[Chapters failed]', chaptersRes.reason);
-                if (container) {
-                    container.innerHTML = `
-                        <div style="text-align:center;padding:40px;color:#ff6b6b;">
-                            <div style="font-size:24px;margin-bottom:10px">📡</div>
-                            <div>Failed to load chapter matrix.</div>
-                            <span onclick="loadBankData()" style="color:#FFD700;cursor:pointer;text-decoration:underline;font-size:12px;font-weight:700;">Retry Sync</span>
-                        </div>`;
-                }
-            }
-
-            if (notesRes.status === 'rejected' || (notesRes.status === 'fulfilled' && !notesRes.value.success)) {
-                console.error('[Notes failed]', notesRes.reason || notesRes.value?.message);
-                // We don't overwrite chapters if they succeeded, just log it.
+                container.innerHTML = '';
+                chapters.forEach(chap => {
+                    const chapterData = notesData.find(n => n.chapterId === chap.chapterId);
+                    const chapterNotes = chapterData?.notes || [];
+                    const node = document.createElement('div');
+                    node.className = 'chapter-node adv-card';
+                    node.innerHTML = `
+                        <div class="chapter-title-row">
+                            <div style="display:flex; align-items:center;"><div class="chapter-indicator"></div><span>${chap.chapterName}</span></div>
+                            <span style="font-size: 10px; font-weight: 900; color: var(--primary); opacity:0.6;">${chapterNotes.length} ASSETS</span>
+                        </div>
+                        <div class="notebook-grid">
+                            ${renderNoteNode(chapterNotes.filter(n => n.noteType === 'complete'), 'complete', 'Detailed Notes', 'MASTER BLUEPRINT')}
+                            ${renderNoteNode(chapterNotes.filter(n => n.noteType === 'flash'), 'flash', 'Quick Revision', 'FLASH MEMO')}
+                        </div>
+                    `;
+                    container.appendChild(node);
+                });
             }
         }
 
         function renderNoteNode(notes, type, title, subtitle) {
-            const icon = type === 'complete' 
-                ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`
-                : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`;
-            
-            const label = type === 'complete' ? 'COMPREHENSIVE NODE' : 'FLASH NODE';
-
-            if (notes.length === 0) {
-                return `
-                    <div class="notebook-card" style="opacity: 0.5;">
-                        <div class="card-type">${label}</div>
-                        <div class="note-header">
-                            <div class="note-icon-box">${icon}</div>
-                            <div>
-                                <div style="font-weight: 800; color: #fff; font-size: 14px;">${title}</div>
-                                <div style="font-size: 9px; color: var(--primary); font-weight: 800; opacity: 0.7;">NO DATA SYNCED</div>
-                            </div>
-                        </div>
-                        <div class="empty-zone">WAITING FOR REPOSITORY PULSE...</div>
-                    </div>
-                `;
-            }
+            const label = type === 'complete' ? 'DETAILED' : 'FLASH';
+            if (notes.length === 0) return `<div class="notebook-card" style="opacity: 0.5;"><div class="card-type">${label}</div><div class="empty-zone">REPOSITORY EMPTY</div></div>`;
 
             return `
                 <div class="notebook-card">
                     <div class="card-type">${label}</div>
-                    <div class="note-header">
-                        <div class="note-icon-box">${icon}</div>
-                        <div>
-                            <div style="font-weight: 800; color: #fff; font-size: 14px;">${title}</div>
-                            <div style="font-size: 9px; color: var(--primary); font-weight: 800; opacity: 0.7;">${subtitle}</div>
-                        </div>
-                    </div>
+                    <div style="font-weight: 800; color: #fff; font-size: 14px; margin: 10px 0;">${title}</div>
                     ${notes.map(note => `
                         <div class="document-item">
-                            <div style="font-weight: 700; color: #fff; font-size: 12px; margin-bottom:5px;">${note.fileName}</div>
-                            <div class="doc-actions">
-                                <button class="act-btn" onclick="window.downloadNote('${note.fileUrl}', '${note.fileName}')">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                    SYNC & VIEW
-                                </button>
-                            </div>
+                            <div style="font-weight: 700; color: #fff; font-size: 11px;">${note.fileName}</div>
+                            <button class="act-btn" onclick="window.open('${note.fileUrl}', '_blank')">SYNC & VIEW</button>
                         </div>
                     `).join('')}
                 </div>
             `;
         }
 
-        window.downloadNote = async (url) => {
-            window.open(url, '_blank');
-            const res = await apiCall('/student/streak/activity', 'POST');
-            if (res && res.success) {
-                const streakVal = document.getElementById('streak-val-header');
-                if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+        async function initDashboard() {
+            const name = localStorage.getItem(BP.NAME) || 'Student';
+            const icon = document.querySelector('.profile-icon');
+            if (icon) icon.textContent = name.substring(0, 2).toUpperCase();
+
+            const streakRes = await apiCall('/student/streak');
+            if (streakRes.success) {
+                document.getElementById('streak-val-header').textContent = streakRes.data.currentStreak || 0;
                 BP.initStreakFlame('streak-canvas');
             }
-        };
 
-        window.showBankList = function() {
-            document.getElementById('bank-list-view').style.display = 'block';
-            document.getElementById('bank-detail-view').style.display = 'none';
-            document.getElementById('back-btn').style.display = 'none';
-            document.getElementById('page-title').innerText = 'Bank Inventory';
+            loadMyBanks();
         }
 
-        window.addEventListener('load', () => {
-            const grid = document.querySelector('.banks-grid');
-            if (grid) grid.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
-
-            initPage(guardStudent, async () => {
-                // Set profile icon & refresh from API
-                const cachedName = localStorage.getItem(BP.NAME) || 'Student';
-                const initials = (name) => name[0].toUpperCase() + (name.split(' ')[1]?.[0] || name[1] || '').toUpperCase();
-                document.querySelector('.profile-icon').textContent = initials(cachedName);
-
-                apiCall('/student/profile').then(res => {
-                    if (res.success) {
-                        document.querySelector('.profile-icon').textContent = initials(res.data.displayName);
-                        localStorage.setItem(BP.NAME, res.data.displayName);
-                    }
-                });
-
-                loadMyBanks();
-                
-                // Load streak
-                const streakRes = await apiCall('/student/streak');
-                if (streakRes && streakRes.success) {
-                    document.getElementById('streak-val-header').textContent = streakRes.data.currentStreak || 0;
-                    BP.initStreakFlame('streak-canvas');
-                }
-            });
-
-            setInterval(loadMyBanks, 10000); // 10s auto-sync
-            
-            // Override search button click
-            const searchBtn = document.querySelector('.search-btn');
-            if (searchBtn) searchBtn.onclick = searchBank;
-        });
+        initPage(guardStudent, initDashboard);
     </script>
-<script src="/assets/js/ripple.js"></script>
+    <script src="/assets/js/ripple.js"></script>
 </body>
 
 </html>

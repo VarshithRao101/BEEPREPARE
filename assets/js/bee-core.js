@@ -181,40 +181,18 @@ export async function getAnnouncements() {
 }
 
 export async function initPage(guardFn, dataFetchFn) {
-  // Loop protection — if we redirected to login less than
-  // 2 seconds ago, do not redirect again
-  // This breaks any remaining redirect loop
+  // Loop protection
   const lastRedirect = parseInt(sessionStorage.getItem('_lastRedirectAt') || '0');
   const now = Date.now();
   if (now - lastRedirect < 2000) {
     console.warn('[initPage] Redirect loop detected — stopping.');
     BP.hideLoader();
-    // Show a recoverable error instead of looping forever
     document.body.innerHTML = `
-      <div style="
-        min-height:100vh;display:flex;flex-direction:column;
-        align-items:center;justify-content:center;
-        background:#0a0a0a;color:#fff;font-family:sans-serif;
-        text-align:center;padding:20px;
-      ">
+      <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;color:#fff;font-family:sans-serif;text-align:center;padding:20px;">
         <div style="font-size:40px;margin-bottom:16px">⚠️</div>
-        <div style="font-size:20px;font-weight:700;margin-bottom:8px">
-          Session Error
-        </div>
-        <div style="color:#888;margin-bottom:24px;font-size:14px">
-          Your session could not be verified.<br>Please sign in again.
-        </div>
-        <button onclick="
-          localStorage.removeItem('bp_token');
-          localStorage.removeItem('bp_role');
-          localStorage.removeItem('bp_activated');
-          sessionStorage.clear();
-          window.location.href='/index.html';
-        " style="
-          background:#FFD700;color:#000;border:none;
-          padding:12px 28px;border-radius:10px;
-          font-weight:700;font-size:15px;cursor:pointer;
-        ">Sign In Again</button>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px">Session Error</div>
+        <div style="color:#888;margin-bottom:24px;font-size:14px">Your session could not be verified.<br>Please sign in again.</div>
+        <button onclick="localStorage.clear(); sessionStorage.clear(); window.location.href='/index.html';" style="background:#FFD700;color:#000;border:none;padding:12px 28px;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;">Sign In Again</button>
       </div>
     `;
     return null;
@@ -222,29 +200,45 @@ export async function initPage(guardFn, dataFetchFn) {
 
   BP.showLoader();
   try {
+    // 1. Auth Guarding (Role specific)
+    if (guardFn) {
+        const isAuthorized = await guardFn();
+        if (!isAuthorized) {
+            console.warn("[initPage] Guard failed. Execution terminated.");
+            return null;
+        }
+    }
+
+    // 2. Token Acquisition
     const token = await getFreshToken();
     if (!token) {
+      console.warn("[initPage] No token acquired.");
       sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
       BP.hideLoader();
       window.location.href = getIndexPath();
       return null;
     }
 
-    const dataPromise = dataFetchFn ? dataFetchFn(token) : Promise.resolve(null);
+    // 3. Backend Session Verification (Double-Check)
     const sessionResult = await verifySession();
-
     if (!sessionResult?.success) {
+      console.warn("[initPage] Session verification failed.");
       sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
       BP.hideLoader();
       window.location.href = getIndexPath();
       return null;
     }
 
-    const data = await dataPromise;
-    return data;
+    // 4. Data Fetching
+    if (dataFetchFn) {
+        console.log("[initPage] Executing data fetch protocol...");
+        await dataFetchFn(token);
+    }
+    
+    return sessionResult.data;
 
   } catch (err) {
-    console.error('[initPage error]', err);
+    console.error('[initPage critical error]', err);
     return null;
   } finally {
     BP.hideLoader();
