@@ -184,37 +184,41 @@ export async function getAnnouncements() {
 }
 
 export async function initPage(guardFn, dataFetchFn) {
-  // 0. Force immediate loader visibility
   BP.showLoader();
+  try {
+    // Fire warmup ping + token fetch simultaneously
+    const token = await getFreshToken();
 
-  // 1. First, run the guard if provided
-  if (guardFn) {
-    const isAllowed = await guardFn();
-    if (!isAllowed) return null;
+    if (!token) {
+      BP.hideLoader();
+      window.location.href = '/index.html';
+      return null;
+    }
+
+    // Start data fetch immediately after token — don't wait for session
+    const dataPromise = dataFetchFn ? dataFetchFn(token) : Promise.resolve(null);
+
+    // Verify session in parallel with data fetch
+    const sessionResult = await verifySession(token);
+
+    if (!sessionResult?.success) {
+      BP.hideLoader();
+      window.location.href = '/index.html';
+      return null;
+    }
+
+    // Wait for data
+    const data = await dataPromise;
+    return data;
+
+  } catch (err) {
+    console.error('[initPage error]', err);
+    return null;
+  } finally {
+    // ALWAYS hide loader — no matter what happened above
+    // finally block runs on success, error, AND return
+    BP.hideLoader();
   }
-
-  // 2. Parallel start: get token and check maintenance
-  const tokenPromise = getFreshToken();
-  const maintenancePromise = getMaintenanceStatus().catch(() => null);
-
-  const token = await tokenPromise;
-  
-  // 3. Parallel data fetch & session verification
-  // We use Promise.all to ensure both finish (or fail) before we proceed
-  const [sessionRes, dataRes] = await Promise.all([
-    verifySession(token).catch(e => ({ success: false, error: e })),
-    dataFetchFn ? dataFetchFn(token) : Promise.resolve(null)
-  ]);
-
-  // 4. Handle session failure
-  // Note: apiCall already handles 401 redirects. 
-  // We only redirect here if the guard explicitly failed or role mismatch occurred.
-  if (sessionRes && sessionRes.success === false && sessionRes.message === 'Session expired') {
-    return null; // apiCall already redirected
-  }
-
-  // 5. Return the data result
-  return dataRes;
 }
 
 // Standard API caller

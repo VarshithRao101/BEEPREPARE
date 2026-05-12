@@ -210,7 +210,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+        import { 
+          getAuth, 
+          signInWithPopup, 
+          signInWithRedirect, 
+          getRedirectResult, 
+          GoogleAuthProvider, 
+          onAuthStateChanged 
+        } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
         import { 
           firebaseConfig, 
           apiCall, 
@@ -221,6 +228,55 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
+        function showLoginError(message) {
+          const errEl = document.getElementById('login-error')
+                     || document.createElement('div');
+          errEl.id = 'login-error';
+          errEl.style.cssText = 'color:#ff4444;text-align:center;margin-top:12px;font-size:14px;font-weight:600;';
+          errEl.textContent = message;
+          const btn = document.getElementById('googleSignInBtn');
+          if (btn && !document.getElementById('login-error')) {
+            btn.parentNode.insertBefore(errEl, btn.nextSibling);
+          }
+        }
+
+        async function handleAuthResult(result) {
+          const user = result.user;
+          const idToken = await user.getIdToken(true);
+
+          const response = await apiCall(
+            '/auth/google-login',
+            'POST',
+            { idToken },
+            false
+          );
+
+          if (!response || !response.success) {
+            throw new Error(response?.message || 'Login failed');
+          }
+
+          const u = response.data.user;
+          localStorage.setItem(BP.TOKEN, idToken);
+          localStorage.setItem(BP.UID, u.googleUid);
+          localStorage.setItem(BP.NAME, u.displayName);
+          localStorage.setItem(BP.EMAIL, u.email);
+          localStorage.setItem(BP.PHOTO, u.photoUrl || '');
+          localStorage.setItem(BP.ROLE, u.role || '');
+          localStorage.setItem(BP.ACTIVATED, u.isActivated ? 'true' : 'false');
+          localStorage.setItem(BP.PLAN, u.planType || 'free');
+
+          const redirect = response.data.redirectTo;
+          if (redirect === 'activation') {
+            window.location.href = 'activation.html';
+          } else if (redirect === 'role-select') {
+            window.location.href = 'beginners/role-select.html';
+          } else if (redirect === 'teacher-home') {
+            window.location.href = 'beginners/teacher/teacher-home.html';
+          } else if (redirect === 'student-home') {
+            window.location.href = 'beginners/student/student-home.html';
+          }
+        }
+
         async function handleGoogleLogin() {
           const btn = document.getElementById('googleSignInBtn');
           const btnText = document.getElementById('btnText');
@@ -228,87 +284,58 @@
           btn.disabled = true;
           btnText.innerText = "Signing in...";
           btn.style.opacity = "0.7";
-          btn.style.cursor = "not-allowed";
+
+          const provider = new GoogleAuthProvider();
+          provider.setCustomParameters({ prompt: 'select_account' });
+
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+                        || window.innerWidth < 768;
 
           try {
-            const provider = new GoogleAuthProvider();
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-            const idToken = await user.getIdToken(true);
-
-            // Step 3: Call backend
-            const response = await apiCall(
-              '/auth/google-login',
-              'POST',
-              { idToken },
-              false // no auth header needed for this call
-            );
-
-            if (!response || !response.success) {
-              throw new Error(response?.message || 'Login failed');
+            if (isMobile) {
+              sessionStorage.setItem('_loginRedirectPending', '1');
+              await signInWithRedirect(auth, provider);
+            } else {
+              const result = await signInWithPopup(auth, provider);
+              await handleAuthResult(result);
             }
-
-            // Step 4: Save to localStorage
-            const u = response.data.user;
-            localStorage.setItem(BP.TOKEN, idToken);
-            localStorage.setItem(BP.UID, u.googleUid);
-            localStorage.setItem(BP.NAME, u.displayName);
-            localStorage.setItem(BP.EMAIL, u.email);
-            localStorage.setItem(BP.PHOTO, u.photoUrl || '');
-            localStorage.setItem(BP.ROLE, u.role || '');
-            // CRITICAL — always set from server not cache:
-            localStorage.setItem(BP.ACTIVATED,
-              u.isActivated ? 'true' : 'false');
-            localStorage.setItem(BP.PLAN,
-              u.planType || 'free');
-
-            // Step 5: Redirect based on backend response
-            const redirect = response.data.redirectTo;
-            if (redirect === 'activation') {
-              window.location.href = 'activation.html';
-            } else if (redirect === 'role-select') {
-              window.location.href = 'beginners/role-select.html';
-            } else if (redirect === 'teacher-home') {
-              window.location.href = 'beginners/teacher/teacher-home.html';
-            } else if (redirect === 'student-home') {
-              window.location.href = 'beginners/student/student-home.html';
-            }
-
           } catch (err) {
             console.error('Login error:', err);
-            
             btn.disabled = false;
             btnText.innerText = "Continue with Google";
             btn.style.opacity = "1";
-            btn.style.cursor = "pointer";
+            showLoginError(err.message || 'Please try again.');
+          }
+        }
 
-            Swal.fire({
-              icon: 'error',
-              title: 'Sign In Failed',
-              text: err.message || 'Please try again.',
-              toast: true,
-              position: 'top-end',
-              showConfirmButton: false,
-              timer: 3000,
-              background: '#1a1a2e',
-              color: '#ffffff'
-            });
+        async function checkRedirectResult() {
+          if (sessionStorage.getItem('_loginRedirectPending')) {
+            BP.showLoader();
+            try {
+              const result = await getRedirectResult(auth);
+              if (result && result.user) {
+                sessionStorage.removeItem('_loginRedirectPending');
+                await handleAuthResult(result);
+              }
+            } catch (err) {
+              console.error('[Redirect result error]', err);
+              showLoginError('Sign in failed. Please try again.');
+            } finally {
+              BP.hideLoader();
+              sessionStorage.removeItem('_loginRedirectPending');
+            }
           }
         }
 
         document.getElementById('googleSignInBtn').addEventListener('click', handleGoogleLogin);
+        checkRedirectResult();
 
-        // Auto redirect instantly based on local cache. The destination page's guard will verify it.
         async function handleAutoRedirect() {
           const role = localStorage.getItem(BP.ROLE);
           const activated = localStorage.getItem(BP.ACTIVATED);
           const hasToken = !!localStorage.getItem(BP.TOKEN);
-
-          // If we have data in cache, we CAN redirect, but let's wait a split second for Firebase 
-          // to avoid the "bounce" if the token is actually expired.
           const auth = getAuth();
           
-          // If Firebase is already ready, use it definitively
           if (auth.currentUser) {
               const u = auth.currentUser;
               if (activated === 'true') {
@@ -318,20 +345,16 @@
               }
           }
 
-          // If not ready, wait for ONE state change
           const unsubscribe = onAuthStateChanged(auth, (user) => {
               if (unsubscribe) unsubscribe();
               if (user && activated === 'true') {
                   if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
                   else if (role === 'student') window.location.replace('beginners/student/student-home.html');
               } else if (hasToken && !user) {
-                  // Token in cache but Firebase says NO USER. Clear cache to stop loops.
-                  console.warn("Token exists but no Firebase user. Cleaning up.");
                   localStorage.removeItem(BP.TOKEN);
               }
           });
           
-          // Max wait 1.5s for auto-redirect
           setTimeout(() => { if (unsubscribe) unsubscribe(); }, 1500);
         }
 

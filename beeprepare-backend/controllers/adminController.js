@@ -1036,11 +1036,15 @@ const getSettings = async (req, res) => {
 const toggleMaintenance = async (req, res) => {
   const { actionCode, enabled, message } = req.body;
 
+  // Action code verification removed as requested
+  /*
   const validCode = enabled 
     ? verifyActionCode('maintenance_on', actionCode) 
     : verifyActionCode('maintenance_off', actionCode);
 
   if (!validCode) return error(res, 'Invalid action code', 'INVALID_CODE', 403);
+  */
+
 
   await AppSettings.findOneAndUpdate(
     { key: 'maintenance_mode' },
@@ -1057,6 +1061,12 @@ const toggleMaintenance = async (req, res) => {
 
   if (message) {
     await AppSettings.findOneAndUpdate(
+      { key: 'maintenance_message' },
+      { value: message, updatedBy: req.admin.adminId, updatedAt: new Date() },
+      { upsert: true }
+    );
+    // Sync with SystemConfig for public-facing checks
+    await SystemConfig.findOneAndUpdate(
       { key: 'maintenance_message' },
       { value: message, updatedBy: req.admin.adminId, updatedAt: new Date() },
       { upsert: true }

@@ -522,9 +522,21 @@
                 const result = await apiCall('/student/banks');
                 if (result && result.success) {
                     renderBankCards(result.data);
+                } else {
+                    throw new Error(result?.message || 'Failed to sync hubs');
                 }
-            } catch (e) {
-                console.error('Bank sync failed:', e);
+            } catch (err) {
+                console.error('[Banks load failed]', err);
+                const grid = document.querySelector('.banks-grid');
+                if (grid) {
+                    grid.innerHTML = `
+                        <div style="grid-column: 1/-1; background: rgba(255,68,68,0.05); border: 1px solid rgba(255,68,68,0.2); border-radius: 16px; padding: 30px; text-align: center; color: #ff6b6b;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">📡</div>
+                            <div style="font-weight: 700; margin-bottom: 5px;">Hub Sync Failed</div>
+                            <div style="font-size: 13px; opacity: 0.7; margin-bottom: 15px;">We couldn't connect to your academic nodes.</div>
+                            <button onclick="location.reload()" style="background:#FFD700; color:#000; border:none; padding:8px 20px; border-radius:8px; font-weight:700; cursor:pointer;">Retry Connection</button>
+                        </div>`;
+                }
             }
         }
 
@@ -789,7 +801,6 @@
                 container.innerHTML = `<div class="skeleton sk-card"></div><div class="skeleton sk-card"></div>`;
             }
 
-            // Fix 6: Parallelize chapters and notes
             const [chaptersRes, notesRes] = await Promise.allSettled([
                 apiCall(`/student/banks/${bankId}/chapters`),
                 apiCall(`/student/notes?bankId=${bankId}`)
@@ -797,31 +808,48 @@
 
             if (chaptersRes.status === 'fulfilled' && chaptersRes.value.success) {
                 const chapters = chaptersRes.value.data.chapters;
-                const notesData = notesRes.status === 'fulfilled' && notesRes.value.success ? notesRes.value.data.chapters : [];
+                const notesData = (notesRes.status === 'fulfilled' && notesRes.value.success) ? notesRes.value.data.chapters : [];
                 
-                container.innerHTML = '';
-                chapters.forEach(chap => {
-                    const chapterData = notesData.find(n => n.chapterId === chap.chapterId);
-                    const chapterNotes = chapterData?.notes || [];
-                    const node = document.createElement('div');
-                    node.className = 'chapter-node';
-                    const completeNotes = chapterNotes.filter(n => n.noteType === 'complete');
-                    const flashNotes = chapterNotes.filter(n => n.noteType === 'flash');
-                    node.innerHTML = `
-                        <div class="chapter-title-row">
-                            <div style="display:flex; align-items:center;">
-                                <div class="chapter-indicator"></div>
-                                <span>${chap.chapterName}</span>
+                if (container) {
+                    container.innerHTML = '';
+                    chapters.forEach(chap => {
+                        const chapterData = notesData.find(n => n.chapterId === chap.chapterId);
+                        const chapterNotes = chapterData?.notes || [];
+                        const node = document.createElement('div');
+                        node.className = 'chapter-node';
+                        const completeNotes = chapterNotes.filter(n => n.noteType === 'complete');
+                        const flashNotes = chapterNotes.filter(n => n.noteType === 'flash');
+                        node.innerHTML = `
+                            <div class="chapter-title-row">
+                                <div style="display:flex; align-items:center;">
+                                    <div class="chapter-indicator"></div>
+                                    <span>${chap.chapterName}</span>
+                                </div>
+                                <span style="font-size: 10px; font-weight: 900; color: var(--primary); opacity:0.6;">${chapterNotes.length} RESOURCES</span>
                             </div>
-                            <span style="font-size: 10px; font-weight: 900; color: var(--primary); opacity:0.6;">${chapterNotes.length} RESOURCES</span>
-                        </div>
-                        <div class="notebook-grid">
-                            ${renderNoteNode(completeNotes, 'complete', 'Master Blueprint', 'DETAILED NOTES')}
-                            ${renderNoteNode(flashNotes, 'flash', 'Short Memo', 'QUICK REVISION')}
-                        </div>
-                    `;
-                    container.appendChild(node);
-                });
+                            <div class="notebook-grid">
+                                ${renderNoteNode(completeNotes, 'complete', 'Master Blueprint', 'DETAILED NOTES')}
+                                ${renderNoteNode(flashNotes, 'flash', 'Short Memo', 'QUICK REVISION')}
+                            </div>
+                        `;
+                        container.appendChild(node);
+                    });
+                }
+            } else {
+                console.error('[Chapters failed]', chaptersRes.reason);
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:40px;color:#ff6b6b;">
+                            <div style="font-size:24px;margin-bottom:10px">📡</div>
+                            <div>Failed to load chapter matrix.</div>
+                            <span onclick="loadBankData()" style="color:#FFD700;cursor:pointer;text-decoration:underline;font-size:12px;font-weight:700;">Retry Sync</span>
+                        </div>`;
+                }
+            }
+
+            if (notesRes.status === 'rejected' || (notesRes.status === 'fulfilled' && !notesRes.value.success)) {
+                console.error('[Notes failed]', notesRes.reason || notesRes.value?.message);
+                // We don't overwrite chapters if they succeeded, just log it.
             }
         }
 

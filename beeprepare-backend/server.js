@@ -367,13 +367,20 @@ app.use(async (req, res, next) => {
     const now = Date.now();
     if (now - _maintenanceCache.cachedAt > MAINTENANCE_CACHE_TTL) {
       const AppSettings = require('./models/AppSettings');
-      const setting = await AppSettings.findOne({ key: 'maintenance_mode' }).select('value').lean().catch(() => null);
-      _maintenanceCache = { value: setting?.value === true, cachedAt: now };
+      const [mMode, mMsg] = await Promise.all([
+        AppSettings.findOne({ key: 'maintenance_mode' }).select('value').lean().catch(() => null),
+        AppSettings.findOne({ key: 'maintenance_message' }).select('value').lean().catch(() => null)
+      ]);
+      _maintenanceCache = { 
+        value: mMode?.value === true, 
+        message: mMsg?.value || 'The BEE core is undergoing manual synchronization.',
+        cachedAt: now 
+      };
     }
     if (_maintenanceCache.value) {
       return res.status(503).json({
         success: false,
-        message: 'Under maintenance.',
+        message: _maintenanceCache.message,
         code: 'MAINTENANCE_MODE',
         maintenance: true
       });

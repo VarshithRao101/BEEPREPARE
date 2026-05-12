@@ -265,82 +265,106 @@
         }
 
         async function loadDashboard(showOverlay = true) {
-            const [result, doubtsResult] = await Promise.all([
-                apiCall('/student/dashboard', 'GET', null, true, false, showOverlay).catch(()=>null),
-                apiCall('/student/doubts', 'GET', null, true, false, showOverlay).catch(()=>null)
-            ]);
-            
-            if (result && result.success) {
-                const d = result.data;
+            try {
+                const [result, doubtsResult] = await Promise.all([
+                    apiCall('/student/dashboard', 'GET', null, true, false, showOverlay),
+                    apiCall('/student/doubts', 'GET', null, true, false, showOverlay)
+                ]);
+                
+                if (result && result.success) {
+                    const d = result.data;
 
-                // Quote
-                if (d.dailyQuote) {
-                    const qText = document.getElementById('quote-text-plain');
-                    const qAuthor = document.getElementById('quote-author-plain');
-                    if (qText) {
-                        qText.innerText = `"${d.dailyQuote.text}"`;
-                        qAuthor.innerText = d.dailyQuote.author || 'Be Prepare';
-                        document.getElementById('quote-plain-container').style.display = 'block';
+                    // Quote
+                    if (d.dailyQuote) {
+                        const qText = document.getElementById('quote-text-plain');
+                        const qAuthor = document.getElementById('quote-author-plain');
+                        if (qText) {
+                            qText.innerText = `"${d.dailyQuote.text}"`;
+                            qAuthor.innerText = d.dailyQuote.author || 'Be Prepare';
+                            document.getElementById('quote-plain-container').style.display = 'block';
+                        }
                     }
-                }
 
-                // Streak
-                const streakVal = document.getElementById('streak-val-header');
-                if (streakVal) streakVal.textContent = d.streak?.current || 0;
-                BP.initStreakFlame('streak-canvas');
+                    // Streak
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = d.streak?.current || 0;
+                    BP.initStreakFlame('streak-canvas');
 
-                // Subjects
-                const subjectContainer = document.getElementById('subject-container');
-                if (subjectContainer) {
-                    subjectContainer.innerHTML = '';
-                    if (d.subjects && d.subjects.length > 0) {
-                        d.subjects.forEach(sub => {
-                            const card = document.createElement('div');
-                            card.className = 'subject-card';
-                            card.innerHTML = `
-                                <div style="width:40px;height:40px;margin:0 auto 10px;background:rgba(255,215,0,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                                    <img src="../../assets/images/subjects/${sub.subject.toLowerCase()}.svg" style="width:24px;height:24px;" onerror="this.src='../../assets/images/subjects/default.svg'">
-                                </div>
-                                <div style="font-weight:800;font-size:12px;">${sub.subject}</div>
+                    // Subjects
+                    const subjectContainer = document.getElementById('subject-container');
+                    if (subjectContainer) {
+                        subjectContainer.innerHTML = '';
+                        if (d.subjects && d.subjects.length > 0) {
+                            d.subjects.forEach(sub => {
+                                const card = document.createElement('div');
+                                card.className = 'subject-card';
+                                card.innerHTML = `
+                                    <div style="width:40px;height:40px;margin:0 auto 10px;background:rgba(255,215,0,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                                        <img src="../../assets/images/subjects/${sub.subject.toLowerCase()}.svg" style="width:24px;height:24px;" onerror="this.src='../../assets/images/subjects/default.svg'">
+                                    </div>
+                                    <div style="font-weight:800;font-size:12px;">${sub.subject}</div>
+                                `;
+                                card.onclick = () => window.location.href = `student-bank.html?subject=${sub.subject}`;
+                                subjectContainer.appendChild(card);
+                            });
+                        } else {
+                            subjectContainer.innerHTML = `<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No banks found.</p>`;
+                        }
+                    }
+
+                    // Activity
+                    const logWrapper = document.getElementById('activity-log-wrapper');
+                    if (logWrapper && d.activityLog) {
+                        logWrapper.innerHTML = '';
+                        d.activityLog.slice(0, 5).reverse().forEach(log => {
+                            const item = document.createElement('div');
+                            item.style = "margin-bottom:15px; border-left: 2px solid var(--primary); padding-left: 15px;";
+                            item.innerHTML = `
+                                <div style="font-size:13px;font-weight:800;">${log.title}</div>
+                                <div style="font-size:11px;color:var(--text-muted);">${log.description} • ${timeAgo(log.createdAt)}</div>
                             `;
-                            card.onclick = () => window.location.href = `student-bank.html?subject=${sub.subject}`;
-                            subjectContainer.appendChild(card);
-                        });
-                    } else {
-                        subjectContainer.innerHTML = `<p style="grid-column:span 2;text-align:center;color:var(--text-muted);font-size:12px;">No banks found.</p>`;
-                    }
-                }
-
-                // Activity
-                const logWrapper = document.getElementById('activity-log-wrapper');
-                if (logWrapper && d.activityLog) {
-                    logWrapper.innerHTML = '';
-                    d.activityLog.slice(0, 5).reverse().forEach(log => {
-                        const item = document.createElement('div');
-                        item.style = "margin-bottom:15px; border-left: 2px solid var(--primary); padding-left: 15px;";
-                        item.innerHTML = `
-                            <div style="font-size:13px;font-weight:800;">${log.title}</div>
-                            <div style="font-size:11px;color:var(--text-muted);">${log.description} • ${timeAgo(log.createdAt)}</div>
-                        `;
-                        logWrapper.appendChild(item);
-                    });
-                }
-
-                // Doubts
-                if (doubtsResult && doubtsResult.success) {
-                    const doubts = doubtsResult.data.chats.slice(0, 3);
-                    const container = document.querySelector('.recent-doubts');
-                    if (container && doubts.length > 0) {
-                        container.innerHTML = '';
-                        doubts.forEach(doubt => {
-                            const dCard = document.createElement('div');
-                            dCard.className = 'adv-card';
-                            dCard.style = "padding:12px;margin-bottom:10px;cursor:pointer;font-size:12px;";
-                            dCard.innerHTML = `<strong>${doubt.subject}</strong>: ${doubt.questionPreview || 'Doubt Details...'}`;
-                            dCard.onclick = () => window.location.href = 'student-doubts.html';
-                            container.appendChild(dCard);
+                            logWrapper.appendChild(item);
                         });
                     }
+
+                    // Doubts
+                    if (doubtsResult && doubtsResult.success) {
+                        const doubts = doubtsResult.data.chats.slice(0, 3);
+                        const container = document.querySelector('.recent-doubts');
+                        if (container && doubts.length > 0) {
+                            container.innerHTML = '';
+                            doubts.forEach(doubt => {
+                                const dCard = document.createElement('div');
+                                dCard.className = 'adv-card';
+                                dCard.style = "padding:12px;margin-bottom:10px;cursor:pointer;font-size:12px;";
+                                dCard.innerHTML = `<strong>${doubt.subject}</strong>: ${doubt.questionPreview || 'Doubt Details...'}`;
+                                dCard.onclick = () => window.location.href = 'student-doubts.html';
+                                container.appendChild(dCard);
+                            });
+                        }
+                    }
+                } else {
+                    throw new Error('Dashboard signal lost');
+                }
+            } catch (err) {
+                console.error('[Dashboard load failed]', err);
+                document.querySelectorAll('.skeleton, .sk-card, .sk-line').forEach(el => {
+                    el.style.animation = 'none';
+                    el.style.background = 'rgba(255,255,255,0.03)';
+                });
+                
+                const container = document.querySelector('main');
+                if (container && !document.getElementById('error-banner')) {
+                    const errBanner = document.createElement('div');
+                    errBanner.id = 'error-banner';
+                    errBanner.style.cssText = `background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3); border-radius: 12px; padding: 16px; margin: 16px; color: #ff6b6b; text-align: center; font-size: 14px;`;
+                    errBanner.innerHTML = `
+                        <div style="font-size:20px;margin-bottom:8px">⚠️</div>
+                        <div style="font-weight:600;margin-bottom:4px">Data failed to load</div>
+                        <div style="opacity:0.7;margin-bottom:12px">Check your connection and try again</div>
+                        <button onclick="location.reload()" style="background:#FFD700;color:#000;border:none;padding:8px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;">Retry</button>
+                    `;
+                    container.prepend(errBanner);
                 }
             }
         }

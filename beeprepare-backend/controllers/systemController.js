@@ -6,9 +6,13 @@ const { success, error } = require('../utils/responseHelper');
 const getMaintenanceStatus = async (req, res) => {
   try {
     await connectDB();
-    const config = await SystemConfig.findOne({ key: 'maintenance_mode' }).lean();
+    const [mMode, mMsg] = await Promise.all([
+      SystemConfig.findOne({ key: 'maintenance_mode' }).lean(),
+      SystemConfig.findOne({ key: 'maintenance_message' }).lean()
+    ]);
     return success(res, 'Maintenance status fetched', { 
-      isMaintenance: config ? config.value : false 
+      isMaintenance: mMode ? mMode.value : false,
+      message: mMsg ? mMsg.value : null
     });
   } catch (err) {
     return error(res, 'Failed to fetch status', 'SERVER_ERROR', 500);
