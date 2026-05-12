@@ -346,25 +346,67 @@
           }
 
           // 2. Otherwise wait for state change
-          const unsubscribe = onAuthStateChanged(auth, (user) => {
-              if (unsubscribe) unsubscribe();
-              
-              // ALWAYS read from localStorage FRESH inside the callback to avoid closure staleness
-              const role = localStorage.getItem(BP.ROLE);
-              const activated = localStorage.getItem(BP.ACTIVATED);
-              const hasToken = !!localStorage.getItem(BP.TOKEN);
+          const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (unsubscribe) unsubscribe();
 
-              if (user && activated === 'true' && role) {
-                  console.log("[AUTO] Auth state changed, redirecting to", role);
-                  if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
-                  else if (role === 'student') window.location.replace('beginners/student/student-home.html');
-              } else if (hasToken && !user) {
-                  // Token exists but Firebase says NO USER. Definitive cleanup to stop loops.
-                  console.warn("[AUTO] Token present but no Firebase user. Clearing session.");
+            const role      = localStorage.getItem(BP.ROLE);
+            const activated = localStorage.getItem(BP.ACTIVATED);
+            const hasToken  = !!localStorage.getItem(BP.TOKEN);
+
+            // No user in Firebase — clear everything and stay on login
+            if (!user) {
+              if (hasToken) {
+                console.warn('[AUTO] No Firebase user. Clearing stale session.');
+                localStorage.removeItem(BP.TOKEN);
+                localStorage.removeItem(BP.ACTIVATED);
+                localStorage.removeItem(BP.ROLE);
+                sessionStorage.clear();
+              }
+              return; // Stay on login page
+            }
+
+            // User exists in Firebase — but VERIFY with server before redirecting
+            // This prevents redirecting when the server-side session is invalid
+            if (user && activated === 'true' && role && hasToken) {
+              try {
+                // Get a fresh token and do a quick server check
+                const freshToken = await user.getIdToken(false);
+                const resp = await fetch('/api/auth/verify-session', {
+                  method: 'GET',
+                  headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + freshToken
+                  }
+                });
+                const data = await resp.json();
+
+                if (data?.success) {
+                  // Server confirmed valid — safe to redirect
+                  console.log('[AUTO] Session confirmed, redirecting to', role);
+                  if (role === 'teacher') {
+                    window.location.replace('/beginners/teacher/teacher-home.html');
+                  } else if (role === 'student') {
+                    window.location.replace('/beginners/student/student-home.html');
+                  }
+                } else {
+                  // Server says invalid — clear everything, stay on login
+                  console.warn('[AUTO] Server rejected session. Clearing.');
                   localStorage.removeItem(BP.TOKEN);
                   localStorage.removeItem(BP.ACTIVATED);
                   localStorage.removeItem(BP.ROLE);
+                  sessionStorage.clear();
+                  // Sign out of Firebase too so loop cannot restart
+                  await auth.signOut();
+                }
+              } catch (err) {
+                // Network error — don't redirect, don't clear, just wait
+                console.warn('[AUTO] Could not verify session, staying on login.', err.message);
               }
+              return;
+            }
+
+            // User in Firebase but no localStorage flags — they need to complete login
+            // This is a fresh login, not a loop — do nothing, let login flow handle it
           });
           
           setTimeout(() => { if (unsubscribe) unsubscribe(); }, 2000);

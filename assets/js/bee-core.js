@@ -181,30 +181,65 @@ export async function getAnnouncements() {
 }
 
 export async function initPage(guardFn, dataFetchFn) {
+  // Loop protection — if we redirected to login less than
+  // 2 seconds ago, do not redirect again
+  // This breaks any remaining redirect loop
+  const lastRedirect = parseInt(sessionStorage.getItem('_lastRedirectAt') || '0');
+  const now = Date.now();
+  if (now - lastRedirect < 2000) {
+    console.warn('[initPage] Redirect loop detected — stopping.');
+    BP.hideLoader();
+    // Show a recoverable error instead of looping forever
+    document.body.innerHTML = `
+      <div style="
+        min-height:100vh;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;
+        background:#0a0a0a;color:#fff;font-family:sans-serif;
+        text-align:center;padding:20px;
+      ">
+        <div style="font-size:40px;margin-bottom:16px">⚠️</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px">
+          Session Error
+        </div>
+        <div style="color:#888;margin-bottom:24px;font-size:14px">
+          Your session could not be verified.<br>Please sign in again.
+        </div>
+        <button onclick="
+          localStorage.removeItem('bp_token');
+          localStorage.removeItem('bp_role');
+          localStorage.removeItem('bp_activated');
+          sessionStorage.clear();
+          window.location.href='/index.html';
+        " style="
+          background:#FFD700;color:#000;border:none;
+          padding:12px 28px;border-radius:10px;
+          font-weight:700;font-size:15px;cursor:pointer;
+        ">Sign In Again</button>
+      </div>
+    `;
+    return null;
+  }
+
   BP.showLoader();
   try {
-    // Fire warmup ping + token fetch simultaneously
     const token = await getFreshToken();
-
     if (!token) {
+      sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
       BP.hideLoader();
-      window.location.href = '/index.html';
+      window.location.href = getIndexPath();
       return null;
     }
 
-    // Start data fetch immediately after token — don't wait for session
     const dataPromise = dataFetchFn ? dataFetchFn(token) : Promise.resolve(null);
-
-    // Verify session in parallel with data fetch
     const sessionResult = await verifySession(token);
 
     if (!sessionResult?.success) {
+      sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
       BP.hideLoader();
-      window.location.href = '/index.html';
+      window.location.href = getIndexPath();
       return null;
     }
 
-    // Wait for data
     const data = await dataPromise;
     return data;
 
@@ -212,8 +247,6 @@ export async function initPage(guardFn, dataFetchFn) {
     console.error('[initPage error]', err);
     return null;
   } finally {
-    // ALWAYS hide loader — no matter what happened above
-    // finally block runs on success, error, AND return
     BP.hideLoader();
   }
 }
@@ -317,9 +350,22 @@ export async function apiCall(
       }
 
       console.error('🔴 [API] Session definitive failure. Redirecting to index.');
-      localStorage.clear();
-      clearSessionCache();
-      window.location.href = getIndexPath();
+      // Clear ONLY auth-related keys — not the entire localStorage
+      // Full clear causes race condition where index.html reads
+      // stale values before the clear completes
+      localStorage.removeItem(BP.TOKEN);
+      localStorage.removeItem(BP.ROLE);
+      localStorage.removeItem(BP.ACTIVATED);
+      localStorage.removeItem(BP.USER_UID);
+      localStorage.removeItem(BP.USER_DATA);
+      sessionStorage.clear();
+      _sessionCache    = null;
+      _sessionCachedAt = 0;
+
+      // Small delay before redirect so storage ops complete
+      setTimeout(() => {
+        window.location.href = getIndexPath();
+      }, 50);
       return { success: false, message: 'Session expired' };
     }
 
@@ -340,7 +386,14 @@ export async function apiCall(
     }
 
     if (res.status === 403 && (data.error?.code === 'ACCOUNT_BLOCKED' || data.error?.code === 'ACCOUNT_BLACKLISTED')) {
-      localStorage.clear();
+      localStorage.removeItem(BP.TOKEN);
+      localStorage.removeItem(BP.ROLE);
+      localStorage.removeItem(BP.ACTIVATED);
+      localStorage.removeItem(BP.USER_UID);
+      localStorage.removeItem(BP.USER_DATA);
+      sessionStorage.clear();
+      _sessionCache    = null;
+      _sessionCachedAt = 0;
       document.body.innerHTML = `<div style="position:fixed;inset:0;background:#0a0a1a;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;"><div><h1 style="color:#ff4444;font-size:48px;">🚫</h1><h2>Account Suspended</h2><p>Contact support@beeprepare.com</p></div></div>`;
       return data;
     }
@@ -378,8 +431,14 @@ export async function guardTeacher() {
   // 1. If we have NO UID or NO TOKEN, definitely redirect.
   if (!uid || !localStorage.getItem(BP.TOKEN)) {
     console.warn("[GUARD] No session found. Redirecting...");
-    localStorage.clear();
-    clearSessionCache();
+    localStorage.removeItem(BP.TOKEN);
+    localStorage.removeItem(BP.ROLE);
+    localStorage.removeItem(BP.ACTIVATED);
+    localStorage.removeItem(BP.USER_UID);
+    localStorage.removeItem(BP.USER_DATA);
+    sessionStorage.clear();
+    _sessionCache    = null;
+    _sessionCachedAt = 0;
     window.location.href = base;
     return false;
   }
@@ -396,8 +455,14 @@ export async function guardTeacher() {
       role = 'teacher';
     } else {
       console.error("[GUARD] Reconciliation failed. Definitive unauthorized.");
-      localStorage.clear();
-      clearSessionCache();
+      localStorage.removeItem(BP.TOKEN);
+      localStorage.removeItem(BP.ROLE);
+      localStorage.removeItem(BP.ACTIVATED);
+      localStorage.removeItem(BP.USER_UID);
+      localStorage.removeItem(BP.USER_DATA);
+      sessionStorage.clear();
+      _sessionCache    = null;
+      _sessionCachedAt = 0;
       window.location.href = base;
       return false;
     }
@@ -414,8 +479,14 @@ export async function guardStudent() {
 
   if (!uid || !localStorage.getItem(BP.TOKEN)) {
     console.warn("[GUARD] No session found. Redirecting...");
-    localStorage.clear();
-    clearSessionCache();
+    localStorage.removeItem(BP.TOKEN);
+    localStorage.removeItem(BP.ROLE);
+    localStorage.removeItem(BP.ACTIVATED);
+    localStorage.removeItem(BP.USER_UID);
+    localStorage.removeItem(BP.USER_DATA);
+    sessionStorage.clear();
+    _sessionCache    = null;
+    _sessionCachedAt = 0;
     window.location.href = base;
     return false;
   }
@@ -429,8 +500,14 @@ export async function guardStudent() {
       localStorage.setItem(BP.ROLE, 'student');
       role = 'student';
     } else {
-      localStorage.clear();
-      clearSessionCache();
+      localStorage.removeItem(BP.TOKEN);
+      localStorage.removeItem(BP.ROLE);
+      localStorage.removeItem(BP.ACTIVATED);
+      localStorage.removeItem(BP.USER_UID);
+      localStorage.removeItem(BP.USER_DATA);
+      sessionStorage.clear();
+      _sessionCache    = null;
+      _sessionCachedAt = 0;
       window.location.href = base;
       return false;
     }
