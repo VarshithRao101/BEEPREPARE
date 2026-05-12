@@ -333,19 +333,6 @@
         async function handleAutoRedirect() {
           const auth = getAuth();
           
-          // 1. Instant check if Firebase is already initialized
-          if (auth.currentUser) {
-              const role = localStorage.getItem(BP.ROLE);
-              const activated = localStorage.getItem(BP.ACTIVATED);
-              if (activated === 'true' && role) {
-                  console.log("[AUTO] Firebase active, redirecting to", role);
-                  if (role === 'teacher') window.location.replace('beginners/teacher/teacher-home.html');
-                  else if (role === 'student') window.location.replace('beginners/student/student-home.html');
-                  return;
-              }
-          }
-
-          // 2. Otherwise wait for state change
           const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (unsubscribe) unsubscribe();
 
