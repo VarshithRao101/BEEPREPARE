@@ -149,7 +149,26 @@
 
         <!-- STEP 3 -->
         <div class="glass-card">
-            <div class="step-title"><span class="step-num">3</span> EXECUTION</div>
+            <div class="step-title"><span class="step-num">3</span> EXECUTION & MEDIA</div>
+            
+            <!-- Summary Bar -->
+            <div id="detectionSummary" style="display:none; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:15px; padding:20px; margin-bottom:20px; display:flex; justify-content:space-around; align-items:center; text-align:center;">
+                <div>
+                    <div style="font-size:24px; font-weight:900; color:#fff;" id="sumTotal">0</div>
+                    <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Nodes Detected</div>
+                </div>
+                <div style="width:1px; height:30px; background:var(--border);"></div>
+                <div>
+                    <div style="font-size:24px; font-weight:900; color:var(--primary);" id="sumMedia">0</div>
+                    <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Diagrams Linked</div>
+                </div>
+                <div style="width:1px; height:30px; background:var(--border);"></div>
+                <div>
+                    <div style="font-size:24px; font-weight:900; color:#ff4d4d;" id="sumMissing">0</div>
+                    <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Media Required</div>
+                </div>
+            </div>
+
             <div id="previewArea" class="preview-area"></div>
             
             <button class="btn-action" id="uploadBtn" onclick="handleUpload()">COMMENCE UPLOAD</button>
@@ -225,12 +244,19 @@
             document.getElementById('charCount').textContent = `Characters: ${text.length}`;
             const blocks = text.split('---').filter(b => b.trim().length > 0);
             document.getElementById('blockCount').textContent = `Detected Blocks: ${blocks.length} / 200`;
+
+            // Auto-detect after small delay
+            clearTimeout(window.detectTimeout);
+            window.detectTimeout = setTimeout(() => generatePreview(), 800);
         };
 
         window.generatePreview = () => {
             const text = document.getElementById('pushData').value.trim();
+            const summaryBar = document.getElementById('detectionSummary');
+            
             if(!text) {
                 stagedQuestions = [];
+                summaryBar.style.display = 'none';
                 renderStaging();
                 return;
             }
@@ -248,12 +274,21 @@
                         if(line.startsWith('TYPE:')) q.type = line.substring(5).trim();
                         if(line.startsWith('MARKS:')) q.marks = line.substring(6).trim();
                         if(line.startsWith('DIFFICULTY:')) q.diff = line.substring(11).trim();
+                        if(line.startsWith('IMG:')) q.image = line.substring(4).trim();
                     });
                     filtered.push(q);
                 }
             });
 
             stagedQuestions = filtered;
+            
+            // Update Summary Bar
+            summaryBar.style.display = 'flex';
+            const mediaCount = stagedQuestions.filter(q => q.image).length;
+            document.getElementById('sumTotal').textContent = stagedQuestions.length;
+            document.getElementById('sumMedia').textContent = mediaCount;
+            document.getElementById('sumMissing').textContent = stagedQuestions.length - mediaCount;
+
             renderStaging();
         };
 
@@ -265,18 +300,26 @@
             }
 
             area.innerHTML = `
-                <div style="margin-bottom:20px; font-weight:800; color:var(--gold); font-size:14px; text-transform:uppercase; letter-spacing:1px;">Staging Area (${stagedQuestions.length} Questions)</div>
+                <div style="margin-bottom:20px; font-weight:800; color:var(--gold); font-size:14px; text-transform:uppercase; letter-spacing:1px;">Media Injection Slots (${stagedQuestions.length})</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
                     ${stagedQuestions.map((q, i) => `
-                        <div class="preview-card" style="position:relative;">
-                            <div style="font-size:10px; color:var(--gold); margin-bottom:5px;">#${i + 1} — ${q.type || 'Short'} [${q.marks || 1}M]</div>
-                            <div style="font-size:13px; font-weight:600; margin-bottom:15px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${(q.text || 'Untitled Node').replace(/</g, '&lt;')}</div>
+                        <div class="preview-card" style="position:relative; ${q.image ? 'border-color:var(--gold); background:rgba(255,215,0,0.02);' : ''}">
+                            <div style="font-size:10px; color:var(--gold); margin-bottom:5px; display:flex; justify-content:space-between;">
+                                <span>SLOT #${i + 1} — ${q.type || 'Short'}</span>
+                                ${q.image ? '<span style="color:#4dff88;">[LINKED]</span>' : '<span style="color:#ff4d4d;">[NO IMAGE]</span>'}
+                            </div>
+                            <div style="font-size:13px; font-weight:600; margin-bottom:15px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${(q.text || 'Untitled Question Node').replace(/</g, '&lt;')}</div>
                             
                             <div style="display:flex; align-items:center; gap:10px;">
-                                <div id="imgPreview_${i}" style="width:50px; height:50px; border:1px solid var(--border); border-radius:8px; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                                    ${q.image ? `<img src="${q.image}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:18px; opacity:0.2;">🖼️</span>'}
+                                <div id="imgPreview_${i}" style="width:60px; height:60px; border:1px solid var(--border); border-radius:12px; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                    ${q.image ? `<img src="${q.image}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:24px; opacity:0.1;">🖼️</span>'}
                                 </div>
-                                <button onclick="triggerImageUpload(${i})" style="flex:1; padding:8px; font-size:10px; background:rgba(255,215,0,0.1); border:1px solid var(--gold); color:var(--gold); border-radius:6px; cursor:pointer; font-weight:800;">ATTACH DIAGRAM</button>
+                                <div style="flex:1;">
+                                    <button onclick="triggerImageUpload(${i})" style="width:100%; padding:10px; font-size:10px; background:${q.image ? 'rgba(77,255,136,0.1)' : 'rgba(255,215,0,0.1)'}; border:1px solid ${q.image ? '#4dff88' : 'var(--gold)'}; color:${q.image ? '#4dff88' : 'var(--gold)'}; border-radius:8px; cursor:pointer; font-weight:800; text-transform:uppercase;">
+                                        ${q.image ? 'Change Diagram' : 'Attach Photo'}
+                                    </button>
+                                    <div style="font-size:9px; color:var(--muted); margin-top:5px; text-align:center;">Cloud Storage Slot Ready</div>
+                                </div>
                             </div>
                             <input type="file" id="file_${i}" accept="image/*" style="display:none;" onchange="handleImageAttach(event, ${i})">
                         </div>
@@ -301,13 +344,18 @@
                 const rawIdx = target.rawIndex;
                 
                 if(blocks[rawIdx] !== undefined) {
-                    // Remove old image line if exists
                     let content = blocks[rawIdx].split('\n').filter(l => !l.trim().startsWith('IMG:')).join('\n');
                     blocks[rawIdx] = content.trim() + `\nIMG: ${base64}\n`;
                 }
                 document.getElementById('pushData').value = blocks.join('---');
+                
+                // Update Summary without full generatePreview call to preserve state
+                const mediaCount = stagedQuestions.filter(q => q.image).length;
+                document.getElementById('sumMedia').textContent = mediaCount;
+                document.getElementById('sumMissing').textContent = stagedQuestions.length - mediaCount;
+                
                 renderStaging();
-                showToast(`Diagram attached to question #${i + 1}`, "success");
+                showToast(`Diagram linked to Slot #${i + 1}`, "success");
             };
             reader.readAsDataURL(file);
         };
@@ -335,6 +383,7 @@
                     showToast(res.message, "success");
                     document.getElementById('pushData').value = '';
                     stagedQuestions = [];
+                    document.getElementById('detectionSummary').style.display = 'none';
                     renderStaging();
                     updateStats();
                 } else {
@@ -363,7 +412,7 @@
             previewBtn.style.marginTop = '10px';
             previewBtn.style.padding = '10px';
             previewBtn.style.fontSize = '12px';
-            previewBtn.textContent = 'REBUILD STAGING AREA';
+            previewBtn.textContent = 'REBUILD DETECTION MAPPING';
             previewBtn.onclick = () => generatePreview();
             pushArea.appendChild(previewBtn);
         }
