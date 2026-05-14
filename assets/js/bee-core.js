@@ -132,7 +132,7 @@ export async function verifySession(token) {
   }
 
   try {
-    const result = await apiCall('/auth/verify-session', 'POST', { token });
+    const result = await apiCall('/auth/verify-session', 'GET');
     if (result?.success) {
       const u = result.data;
       if (u.role && u.role !== localStorage.getItem(BP.ROLE)) {
@@ -204,6 +204,12 @@ export async function initPage(guardFn, dataFetchFn) {
   // Only show loader for auth check (fast — usually cached)
   
   try {
+    // 1. Local Guard (Fast check)
+    if (guardFn) {
+        const isAuthorized = await guardFn();
+        if (!isAuthorized) return null;
+    }
+
     const token = await getFreshToken();
     if (!token) {
       sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
@@ -212,7 +218,6 @@ export async function initPage(guardFn, dataFetchFn) {
     }
 
     // Run auth verify AND data fetch simultaneously
-    // Don't wait for auth before starting data fetch
     const [sessionResult, data] = await Promise.all([
       verifySession(token),
       dataFetchFn ? dataFetchFn(token).catch(e => null) : Promise.resolve(null)

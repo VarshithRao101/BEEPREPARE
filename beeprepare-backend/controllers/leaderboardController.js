@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Streak = require('../models/Streak');
 const TestSession = require('../models/TestSession');
 const LeaderboardSnapshot = require('../models/LeaderboardSnapshot');
+const Bank = require('../models/Bank');
 
 /**
  * ADVANCED DSA: Min-Heap Implementation for Top-K Selection
@@ -150,19 +151,73 @@ exports.getGlobalLeaderboard = async (req, res) => {
 exports.getTeacherLeaderboard = async (req, res) => {
     try {
         const teacherId = req.user.googleUid;
-        const { type = 'daily' } = req.query;
+        const { type = 'daily', bankId } = req.query;
 
-        // 1. Get the latest global snapshot
+        // ══════════════════════════════════════════════════════════════════════════════
+        // CASE 1: BANK-SPECIFIC LEADERBOARD (Direct Query for accuracy)
+        // ══════════════════════════════════════════════════════════════════════════════
+        if (bankId && bankId !== 'all') {
+            const bank = await Bank.findOne({ _id: bankId, teacherId }).select('approvedStudents').lean();
+            if (!bank) return res.status(404).json({ success: false, message: 'Bank not found' });
+
+            const students = await User.find({ 
+                googleUid: { $in: bank.approvedStudents || [] },
+                role: 'student'
+            }).select('googleUid displayName photoUrl class exp dailyExp monthlyExp yearlyExp').lean();
+
+            const studentUids = students.map(s => s.googleUid);
+            
+            // Bulk fetch streaks and test counts for performance
+            const [streaks, tests] = await Promise.all([
+                Streak.find({ userId: { $in: studentUids } }).select('userId currentStreak').lean(),
+                TestSession.aggregate([
+                    { $match: { studentId: { $in: studentUids }, status: 'completed' } },
+                    { $group: { _id: '$studentId', count: { $sum: 1 } } }
+                ])
+            ]);
+
+            const streakMap = Object.fromEntries(streaks.map(s => [s.userId, s.currentStreak]));
+            const testMap = Object.fromEntries(tests.map(t => [t._id, t.count]));
+
+            const rankings = students.map(s => {
+                let currentExp = s.exp || 0;
+                if (type === 'daily') currentExp = s.dailyExp || 0;
+                if (type === 'monthly') currentExp = s.monthlyExp || 0;
+                if (type === 'yearly') currentExp = s.yearlyExp || 0;
+
+                return {
+                    userId: s.googleUid,
+                    displayName: s.displayName,
+                    photoUrl: s.photoUrl,
+                    className: s.class,
+                    exp: currentExp,
+                    streak: streakMap[s.googleUid] || 0,
+                    testsCompleted: testMap[s.googleUid] || 0
+                };
+            });
+
+            // Sort by EXP descending
+            rankings.sort((a, b) => b.exp - a.exp);
+            const finalRankings = rankings.map((r, index) => ({ ...r, rank: index + 1 }));
+
+            return res.json({
+                success: true,
+                rankings: finalRankings,
+                lastUpdated: new Date()
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════════
+        // CASE 2: GLOBAL TEACHER LEADERBOARD (Uses Snapshot)
+        // ══════════════════════════════════════════════════════════════════════════════
         const snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
         if (!snapshot) return res.json({ success: true, rankings: [] });
 
-        // 2. Identify students linked to this teacher
         const linkedUsers = await User.find({ 
             'activeBanks.teacherId': teacherId 
         }).select('googleUid');
         const linkedIds = new Set(linkedUsers.map(u => u.googleUid));
 
-        // 3. Filter global snapshot and map fields for consistency
         const filteredRankings = snapshot.rankings
             .filter(r => linkedIds.has(r.userId))
             .map((r, index) => ({
@@ -182,6 +237,7 @@ exports.getTeacherLeaderboard = async (req, res) => {
             lastUpdated: snapshot.lastUpdated
         });
     } catch (error) {
+        console.error('getTeacherLeaderboard error:', error);
         res.status(500).json({ success: false, message: 'Teacher leaderboard fetch failed' });
     }
 };

@@ -235,10 +235,15 @@
                         <p style="color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px;">Academic Wall of Fame</p>
                     </div>
                 </div>
-                <div class="stat-toggle" style="display: flex; gap: 10px;">
-                    <button class="toggle-btn active" id="btn-daily" onclick="switchType('daily')">Daily</button>
-                    <button class="toggle-btn" id="btn-monthly" onclick="switchType('monthly')">Monthly</button>
-                    <button class="toggle-btn" id="btn-yearly" onclick="switchType('yearly')">Yearly</button>
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <select id="bank-selector" onchange="switchBank(this.value)" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px 20px; border-radius: 15px; font-family: 'Outfit', sans-serif; font-weight: 700; cursor: pointer; outline: none; transition: 0.3s; min-width: 180px;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+                        <option value="all">All Study Banks</option>
+                    </select>
+                    <div class="stat-toggle" style="display: flex; gap: 10px;">
+                        <button class="toggle-btn active" id="btn-daily" onclick="switchType('daily')">Daily</button>
+                        <button class="toggle-btn" id="btn-monthly" onclick="switchType('monthly')">Monthly</button>
+                        <button class="toggle-btn" id="btn-yearly" onclick="switchType('yearly')">Yearly</button>
+                    </div>
                 </div>
             </header>
 
@@ -273,9 +278,26 @@
         import { apiCall, guardTeacher, initPage, BP } from '../../assets/js/bee-core.js';
 
         let currentType = 'daily';
+        let currentBankId = 'all';
+
+        async function loadBanks() {
+            try {
+                const res = await apiCall('/teacher/dashboard', 'GET');
+                if (res && res.success && res.subjects) {
+                    const selector = document.getElementById('bank-selector');
+                    res.subjects.forEach(bank => {
+                        const opt = document.createElement('option');
+                        opt.value = bank.bankId;
+                        opt.textContent = `${bank.subject} - ${bank.class}`;
+                        selector.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.warn("Failed to load banks for filter", e); }
+        }
 
         async function loadData() {
-            const res = await apiCall(`/leaderboard/teacher?type=${currentType}`, 'GET');
+            const url = `/leaderboard/teacher?type=${currentType}${currentBankId !== 'all' ? `&bankId=${currentBankId}` : ''}`;
+            const res = await apiCall(url, 'GET');
             const tbody = document.getElementById('performance-body');
             const podium = document.getElementById('podium-container');
             const empty = document.getElementById('empty-state');
@@ -351,7 +373,15 @@
             loadData();
         };
 
-        initPage(guardTeacher, loadData);
+        window.switchBank = (bankId) => {
+            currentBankId = bankId;
+            loadData();
+        };
+
+        initPage(guardTeacher, async () => {
+            await loadBanks();
+            await loadData();
+        });
     </script>
 </body>
 </html>
