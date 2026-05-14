@@ -2,8 +2,8 @@
 
 (function() {
     const GEMINI_API_KEY = 'AIzaSyDH8qTlJ3BOHY9HdKXYb897L8bDeEvoHco';
-    // Using v1 Stable endpoint with cache-busting logic
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+    // Using v1beta endpoint to support system_instruction and newest features
+    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const SYSTEM_PROMPT = `
 You are BEE AI, the highly advanced Central Intelligence for BEEPREPARE.
@@ -91,7 +91,7 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         system_instruction: {
-                            parts: { text: SYSTEM_PROMPT }
+                            parts: [{ text: SYSTEM_PROMPT }]
                         },
                         contents: chatHistory.concat([{ role: 'user', parts: [{ text }] }])
                     })
