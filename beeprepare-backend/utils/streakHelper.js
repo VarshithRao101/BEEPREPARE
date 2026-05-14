@@ -98,6 +98,11 @@ const updateStreak = async (userId) => {
     // For now, let's just save.
 
     await streak.save();
+
+    // Award EXP for daily activity
+    const { awardExp } = require('./expService');
+    awardExp(userId, 'DAILY_STREAK');
+
     return streak;
 
   } catch (err) {

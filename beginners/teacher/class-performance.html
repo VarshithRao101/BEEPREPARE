@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Class Performance - BEEPREPARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/student-theme.css">
+    <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
+    <style>
+        .performance-card {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .perf-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .perf-table th {
+            text-align: left;
+            padding: 15px;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .perf-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .student-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .exp-badge {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 12px;
+        }
+
+        .streak-val {
+            font-weight: 800;
+            color: #FF4500;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-layout">
+        <aside class="pc-sidebar">
+            <div class="sidebar-brand">BEE<span style="color: var(--primary);">TEACHER</span></div>
+            <nav class="sidebar-nav">
+                <a href="teacher-home.html" class="sidebar-link">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="class-performance.html" class="sidebar-link active">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <span>Leaderboard</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="content-wrapper">
+            <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <h2 class="welcome-title-styled" style="background: linear-gradient(135deg, #fff, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0; font-size: 32px; font-weight: 900;">Class Performance</h2>
+                    <p style="color: var(--text-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px;">Tracking Linked Student Growth</p>
+                </div>
+                <div class="stat-toggle" style="margin: 0;">
+                    <button class="toggle-btn active" id="btn-daily" onclick="switchType('daily')">Daily</button>
+                    <button class="toggle-btn" id="btn-monthly" onclick="switchType('monthly')">Monthly</button>
+                    <button class="toggle-btn" id="btn-yearly" onclick="switchType('yearly')">Yearly</button>
+                </div>
+            </header>
+
+            <div class="performance-card">
+                <table class="perf-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Streak</th>
+                            <th>Tests</th>
+                            <th style="text-align: right;">Experience (XP)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="performance-body">
+                        <!-- Dynamic -->
+                    </tbody>
+                </table>
+                <div id="empty-state" style="display: none; text-align: center; padding: 40px; color: var(--text-muted);">
+                    No students have activated your banks yet.
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { apiCall, guardTeacher, initPage } from '../../assets/js/bee-core.js';
+
+        let currentType = 'daily';
+
+        async function loadData() {
+            const res = await apiCall(`/leaderboard/teacher?type=${currentType}`, 'GET');
+            const tbody = document.getElementById('performance-body');
+            const empty = document.getElementById('empty-state');
+            
+            tbody.innerHTML = '';
+            
+            if (res && res.success && res.rankings && res.rankings.length > 0) {
+                empty.style.display = 'none';
+                res.rankings.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="font-weight: 900; color: var(--text-muted);">#${r.rank}</td>
+                        <td>
+                            <div class="student-pill">
+                                <img src="${r.photoUrl || '../../assets/images/default-avatar.png'}" class="student-avatar" onerror="this.src='../../assets/images/default-avatar.png'">
+                                <span style="font-weight: 700; color: #fff;">${r.displayName}</span>
+                            </div>
+                        </td>
+                        <td style="font-weight: 800; font-size: 11px; color: var(--text-muted);">${r.className || 'N/A'}</td>
+                        <td class="streak-val">${r.streak} Days</td>
+                        <td style="font-weight: 600;">${r.testsCompleted || 0}</td>
+                        <td style="text-align: right;">
+                            <span class="exp-badge">${r.exp} XP</span>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                empty.style.display = 'block';
+            }
+        }
+
+        window.switchType = (type) => {
+            currentType = type;
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.id === `btn-${type}`);
+            });
+            loadData();
+        };
+
+        initPage(guardTeacher, loadData);
+    </script>
+</body>
+</html>

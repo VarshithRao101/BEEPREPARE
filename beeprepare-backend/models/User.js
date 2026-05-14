@@ -43,7 +43,12 @@ const userSchema = new Schema({
   aiMessagesResetAt: { type: Date, default: null },
   isBlocked:     { type: Boolean, default: false },
   blockedAt:     { type: Date, default: null },
-  blockedReason: { type: String, default: null }
+  blockedReason: { type: String, default: null },
+  // EXP System
+  exp:           { type: Number, default: 0 },
+  dailyExp:      { type: Number, default: 0 },
+  monthlyExp:    { type: Number, default: 0 },
+  yearlyExp:     { type: Number, default: 0 }
 }, { timestamps: true });
 
 userSchema.index({ googleUid: 1 }, { unique: true });

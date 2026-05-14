@@ -943,8 +943,10 @@ const submitTest = async (req, res) => {
       completedAt: new Date()
     });
 
-    // Update streak
+    // Update streak and Award EXP
     const streak = await updateStreak(studentId);
+    const { awardExp } = require('../utils/expService');
+    awardExp(studentId, 'TEST_COMPLETED');
 
     // Write activity log
     await logActivity(

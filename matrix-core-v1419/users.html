@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -121,6 +121,8 @@
         .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         .detail-item label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
         .detail-item span { font-size: 14px; font-weight: 600; }
+        .edit-stat-btn { font-size: 10px; color: var(--gold); border: 1px solid var(--gold-dim); background: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+        .edit-stat-btn:hover { background: var(--gold-dim); }
 
         /* Rename Modal */
         #rename-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; display: none; align-items: center; justify-content: center; }
@@ -339,6 +341,9 @@
                         <div class="detail-item"><label>Plan</label><span>${p.planType}</span></div>
                         <div class="detail-item"><label>Joined</label><span>${new Date(p.createdAt).toLocaleDateString()}</span></div>
                         <div class="detail-item"><label>Status</label><span>${p.isBlocked ? 'Blocked' : 'Active'}</span></div>
+                        <div class="detail-item"><label>Global EXP</label><span>${p.exp || 0} <button class="edit-stat-btn" onclick="modifyStat('${p.googleUid}', 'exp', ${p.exp || 0})">EDIT</button></span></div>
+                        <div class="detail-item"><label>Daily EXP</label><span>${p.dailyExp || 0}</span></div>
+                        <div class="detail-item"><label>Current Streak</label><span>${stats.streak?.currentStreak || 0} Days</span></div>
                         <div class="detail-item"><label>Question Banks</label><span>${stats.banks.length}</span></div>
                         <div class="detail-item"><label>Tests Generated</label><span>${stats.tests.length}</span></div>
                     </div>
@@ -407,6 +412,18 @@
                 fetchUsers();
             } else {
                 showToast(res?.message || 'Failed to update name', 'error');
+            }
+        };
+        
+        window.modifyStat = async (uid, field, currentVal) => {
+            const newVal = prompt(`Enter new ${field.toUpperCase()}:`, currentVal);
+            if (newVal === null) return;
+            const res = await adminApi(`/leaderboard/modify`, 'POST', { userId: uid, [field]: parseInt(newVal) });
+            if (res && res.success) {
+                showToast("Stats modified", "success");
+                viewUser(uid); // Refresh details
+            } else {
+                showToast(res?.message || "Modification failed", "error");
             }
         };
 

@@ -136,6 +136,12 @@ const generatePaperCtrl = async (req, res) => {
         engineSuccess: result.success
       }
     });
+
+    // Award EXP if student
+    if (req.user && req.user.role === 'student') {
+        const { awardExp } = require('../utils/expService');
+        awardExp(req.user.googleUid, 'PAPER_GENERATED');
+    }
   } catch (err) {
     console.error('[PAPER GENERATION ERROR]', err);
     res.status(500).json({ success: false, message: 'Paper generation failed: ' + err.message });

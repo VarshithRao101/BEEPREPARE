@@ -141,8 +141,10 @@ Be encouraging and concise. Use Markdown.`;
       const aiResponseText = completion.choices[0]?.message?.content || "";
       console.log(`--- BEE AI SYNC SUCCESS (${successfulModel}) ---`);
 
-      // Step 6: Update User Limit
+      // Step 6: Update User Limit and Award EXP
+      const { awardExp } = require('../utils/expService');
       await User.updateOne({ googleUid }, { $inc: { aiMessagesToday: 1 } });
+      awardExp(googleUid, 'AI_DOUBT_SOLVED'); // Async non-blocking
 
       return success(res, 'AI Response successful', {
         aiMessage: aiResponseText,

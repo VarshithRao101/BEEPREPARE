@@ -11,6 +11,9 @@ const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const compression = require('compression');
 
+const maintenanceRoutes = require('./routes/maintenance');
+const leaderboardRoutes = require('./routes/leaderboard');
+
 const {
   securityHeaders,
   requestTracker,
@@ -446,6 +449,9 @@ app.get('/api/admin-security/captcha', (req, res) => {
   });
 });
 
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+
 app.use('/api/matrix', require('./routes/matrix'));
 
 // Other routes
@@ -542,6 +548,21 @@ const startApp = async () => {
         const server = app.listen(PORT, () => {
           logger.info(`BEEPREPARE running on port ${PORT}`);
         });
+
+        // Start Daily Leaderboard Sync
+        const { generateSnapshots } = require('./controllers/leaderboardController');
+        const LeaderboardSnapshot = require('./models/LeaderboardSnapshot');
+        
+        LeaderboardSnapshot.findOne().sort({ lastUpdated: -1 }).then(lastSnapshot => {
+            const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+            if (!lastSnapshot || (new Date() - new Date(lastSnapshot.lastUpdated)) > TWENTY_FOUR_HOURS) {
+                console.log('[Leaderboard] Initiating 24h Snapshot Sync...');
+                generateSnapshots();
+            } else {
+                console.log('[Leaderboard] Snapshot is fresh. Next sync in ' + 
+                    Math.round((TWENTY_FOUR_HOURS - (new Date() - new Date(lastSnapshot.lastUpdated))) / 3600000) + 'h');
+            }
+        }).catch(err => console.error('[Leaderboard] Boot Sync Error:', err));
 
         process.on('SIGTERM', () => {
           server.close(() => process.exit(0));
