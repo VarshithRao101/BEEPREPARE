@@ -108,16 +108,17 @@ const getDashboard = async (req, res) => {
 
     return success(res, 'Dashboard data fetched', {
       displayName: user.displayName,
-      subjects: banks.map(b => ({
-        bankId: b._id,
-        subject: b.subject,
-        class: b.class, // Keep full name for frontend consistency (e.g. "Class 10")
-        bankCode: b.bankCode,
-        totalQuestions: b.totalQuestions,
-        notesCount: b.notesCount,
-        chapterCount: b.chapters?.length || 0,
-        isActive: b.isActive
-      })),
+        subjects: banks.map(b => ({
+          bankId: b._id,
+          subject: b.subject,
+          class: b.class,
+          bankCode: b.bankCode,
+          totalQuestions: b.totalQuestions,
+          notesCount: b.notesCount,
+          chapterCount: b.chapters?.length || 0,
+          chapters: b.chapters || [],
+          isActive: b.isActive
+        })),
       stats: {
         totalQuestions: totalQuestionsSum,
         activeStudents: user.activeStudents || 0,

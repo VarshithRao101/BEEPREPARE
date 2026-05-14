@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -279,9 +279,9 @@
 
         function populateClasses() {
             const dropdown = document.getElementById('class-dropdown');
-            const classes = [...new Set(allBanks.map(b => b.class))].sort((a,b) => a-b);
+            const classes = [...new Set(allBanks.map(b => b.class))].sort();
             dropdown.innerHTML = '<option value="">Select Grade</option>' + 
-                classes.map(c => `<option value="${c}">Class ${c}</option>`).join('');
+                classes.map(c => `<option value="${c}">${c.startsWith('Class') ? c : 'Class ' + c}</option>`).join('');
         }
 
         window.updateSubjectsList = () => {
