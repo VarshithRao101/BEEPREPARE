@@ -104,10 +104,10 @@
 
             const res = await adminApi(`/leaderboard/global?type=${currentType}`);
             
-            if (res && res.success) {
-                renderLeaderboard(res.rankings);
-                if (res.lastUpdated) {
-                    const date = new Date(res.lastUpdated).toLocaleString();
+            if (res && res.success && res.data) {
+                renderLeaderboard(res.data.rankings);
+                if (res.data.lastUpdated) {
+                    const date = new Date(res.data.lastUpdated).toLocaleString();
                     document.getElementById('update-notice').innerText = `SYNCED ON: ${date} • UPDATES EVERY 24H`;
                 }
             } else {
@@ -118,7 +118,7 @@
         window.switchType = (type) => {
             currentType = type;
             document.querySelectorAll('.toggle-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText.toLowerCase() === type);
+                btn.classList.toggle('active', btn.innerText.toLowerCase().includes(type));
             });
             loadLeaderboard();
         };
