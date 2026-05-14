@@ -381,7 +381,56 @@ export async function apiCall(
       sessionStorage.clear();
       _sessionCache    = null;
       _sessionCachedAt = 0;
-      document.body.innerHTML = `<div style="position:fixed;inset:0;background:#0a0a1a;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;"><div><h1 style="color:#ff4444;font-size:48px;">🚫</h1><h2>Account Suspended</h2><p>Contact support@beeprepare.com</p></div></div>`;
+
+      if (window.Swal) {
+          Swal.fire({
+              background: '#0a0a0a',
+              color: '#fff',
+              html: `
+                <div style="padding: 20px; text-align: center; font-family: 'Outfit', sans-serif;">
+                  <div style="width: 80px; height: 80px; background: rgba(255, 68, 68, 0.1); border: 2px solid #ff4444; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 25px; box-shadow: 0 0 30px rgba(255, 68, 68, 0.2);">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff4444" stroke-width="2.5">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                    </svg>
+                  </div>
+                  <h2 style="font-weight: 900; font-size: 24px; margin-bottom: 10px; color: #fff;">ACCOUNT_SUSPENDED</h2>
+                  <p style="color: #888; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
+                    Your access token has been revoked by the security protocol. 
+                    Your account is currently under review or has been restricted.
+                  </p>
+                  <div style="display: flex; gap: 12px;">
+                    <button id="swalContactBtn" style="flex: 1; padding: 15px; background: #FFD700; color: #000; border: none; border-radius: 12px; font-weight: 900; font-size: 13px; cursor: pointer; text-transform: uppercase;">CUSTOMER CARE</button>
+                    <button id="swalExitBtn" style="flex: 1; padding: 15px; background: rgba(255,255,255,0.05); color: #888; border: 1px solid #333; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer;">RETURN TO LOGIN</button>
+                  </div>
+                </div>
+              `,
+              showConfirmButton: false,
+              allowOutsideClick: false,
+              didOpen: () => {
+                document.getElementById('swalContactBtn').onclick = () => {
+                   Swal.fire({
+                     title: 'Technical Assistance',
+                     html: `
+                        <div style="text-align: left; color: #fff; font-size: 14px;">
+                           <div style="margin-bottom: 15px; padding: 10px; background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.1); border-radius: 10px;">
+                              <div style="color: #FFD700; font-weight: 900; font-size: 10px; text-transform: uppercase;">Primary Line</div>
+                              <div style="font-weight: 700; font-size: 16px;">9059068384</div>
+                           </div>
+                        </div>
+                     `,
+                     background: '#0a0a0a', color: '#fff',
+                     confirmButtonColor: '#FFD700', confirmButtonText: 'OK'
+                   });
+                };
+                document.getElementById('swalExitBtn').onclick = () => {
+                  window.location.href = getIndexPath();
+                };
+              }
+          });
+      } else {
+        document.body.innerHTML = `<div style="position:fixed;inset:0;background:#0a0a1a;display:flex;align-items:center;justify-content:center;color:#fff;text-align:center;"><div><h1 style="color:#ff4444;font-size:48px;">🚫</h1><h2>Account Suspended</h2><p>Contact support@beeprepare.com</p><button onclick="window.location.href='/'">Return to Login</button></div></div>`;
+      }
       return data;
     }
 
