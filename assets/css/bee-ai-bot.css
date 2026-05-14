@@ -1,0 +1,255 @@
+/* BEE AI Chat Bot - Premium Styling */
+:root {
+    --bot-primary: #FFD700;
+    --bot-bg: rgba(10, 10, 15, 0.95);
+    --bot-glass: rgba(255, 255, 255, 0.05);
+    --bot-border: rgba(255, 215, 0, 0.2);
+    --bot-text: #ffffff;
+    --bot-text-muted: #94a3b8;
+}
+
+.bee-bot-trigger {
+    position: fixed;
+    bottom: 90px; /* Above bottom nav */
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bot-primary), #ffa000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    animation: botPulse 2s infinite;
+}
+
+@keyframes botPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+.bee-bot-trigger:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5);
+}
+
+.bee-bot-trigger svg {
+    width: 30px;
+    height: 30px;
+    color: #000;
+}
+
+/* Chat Window */
+.bee-chat-window {
+    position: fixed;
+    bottom: 100px;
+    right: 25px;
+    width: 380px;
+    height: 550px;
+    background: var(--bot-bg);
+    backdrop-filter: blur(25px);
+    border: 1px solid var(--bot-border);
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1001;
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
+}
+
+.bee-chat-window.active {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: all;
+}
+
+.bee-chat-header {
+    padding: 20px 25px;
+    background: rgba(255, 215, 0, 0.05);
+    border-bottom: 1px solid var(--bot-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.bee-chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bee-bot-avatar {
+    width: 35px;
+    height: 35px;
+    background: var(--bot-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-weight: 900;
+}
+
+.bee-chat-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+}
+
+.bee-chat-header p {
+    margin: 2px 0 0;
+    font-size: 10px;
+    color: var(--bot-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.bee-chat-close {
+    cursor: pointer;
+    color: var(--bot-text-muted);
+    transition: 0.3s;
+}
+
+.bee-chat-close:hover {
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+/* Messages */
+.bee-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bee-msg {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bee-msg.bot {
+    align-self: flex-start;
+    background: var(--bot-glass);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom-left-radius: 4px;
+}
+
+.bee-msg.user {
+    align-self: flex-end;
+    background: var(--bot-primary);
+    color: #000;
+    font-weight: 600;
+    border-bottom-right-radius: 4px;
+}
+
+/* Input Area */
+.bee-chat-input-area {
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--bot-border);
+    display: flex;
+    gap: 10px;
+}
+
+.bee-chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 12px 15px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.bee-chat-input:focus {
+    border-color: var(--bot-primary);
+    background: rgba(255, 215, 0, 0.05);
+}
+
+.bee-chat-send {
+    width: 45px;
+    height: 45px;
+    background: var(--bot-primary);
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.bee-chat-send:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+}
+
+.bee-chat-send:disabled {
+    background: #333;
+    cursor: not-allowed;
+}
+
+/* Typing Indicator */
+.typing {
+    display: flex;
+    gap: 4px;
+    padding: 10px;
+}
+
+.typing span {
+    width: 6px;
+    height: 6px;
+    background: var(--bot-primary);
+    border-radius: 50%;
+    animation: typing 1s infinite alternate;
+}
+
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    from { opacity: 0.3; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(-4px); }
+}
+
+@media (max-width: 480px) {
+    .bee-chat-window {
+        width: 100vw;
+        height: 100vh;
+        bottom: 0;
+        right: 0;
+        border-radius: 0;
+    }
+    .bee-bot-trigger {
+        bottom: 80px;
+        right: 20px;
+    }
+}
