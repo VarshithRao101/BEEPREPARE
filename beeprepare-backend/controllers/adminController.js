@@ -1579,8 +1579,32 @@ const bulkUploadQuestions = async (req, res) => {
         'PARSE_ERROR', 400);
     }
 
-    // Save to Questions DB (Cluster 1)
-    const saved = await Question.insertMany(parsed);
+      // Process Images & Finalize Payload
+      const finalized = [];
+      const { cloudinary } = require('../utils/cloudinaryHelper');
+
+      for (const q of parsed) {
+        if (q.imageUrl && q.imageUrl.startsWith('data:image')) {
+          try {
+            const uploadRes = await cloudinary.uploader.upload(q.imageUrl, {
+              folder: `questions/teacher_${q.teacherId}`,
+              resource_type: 'image',
+              format: 'webp',
+              quality: 'auto'
+            });
+            q.imageUrl = uploadRes.secure_url;
+            q.imagePublicId = uploadRes.public_id;
+          } catch (uploadErr) {
+            console.error('[Bulk Upload] Image processing failed:', uploadErr.message);
+            // Fallback: remove base64 to avoid DB bloat if upload fails
+            delete q.imageUrl;
+          }
+        }
+        finalized.push(q);
+      }
+
+      // Save to Questions DB (Cluster 1)
+      const saved = await Question.insertMany(finalized);
 
     // Update bank question count
     await Bank.findByIdAndUpdate(bankId, {
