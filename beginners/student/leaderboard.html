@@ -173,12 +173,21 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 768px) {
-            .podium-section { grid-template-columns: 1fr; }
-            .podium-card.rank-1 { order: 1; }
+            .podium-section { grid-template-columns: 1fr; gap: 40px; }
+            .podium-card.rank-1 { order: 1; transform: scale(1.05); }
             .podium-card.rank-2 { order: 2; }
             .podium-card.rank-3 { order: 3; }
-            .rank-row { grid-template-columns: 50px 50px 1fr 80px; padding: 15px; }
+            .rank-row { 
+                grid-template-columns: 40px 45px 1fr 60px 70px; 
+                padding: 12px 15px; 
+                gap: 10px;
+            }
             .rank-class { display: none; }
+            .rank-num { font-size: 16px; }
+            .rank-img { width: 35px; height: 35px; }
+            .rank-name { font-size: 14px; }
+            .rank-exp-val { font-size: 14px; }
+            .streak-container { transform: scale(0.8); }
         }
 
         .snapshot-notice {
@@ -230,7 +239,7 @@
 
 
     <script type="module">
-        import { apiCall, guardStudent, initPage } from '../../assets/js/bee-core.js';
+        import { apiCall, guardStudent, initPage, BP } from '../../assets/js/bee-core.js';
 
         let currentType = 'daily';
 
@@ -291,6 +300,7 @@
             });
 
             rest.forEach(r => {
+                const rowId = `streak-${r.userId}`;
                 const row = `
                     <div class="rank-row">
                         <div class="rank-num">#${r.rank}</div>
@@ -299,14 +309,16 @@
                             <div class="rank-name">${r.displayName}</div>
                             <div class="rank-class">${r.className || 'Student'}</div>
                         </div>
-                        <div style="text-align: center;">
-                            <div style="font-weight:900; color: #fff; font-size:16px;">🔥 ${r.streak}</div>
-                            <div style="font-size:8px; color: var(--primary); font-weight:800;">STREAK</div>
+                        <div class="streak-container" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                            <canvas id="${rowId}" width="16" height="16" style="width: 24px; height: 24px; image-rendering: pixelated;"></canvas>
+                            <div style="font-size:9px; color: #fff; font-weight:900; margin-top: -2px;">${r.streak}</div>
                         </div>
                         <div class="rank-exp-val">${r.exp} <span style="font-size:10px; opacity:0.5">XP</span></div>
                     </div>
                 `;
                 listContainer.insertAdjacentHTML('beforeend', row);
+                // Draw static flame
+                setTimeout(() => BP.drawStaticFlame(rowId), 0);
             });
         }
 

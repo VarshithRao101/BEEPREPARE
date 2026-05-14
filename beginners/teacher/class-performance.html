@@ -206,10 +206,18 @@
         }
 
         @media (max-width: 768px) {
-            .podium-section { grid-template-columns: 1fr; }
-            .podium-card.rank-1 { order: 1; }
+            .podium-section { grid-template-columns: 1fr; gap: 40px; }
+            .podium-card.rank-1 { order: 1; transform: scale(1.05); }
             .podium-card.rank-2 { order: 2; }
             .podium-card.rank-3 { order: 3; }
+            .performance-card { 
+                padding: 15px; 
+                border-radius: 20px; 
+                overflow-x: auto; 
+                -webkit-overflow-scrolling: touch;
+            }
+            .perf-table { min-width: 600px; }
+            .header h2 { font-size: 28px; }
         }
     </style>
 </head>
@@ -262,7 +270,7 @@
             </div>
         </main>
     <script type="module">
-        import { apiCall, guardTeacher, initPage } from '../../assets/js/bee-core.js';
+        import { apiCall, guardTeacher, initPage, BP } from '../../assets/js/bee-core.js';
 
         let currentType = 'daily';
 
@@ -303,6 +311,7 @@
 
                 // Render Table
                 rankings.forEach(r => {
+                    const rowId = `streak-${r.userId}`;
                     const tr = document.createElement('tr');
                     tr.className = 'rank-row';
                     tr.innerHTML = `
@@ -314,13 +323,20 @@
                             </div>
                         </td>
                         <td style="font-weight: 800; font-size: 12px; color: var(--text-muted);">${r.className || 'N/A'}</td>
-                        <td class="streak-val">🔥 ${r.streak} Days</td>
+                        <td class="streak-val">
+                           <div style="display: flex; align-items: center; gap: 8px;">
+                               <canvas id="${rowId}" width="16" height="16" style="width: 20px; height: 20px; image-rendering: pixelated;"></canvas>
+                               <span>${r.streak} Days</span>
+                           </div>
+                        </td>
                         <td style="font-weight: 700; color: #fff;">${r.testsCompleted || 0}</td>
                         <td style="text-align: right;">
                             <span class="exp-badge">${r.exp} XP</span>
                         </td>
                     `;
                     tbody.appendChild(tr);
+                    // Draw static flame
+                    setTimeout(() => BP.drawStaticFlame(rowId), 0);
                 });
             } else {
                 empty.style.display = 'block';

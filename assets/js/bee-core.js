@@ -627,6 +627,33 @@ export const BP = {
     flame();
   },
 
+  drawStaticFlame: (canvasId) => {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(1, 0, 0, -1, 0, 16);
+    ctx.clearRect(0, 0, 16, 16);
+    
+    const y = [2, 1, 0, 0, 0, 0, 1, 2];
+    const avg = [7, 9, 11, 13, 13, 11, 9, 7]; // Fixed heights for "constant" look
+    
+    ctx.strokeStyle = "#d14234";
+    let i = 0;
+    for (let x = 4; x < 12; x++) {
+      ctx.beginPath(); ctx.moveTo(x + 0.5, y[i]); ctx.lineTo(x + 0.5, avg[i++]); ctx.stroke();
+    }
+    ctx.strokeStyle = "#f2a55f";
+    let j = 1;
+    for (let x = 5; x < 11; x++) {
+      ctx.beginPath(); ctx.moveTo(x + 0.5, y[j] + 1); ctx.lineTo(x + 0.5, avg[j++] - 4); ctx.stroke();
+    }
+    ctx.strokeStyle = "#e8dec5";
+    let k = 3;
+    for (let x = 7; x < 9; x++) {
+      ctx.beginPath(); ctx.moveTo(x + 0.5, y[k]); ctx.lineTo(x + 0.5, avg[k++] - 8); ctx.stroke();
+    }
+  },
+
   showMaintenanceOverlay: (msg) => {
     if (document.querySelector('.maintenance-overlay')) return;
     
