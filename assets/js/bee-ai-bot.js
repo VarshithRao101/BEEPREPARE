@@ -1,27 +1,15 @@
-/* BEE AI Chat Bot - Nexus 2.7 Premium Logic */
+/* BEE AI Chat Bot - Nexus 2.8 Premium Hybrid Logic */
 
 (function() {
-    const GEMINI_API_KEY = 'AIzaSyDH8qTlJ3BOHY9HdKXYb897L8bDeEvoHco';
-    // Using v1beta endpoint to support system_instruction and newest features
-    const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-    const SYSTEM_PROMPT = `
-You are BEE AI, the highly advanced Central Intelligence for BEEPREPARE.
-Directive: Autonomously resolve 80% of scholar/teacher issues.
-Identity: Version 2.7 - Nexus Stable.
-
-KNOWLEDGE BASE:
-1. TECHNICAL: Suggest "Hard Reload" (Ctrl+F5) for stuck loading screens or UI glitches.
-2. ACTIVATION: Users need a Validation Key from the "Activation Requests" section to unlock features.
-3. BANK ACCESS: Ensure Node ID is correctly linked in "Bank Inventory".
-4. GENERATION: Verify Question Pool size if generation fails.
-5. FALLBACK: Only if you cannot solve it, provide: Mobile 9059068384, Email: ravindarraodevarneni@gmail.com.
-
-Solve issues FIRST using logic. Only provide support details as a last resort.
-`;
-
+    // ══════════════════════════════════════════════════════════════════════════════
+    // 1. CONFIGURATION & STATE
+    // ══════════════════════════════════════════════════════════════════════════════
     let chatHistory = []; 
+    let isProcessing = false;
 
+    // ══════════════════════════════════════════════════════════════════════════════
+    // 2. CORE INITIALIZATION
+    // ══════════════════════════════════════════════════════════════════════════════
     function initChatBot() {
         if (document.getElementById('bee-chat-window')) return;
 
@@ -34,21 +22,23 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
                         <div class="bee-bot-avatar">B</div>
                         <div>
                             <h3>BEE AI Assistant</h3>
-                            <p>Online • Secure Node</p>
+                            <p id="bee-bot-status">Online • Secure Node</p>
                         </div>
                     </div>
-                    <div class="bee-chat-close" id="bee-chat-close" style="cursor:pointer; padding:5px;">
+                    <div class="bee-chat-close" id="bee-chat-close">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </div>
                 </div>
                 <div class="bee-chat-messages" id="bee-chat-messages">
-                    <div class="bee-msg bot">Nexus 2.7 Online. Uplink Stable. BEE AI is ready. How can I assist you?</div>
+                    <div class="bee-msg bot">Nexus 2.8 Online. Uplink Stable. I am BEE AI, your academic intelligence partner. How can I assist you today?</div>
                 </div>
                 <div class="bee-chat-input-area">
-                    <input type="text" class="bee-chat-input" id="bee-chat-input" placeholder="Type your query...">
-                    <button class="bee-chat-send" id="bee-chat-send">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
+                    <div class="bee-input-wrapper">
+                        <input type="text" class="bee-chat-input" id="bee-chat-input" placeholder="Ask anything academic...">
+                        <button class="bee-chat-send" id="bee-chat-send">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -59,9 +49,11 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
         const input = document.getElementById('bee-chat-input');
         const sendBtn = document.getElementById('bee-chat-send');
         const messagesCont = document.getElementById('bee-chat-messages');
+        const statusEl = document.getElementById('bee-bot-status');
 
         closeBtn.onclick = () => windowEl.classList.remove('active');
 
+        // Hijack Customer Care Button
         function secureHijack() {
             const ccBtn = document.getElementById('customerCareBtn');
             if (ccBtn && !ccBtn.dataset.hijacked) {
@@ -69,55 +61,54 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     windowEl.classList.add('active');
+                    input.focus();
                 }, true);
                 ccBtn.dataset.hijacked = "true";
                 ccBtn.title = "Chat with BEE AI Assistant";
                 ccBtn.style.cursor = "pointer";
             }
         }
-        setInterval(secureHijack, 500);
+        setInterval(secureHijack, 1000);
 
         async function sendMessage() {
             const text = input.value.trim();
-            if (!text) return;
+            if (!text || isProcessing) return;
 
+            isProcessing = true;
             appendMessage('user', text);
             input.value = '';
             const typingId = showTyping();
+            statusEl.innerText = "Processing Query...";
+            statusEl.classList.add('processing');
 
             try {
-                const response = await fetch(GEMINI_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: {
-                            parts: [{ text: SYSTEM_PROMPT }]
-                        },
-                        contents: chatHistory.concat([{ role: 'user', parts: [{ text }] }])
-                    })
-                });
+                // Use bee-core.js apiCall for authenticated backend communication
+                // This handles tokens, security, and consistent error reporting
+                const response = await window.apiCall('/ai/chat', 'POST', { message: text });
 
-                if (!response.ok) {
-                    const err = await response.json().catch(()=>({}));
-                    throw new Error(err.error?.message || "STABLE_UPLINK_FAILURE");
-                }
-
-                const data = await response.json();
                 removeTyping(typingId);
+                statusEl.innerText = "Online • Secure Node";
+                statusEl.classList.remove('processing');
 
-                if (data.candidates && data.candidates[0].content) {
-                    const botText = data.candidates[0].content.parts[0].text;
+                if (response && response.success) {
+                    const botText = response.data.aiMessage;
                     appendMessage('bot', botText);
-                    chatHistory.push({ role: 'user', parts: [{ text }] });
-                    chatHistory.push({ role: 'model', parts: [{ text: botText }] });
-                    if (chatHistory.length > 20) chatHistory.splice(0, 2);
+                    
+                    // Update limits UI if available
+                    if (response.data.remainingToday !== undefined) {
+                        console.log(`AI Credits: ${response.data.remainingToday}/${response.data.dailyLimit}`);
+                    }
                 } else {
-                    appendMessage('bot', "Protocol synchronization failed. Please retry your uplink.");
+                    const errorMsg = response?.message || "Protocol synchronization failed.";
+                    appendMessage('bot', `⚠️ Uplink Warning: ${errorMsg}`);
                 }
             } catch (error) {
                 removeTyping(typingId);
+                statusEl.innerText = "Connection Fault";
                 console.error("BEE AI Error:", error);
-                appendMessage('bot', `Uplink Failure: ${error.message}. Please verify your API key or contact support: 9059068384.`);
+                appendMessage('bot', `Uplink Failure: Neural link disrupted. Please retry in 30 seconds.`);
+            } finally {
+                isProcessing = false;
             }
         }
 
@@ -127,7 +118,14 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
         function appendMessage(role, text) {
             const msg = document.createElement('div');
             msg.className = `bee-msg ${role}`;
-            msg.innerText = text;
+            
+            // Render Markdown if marked is available
+            if (role === 'bot' && window.marked) {
+                msg.innerHTML = window.marked.parse(text);
+            } else {
+                msg.innerText = text;
+            }
+            
             messagesCont.appendChild(msg);
             messagesCont.scrollTop = messagesCont.scrollHeight;
         }
@@ -149,9 +147,10 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
         }
     }
 
+    // Delay initialization to ensure bee-core is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initChatBot);
+        document.addEventListener('DOMContentLoaded', () => setTimeout(initChatBot, 500));
     } else {
-        initChatBot();
+        setTimeout(initChatBot, 500);
     }
 })();

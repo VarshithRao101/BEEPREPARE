@@ -77,6 +77,18 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: 700;
+    transition: 0.3s;
+}
+
+.bee-chat-header p.processing {
+    color: #fff;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
 .bee-chat-close {
@@ -123,12 +135,21 @@
     border-bottom-left-radius: 4px;
 }
 
+/* Markdown Support inside Bot Messages */
+.bee-msg.bot p { margin: 0 0 10px 0; }
+.bee-msg.bot p:last-child { margin-bottom: 0; }
+.bee-msg.bot ul, .bee-msg.bot ol { margin: 5px 0; padding-left: 20px; }
+.bee-msg.bot li { margin-bottom: 4px; }
+.bee-msg.bot strong { color: var(--bot-primary); font-weight: 800; }
+.bee-msg.bot code { background: rgba(255,255,255,0.1); padding: 2px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+
 .bee-msg.user {
     align-self: flex-end;
     background: var(--bot-primary);
     color: #000;
     font-weight: 600;
     border-bottom-right-radius: 4px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
 }
 
 /* Input Area */
