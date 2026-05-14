@@ -1,13 +1,14 @@
-/* BEE AI Chat Bot - Nexus 2.6 Premium Logic */
+/* BEE AI Chat Bot - Nexus 2.7 Premium Logic */
 
 (function() {
     const GEMINI_API_KEY = 'AIzaSyDH8qTlJ3BOHY9HdKXYb897L8bDeEvoHco';
+    // Using v1 Stable endpoint with cache-busting logic
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const SYSTEM_PROMPT = `
 You are BEE AI, the highly advanced Central Intelligence for BEEPREPARE.
 Directive: Autonomously resolve 80% of scholar/teacher issues.
-Identity: Version 2.6 - Nexus Core.
+Identity: Version 2.7 - Nexus Stable.
 
 KNOWLEDGE BASE:
 1. TECHNICAL: Suggest "Hard Reload" (Ctrl+F5) for stuck loading screens or UI glitches.
@@ -41,7 +42,7 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
                     </div>
                 </div>
                 <div class="bee-chat-messages" id="bee-chat-messages">
-                    <div class="bee-msg bot">Nexus Uplink Established. BEE AI 2.6 is ready. How can I assist you?</div>
+                    <div class="bee-msg bot">Nexus 2.7 Online. Uplink Stable. BEE AI is ready. How can I assist you?</div>
                 </div>
                 <div class="bee-chat-input-area">
                     <input type="text" class="bee-chat-input" id="bee-chat-input" placeholder="Type your query...">
@@ -61,7 +62,6 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
 
         closeBtn.onclick = () => windowEl.classList.remove('active');
 
-        // EXCLUSIVE Hijack for Customer Care Button (Circle bottom right)
         function secureHijack() {
             const ccBtn = document.getElementById('customerCareBtn');
             if (ccBtn && !ccBtn.dataset.hijacked) {
@@ -86,7 +86,6 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
             const typingId = showTyping();
 
             try {
-                // Using system_instruction for better AI behavior
                 const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -100,7 +99,7 @@ Solve issues FIRST using logic. Only provide support details as a last resort.
 
                 if (!response.ok) {
                     const err = await response.json().catch(()=>({}));
-                    throw new Error(err.error?.message || "API_FAILURE");
+                    throw new Error(err.error?.message || "STABLE_UPLINK_FAILURE");
                 }
 
                 const data = await response.json();
