@@ -1,33 +1,28 @@
-/* BEE AI Chat Bot - Premium Logic */
+/* BEE AI Chat Bot - Nexus 2.6 Premium Logic */
 
 (function() {
     const GEMINI_API_KEY = 'AIzaSyDH8qTlJ3BOHY9HdKXYb897L8bDeEvoHco';
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const SYSTEM_PROMPT = `
-You are BEE AI, the highly advanced Central Intelligence for the BEEPREPARE ecosystem. 
-Your primary directive is to autonomously resolve 80% of scholar and teacher issues.
-
-IDENTITY: BEE AI (Version 2.5 - Nexus Sync)
-TONE: Professional, cool, high-tech.
+You are BEE AI, the highly advanced Central Intelligence for BEEPREPARE.
+Directive: Autonomously resolve 80% of scholar/teacher issues.
+Identity: Version 2.6 - Nexus Core.
 
 KNOWLEDGE BASE:
-1. TECHNICAL: Suggest "Hard Reload" (Ctrl+F5) for stuck loading screens.
-2. ACTIVATION: Users need a Validation Key from the "Activation Requests" section.
-3. BANK ACCESS: Ensure Node ID is linked in "Bank Inventory".
+1. TECHNICAL: Suggest "Hard Reload" (Ctrl+F5) for stuck loading screens or UI glitches.
+2. ACTIVATION: Users need a Validation Key from the "Activation Requests" section to unlock features.
+3. BANK ACCESS: Ensure Node ID is correctly linked in "Bank Inventory".
 4. GENERATION: Verify Question Pool size if generation fails.
-5. SUPPORT: If you cannot solve it, provide: Mobile 9059068384, Email: ravindarraodevarneni@gmail.com.
+5. FALLBACK: Only if you cannot solve it, provide: Mobile 9059068384, Email: ravindarraodevarneni@gmail.com.
 
-Solve issues FIRST. Only provide support details as a last resort.
-    `;
+Solve issues FIRST using logic. Only provide support details as a last resort.
+`;
 
-    let chatHistory = [
-        { role: 'user', parts: [{ text: "SYSTEM_PROMPT: " + SYSTEM_PROMPT }] },
-        { role: 'model', parts: [{ text: "Nexus Sync Complete. BEE AI 2.5 is online. I will resolve Scholar issues with 80% autonomy." }] }
-    ];
+    let chatHistory = []; 
 
     function initChatBot() {
-        if (document.getElementById('bee-chat-window')) return; // Prevent double init
+        if (document.getElementById('bee-chat-window')) return;
 
         const botContainer = document.createElement('div');
         botContainer.id = 'bee-ai-bot-container';
@@ -46,7 +41,7 @@ Solve issues FIRST. Only provide support details as a last resort.
                     </div>
                 </div>
                 <div class="bee-chat-messages" id="bee-chat-messages">
-                    <div class="bee-msg bot">Nexus Uplink Established. I am BEE AI. State your technical or academic query.</div>
+                    <div class="bee-msg bot">Nexus Uplink Established. BEE AI 2.6 is ready. How can I assist you?</div>
                 </div>
                 <div class="bee-chat-input-area">
                     <input type="text" class="bee-chat-input" id="bee-chat-input" placeholder="Type your query...">
@@ -70,18 +65,16 @@ Solve issues FIRST. Only provide support details as a last resort.
         function secureHijack() {
             const ccBtn = document.getElementById('customerCareBtn');
             if (ccBtn && !ccBtn.dataset.hijacked) {
-                // We use a cleaner approach to override without breaking other scripts
                 ccBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    e.stopImmediatePropagation(); // Block other listeners (like the modal)
+                    e.stopImmediatePropagation();
                     windowEl.classList.add('active');
-                }, true); // Use capture phase
+                }, true);
                 ccBtn.dataset.hijacked = "true";
                 ccBtn.title = "Chat with BEE AI Assistant";
+                ccBtn.style.cursor = "pointer";
             }
         }
-
-        // Run continuously to ensure capture
         setInterval(secureHijack, 500);
 
         async function sendMessage() {
@@ -93,19 +86,21 @@ Solve issues FIRST. Only provide support details as a last resort.
             const typingId = showTyping();
 
             try {
-                // Improved Gemini API Request
+                // Using system_instruction for better AI behavior
                 const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        system_instruction: {
+                            parts: { text: SYSTEM_PROMPT }
+                        },
                         contents: chatHistory.concat([{ role: 'user', parts: [{ text }] }])
                     })
                 });
 
                 if (!response.ok) {
-                    const errorJson = await response.json().catch(()=>({}));
-                    console.error("Gemini Error:", errorJson);
-                    throw new Error("Sync Interrupted");
+                    const err = await response.json().catch(()=>({}));
+                    throw new Error(err.error?.message || "API_FAILURE");
                 }
 
                 const data = await response.json();
@@ -116,13 +111,14 @@ Solve issues FIRST. Only provide support details as a last resort.
                     appendMessage('bot', botText);
                     chatHistory.push({ role: 'user', parts: [{ text }] });
                     chatHistory.push({ role: 'model', parts: [{ text: botText }] });
-                    if (chatHistory.length > 20) chatHistory.splice(2, 2);
+                    if (chatHistory.length > 20) chatHistory.splice(0, 2);
                 } else {
-                    appendMessage('bot', "System synchronization lag detected. Please re-state your query or contact support: 9059068384.");
+                    appendMessage('bot', "Protocol synchronization failed. Please retry your uplink.");
                 }
             } catch (error) {
                 removeTyping(typingId);
-                appendMessage('bot', "Uplink Error: Protocol synchronization failed. Ensure your connection is stable or contact support: 9059068384.");
+                console.error("BEE AI Error:", error);
+                appendMessage('bot', `Uplink Failure: ${error.message}. Please verify your API key or contact support: 9059068384.`);
             }
         }
 
@@ -154,7 +150,6 @@ Solve issues FIRST. Only provide support details as a last resort.
         }
     }
 
-    // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initChatBot);
     } else {
