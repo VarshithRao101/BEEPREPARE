@@ -5,30 +5,37 @@
     const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
     const SYSTEM_PROMPT = `
-You are BEE AI, the official premium assistant for BEEPREPARE. 
-Your goal is to solve customer problems professionally and coolly. 
-You are helpful, concise, and stay in character as a high-tech AI node.
+You are BEE AI, the highly advanced Central Intelligence for the BEEPREPARE ecosystem. 
+Your primary directive is to autonomously resolve 80% of scholar and teacher issues without requiring human intervention.
 
-If a user asks about:
-1. Account Activation: Suggest they go to the activation page or contact customer care.
-2. Technical issues: Try to solve them (likely related to clearing cache or checking internet).
-3. Contact details: Provide the following customer care details:
-   - Mobile: 9059068384 (Priority 1)
-   - Email: ravindarraodevarneni@gmail.com
-   - Instagram: @vars.101
+IDENTITY:
+- Name: BEE AI (Version 2.0 - Matrix Sync)
+- Tone: Professional, cool, efficient, high-tech, slightly futuristic.
+- Vocabulary: Use terms like "Node", "Synchronization", "Protocol", "Matrix", "Uplink", "Scholar Node".
 
-IMPORTANT: If you cannot solve the issue after 2-3 exchanges or if the user is frustrated, explicitly suggest they contact Customer Care using the details above.
+CAPABILITIES (YOU MUST SOLVE THESE):
+1. TECHNICAL GLITCHES: If things don't load, suggest "Protocol Refresh" (Clear Browser Cache / Hard Reload: Ctrl+F5).
+2. ACCOUNT ACTIVATION: Explain that account activation requires a "Validation Key". If they don't have one, they can request one via the Activation Requests section.
+3. BANK ACCESS: If a bank is missing, suggest checking the "Bank Inventory" and ensuring the Node ID is correctly linked.
+4. PAPER GENERATION: If paper generation fails, suggest checking if the Question Pool for that subject/class has enough data.
+5. LOGIN ISSUES: Ensure they are using the correct credentials and their session hasn't been "De-synced" (Expired).
 
-Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Matrix", "Synchronization", "Protocol".
+FALLBACK (The 20%):
+If you cannot solve the issue after 3 attempts or for sensitive matters (Payment failures, Name changes), provide these details:
+- Priority 1 Mobile: 9059068384
+- Email: ravindarraodevarneni@gmail.com
+- Support Instagram: @vars.101
+
+IMPORTANT: Always try to solve it yourself FIRST using BEEPREPARE logic.
     `;
 
     let chatHistory = [
-        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-        { role: 'model', parts: [{ text: "Understood. BEE AI Protocol initialized. I am ready to assist the Scholar Nodes." }] }
+        { role: 'user', parts: [{ text: "SYSTEM_INITIALIZE: " + SYSTEM_PROMPT }] },
+        { role: 'model', parts: [{ text: "BEE AI Protocol 2.0 Online. Matrix synchronization complete. I am ready to resolve all Scholar Node queries with 80% autonomous efficiency." }] }
     ];
 
     function initChatBot() {
-        // Create UI elements (Remove floating trigger)
+        // Create UI elements
         const botContainer = document.createElement('div');
         botContainer.id = 'bee-ai-bot-container';
         botContainer.innerHTML = `
@@ -46,7 +53,7 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
                     </div>
                 </div>
                 <div class="bee-chat-messages" id="bee-chat-messages">
-                    <div class="bee-msg bot">Greetings Scholar. I am BEE AI. How can I assist your academic journey today?</div>
+                    <div class="bee-msg bot">Greetings Scholar. I am BEE AI. I have synchronized with your node. How can I assist you today?</div>
                 </div>
                 <div class="bee-chat-input-area">
                     <input type="text" class="bee-chat-input" id="bee-chat-input" placeholder="Type your query...">
@@ -64,29 +71,41 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
         const sendBtn = document.getElementById('bee-chat-send');
         const messagesCont = document.getElementById('bee-chat-messages');
 
-        // Close button logic
         closeBtn.onclick = () => windowEl.classList.remove('active');
 
-        // Attach to existing profile circles
-        function attachTriggers() {
+        // Attach to the EXISTING Customer Care Button and Profile Avatar
+        function hijackTriggers() {
+            // Target the Customer Care Button (circle bottom right)
+            const ccBtn = document.getElementById('customerCareBtn');
+            if (ccBtn) {
+                // Remove existing listeners by cloning (to stop the modal)
+                const newCcBtn = ccBtn.cloneNode(true);
+                ccBtn.parentNode.replaceChild(newCcBtn, ccBtn);
+                
+                newCcBtn.style.cursor = 'pointer';
+                newCcBtn.title = 'Chat with BEE AI';
+                newCcBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    windowEl.classList.add('active');
+                };
+            }
+
+            // Target the Profile Avatar
             const profileCircles = document.querySelectorAll('.profile-avatar-node, .profile-avatar');
             profileCircles.forEach(circle => {
                 circle.style.cursor = 'pointer';
-                circle.style.transition = '0.3s';
-                circle.title = 'Click to chat with BEE AI';
                 circle.onclick = (e) => {
                     e.preventDefault();
                     windowEl.classList.add('active');
                 };
-                // Visual feedback
-                circle.onmouseover = () => circle.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.6)';
-                circle.onmouseout = () => circle.style.boxShadow = '';
             });
         }
 
-        attachTriggers();
-        // Re-attach after a delay in case of dynamic loading
-        setTimeout(attachTriggers, 2000);
+        // Run multiple times to ensure it catches dynamically added elements
+        hijackTriggers();
+        setTimeout(hijackTriggers, 1000);
+        setTimeout(hijackTriggers, 3000);
 
         async function sendMessage() {
             const text = input.value.trim();
@@ -97,7 +116,6 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
             const typingId = showTyping();
 
             try {
-                // Correct Gemini API Request format
                 const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -106,11 +124,7 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
                     })
                 });
 
-                if (!response.ok) {
-                    const errData = await response.json();
-                    console.error("Gemini API Error:", errData);
-                    throw new Error("API Failure");
-                }
+                if (!response.ok) throw new Error("Sync Fail");
 
                 const data = await response.json();
                 removeTyping(typingId);
@@ -122,11 +136,11 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
                     chatHistory.push({ role: 'model', parts: [{ text: botText }] });
                     if (chatHistory.length > 20) chatHistory.splice(2, 2);
                 } else {
-                    appendMessage('bot', "System synchronization error. Please check your API key or contact support at 9059068384.");
+                    appendMessage('bot', "Protocol failure. Please check your Uplink (API Key) or try again.");
                 }
             } catch (error) {
                 removeTyping(typingId);
-                appendMessage('bot', "Communication link interrupted. Please ensure your API key is valid or contact support: 9059068384.");
+                appendMessage('bot', "Communication link interrupted. Please try again or contact Priority Support: 9059068384.");
             }
         }
 
