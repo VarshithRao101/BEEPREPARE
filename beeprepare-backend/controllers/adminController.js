@@ -1647,7 +1647,7 @@ const deleteStudyCircle = async (req, res) => {
   try {
     const { id } = req.params;
     const { actionCode } = req.body;
-    if (!verifyActionCode('delete_bank', actionCode)) {
+    if (!verifyActionCode('delete_circle', actionCode)) {
       return error(res, 'Invalid action code', 'INVALID_CODE', 403);
     }
     await StudyCircle.findByIdAndDelete(id);

@@ -89,6 +89,7 @@ const verifyActionCode = (action, code) => {
     'delete_key': process.env.CODE_DELETE_KEY,
     'delete_payment': process.env.CODE_DELETE_PAYMENT,
     'bulk_upload': process.env.CODE_BULK_UPLOAD,
+    'delete_circle': process.env.CODE_DELETE_CIRCLE,
     'manage_blacklist': process.env.CODE_BLOCK_USER,
     'add_announcement': process.env.CODE_ADD_ANNOUNCEMENT || 'BEEAA592810'
   };
