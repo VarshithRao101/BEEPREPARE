@@ -60,8 +60,21 @@
                 ccBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
-                    windowEl.classList.add('active');
-                    input.focus();
+                    
+                    // Determine if on mobile (portable pov)
+                    if (window.innerWidth <= 768) {
+                        // Redirect to dedicated AI page for phone POV
+                        let chatPath = 'beginners/ai-chat.html';
+                        if (window.location.pathname.includes('/beginners/student/') || window.location.pathname.includes('/beginners/teacher/')) {
+                            chatPath = '../ai-chat.html';
+                        } else if (window.location.pathname.includes('/beginners/')) {
+                            chatPath = 'ai-chat.html';
+                        }
+                        window.location.href = chatPath;
+                    } else {
+                        windowEl.classList.add('active');
+                        input.focus();
+                    }
                 }, true);
                 ccBtn.dataset.hijacked = "true";
                 ccBtn.title = "Chat with BEE AI Assistant";

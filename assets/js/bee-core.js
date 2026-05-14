@@ -45,13 +45,10 @@ export async function getFreshToken(forceRefresh = false) {
   const cachedToken = localStorage.getItem(BP.TOKEN);
   const cachedTime = localStorage.getItem('bp_token_time');
   
-  if (!forceRefresh && cachedToken && cachedTime && (now - parseInt(cachedTime) < 45 * 60 * 1000)) {
-    // If not logging out, we can safely use the hot cache
-    if (!localStorage.getItem(BP.LOGGING_OUT) && !sessionStorage.getItem('_loginInProgress')) {
-      lastToken = cachedToken;
-      lastFetchTime = parseInt(cachedTime);
-      return cachedToken;
-    }
+  if (!forceRefresh && cachedToken && cachedTime && (now - parseInt(cachedTime) < 50 * 60 * 1000) && !sessionStorage.getItem('_loginInProgress')) {
+    lastToken = cachedToken;
+    lastFetchTime = parseInt(cachedTime);
+    return cachedToken;  // INSTANT — no Firebase wait
   }
 
   // 2. Auth state check
@@ -64,7 +61,7 @@ export async function getFreshToken(forceRefresh = false) {
         if (unsubscribe) unsubscribe();
         resolve();
       });
-      setTimeout(() => { if (unsubscribe) unsubscribe(); resolve(); }, 5000); // 5s max wait for auth state
+      setTimeout(() => { if (unsubscribe) unsubscribe(); resolve(); }, 2000);
     });
   }
 
@@ -104,44 +101,48 @@ export function getIndexPath() {
 
 const CACHE_PREFIX = 'bp_cache_';
 const CACHE_TTL = {
-  '/auth/verify-session': 2 * 60 * 1000, // 2 mins (fixes guardTeacher page-load waterfall)
-  '/teacher/dashboard': 30 * 1000,       // 30 seconds
-  '/student/dashboard': 30 * 1000,       // 30 seconds
-  '/student/banks': 30 * 1000,           // 30 seconds
-  '/student/profile': 60 * 1000,         // 1 minute
-  '/circles': 30 * 1000,                 // 30 seconds
-  '/announcements/active': 5 * 60 * 1000, // 5 minutes
-  '/quotes': 10 * 60 * 1000,             // 10 minutes
-  '/system/maintenance': 30 * 1000,      // 30 seconds
+  '/auth/verify-session': 8 * 60 * 1000,    // 8 min (was 2 min)
+  '/teacher/dashboard':   60 * 1000,          // 60s  (was 30s)
+  '/student/dashboard':   60 * 1000,          // 60s  (was 30s)
+  '/student/banks':       2 * 60 * 1000,      // 2 min (was 30s)
+  '/student/profile':     5 * 60 * 1000,      // 5 min (was 1 min)
+  '/teacher/profile':     5 * 60 * 1000,      // NEW
+  '/circles':             2 * 60 * 1000,      // 2 min (was 30s)
+  '/announcements/active':10 * 60 * 1000,     // 10 min (was 5 min)
+  '/quotes':              30 * 60 * 1000,     // 30 min (was 10 min)
+  '/system/maintenance':  2 * 60 * 1000,      // 2 min (was 30s)
 };
 
 // Session cache — lives in memory for the browser session
 let _sessionCache = null;
 let _sessionCachedAt = 0;
-const SESSION_CACHE_TTL = 4 * 60 * 1000; // 4 minutes
+const SESSION_CACHE_TTL = 8 * 60 * 1000;
 
-export async function verifySession() {
+export async function verifySession(token) {
   const now = Date.now();
+  
+  // Navigation cache — if verified < 30 seconds ago, instant return
+  if (_sessionCache && (now - _sessionCachedAt) < 30000) {
+    return _sessionCache;
+  }
+  
+  // Full cache — if verified < 8 minutes ago, return cache
   if (_sessionCache && (now - _sessionCachedAt) < SESSION_CACHE_TTL) {
     return _sessionCache;
   }
+
   try {
-    const result = await apiCall('/auth/verify-session', 'GET');
+    const result = await apiCall('/auth/verify-session', 'POST', { token });
     if (result?.success) {
       const u = result.data;
-      
-      // AUTO-HEAL: Sync localStorage with server definitive state
       if (u.role && u.role !== localStorage.getItem(BP.ROLE)) {
-          console.log("[SYNC] Updating role:", u.role);
-          localStorage.setItem(BP.ROLE, u.role);
+        localStorage.setItem(BP.ROLE, u.role);
       }
       const serverActivated = u.isActivated ? 'true' : 'false';
       if (serverActivated !== localStorage.getItem(BP.ACTIVATED)) {
-          console.log("[SYNC] Updating activation:", serverActivated);
-          localStorage.setItem(BP.ACTIVATED, serverActivated);
+        localStorage.setItem(BP.ACTIVATED, serverActivated);
       }
-
-      _sessionCache = result;
+      _sessionCache    = result;
       _sessionCachedAt = now;
     }
     return result;
@@ -198,50 +199,36 @@ export async function initPage(guardFn, dataFetchFn) {
     return null;
   }
 
-  BP.showLoader();
+  // DO NOT show full-screen loader here anymore
+  // Page HTML skeletons are already visible — let them show
+  // Only show loader for auth check (fast — usually cached)
+  
   try {
-    // 1. Auth Guarding (Role specific)
-    if (guardFn) {
-        const isAuthorized = await guardFn();
-        if (!isAuthorized) {
-            console.warn("[initPage] Guard failed. Execution terminated.");
-            return null;
-        }
-    }
-
-    // 2. Token Acquisition
     const token = await getFreshToken();
     if (!token) {
-      console.warn("[initPage] No token acquired.");
       sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
-      BP.hideLoader();
       window.location.href = getIndexPath();
       return null;
     }
 
-    // 3. Backend Session Verification (Double-Check)
-    const sessionResult = await verifySession();
+    // Run auth verify AND data fetch simultaneously
+    // Don't wait for auth before starting data fetch
+    const [sessionResult, data] = await Promise.all([
+      verifySession(token),
+      dataFetchFn ? dataFetchFn(token).catch(e => null) : Promise.resolve(null)
+    ]);
+
     if (!sessionResult?.success) {
-      console.warn("[initPage] Session verification failed.");
       sessionStorage.setItem('_lastRedirectAt', String(Date.now()));
-      BP.hideLoader();
       window.location.href = getIndexPath();
       return null;
     }
 
-    // 4. Data Fetching
-    if (dataFetchFn) {
-        console.log("[initPage] Executing data fetch protocol...");
-        await dataFetchFn(token);
-    }
-    
-    return sessionResult.data;
+    return data;
 
   } catch (err) {
-    console.error('[initPage critical error]', err);
+    console.error('[initPage error]', err);
     return null;
-  } finally {
-    BP.hideLoader();
   }
 }
 
@@ -267,14 +254,21 @@ export async function apiCall(
         const cachedStr = sessionStorage.getItem(CACHE_PREFIX + endpoint);
         if (cachedStr) {
           const cached = JSON.parse(cachedStr);
-          if (Date.now() - cached.at < ttl) return cached.data;
+          if (Date.now() - cached.at < ttl) {
+            // Cache hit — return WITHOUT showing loader at all
+            return cached.data;
+          }
         }
       } catch (e) { console.warn('Cache error', e); }
     }
   }
 
+  // Only show loader for actual network calls
+  // Change showOverlay default — don't show for fast endpoints
   let loaderShown = false;
-  if (showOverlay) {
+  if (showOverlay && !endpoint.includes('verify-session') 
+                  && !endpoint.includes('maintenance')
+                  && !endpoint.includes('announcements')) {
     BP.showLoader();
     loaderShown = true;
   }
@@ -956,7 +950,7 @@ export const BP = {
             loader.classList.remove('active');
             if (document.body) document.body.style.overflow = '';
           }
-        }, 300);
+        }, 100);
       }
     }
   },
@@ -1063,5 +1057,46 @@ BP.initAnnouncementBanner();
 // Expose to global window for non-module scripts
 window.apiCall = apiCall;
 window.BP = BP;
+
+// FIX 5 — Preload next page data on hover/touch
+document.addEventListener('DOMContentLoaded', () => {
+  const NAV_PREFETCH = {
+    'teacher-home.html':    '/api/teacher/dashboard',
+    'student-home.html':    '/api/student/dashboard', 
+    'student-bank.html':    '/api/student/banks',
+    'teacher-profile.html': '/api/teacher/profile',
+  };
+
+  document.querySelectorAll('nav a, .nav-item, [data-nav]').forEach(link => {
+    const href = link.href || link.dataset.href || '';
+    const prefetchEndpoint = Object.keys(NAV_PREFETCH)
+      .find(page => href.includes(page));
+    
+    if (!prefetchEndpoint) return;
+    const endpoint = NAV_PREFETCH[prefetchEndpoint];
+
+    let prefetched = false;
+    const doPrefetch = async () => {
+      if (prefetched) return;
+      prefetched = true;
+      const token = localStorage.getItem(BP.TOKEN);
+      if (!token) return;
+      // Silent background fetch — no loader shown
+      fetch('/api' + endpoint.replace('/api',''), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(r => r.json()).then(data => {
+        if (data?.success) {
+          sessionStorage.setItem(
+            'bp_cache_' + endpoint.replace('/api',''),
+            JSON.stringify({ data, at: Date.now() })
+          );
+        }
+      }).catch(() => {});
+    };
+
+    link.addEventListener('mouseenter', doPrefetch);  // desktop hover
+    link.addEventListener('touchstart', doPrefetch);  // mobile tap start
+  });
+});
 
 export default BP;
