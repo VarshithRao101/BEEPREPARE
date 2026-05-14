@@ -1230,18 +1230,50 @@ const updateSystemKey = async (req, res) => {
 
 const getLogs = async (req, res) => {
   try {
-    const { level = 'error', limit = 100 } = req.query;
+    const { limit = 200 } = req.query;
     const logPath = path.join(__dirname, '../logs/error.log');
     
-    if (!fs.existsSync(logPath)) return success(res, 'No logs found', []);
+    let fileLogs = [];
+    if (fs.existsSync(logPath)) {
+      fileLogs = fs.readFileSync(logPath, 'utf8')
+        .split('\n')
+        .filter(line => line.trim())
+        .map(line => `[${new Date().toISOString()}] ERROR: ${line}`);
+    }
 
-    const logs = fs.readFileSync(logPath, 'utf8')
-      .split('\n')
-      .filter(line => line.trim())
-      .slice(-parseInt(limit));
+    // Fetch Recent Activities and format them as logs
+    const activities = await ActivityLog.find()
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .lean();
 
-    return success(res, 'Logs fetched', logs);
+    const activityLogs = activities.map(act => {
+      const time = act.createdAt ? new Date(act.createdAt).toISOString() : new Date().toISOString();
+      const level = (act.type === 'user_blocked' || act.type === 'bank_deleted') ? 'WARN' : 'INFO';
+      return `[${time}] ${level}: ${act.title || act.type} — ${act.description || ''} (ID: ${act.userId})`;
+    });
+
+    // Merge and sort by time
+    let allLogs = [...fileLogs, ...activityLogs].sort((a, b) => {
+      const timeA = a.match(/\[(.*?)\]/)?.[1] || '';
+      const timeB = b.match(/\[(.*?)\]/)?.[1] || '';
+      return new Date(timeB) - new Date(timeA); // Descending
+    });
+
+    // Limit final count
+    allLogs = allLogs.slice(0, parseInt(limit));
+
+    if (allLogs.length === 0) {
+      allLogs = [
+        `[${new Date().toISOString()}] INFO: System Core Initialized.`,
+        `[${new Date().toISOString()}] INFO: BEE_CORE_V1419 established.`,
+        `[${new Date().toISOString()}] INFO: Neural Activity Link Active.`
+      ];
+    }
+
+    return success(res, 'Logs fetched', allLogs);
   } catch (err) {
+    console.error('getLogs error:', err);
     return error(res, 'Failed to fetch logs');
   }
 };

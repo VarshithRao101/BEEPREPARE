@@ -3,7 +3,7 @@ const { getMainConn } = require('../config/db');
 
 const activityLogSchema = new Schema({
   userId:      { type: String, required: true },
-  type:        { type: String, enum: ['question_added','paper_generated','student_approved','doubt_received','test_completed','note_uploaded','bank_joined','doubt_replied','chapter_deleted','bank_deleted','bank_created', 'key_activated', 'payment_submitted', 'user_blocked', 'user_deleted'] },
+  type:        { type: String, enum: ['question_added','paper_generated','student_approved','doubt_received','test_completed','note_uploaded','bank_joined','doubt_replied','chapter_deleted','bank_deleted','bank_created', 'key_activated', 'payment_submitted', 'user_blocked', 'user_deleted', 'stat_modified', 'user_updated', 'system_restart', 'logs_cleared'] },
   ip:          { type: String },
   title:       { type: String },
   description: { type: String },
