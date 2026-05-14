@@ -36,6 +36,23 @@
     pointer-events: all;
 }
 
+/* Backdrop */
+.bee-chat-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s ease;
+}
+
+.bee-chat-backdrop.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
 .bee-chat-header {
     padding: 20px 25px;
     background: rgba(255, 215, 0, 0.05);
@@ -225,16 +242,43 @@
     to { opacity: 1; transform: translateY(-4px); }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .bee-chat-window {
-        width: 100vw;
-        height: 100vh;
-        bottom: 0;
-        right: 0;
-        border-radius: 0;
+        width: 92%;
+        height: 70vh;
+        bottom: 50%;
+        right: 4%;
+        transform: scale(0.8) translate(0, 50%);
+        border-radius: 40px;
+        box-shadow: 0 40px 100px rgba(0,0,0,0.9);
     }
-    .bee-bot-trigger {
-        bottom: 80px;
-        right: 20px;
+    
+    .bee-chat-window.active {
+        transform: scale(1) translate(0, 50%);
+    }
+
+    .bee-chat-header {
+        padding: 15px 20px;
+    }
+
+    .bee-chat-messages {
+        padding: 15px;
+    }
+
+    .bee-msg {
+        max-width: 90%;
+        font-size: 13px;
+    }
+
+    .bee-chat-input-area {
+        padding: 15px;
+    }
+}
+
+/* Landscape or very small height fix */
+@media (max-height: 500px) {
+    .bee-chat-window {
+        height: 90vh;
+        bottom: 5vh;
     }
 }

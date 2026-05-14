@@ -16,6 +16,7 @@
         const botContainer = document.createElement('div');
         botContainer.id = 'bee-ai-bot-container';
         botContainer.innerHTML = `
+            <div class="bee-chat-backdrop" id="bee-chat-backdrop"></div>
             <div class="bee-chat-window" id="bee-chat-window">
                 <div class="bee-chat-header">
                     <div class="bee-chat-header-info">
@@ -45,13 +46,16 @@
         document.body.appendChild(botContainer);
 
         const windowEl = document.getElementById('bee-chat-window');
+        const backdropEl = document.getElementById('bee-chat-backdrop');
         const closeBtn = document.getElementById('bee-chat-close');
-        const input = document.getElementById('bee-chat-input');
-        const sendBtn = document.getElementById('bee-chat-send');
-        const messagesCont = document.getElementById('bee-chat-messages');
-        const statusEl = document.getElementById('bee-bot-status');
+        
+        const closeChat = () => {
+            windowEl.classList.remove('active');
+            backdropEl.classList.remove('active');
+        };
 
-        closeBtn.onclick = () => windowEl.classList.remove('active');
+        closeBtn.onclick = closeChat;
+        backdropEl.onclick = closeChat;
 
         // Hijack Customer Care Button
         function secureHijack() {
@@ -61,20 +65,10 @@
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     
-                    // Determine if on mobile (portable pov)
-                    if (window.innerWidth <= 768) {
-                        // Redirect to dedicated AI page for phone POV
-                        let chatPath = 'beginners/ai-chat.html';
-                        if (window.location.pathname.includes('/beginners/student/') || window.location.pathname.includes('/beginners/teacher/')) {
-                            chatPath = '../ai-chat.html';
-                        } else if (window.location.pathname.includes('/beginners/')) {
-                            chatPath = 'ai-chat.html';
-                        }
-                        window.location.href = chatPath;
-                    } else {
-                        windowEl.classList.add('active');
-                        input.focus();
-                    }
+                    // NO REDIRECT - Always open as popup
+                    windowEl.classList.add('active');
+                    backdropEl.classList.add('active');
+                    input.focus();
                 }, true);
                 ccBtn.dataset.hijacked = "true";
                 ccBtn.title = "Chat with BEE AI Assistant";
