@@ -16,6 +16,8 @@
 
 .bee-loader-overlay.active {
     display: flex;
+    justify-content: center;
+    align-items: center;
     opacity: 1;
     pointer-events: all;
     visibility: visible;

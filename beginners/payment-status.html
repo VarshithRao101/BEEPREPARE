@@ -262,17 +262,19 @@
 
         <!-- REJECTED STATE -->
         <div class="result-box" id="state-rejected">
-            <div class="status-icon status-rejected">✕</div>
-            <div class="status-title" style="color:#F44336;">Verification Failed</div>
-            <p class="status-desc">We couldn't verify this transaction. Potential reasons: Incorrect UTR or wrong amount.</p>
-            <div class="info-strip" id="reject-box" style="background: rgba(244, 67, 54, 0.05); border-color: rgba(244, 67, 54, 0.2);">
-                <div><span>REASON</span> <span id="lbl-r-reason" style="color:#F44336; text-transform: uppercase; font-size: 12px;">...</span></div>
+            <div class="status-icon status-rejected" style="background: rgba(244, 67, 54, 0.2); color: #F44336; border: 2.5px solid #F44336;">✕</div>
+            <div class="status-title" style="color:#F44336; font-weight: 900; font-size: 28px;">Verification Failed</div>
+            <p class="status-desc" style="color: #ffb8b8; font-weight: 600;">Your payment could not be verified by our node.</p>
+            <div class="info-strip" id="reject-box" style="background: rgba(244, 67, 54, 0.1); border: 2px solid rgba(244, 67, 54, 0.3); padding: 25px; border-radius: 20px;">
+                <div style="margin-bottom: 15px;"><span style="color: #ffb8b8; font-size: 10px; letter-spacing: 2px;">OFFICIAL REASON</span></div>
+                <div id="lbl-r-reason" style="color:#fff; font-weight: 800; font-size: 16px; text-transform: none; line-height: 1.4;">...</div>
             </div>
-            <div class="contact-card">
+            <div class="contact-card" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); margin-top: 25px;">
+                <p style="margin: 0 0 10px 0; font-size: 11px; color: #888;">RESOLUTION STEPS</p>
                 Support: <b>support@beeprepare.com</b><br>
                 WhatsApp: <b>+91 90590 68384</b>
             </div>
-            <button class="btn-check" onclick="location.reload()">Try Different UTR</button>
+            <button class="btn-check" onclick="location.reload()" style="margin-top: 25px; background: #333; color: #fff; border: 1px solid #555;">Try Different UTR</button>
         </div>
     </div>
 

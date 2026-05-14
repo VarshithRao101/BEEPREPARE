@@ -11,8 +11,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const compression = require('compression');
 
-const maintenanceRoutes = require('./routes/maintenance');
-const leaderboardRoutes = require('./routes/leaderboard');
+
 
 const {
   securityHeaders,
@@ -139,6 +138,16 @@ app.use(express.urlencoded({
   extended: true,
   limit: '2mb'
 }));
+
+// ─── CORE ROUTES ───────────────────────────────────────────────────
+const authRoutes = require('./routes/auth');
+const leaderboardRoutes = require('./routes/leaderboard');
+const adminRoutes = require('./routes/admin');
+const studentRoutes = require('./routes/student');
+const teacherRoutes = require('./routes/teacher');
+const paymentRoutes = require('./routes/payment');
+const systemRoutes = require('./routes/system');
+const matrixRoutes = require('./routes/matrix');
 
 // === SECURITY MIDDLEWARE CHAIN ===
 app.use(mongoSanitize({
@@ -398,9 +407,10 @@ app.use(async (req, res, next) => {
 // === ROUTES WITH RATE LIMITING ===
 
 // Auth routes (with strict limiting)
-app.use('/api/auth', authLimiter, require('./routes/auth'));
+app.use('/api/auth', authLimiter, authRoutes);
 
-
+// Leaderboard
+app.use('/api/leaderboard', leaderboardRoutes);
 
 // License (with activation limit)
 app.use('/api/license', requireAuth, activationLimiter, require('./routes/license'));
@@ -409,10 +419,10 @@ app.use('/api/license', requireAuth, activationLimiter, require('./routes/licens
 app.use('/api/redeem', requireAuth, require('./routes/redeem'));
 
 // Teacher routes
-app.use('/api/teacher', requireAuth, require('./routes/teacher'));
+app.use('/api/teacher', requireAuth, teacherRoutes);
 
 // Student routes
-app.use('/api/student', requireAuth, require('./routes/student'));
+app.use('/api/student', requireAuth, studentRoutes);
 
 // AI (with AI-specific limiting)
 app.use('/api/ai', requireAuth, aiLimiter, require('./routes/ai'));
@@ -424,10 +434,10 @@ app.use('/api/feedback', requireAuth, require('./routes/feedback'));
 app.use('/api/circles', requireAuth, require('./routes/circles'));
 
 // Payment (public submit with payment limiter + full security stack; status/resend locked)
-app.use('/api/payment', paymentLimiter, require('./routes/payment'));
+app.use('/api/payment', paymentLimiter, paymentRoutes);
 
 // Admin (protected by rolling gateway)
-app.use('/api/admin', require('./routes/admin'));
+app.use('/api/admin', adminRoutes);
 
 // CAPTCHA Generation
 app.get('/api/admin-security/captcha', (req, res) => {
@@ -449,14 +459,11 @@ app.get('/api/admin-security/captcha', (req, res) => {
   });
 });
 
-app.use('/api/maintenance', maintenanceRoutes);
-app.use('/api/leaderboard', leaderboardRoutes);
-
-app.use('/api/matrix', require('./routes/matrix'));
+app.use('/api/matrix', matrixRoutes);
 
 // Other routes
 app.use('/api/quotes', requireAuth, require('./routes/quotes'));
-app.use('/api/system', require('./routes/system'));
+app.use('/api/system', systemRoutes);
 
 // === PUBLIC HEALTH CHECK ===
 app.get('/health', (req, res) => {
@@ -544,25 +551,25 @@ const startApp = async () => {
     run70HourCleanup();
     setInterval(run70HourCleanup, 60 * 60 * 1000); // Check every hour
 
+    // Start Daily Leaderboard Sync (Runs on cold-starts/boot)
+    const { generateSnapshots } = require('./controllers/leaderboardController');
+    const LeaderboardSnapshot = require('./models/LeaderboardSnapshot');
+    
+    LeaderboardSnapshot.findOne().sort({ lastUpdated: -1 }).then(lastSnapshot => {
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+        if (!lastSnapshot || (new Date() - new Date(lastSnapshot.lastUpdated)) > TWENTY_FOUR_HOURS) {
+            console.log('[Leaderboard] Initiating 24h Snapshot Sync...');
+            generateSnapshots();
+        } else {
+            console.log('[Leaderboard] Snapshot is fresh. Next sync in ' + 
+                Math.round((TWENTY_FOUR_HOURS - (new Date() - new Date(lastSnapshot.lastUpdated))) / 3600000) + 'h');
+        }
+    }).catch(err => console.error('[Leaderboard] Boot Sync Error:', err));
+
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
         const server = app.listen(PORT, () => {
           logger.info(`BEEPREPARE running on port ${PORT}`);
         });
-
-        // Start Daily Leaderboard Sync
-        const { generateSnapshots } = require('./controllers/leaderboardController');
-        const LeaderboardSnapshot = require('./models/LeaderboardSnapshot');
-        
-        LeaderboardSnapshot.findOne().sort({ lastUpdated: -1 }).then(lastSnapshot => {
-            const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-            if (!lastSnapshot || (new Date() - new Date(lastSnapshot.lastUpdated)) > TWENTY_FOUR_HOURS) {
-                console.log('[Leaderboard] Initiating 24h Snapshot Sync...');
-                generateSnapshots();
-            } else {
-                console.log('[Leaderboard] Snapshot is fresh. Next sync in ' + 
-                    Math.round((TWENTY_FOUR_HOURS - (new Date() - new Date(lastSnapshot.lastUpdated))) / 3600000) + 'h');
-            }
-        }).catch(err => console.error('[Leaderboard] Boot Sync Error:', err));
 
         process.on('SIGTERM', () => {
           server.close(() => process.exit(0));

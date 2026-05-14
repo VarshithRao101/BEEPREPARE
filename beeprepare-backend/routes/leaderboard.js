@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const leaderboardController = require('../controllers/leaderboardController');
-const { requireAuth } = require('../middleware/auth');
+const requireAuth = require('../middleware/requireAuth');
 
 // GLOBAL (Student POV)
 router.get('/global', requireAuth, leaderboardController.getGlobalLeaderboard);

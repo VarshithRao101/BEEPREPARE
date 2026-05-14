@@ -362,8 +362,8 @@ export async function apiCall(
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error('JSON Parse Error:', text);
-      throw new Error('SERVER_INVALID_JSON');
+      console.error('[BEE CORE] Non-JSON Response from ' + endpoint, text.substring(0, 300));
+      throw new Error('SERVER_INTERNAL_FAULT');
     }
 
     // 7. Global Checks (Maintenance, Blocked)
@@ -904,10 +904,13 @@ export const BP = {
         style.id = 'bee-loader-style-inline';
         style.textContent = `
             .bee-loader-overlay {
+                position: fixed; inset: 0;
                 z-index: 100000; opacity: 0; transition: opacity 0.4s ease;
-                pointer-events: none; backdrop-filter: blur(10px);
+                pointer-events: none; backdrop-filter: blur(15px);
+                display: flex; align-items: center; justify-content: center;
+                background: rgba(0, 0, 0, 0.4);
             }
-            .bee-loader-overlay.active { display: flex; opacity: 1; pointer-events: all; visibility: visible; }
+            .bee-loader-overlay.active { opacity: 1; pointer-events: all; visibility: visible; }
             .loader-container { 
                 background: rgba(15, 15, 20, 0.98); padding: 50px; border-radius: 40px;
                 border: 1px solid rgba(255, 215, 0, 0.3); display: flex; flex-direction: column;

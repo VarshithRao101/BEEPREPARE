@@ -138,7 +138,7 @@ exports.getGlobalLeaderboard = async (req, res) => {
  */
 exports.getTeacherLeaderboard = async (req, res) => {
     try {
-        const teacherId = req.user.uid;
+        const teacherId = req.user.googleUid;
         const { type = 'daily' } = req.query;
 
         // 1. Get the latest global snapshot
