@@ -20,69 +20,32 @@
             --border: rgba(255, 215, 0, 0.2);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        body {
-            background: transparent;
-            color: var(--text);
-            padding-top: 130px;
-            min-height: 100vh;
-        }
-
-        .main-bg {
-            position: fixed;
-            inset: 0;
-            background: #000 url('/assets/images/abstract-bg.png') no-repeat center center fixed;
-            background-size: cover;
-            z-index: -1;
-            filter: brightness(1.0);
-        }
-
-        .glass {
-            background: var(--surface);
-            backdrop-filter: blur(25px);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 30px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.6);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: transparent; color: var(--text); padding-top: 130px; min-height: 100vh; }
+        .main-bg { position: fixed; inset: 0; background: #000 url('/assets/images/abstract-bg.png') no-repeat center center fixed; background-size: cover; z-index: -1; }
+        .glass { background: var(--surface); backdrop-filter: blur(25px); border: 1px solid var(--border); border-radius: 30px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.6); }
         
         header {
             position: fixed; top: 20px; left: 20px; right: 20px; height: 80px;
             background: var(--surface); border: 1px solid var(--border);
             backdrop-filter: blur(25px); border-radius: 20px;
             display: flex; align-items: center; padding: 0 30px; z-index: 1000;
-            justify-content: space-between;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            justify-content: space-between; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
         .header-left { display: flex; align-items: center; gap: 20px; }
-        .back-btn { 
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px; color: var(--gold); text-decoration: none; transition: 0.3s;
-        }
+        .back-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--gold); text-decoration: none; transition: 0.3s; }
         .back-btn:hover { background: var(--gold); color: #000; }
         .header-title { font-weight: 900; color: var(--gold); font-size: 20px; letter-spacing: -0.5px; }
         .header-right { display: flex; align-items: center; gap: 25px; }
         .admin-id { font-size: 13px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .logout-btn { 
-            background: rgba(255, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(255,68,68,0.2); 
-            padding: 10px 18px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.3s;
-        }
+        .logout-btn { background: rgba(255, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(255,68,68,0.2); padding: 10px 18px; border-radius: 10px; font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .logout-btn:hover { background: var(--danger); color: #000; }
 
         .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        
         .search-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 20px; }
         .search-box { flex: 1; position: relative; }
         .search-box input { width: 100%; padding: 12px 16px; background: var(--surface); border: 1px solid #333; border-radius: 8px; color: #fff; outline: none; }
         .search-box input:focus { border-color: var(--gold); }
-        
         .filter-pills { display: flex; gap: 10px; }
         .pill { padding: 8px 16px; border-radius: 20px; background: var(--surface2); border: 1px solid #333; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s; }
         .pill.active { background: var(--gold); color: #000; border-color: var(--gold); }
@@ -97,14 +60,12 @@
         .dot { width: 8px; height: 8px; border-radius: 50%; }
         .dot-active { background: var(--success); box-shadow: 0 0 10px var(--success); }
         .dot-blocked { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
-
         .role-badge { font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
         .role-teacher { background: rgba(76, 175, 80, 0.1); color: var(--success); }
         .role-student { background: rgba(255, 215, 0, 0.1); color: var(--gold); }
 
         .action-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 5px; }
         .action-btn:hover { color: var(--gold); }
-        
         .dropdown { position: relative; display: inline-block; }
         .dropdown-content { display: none; position: absolute; right: 0; background: var(--surface2); min-width: 150px; border: 1px solid #333; border-radius: 8px; z-index: 100; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .dropdown-content button { width: 100%; padding: 12px; text-align: left; background: none; border: none; color: #fff; cursor: pointer; font-size: 13px; }
@@ -112,7 +73,6 @@
         .dropdown-content button.danger:hover { color: var(--danger); }
         .show { display: block; }
 
-        /* Detail Modal */
         #detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
         .detail-card { width: 100%; max-width: 600px; background: var(--surface); border: 1px solid var(--gold-dim); border-radius: 16px; padding: 32px; position: relative; }
         .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px; color: var(--muted); }
@@ -124,19 +84,6 @@
         .edit-stat-btn { font-size: 10px; color: var(--gold); border: 1px solid var(--gold-dim); background: none; padding: 2px 6px; border-radius: 4px; cursor: pointer; margin-left: 10px; }
         .edit-stat-btn:hover { background: var(--gold-dim); }
 
-        /* Rename Modal */
-        #rename-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 3000; display: none; align-items: center; justify-content: center; }
-        #rename-overlay.active { display: flex; }
-        .rename-card { width: 90%; max-width: 420px; background: #0a0a0a; border: 1px solid var(--gold); border-radius: 20px; padding: 36px; animation: modalPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes modalPop { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
-        .rename-card h3 { color: var(--gold); font-weight: 900; font-size: 18px; margin-bottom: 6px; }
-        .rename-card p { color: #666; font-size: 13px; margin-bottom: 24px; }
-        .rename-card input { width: 100%; padding: 14px 16px; background: #1a1a1a; border: 1px solid #333; border-radius: 10px; color: #fff; font-size: 15px; outline: none; margin-bottom: 20px; font-family: 'Outfit', sans-serif; }
-        .rename-card input:focus { border-color: var(--gold); }
-        .rename-actions { display: flex; gap: 12px; }
-        .rename-cancel { flex: 1; padding: 12px; background: transparent; border: 1px solid #333; color: #888; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 13px; }
-        .rename-confirm { flex: 1; padding: 12px; background: var(--gold); color: #000; border: none; border-radius: 10px; cursor: pointer; font-weight: 900; font-size: 13px; }
-
         .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 30px; padding-bottom: 50px; }
         .page-btn { padding: 8px 16px; background: var(--surface2); border: 1px solid #333; color: var(--text); border-radius: 6px; cursor: pointer; }
         .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -145,14 +92,11 @@
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
-
     <div class="main-bg"></div>
     <header>
         <div class="header-left">
             <a href="index.html" class="back-btn">←</a>
-            <span class="header-title">
-                <span style="color: #FFD700;">BEE</span><span style="color: #e0e0e0;">PREPARE</span> User Directory
-            </span>
+            <span class="header-title"><span style="color: #FFD700;">BEE</span><span style="color: #e0e0e0;">PREPARE</span> User Directory</span>
         </div>
         <div class="header-right">
             <span class="admin-id" id="adminIdDisplay">Admin Hub</span>
@@ -162,9 +106,7 @@
 
     <div class="container">
         <div class="search-row">
-            <div class="search-box">
-                <input type="text" id="userSearch" placeholder="Search by name or email..." oninput="handleSearch(this.value)">
-            </div>
+            <div class="search-box"><input type="text" id="userSearch" placeholder="Search by name or email..." oninput="handleSearch(this.value)"></div>
             <div class="filter-pills" id="roleFilters">
                 <div class="pill active" onclick="filterRole('all', this)">All</div>
                 <div class="pill" onclick="filterRole('teacher', this)">Teachers</div>
@@ -176,47 +118,19 @@
         <div class="glass" style="padding: 0; overflow-x: auto;">
             <table>
                 <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Plan</th>
-                        <th>Status</th>
-                        <th>Joined</th>
-                        <th>Actions</th>
-                    </tr>
+                    <tr><th>User</th><th>Email</th><th>Role</th><th>Plan</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
                 </thead>
-                <tbody id="userTableBody">
-                    <!-- Rows populated by JS -->
-                </tbody>
+                <tbody id="userTableBody"></tbody>
             </table>
         </div>
-
-        <div class="pagination" id="pagination">
-            <!-- Buttons populated by JS -->
-        </div>
-    </div>
-
-    <!-- Rename Modal -->
-    <div id="rename-overlay">
-        <div class="rename-card">
-            <h3>Change Display Name</h3>
-            <p id="rename-subtitle">Enter the new permanent name for this user.</p>
-            <input type="text" id="rename-input" placeholder="New display name..." />
-            <div class="rename-actions">
-                <button class="rename-cancel" onclick="closeRenameModal()">CANCEL</button>
-                <button class="rename-confirm" onclick="submitRename()">CONFIRM</button>
-            </div>
-        </div>
+        <div class="pagination" id="pagination"></div>
     </div>
 
     <!-- Detail Modal -->
     <div id="detail-overlay">
         <div class="detail-card">
             <span class="close-btn" onclick="closeDetail()">×</span>
-            <div id="detailContent">
-                <!-- Populated by JS -->
-            </div>
+            <div id="detailContent"></div>
         </div>
     </div>
 
@@ -234,7 +148,6 @@
                 else url += `&role=${currentRole}`;
             }
             if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
-
             const res = await adminApi(url);
             if (res && res.success) {
                 renderTable(res.data.users);
@@ -261,23 +174,14 @@
                         <td style="color:var(--muted);">${u.email}</td>
                         <td><span class="role-badge role-${u.role}">${u.role}</span></td>
                         <td><span style="font-size:12px;">${u.planType || 'Free'}</span></td>
-                        <td>
-                            <div class="status-badge">
-                                <span class="dot ${u.isBlocked ? 'dot-blocked' : 'dot-active'}"></span>
-                                ${u.isBlocked ? 'Blocked' : 'Active'}
-                            </div>
-                        </td>
+                        <td><div class="status-badge"><span class="dot ${u.isBlocked ? 'dot-blocked' : 'dot-active'}"></span>${u.isBlocked ? 'Blocked' : 'Active'}</div></td>
                         <td style="font-size:12px; color:var(--muted);">${new Date(u.createdAt).toLocaleDateString()}</td>
                         <td>
                             <div class="dropdown">
                                 <button class="action-btn" onclick="toggleDropdown(this)">•••</button>
                                 <div class="dropdown-content">
                                     <button onclick="viewUser('${u.googleUid}')">View Details</button>
-                                    ${u.isBlocked 
-                                        ? `<button onclick="unblockUser('${u.googleUid}')">Unblock</button>`
-                                        : `<button onclick="confirmBlock('${u.googleUid}')" style="color:var(--danger);">Block User</button>`
-                                    }
-                                    <button onclick="changeName('${u.googleUid}')" data-uid="${u.googleUid}" data-name="${(u.displayName || '').replace(/"/g, '&quot;')}" style="color:var(--gold);">Change Name</button>
+                                    ${u.isBlocked ? `<button onclick="unblockUser('${u.googleUid}')">Unblock</button>` : `<button onclick="confirmBlock('${u.googleUid}')" style="color:var(--danger);">Block User</button>`}
                                     <button onclick="confirmDelete('${u.googleUid}')" class="danger" style="color:var(--danger);">Delete Permanent</button>
                                 </div>
                             </div>
@@ -291,9 +195,7 @@
             const container = document.getElementById('pagination');
             if (pager.pages <= 1) { container.innerHTML = ''; return; }
             let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Prev</button>`;
-            for (let i = 1; i <= pager.pages; i++) {
-                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-            }
+            for (let i = 1; i <= pager.pages; i++) { html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`; }
             html += `<button class="page-btn" ${currentPage === pager.pages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>`;
             container.innerHTML = html;
         }
@@ -307,19 +209,11 @@
             fetchUsers();
         };
         window.handleSearch = (val) => { searchQuery = val; currentPage = 1; fetchUsers(); };
-
         window.toggleDropdown = (btn) => {
-            document.querySelectorAll('.dropdown-content').forEach(d => {
-                if (d !== btn.nextElementSibling) d.classList.remove('show');
-            });
+            document.querySelectorAll('.dropdown-content').forEach(d => { if (d !== btn.nextElementSibling) d.classList.remove('show'); });
             btn.nextElementSibling.classList.toggle('show');
         };
-
-        window.onclick = (e) => {
-            if (!e.target.matches('.action-btn')) {
-                document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
-            }
-        };
+        window.onclick = (e) => { if (!e.target.matches('.action-btn')) { document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show')); } };
 
         window.viewUser = async (uid) => {
             const res = await adminApi(`/users/${uid}`);
@@ -327,14 +221,10 @@
                 const p = res.data.profile;
                 const stats = res.data;
                 const initials = (p.displayName || 'U').split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
-                
                 document.getElementById('detailContent').innerHTML = `
                     <div class="detail-header">
                         <div class="avatar detail-avatar">${initials}</div>
-                        <div>
-                            <h2 style="margin-bottom:4px;">${p.displayName}</h2>
-                            <p style="color:var(--muted);">${p.email}</p>
-                        </div>
+                        <div><h2 style="margin-bottom:4px;">${p.displayName}</h2><p style="color:var(--muted);">${p.email}</p></div>
                     </div>
                     <div class="detail-grid">
                         <div class="detail-item"><label>Role</label><span>${p.role}</span></div>
@@ -381,61 +271,20 @@
             }
         };
 
-        let _renameUid = null;
-
-        window.changeName = (uid) => {
-            // Find the button and pull the current name safely from data attr
-            const btn = document.querySelector(`[data-uid="${uid}"]`);
-            const currentName = btn ? btn.getAttribute('data-name') : '';
-            _renameUid = uid;
-            document.getElementById('rename-input').value = currentName;
-            document.getElementById('rename-subtitle').textContent = `Current name: ${currentName || '(none)'}`;
-            document.getElementById('rename-overlay').classList.add('active');
-            setTimeout(() => document.getElementById('rename-input').focus(), 100);
-        };
-
-        window.closeRenameModal = () => {
-            document.getElementById('rename-overlay').classList.remove('active');
-            _renameUid = null;
-        };
-
-        window.submitRename = async () => {
-            const newName = document.getElementById('rename-input').value.trim();
-            if (!newName || newName.length < 2) {
-                showToast('Name must be at least 2 characters', 'warning');
-                return;
-            }
-            const res = await adminApi(`/users/${_renameUid}/update-name`, 'POST', { newName });
-            if (res && res.success) {
-                showToast('Name updated permanently', 'success');
-                closeRenameModal();
-                fetchUsers();
-            } else {
-                showToast(res?.message || 'Failed to update name', 'error');
-            }
-        };
-        
         window.modifyStat = async (uid, field, currentVal) => {
             const newVal = prompt(`Enter new ${field.toUpperCase()}:`, currentVal);
             if (newVal === null) return;
             const res = await adminApi(`/leaderboard/modify`, 'POST', { userId: uid, [field]: parseInt(newVal) });
             if (res && res.success) {
                 showToast("Stats modified", "success");
-                viewUser(uid); // Refresh details
+                viewUser(uid);
             } else {
                 showToast(res?.message || "Modification failed", "error");
             }
         };
 
-        // Allow Enter key in rename input
-        document.getElementById('rename-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') submitRename();
-            if (e.key === 'Escape') closeRenameModal();
-        });
-
         fetchUsers();
     </script>
-
 <script src="/assets/js/ripple.js"></script>
 </body>
 </html>

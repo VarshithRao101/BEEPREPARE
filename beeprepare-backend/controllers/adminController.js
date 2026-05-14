@@ -441,6 +441,8 @@ const updateUserName = async (req, res) => {
     const { googleUid } = req.params;
     const { newName } = req.body;
 
+    console.log(`[ADMIN] Update name request for ${googleUid} to "${newName}"`);
+
     if (!newName || newName.trim().length < 2) {
       return error(res, 'Invalid name. Min 2 characters required.', 'INVALID_NAME', 400);
     }
@@ -452,17 +454,23 @@ const updateUserName = async (req, res) => {
     );
 
     if (!user) {
+      console.warn(`[ADMIN] User ${googleUid} not found for name update`);
       return error(res, 'User not found', 'NOT_FOUND', 404);
     }
 
-    await ActivityLog.create({
-      userId: `ADMIN_${req.admin.adminId}`,
-      type: 'user_updated',
-      title: 'Name Changed Permanently',
-      description: `Name for user ${googleUid} was changed to "${newName.trim()}" by admin.`,
-      ip: req.ip,
-      color: '#3498db'
-    });
+    // Log Activity
+    try {
+        await ActivityLog.create({
+          userId: `ADMIN_${req.admin?.adminId || 'UNKNOWN'}`,
+          type: 'user_updated',
+          title: 'Name Changed Permanently',
+          description: `Name for user ${googleUid} was changed to "${newName.trim()}" by admin.`,
+          ip: req.ip,
+          color: '#3498db'
+        });
+    } catch (logErr) {
+        console.warn('[ADMIN] Activity log failed for name update:', logErr.message);
+    }
 
     return success(res, 'Student name updated permanently', {
       googleUid,
@@ -472,6 +480,40 @@ const updateUserName = async (req, res) => {
     console.error('updateUserName error:', err);
     return error(res, 'Failed to update user name', 'SERVER_ERROR', 500);
   }
+};
+
+const modifyLeaderboard = async (req, res) => {
+    try {
+        const { userId, exp, dailyExp, monthlyExp, yearlyExp } = req.body;
+        
+        if (!userId) return error(res, 'User ID required', 'MISSING_UID', 400);
+
+        const updateData = {};
+        if (exp !== undefined) updateData.exp = exp;
+        if (dailyExp !== undefined) updateData.dailyExp = dailyExp;
+        if (monthlyExp !== undefined) updateData.monthlyExp = monthlyExp;
+        if (yearlyExp !== undefined) updateData.yearlyExp = yearlyExp;
+
+        const user = await User.findOneAndUpdate({ googleUid: userId }, { $set: updateData }, { new: true });
+        if (!user) return error(res, 'User not found', 'NOT_FOUND', 404);
+
+        // Log Activity
+        try {
+            await ActivityLog.create({
+                userId: `ADMIN_${req.admin?.adminId || 'UNKNOWN'}`,
+                type: 'stat_modified',
+                title: 'Leaderboard Stats Adjusted',
+                description: `Admin modified stats for ${userId}. New Data: ${JSON.stringify(updateData)}`,
+                ip: req.ip,
+                color: '#f1c40f'
+            });
+        } catch (e) {}
+
+        return success(res, 'User stats updated. Changes will reflect in the next 24h snapshot.');
+    } catch (err) {
+        console.error('modifyLeaderboard error:', err);
+        return error(res, 'Failed to update stats', 'SERVER_ERROR', 500);
+    }
 };
 
 // ============ PAYMENT MANAGEMENT ============
@@ -1563,7 +1605,7 @@ module.exports = {
   removeAnnouncement, updateSystemKey,
   getLogs, clearLogs, restartServer,
   getBlacklist, addToBlacklist, removeFromBlacklist,
-  updateUserName, getActivity, getStorageStats,
+  updateUserName, modifyLeaderboard, getActivity, getStorageStats,
   bulkUploadQuestions, getTeachers, getTeacherBanks,
   deletePaymentRequest, deleteLicenseKey,
   getStudyCircles, deleteStudyCircle

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Leaderboard | Admin Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: rgba(8, 8, 10, 0.2);
+            --surface2: rgba(10, 10, 12, 0.15);
+            --gold: #FFD700;
+            --gold-dim: rgba(255, 215, 0, 0.15);
+            --success: #4CAF50;
+            --danger: #ff4444;
+            --warning: #FFA500;
+            --text: #ffffff;
+            --muted: #888888;
+            --border: rgba(255, 215, 0, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background: transparent; color: var(--text); padding-top: 130px; min-height: 100vh; }
+        .main-bg { position: fixed; inset: 0; background: #000 url('/assets/images/abstract-bg.png') no-repeat center center fixed; background-size: cover; z-index: -1; }
+        
+        header {
+            position: fixed; top: 20px; left: 20px; right: 20px; height: 80px;
+            background: var(--surface); border: 1px solid var(--border);
+            backdrop-filter: blur(25px); border-radius: 20px;
+            display: flex; align-items: center; padding: 0 30px; z-index: 1000;
+            justify-content: space-between;
+        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .back-btn { 
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: var(--gold); text-decoration: none; transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--gold); color: #000; }
+        .header-title { font-weight: 900; color: var(--gold); font-size: 20px; }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        
+        .stat-toggle { display: flex; gap: 10px; justify-content: center; margin-bottom: 40px; }
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid #333;
+            color: var(--muted); padding: 10px 25px; border-radius: 15px;
+            font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 12px; text-transform: uppercase;
+        }
+        .toggle-btn.active { background: var(--gold); color: #000; border-color: var(--gold); }
+
+        .rank-list { background: var(--surface); border-radius: 30px; border: 1px solid var(--border); padding: 10px; }
+        .rank-row {
+            display: grid; grid-template-columns: 60px 50px 1fr 100px 120px;
+            align-items: center; padding: 15px 20px; border-radius: 20px;
+            margin-bottom: 8px; transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+        .rank-row:hover { background: rgba(255,215,0,0.05); }
+        .rank-num { font-weight: 900; font-size: 18px; color: var(--muted); }
+        .rank-img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); }
+        .rank-name { font-weight: 700; color: #fff; font-size: 15px; }
+        .rank-exp { font-weight: 900; color: var(--gold); text-align: right; font-size: 16px; }
+        .edit-btn { background: none; border: 1.5px solid var(--gold-dim); color: var(--gold); font-size: 10px; font-weight: 900; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: 0.3s; margin-left: 20px; }
+        .edit-btn:hover { background: var(--gold); color: #000; }
+
+        .loader { text-align: center; padding: 100px; color: var(--gold); font-weight: 900; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+    <div class="main-bg"></div>
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">←</a>
+            <span class="header-title">Student Wall of Fame</span>
+        </div>
+        <div class="header-right">
+            <span id="adminIdDisplay" style="font-size: 13px; color: var(--gold); font-weight: 700;">Admin Hub</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stat-toggle">
+            <button class="toggle-btn active" onclick="switchType('daily')">Daily</button>
+            <button class="toggle-btn" onclick="switchType('monthly')">Monthly</button>
+            <button class="toggle-btn" onclick="switchType('yearly')">Yearly</button>
+        </div>
+
+        <div class="rank-list" id="rank-list-container">
+            <div class="loader">SYNCHRONIZING_CORE_DATA...</div>
+        </div>
+        
+        <p id="update-notice" style="text-align: center; font-size: 10px; color: var(--muted); margin-top: 30px; letter-spacing: 1px; font-weight: 700;">SNAPSHOTS SYNC EVERY 24 HOURS</p>
+    </div>
+
+    <script type="module">
+        import { adminApi, showToast } from './matrix-core.js';
+
+        let currentType = 'daily';
+
+        async function loadLeaderboard() {
+            const listContainer = document.getElementById('rank-list-container');
+            listContainer.innerHTML = '<div class="loader">FETCHING_RANKS...</div>';
+
+            // We use the public leaderboard API since it's cached/snapshot based
+            // But we can also use a special admin one if needed. 
+            // For now, let's use the standard one but through adminApi for consistency.
+            const res = await fetch(`/api/leaderboard/global?type=${currentType}`).then(r => r.json());
+            
+            if (res && res.success) {
+                renderLeaderboard(res.rankings);
+                if (res.lastUpdated) {
+                    const date = new Date(res.lastUpdated).toLocaleString();
+                    document.getElementById('update-notice').innerText = `SYNCED ON: ${date} • UPDATES EVERY 24H`;
+                }
+            } else {
+                listContainer.innerHTML = '<div class="loader" style="color:var(--danger);">FAILED_TO_LOAD</div>';
+            }
+        }
+
+        window.switchType = (type) => {
+            currentType = type;
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.toLowerCase() === type);
+            });
+            loadLeaderboard();
+        };
+
+        function renderLeaderboard(rankings) {
+            const listContainer = document.getElementById('rank-list-container');
+            listContainer.innerHTML = '';
+
+            if (!rankings || rankings.length === 0) {
+                listContainer.innerHTML = '<div class="loader">NO_DATA_SYNCED</div>';
+                return;
+            }
+
+            rankings.forEach(r => {
+                const row = `
+                    <div class="rank-row">
+                        <div class="rank-num">#${r.rank}</div>
+                        <img src="${r.photoUrl || '/assets/images/default-avatar.png'}" class="rank-img" onerror="this.src='/assets/images/default-avatar.png'">
+                        <div>
+                            <div class="rank-name">${r.displayName}</div>
+                            <div style="font-size:10px; color:var(--muted); font-weight:800;">${r.userId}</div>
+                        </div>
+                        <div class="rank-exp">${r.exp} <span style="font-size:10px; opacity:0.5">XP</span></div>
+                        <button class="edit-btn" onclick="modifyStat('${r.userId}', '${currentType}Exp', ${r.exp})">MODIFY</button>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        window.modifyStat = async (uid, field, currentVal) => {
+            const newVal = prompt(`Enter new EXP for ${field}:`, currentVal);
+            if (newVal === null) return;
+            
+            // Map the field correctly for the backend
+            // Backend expects 'exp', 'dailyExp', 'monthlyExp', 'yearlyExp'
+            let backendField = 'exp';
+            if (field === 'dailyExp') backendField = 'dailyExp';
+            if (field === 'monthlyExp') backendField = 'monthlyExp';
+            if (field === 'yearlyExp') backendField = 'yearlyExp';
+
+            const res = await adminApi('/leaderboard/modify', 'POST', { 
+                userId: uid, 
+                [backendField]: parseInt(newVal) 
+            });
+
+            if (res && res.success) {
+                showToast("Stats modified successfully", "success");
+                loadLeaderboard();
+            } else {
+                showToast(res?.message || "Modification failed", "error");
+            }
+        };
+
+        loadLeaderboard();
+    </script>
+</body>
+</html>
