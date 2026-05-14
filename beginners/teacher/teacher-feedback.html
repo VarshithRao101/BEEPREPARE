@@ -389,11 +389,12 @@
             const fileInput = document.getElementById('filePayload');
             
             if(!msg && currentRating === 0) {
-                Swal.fire({
+                await Swal.fire({
                     icon: 'error',
                     title: 'EMPTY PAYLOAD',
                     text: 'Please input observations or a diagnostic rating before transmission.',
-                    background: '#080808', color: '#fff'
+                    background: '#0a0a0a', color: '#fff',
+                    confirmButtonColor: 'var(--primary)'
                 });
                 return;
             }
@@ -434,7 +435,15 @@
                     throw new Error(result.message || 'Transmission failed.');
                 }
             } catch (err) {
-                Swal.fire({ icon: 'error', title: 'TRANSMISSION ERROR', text: err.name === 'AbortError' ? 'Link Timeout: Server not responding.' : err.message, background: '#080808', color: '#fff' });
+                console.error('Transmission Error:', err);
+                await Swal.fire({ 
+                    icon: 'error', 
+                    title: 'TRANSMISSION ERROR', 
+                    text: err.name === 'AbortError' ? 'Link Timeout: Server not responding.' : err.message, 
+                    background: '#0a0a0a', 
+                    color: '#fff',
+                    confirmButtonColor: '#FFD700'
+                });
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
             }

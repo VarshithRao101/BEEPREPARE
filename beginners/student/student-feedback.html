@@ -410,7 +410,14 @@
             const fileInput = document.getElementById('fileUpload');
 
             if (!message && currentRating === 0) {
-                return Swal.fire({ icon: 'warning', title: 'Input Required', text: 'Please provide a message or a rating.', background: '#0a0a1a', color: '#fff' });
+                return await Swal.fire({ 
+                    icon: 'warning', 
+                    title: 'Input Required', 
+                    text: 'Please provide a message or a rating.', 
+                    background: '#0a0a0a', 
+                    color: '#fff',
+                    confirmButtonColor: '#FFD700'
+                });
             }
 
             const btn = document.querySelector('.submit-btn');
@@ -449,7 +456,14 @@
                 console.error('Feedback Error:', err);
                 btn.disabled = false;
                 btn.textContent = 'Submit Feedback';
-                Swal.fire({ icon: 'error', title: 'Submission Failed', text: 'Terminal error. Please try again later.', background: '#0a0a1a', color: '#fff' });
+                await Swal.fire({ 
+                    icon: 'error', 
+                    title: 'Submission Failed', 
+                    text: err.message || 'Terminal error. Please try again later.', 
+                    background: '#0a0a0a', 
+                    color: '#fff',
+                    confirmButtonColor: '#FFD700'
+                });
             }
         };
 
@@ -479,9 +493,6 @@
             });
         });
     </script>
-<script src="/assets/js/ripple.js"></script>
-</body>
-</html>
-<script src="/assets/js/ripple.js"></script>
+    <script src="/assets/js/ripple.js"></script>
 </body>
 </html>
