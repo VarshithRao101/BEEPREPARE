@@ -28,13 +28,10 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
     ];
 
     function initChatBot() {
-        // Create UI elements
+        // Create UI elements (Remove floating trigger)
         const botContainer = document.createElement('div');
         botContainer.id = 'bee-ai-bot-container';
         botContainer.innerHTML = `
-            <div class="bee-bot-trigger" id="bee-bot-trigger">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
-            </div>
             <div class="bee-chat-window" id="bee-chat-window">
                 <div class="bee-chat-header">
                     <div class="bee-chat-header-info">
@@ -61,46 +58,59 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
         `;
         document.body.appendChild(botContainer);
 
-        const trigger = document.getElementById('bee-bot-trigger');
         const windowEl = document.getElementById('bee-chat-window');
         const closeBtn = document.getElementById('bee-chat-close');
         const input = document.getElementById('bee-chat-input');
         const sendBtn = document.getElementById('bee-chat-send');
         const messagesCont = document.getElementById('bee-chat-messages');
 
-        trigger.onclick = () => windowEl.classList.toggle('active');
+        // Close button logic
         closeBtn.onclick = () => windowEl.classList.remove('active');
 
-        // Attach to profile circles if they exist
-        const profileCircles = document.querySelectorAll('.profile-avatar-node, .profile-avatar');
-        profileCircles.forEach(circle => {
-            circle.style.cursor = 'pointer';
-            circle.title = 'Open BEE AI Assistant';
-            circle.onclick = (e) => {
-                e.preventDefault();
-                windowEl.classList.add('active');
-            };
-        });
+        // Attach to existing profile circles
+        function attachTriggers() {
+            const profileCircles = document.querySelectorAll('.profile-avatar-node, .profile-avatar');
+            profileCircles.forEach(circle => {
+                circle.style.cursor = 'pointer';
+                circle.style.transition = '0.3s';
+                circle.title = 'Click to chat with BEE AI';
+                circle.onclick = (e) => {
+                    e.preventDefault();
+                    windowEl.classList.add('active');
+                };
+                // Visual feedback
+                circle.onmouseover = () => circle.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.6)';
+                circle.onmouseout = () => circle.style.boxShadow = '';
+            });
+        }
+
+        attachTriggers();
+        // Re-attach after a delay in case of dynamic loading
+        setTimeout(attachTriggers, 2000);
 
         async function sendMessage() {
             const text = input.value.trim();
             if (!text) return;
 
-            // User message UI
             appendMessage('user', text);
             input.value = '';
-            
-            // Show typing
             const typingId = showTyping();
 
             try {
+                // Correct Gemini API Request format
                 const response = await fetch(GEMINI_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [...chatHistory, { role: 'user', parts: [{ text }] }]
+                        contents: chatHistory.concat([{ role: 'user', parts: [{ text }] }])
                     })
                 });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    console.error("Gemini API Error:", errData);
+                    throw new Error("API Failure");
+                }
 
                 const data = await response.json();
                 removeTyping(typingId);
@@ -110,15 +120,13 @@ Maintain a "Central Hub" aesthetic in your language. Use terms like "Node", "Mat
                     appendMessage('bot', botText);
                     chatHistory.push({ role: 'user', parts: [{ text }] });
                     chatHistory.push({ role: 'model', parts: [{ text: botText }] });
-                    
-                    // Limit history to keep it fast
                     if (chatHistory.length > 20) chatHistory.splice(2, 2);
                 } else {
-                    appendMessage('bot', "System synchronization error. Please contact Customer Care at 9059068384 for immediate assistance.");
+                    appendMessage('bot', "System synchronization error. Please check your API key or contact support at 9059068384.");
                 }
             } catch (error) {
                 removeTyping(typingId);
-                appendMessage('bot', "Connection to BEE Central Hub lost. Please check your network or message Support: 9059068384.");
+                appendMessage('bot', "Communication link interrupted. Please ensure your API key is valid or contact support: 9059068384.");
             }
         }
 
