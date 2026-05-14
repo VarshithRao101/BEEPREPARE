@@ -1060,4 +1060,8 @@ BP.initLoader();
 BP.initMaintenanceCheck();
 BP.initAnnouncementBanner();
 
+// Expose to global window for non-module scripts
+window.apiCall = apiCall;
+window.BP = BP;
+
 export default BP;
