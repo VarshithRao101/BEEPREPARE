@@ -2,9 +2,9 @@ const { Schema } = require('mongoose');
 const { getMainConn } = require('../config/db');
 
 const feedbackSchema = new Schema({
-  userId:        { type: String, required: true },
+  userId:        { type: String, required: true, ref: 'User' },
   context:       { type: String, enum: ['Teacher','Student'] },
-  feedbackType:  { type: String, enum: ['bug','feature','rating','content'] },
+  feedbackType:  { type: String, enum: ['bug','feature','rating','content','star'] },
   message:       { type: String },
   rating:        { type: Number, min: 0, max: 5 },
   attachmentUrl: { type: String, default: null },

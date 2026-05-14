@@ -24,7 +24,7 @@ const submitFeedback = async (req, res) => {
     const context = req.user.role === 'teacher' ? 'Teacher' : 'Student';
 
     // Validate feedbackType
-    const validTypes = ['bug', 'feature', 'rating', 'content'];
+    const validTypes = ['bug', 'feature', 'rating', 'content', 'star'];
     if (!feedbackType || !validTypes.includes(feedbackType)) {
       return error(res, `feedbackType must be one of: ${validTypes.join(', ')}`, 'INVALID_TYPE', 400);
     }

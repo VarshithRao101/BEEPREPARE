@@ -831,34 +831,39 @@ const generateKeys = async (req, res) => {
 // ============ FEEDBACK ============
 
 const getFeedback = async (req, res) => {
-  const { type, context, page = 1 } = req.query;
-  const limit = 20;
-  const query = {};
+  try {
+    const { type, context, page = 1 } = req.query;
+    const limit = 20;
+    const query = {};
 
-  if (type) query.feedbackType = type;
-  if (context) query.context = context;
+    if (type) query.feedbackType = type;
+    if (context) query.context = context;
 
-  // Warm up User model for population
-  const _u = User.modelName;
+    const feedbacks = await Feedback.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
 
-  const feedbacks = await Feedback.find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .populate('userId', 'displayName email role');
+    // Enrich with User info manually since userId is a string UID
+    const enriched = await Promise.all(
+      feedbacks.map(async (f) => {
+        const user = await User.findOne({ googleUid: f.userId }, 'displayName email role').lean();
+        return {
+          ...f,
+          type: f.feedbackType === 'star' ? 'rating' : f.feedbackType,
+          userEmail: user?.email || 'Anonymous',
+          userRole: user?.role || (f.context || 'User'),
+          userName: user?.displayName || 'Unknown'
+        };
+      })
+    );
 
-  // Map to include 'type' field for frontend compatibility (some pages expect .type)
-  const mapped = feedbacks.map(f => {
-    const obj = f.toObject ? f.toObject() : f;
-    return {
-      ...obj,
-      type: obj.feedbackType,
-      userEmail: obj.userId?.email || 'Anonymous',
-      userRole: obj.userId?.role || 'User'
-    };
-  });
-
-  return success(res, 'Feedback fetched', mapped);
+    return success(res, 'Feedback fetched', enriched);
+  } catch (err) {
+    console.error('getFeedback error:', err);
+    return error(res, 'Failed to fetch feedback', 'SERVER_ERROR', 500);
+  }
 };
 
 const markFeedbackReviewed = async (req, res) => {
