@@ -154,11 +154,6 @@
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                     <span>Practice</span>
                 </a>
-                <a href="student-doubts.html" class="sidebar-link">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-                    <span>My Doubts</span>
-                    <div id="sidebar-doubt-signal" class="signal-dot" style="display: none;"></div>
-                </a>
                 <a href="../ai-chat.html" class="sidebar-link">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-13.04 8.5 8.5 0 0 1 8.5 8.54c0 .24 0 .44-.05.7zM17.5 11a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0z" /></svg>
                     <span>BEE AI Assistant</span>
@@ -247,16 +242,6 @@
                         <div class="skeleton sk-line"></div>
                     </div>
 
-                    <div class="section-divider">
-                        <span class="section-label">Doubt Hub</span>
-                        <div class="divider-line"></div>
-                    </div>
-                    <div id="doubts-container" class="adv-card" style="padding: 20px;">
-                        <div class="empty-state" style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px;">
-                            No active doubts found.
-                        </div>
-                        <button onclick="window.location.href='student-doubts.html'" class="btn-adv" style="width: 100%; margin-top: 15px; padding: 12px; font-size: 11px;">Open Doubt Center</button>
-                    </div>
                 </div>
             </div>
         </main>
@@ -307,10 +292,7 @@
 
         async function loadDashboard(showOverlay = true) {
             try {
-                const [result, doubtsResult] = await Promise.all([
-                    apiCall('/student/dashboard', 'GET', null, true, false, showOverlay).catch(e => { console.error("Dash fail", e); return null; }),
-                    apiCall('/student/doubts', 'GET', null, true, false, false).catch(e => { console.error("Doubts fail", e); return null; })
-                ]);
+                const result = await apiCall('/student/dashboard', 'GET', null, true, false, showOverlay).catch(e => { console.error("Dash fail", e); return null; });
                 
                 if (result && result.success) {
                     const d = result.data;
@@ -386,24 +368,6 @@
                         }
                     }
 
-                    // Doubts
-                    if (doubtsResult && doubtsResult.success) {
-                        const doubts = doubtsResult.data.chats || [];
-                        const container = document.getElementById('doubts-container');
-                        if (container && doubts.length > 0) {
-                            // Keep only the button if doubts exist, or show mini cards
-                            const btnHtml = `<button onclick="window.location.href='student-doubts.html'" class="btn-adv" style="width: 100%; margin-top: 15px; padding: 12px; font-size: 11px;">Open Doubt Center</button>`;
-                            container.innerHTML = '';
-                            doubts.slice(0, 3).forEach(doubt => {
-                                const dCard = document.createElement('div');
-                                dCard.style = "padding:12px;margin-bottom:10px;background:rgba(255,255,255,0.03);border-radius:12px;cursor:pointer;font-size:12px;border:1px solid rgba(255,255,255,0.05);";
-                                dCard.innerHTML = `<strong>${doubt.subject}</strong>: ${doubt.questionPreview || 'Doubt Details...'}`;
-                                dCard.onclick = () => window.location.href = 'student-doubts.html';
-                                container.appendChild(dCard);
-                            });
-                            container.insertAdjacentHTML('beforeend', btnHtml);
-                        }
-                    }
                 } else {
                     throw new Error(result?.message || 'Dashboard signal lost');
                 }

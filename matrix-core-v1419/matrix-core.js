@@ -6,11 +6,11 @@
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
     ? 'http://localhost:5000/api/admin' 
     : '/api/admin';
-const AUTH_TOKEN = sessionStorage.getItem('admin_token');
-const ADMIN_ID = sessionStorage.getItem('admin_id');
+const getAuthToken = () => sessionStorage.getItem('admin_token');
+const getAdminId = () => sessionStorage.getItem('admin_id');
 
 // Global Auth Guard
-if (!AUTH_TOKEN && !window.location.pathname.endsWith('index.html')) {
+if (!getAuthToken() && !window.location.pathname.endsWith('index.html')) {
     window.location.href = 'index.html';
 }
 
@@ -25,7 +25,7 @@ async function getCsrfToken() {
     if (_csrfToken && now < _csrfExpiry - 60000) return _csrfToken; // Reuse if >1min left
     try {
         const res = await fetch(API_BASE.replace('/admin', '') + '/admin-csrf-token', {
-            headers: { 'Authorization': 'Bearer ' + AUTH_TOKEN }
+            headers: { 'Authorization': 'Bearer ' + getAuthToken() }
         });
         const data = await res.json();
         if (data.success) {
@@ -45,7 +45,7 @@ export async function adminApi(endpoint, method = 'GET', body = null) {
         method,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + AUTH_TOKEN
+            'Authorization': 'Bearer ' + getAuthToken()
         }
     };
     if (body) options.body = JSON.stringify(body);
@@ -189,5 +189,5 @@ window.terminateSession = () => {
 // Initialize Admin ID Display
 document.addEventListener('DOMContentLoaded', () => {
     const display = document.getElementById('adminIdDisplay');
-    if (display) display.textContent = ADMIN_ID || 'BEE_ADMIN';
+    if (display) display.textContent = getAdminId() || 'BEE_ADMIN';
 });

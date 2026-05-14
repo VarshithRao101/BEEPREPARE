@@ -84,7 +84,7 @@ const adminLogin = async (req, res) => {
     await AdminSession.create({
       adminId: authResult.id,
       token: tokenJwt,
-      ip,
+      ipAddress: ip,
       userAgent: req.headers['user-agent'] || 'unknown',
       expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000) // 8h
     });

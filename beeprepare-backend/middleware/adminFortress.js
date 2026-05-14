@@ -236,7 +236,7 @@ const requireActionCode = (actionName) => (req, res, next) => {
   if (expected.length !== provided.length ||
       !crypto.timingSafeEqual(expected, provided)) {
     logger.warn('[ADMIN-SEC] Invalid action code', {
-      adminId, action: actionName, ip: req.ip
+      adminId, action: actionName, ip: req.ip || '', ua: req.headers['user-agent'] || ''
     });
     return res.status(403).json({
       success: false,

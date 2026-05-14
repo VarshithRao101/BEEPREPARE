@@ -25,6 +25,7 @@ router.post('/login',
 );
 router.post('/logout', requireAdmin, ctrl.adminLogout);
 router.get('/verify', requireAdmin, ctrl.verifySession);
+router.get('/verify-session', requireAdmin, ctrl.verifySession);
 
 // ─── All routes below: requireAdmin + session binding ───────────
 // Session binding ensures the token can only be used from the

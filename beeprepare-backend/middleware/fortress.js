@@ -281,10 +281,7 @@ const isHardBlocked = (ip) => {
 const fingerprintRequest = (req) => {
   const components = [
     req.ip || '',
-    req.headers['user-agent'] || '',
-    req.headers['accept-language'] || '',
-    req.headers['accept-encoding'] || '',
-    req.headers['accept'] || '',
+    req.headers['user-agent'] || ''
   ];
   return crypto
     .createHash('sha256')
