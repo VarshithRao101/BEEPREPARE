@@ -1455,14 +1455,14 @@ const bulkUploadQuestions = async (req, res) => {
       return error(res, 'Bank not found', 'NOT_FOUND', 404);
     }
 
-    // Parse questions from text format
+    // Parse questions from text format (Enhanced for New Types & Matrix Engine)
     const parseQuestions = async (text) => {
       const blocks = text.split('---')
         .map(b => b.trim())
         .filter(b => b.length > 0);
 
-      if (blocks.length > 100) {
-        throw new Error('Maximum 100 questions per upload');
+      if (blocks.length > 200) { // Increased limit
+        throw new Error('Maximum 200 questions per upload');
       }
 
       const lastQ = await Question.findOne({}, { numericId: 1 }).sort({ numericId: -1 }).lean();
@@ -1476,13 +1476,15 @@ const bulkUploadQuestions = async (req, res) => {
         const q = {
           bankId: bankId.toString(),
           chapterId: chapterId || 'general',
-          teacherId: bank.teacherId, // Required by model
-          class: bank.class,         // Required by model
-          subject: bank.subject,     // Required by model
+          teacherId: bank.teacherId,
+          class: bank.class,
+          subject: bank.subject,
           createdBy: teacherUid || bank.teacherId,
           isImportant: false,
           numericId: nextId++,
-          chapterIndex: bank.chapters.findIndex(c => c.chapterId === chapterId)
+          chapterIndex: bank.chapters.findIndex(c => c.chapterId === chapterId),
+          metaTags: [],
+          tags: []
         };
         if (q.chapterIndex < 0) q.chapterIndex = 0;
 
@@ -1497,44 +1499,60 @@ const bulkUploadQuestions = async (req, res) => {
             const typeMap = {
               'mcq': 'MCQ',
               'short': 'Short',
-              'very_short': 'Very Short',
-              'very short': 'Very Short',
-              'long': 'Long',
-              'essay': 'Essay',
-              'true_false': 'True or False',
-              'true or false': 'True or False',
-              'fill_blanks': 'Fill in the Blanks',
-              'fill in the blanks': 'Fill in the Blanks',
-              'simple_matching': 'Simple Matching',
-              'matrix_matching': 'Matrix Matching',
-              'reading_passage': 'Reading Passage',
-              'reading passage': 'Reading Passage',
-              'case_study': 'Case Study',
-              'case study': 'Case Study',
-              'data_interpretation': 'Data Interpretation',
-              'data interpretation': 'Data Interpretation'
+              'very_short': 'Very Short', 'very short': 'Very Short',
+              'long': 'Long', 'essay': 'Essay',
+              'true_false': 'True or False', 'true or false': 'True or False',
+              'fill_blanks': 'Fill in the Blanks', 'fill in the blanks': 'Fill in the Blanks',
+              'simple_matching': 'Simple Matching', 'simple matching': 'Simple Matching',
+              'matrix_matching': 'Matrix Matching', 'matrix matching': 'Matrix Matching',
+              'reading_passage': 'Reading Passage', 'reading passage': 'Reading Passage',
+              'case_study': 'Case Study', 'case study': 'Case Study',
+              'data_interpretation': 'Data Interpretation', 'data interpretation': 'Data Interpretation'
             };
             q.questionType = typeMap[rawType] || 'Short';
           } else if (line.startsWith('MARKS:')) {
             q.marks = parseInt(line.substring(6).trim()) || 1;
           } else if (line.startsWith('DIFFICULTY:')) {
             const rawDiff = line.substring(11).trim().toLowerCase();
-            const diffMap = {
-              'easy': 'Easy',
-              'medium': 'Medium',
-              'hard': 'Hard'
-            };
-            q.difficulty = diffMap[rawDiff] || 'Medium';
+            q.difficulty = rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1) || 'Medium';
           } else if (line.startsWith('TAGS:')) {
-            const tags = line.substring(5).split(',').map(t => t.trim());
-            q.tags = tags.filter(t => ['Important', 'Repeated', 'Exam Focus', 'Formula Based'].includes(t));
-            q.isImportant = q.tags.includes('Important');
+            const rawTags = line.substring(5).split(',').map(t => t.trim());
+            q.tags = rawTags.filter(t => ['Important', 'Repeated', 'Exam Focus', 'Formula Based', 'Conceptual', 'Tricky'].includes(t));
+            q.isImportant = q.tags.includes('Important') || q.tags.includes('Repeated');
+            
+            // Map to Matrix Engine metaTags
+            const metaMap = {
+              'Important': 'important', 'Repeated': 'repeated', 'Exam Focus': 'pyqs',
+              'Formula Based': 'formula', 'Conceptual': 'conceptual', 'Tricky': 'tricky'
+            };
+            q.metaTags = q.tags.map(t => metaMap[t]).filter(Boolean);
+            if (q.metaTags.length === 0) q.metaTags.push('standard');
           } else if (/^[A-D]:/.test(line)) {
             const hasCheck = line.includes('✓');
             const optText = line.substring(3).replace('✓', '').trim();
             const optLetter = line.charAt(0);
             options[optLetter] = optText;
             if (hasCheck) correctOption = optLetter;
+          } else if (line.startsWith('PAIRS:')) {
+            // Format: PAIRS: A-1, B-2
+            const pairs = line.substring(6).split(',').map(p => {
+              const [l, r] = p.split('-').map(x => x.trim());
+              return { left: l, right: r };
+            });
+            q.pairs = pairs;
+          } else if (line.startsWith('ROWS:')) {
+            q.rows = line.substring(5).split(',').map(r => r.trim());
+          } else if (line.startsWith('COLS:')) {
+            q.columns = line.substring(5).split(',').map(c => c.trim());
+          } else if (line.startsWith('SUBQ:')) {
+            // Format: SUBQ: text [marks] | text [marks]
+            const subs = line.substring(5).split('|').map(s => {
+              const match = s.match(/(.*)\[(\d+)\]/);
+              return match ? { questionText: match[1].trim(), marks: parseInt(match[2]) } : null;
+            }).filter(Boolean);
+            q.subQuestions = subs;
+          } else if (line.startsWith('IMG:')) {
+             q.imageUrl = line.substring(4).trim();
           }
         }
 
@@ -1546,6 +1564,7 @@ const bulkUploadQuestions = async (req, res) => {
         if (!q.questionText) throw new Error(`Question ${idx + 1} missing Q: text`);
         if (!q.questionType) q.questionType = 'Short';
         if (!q.marks) q.marks = 1;
+        if (q.metaTags.length === 0) q.metaTags = ['standard'];
 
         return q;
       });

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -159,15 +159,18 @@
 
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script type="module">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script type="module">
         import { adminApi, showToast, showCodeModal } from './matrix-core.js';
 
         let activeBank = null;
+        let stagedQuestions = [];
 
         window.loadBankContext = async () => {
             const bankId = document.getElementById('bankIdInput').value.trim();
             if(!bankId) return showToast("Enter Bank ID", "warning");
 
-            const res = await adminApi(`/banks`); // Getting all banks to find this one (simplified for admin)
+            const res = await adminApi(`/banks`); 
             if(res.success) {
                 const bank = res.data.find(b => b._id === bankId || b.bankCode === bankId);
                 if(bank) {
@@ -196,22 +199,25 @@
                 const firstSheet = workbook.SheetNames[0];
                 const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
                 
-                // Convert rows to the text format
                 const text = rows.map(r => {
                     let s = `Q: ${r.Question || r.question || ''}\n`;
                     s += `TYPE: ${r.Type || r.type || 'mcq'}\n`;
-                    if(r.A) s += `A: ${r.A}${r.Correct === 'A' ? ' ✓' : ''}\n`;
-                    if(r.B) s += `B: ${r.B}${r.Correct === 'B' ? ' ✓' : ''}\n`;
-                    if(r.C) s += `C: ${r.C}${r.Correct === 'C' ? ' ✓' : ''}\n`;
-                    if(r.D) s += `D: ${r.D}${r.Correct === 'D' ? ' ✓' : ''}\n`;
+                    if(r.A) s += `A: ${r.A}${String(r.Correct).toUpperCase() === 'A' ? ' ✓' : ''}\n`;
+                    if(r.B) s += `B: ${r.B}${String(r.Correct).toUpperCase() === 'B' ? ' ✓' : ''}\n`;
+                    if(r.C) s += `C: ${r.C}${String(r.Correct).toUpperCase() === 'C' ? ' ✓' : ''}\n`;
+                    if(r.D) s += `D: ${r.D}${String(r.Correct).toUpperCase() === 'D' ? ' ✓' : ''}\n`;
                     s += `MARKS: ${r.Marks || r.marks || 1}\n`;
-                    s += `DIFFICULTY: ${r.Difficulty || r.difficulty || 'medium'}\n`;
+                    s += `DIFFICULTY: ${r.Difficulty || r.difficulty || 'Medium'}\n`;
+                    if(r.Tags || r.tags) s += `TAGS: ${r.Tags || r.tags}\n`;
+                    if(r.Pairs || r.pairs) s += `PAIRS: ${r.Pairs || r.pairs}\n`;
+                    if(r.Subquestions || r.subquestions) s += `SUBQ: ${r.Subquestions || r.subquestions}\n`;
                     return s;
                 }).join('---\n');
                 
                 document.getElementById('pushData').value = text;
                 updateStats();
-                showToast(`Loaded ${rows.length} questions`, "info");
+                showToast(`Excel processed: ${rows.length} rows`, "info");
+                generatePreview();
             };
             reader.readAsArrayBuffer(file);
         };
@@ -221,9 +227,82 @@
             document.getElementById('charCount').textContent = `Characters: ${text.length}`;
             const blocks = text.split('---').filter(b => b.trim().length > 0);
             document.getElementById('blockCount').textContent = `Detected Blocks: ${blocks.length}`;
-            
-            const btn = document.getElementById('uploadBtn');
-            btn.disabled = blocks.length === 0;
+        };
+
+        window.generatePreview = () => {
+            const text = document.getElementById('pushData').value.trim();
+            if(!text) return;
+
+            const blocks = text.split('---').filter(b => b.trim().length > 0);
+            stagedQuestions = blocks.map((block, i) => {
+                const lines = block.split('\n').map(l => l.trim());
+                const q = { id: i, image: null };
+                lines.forEach(line => {
+                    if(line.startsWith('Q:')) q.text = line.substring(2).trim();
+                    if(line.startsWith('TYPE:')) q.type = line.substring(5).trim();
+                    if(line.startsWith('MARKS:')) q.marks = line.substring(6).trim();
+                    if(line.startsWith('DIFFICULTY:')) q.diff = line.substring(11).trim();
+                });
+                return q;
+            });
+
+            renderStaging();
+        };
+
+        function renderStaging() {
+            const area = document.getElementById('previewArea');
+            if(stagedQuestions.length === 0) {
+                area.innerHTML = '';
+                return;
+            }
+
+            area.innerHTML = `
+                <div style="margin-bottom:20px; font-weight:800; color:var(--gold); font-size:14px; text-transform:uppercase; letter-spacing:1px;">Staging Area (${stagedQuestions.length} Questions)</div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                    ${stagedQuestions.map(q => `
+                        <div class="preview-card" style="position:relative;">
+                            <div style="font-size:10px; color:var(--gold); margin-bottom:5px;">#${q.id + 1} — ${q.type} [${q.marks}M]</div>
+                            <div style="font-size:13px; font-weight:600; margin-bottom:15px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${q.text}</div>
+                            
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <div id="imgPreview_${q.id}" style="width:50px; height:50px; border:1px solid var(--border); border-radius:8px; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                    ${q.image ? `<img src="${q.image}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:18px; opacity:0.2;">🖼️</span>'}
+                                </div>
+                                <button onclick="triggerImageUpload(${q.id})" style="flex:1; padding:8px; font-size:10px; background:rgba(255,215,0,0.1); border:1px solid var(--gold); color:var(--gold); border-radius:6px; cursor:pointer; font-weight:800;">ATTACH DIAGRAM</button>
+                            </div>
+                            <input type="file" id="file_${q.id}" accept="image/*" style="display:none;" onchange="handleImageAttach(event, ${q.id})">
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        window.triggerImageUpload = (id) => document.getElementById(`file_${id}`).click();
+
+        window.handleImageAttach = (e, id) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64 = event.target.result;
+                stagedQuestions[id].image = base64;
+                
+                // Update specific preview block
+                const text = document.getElementById('pushData').value;
+                const blocks = text.split('---');
+                if(blocks[id]) {
+                    // Check if IMG line already exists
+                    if(blocks[id].includes('IMG:')) {
+                        blocks[id] = blocks[id].replace(/IMG:.*\n/, `IMG: ${base64}\n`);
+                    } else {
+                        blocks[id] = blocks[id].trim() + `\nIMG: ${base64}\n`;
+                    }
+                }
+                document.getElementById('pushData').value = blocks.join('---');
+                renderStaging();
+                showToast(`Diagram attached to #${id + 1}`, "success");
+            };
+            reader.readAsDataURL(file);
         };
 
         window.handleUpload = async () => {
@@ -231,9 +310,11 @@
             const text = document.getElementById('pushData').value.trim();
             if(!text) return showToast("No payload detected", "warning");
 
+            const blocks = text.split('---').filter(b => b.trim().length > 0);
+            
             const btn = document.getElementById('uploadBtn');
             btn.disabled = true;
-            btn.textContent = 'EXECUTING INJECTION...';
+            btn.textContent = `INJECTING ${blocks.length} NODES...`;
 
             const res = await adminApi('/questions/bulk-upload', 'POST', {
                 teacherUid: activeBank.teacherId?._id || activeBank.teacherId,
@@ -248,13 +329,32 @@
             if(res.success) {
                 showToast(res.message, "success");
                 document.getElementById('pushData').value = '';
+                stagedQuestions = [];
+                renderStaging();
                 updateStats();
             } else {
                 showToast(res.message, "error");
             }
         };
 
-        // Initial load removed as we use direct ID entry now
+        document.getElementById('pushData').addEventListener('input', () => {
+            updateStats();
+            // Debounced preview generation or manual button? Manual is safer for large text
+        });
+
+        // Add manual preview trigger
+        const pushArea = document.querySelector('.stats').parentNode;
+        const previewBtn = document.createElement('button');
+        previewBtn.className = 'btn-action';
+        previewBtn.style.background = '#222';
+        previewBtn.style.color = '#fff';
+        previewBtn.style.border = '1px solid #333';
+        previewBtn.style.marginTop = '10px';
+        previewBtn.style.padding = '10px';
+        previewBtn.style.fontSize = '12px';
+        previewBtn.textContent = 'REBUILD STAGING AREA';
+        previewBtn.onclick = () => generatePreview();
+        pushArea.appendChild(previewBtn);
     </script>
 <script src="/assets/js/ripple.js"></script>
 </body>
