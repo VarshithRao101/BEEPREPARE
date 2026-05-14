@@ -121,11 +121,22 @@ exports.getGlobalLeaderboard = async (req, res) => {
             return res.status(200).json({ success: true, rankings: [], message: 'No snapshot available yet' });
         }
 
+        const rankings = snapshot.rankings.map(r => ({
+            rank: r.rank,
+            userId: r.userId,
+            displayName: r.displayName || r.name || 'Anonymous Student',
+            photoUrl: r.photoUrl || r.photo || '../../assets/images/default-avatar.png',
+            className: r.className || r.class || 'N/A',
+            exp: r.exp || 0,
+            streak: r.streak || 0,
+            testsCompleted: r.testsCompleted || 0
+        }));
+
         res.json({
             success: true,
             type: snapshot.type,
             lastUpdated: snapshot.lastUpdated,
-            rankings: snapshot.rankings
+            rankings
         });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Fetch failed' });
@@ -151,10 +162,19 @@ exports.getTeacherLeaderboard = async (req, res) => {
         }).select('googleUid');
         const linkedIds = new Set(linkedUsers.map(u => u.googleUid));
 
-        // 3. Filter global snapshot
+        // 3. Filter global snapshot and map fields for consistency
         const filteredRankings = snapshot.rankings
             .filter(r => linkedIds.has(r.userId))
-            .map((r, index) => ({ ...r, rank: index + 1 }));
+            .map((r, index) => ({
+                rank: index + 1,
+                userId: r.userId,
+                displayName: r.displayName || r.name || 'Anonymous Student',
+                photoUrl: r.photoUrl || r.photo || '../../assets/images/default-avatar.png',
+                className: r.className || r.class || 'N/A',
+                exp: r.exp || 0,
+                streak: r.streak || 0,
+                testsCompleted: r.testsCompleted || 0
+            }));
 
         res.json({
             success: true,

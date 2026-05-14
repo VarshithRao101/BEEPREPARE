@@ -911,13 +911,14 @@ export const BP = {
                 background: rgba(0, 0, 0, 0.4);
             }
             .bee-loader-overlay.active { opacity: 1; pointer-events: all; visibility: visible; }
-            .loader-container { 
+            .bee-loader-card { 
                 background: rgba(15, 15, 20, 0.98); padding: 50px; border-radius: 40px;
                 border: 1px solid rgba(255, 215, 0, 0.3); display: flex; flex-direction: column;
-                align-items: center; gap: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+                align-items: center; justify-content: center; gap: 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.8);
                 transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                min-width: 280px; min-height: 280px;
             }
-            .bee-loader-overlay.active .loader-container { transform: scale(1); }
+            .bee-loader-overlay.active .bee-loader-card { transform: scale(1); }
             .loader-main-text { 
                 color: #FFD700; font-size: 14px; font-weight: 900; letter-spacing: 6px; 
                 text-transform: uppercase; margin-top: 15px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
@@ -954,7 +955,7 @@ export const BP = {
 
     const loaderHtml = `
       <div id="bee-loader-overlay" class="bee-loader-overlay">
-        <div class="loader-container">
+        <div class="bee-loader-card">
           <div class="pl">
             <div class="pl__dot"></div>
             <div class="pl__dot"></div>

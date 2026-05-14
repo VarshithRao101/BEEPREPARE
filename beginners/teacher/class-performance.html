@@ -8,60 +8,208 @@
     <link rel="stylesheet" href="../../assets/css/student-theme.css">
     <link rel="stylesheet" href="../../assets/css/premium-student-ui.css">
     <style>
+        :root {
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+        }
+
+        .content-wrapper {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* Podium Section */
+        .podium-section {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            align-items: flex-end;
+            gap: 20px;
+            margin-bottom: 50px;
+            padding: 20px 0;
+        }
+
+        .podium-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            padding: 30px 15px;
+            text-align: center;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: slideUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .podium-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .podium-card.rank-1 {
+            order: 2;
+            padding: 50px 20px;
+            background: linear-gradient(145deg, rgba(255, 215, 0, 0.1), rgba(20, 20, 20, 0.4));
+            border: 1px solid var(--gold);
+            animation-delay: 0.2s;
+        }
+
+        .podium-card.rank-2 { order: 1; border-color: var(--silver); animation-delay: 0.1s; }
+        .podium-card.rank-3 { order: 3; border-color: var(--bronze); animation-delay: 0.3s; }
+
+        .podium-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto 15px auto;
+            object-fit: cover;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .rank-1 .podium-avatar {
+            width: 110px;
+            height: 110px;
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .podium-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .podium-name {
+            font-weight: 800;
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .podium-stat {
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        /* Table Styling */
         .performance-card {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            padding: 25px;
-            margin-bottom: 30px;
+            background: rgba(15, 15, 15, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
         .perf-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0 12px;
         }
 
         .perf-table th {
-            text-align: left;
-            padding: 15px;
+            padding: 15px 20px;
             font-size: 11px;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--border);
+            letter-spacing: 2px;
+            font-weight: 800;
+            border: none;
         }
 
-        .perf-table td {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .rank-row {
+            background: rgba(255, 255, 255, 0.02);
+            transition: all 0.3s ease;
         }
+
+        .rank-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.01);
+        }
+
+        .rank-row td {
+            padding: 18px 20px;
+            border: none;
+        }
+
+        .rank-row td:first-child { border-radius: 16px 0 0 16px; }
+        .rank-row td:last-child { border-radius: 0 16px 16px 0; }
 
         .student-pill {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
         .student-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--surface);
-            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .exp-badge {
             background: rgba(255, 215, 0, 0.1);
             color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 6px 14px;
+            border-radius: 12px;
             font-weight: 900;
-            font-size: 12px;
+            font-size: 13px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
         }
 
         .streak-val {
-            font-weight: 800;
+            font-weight: 900;
             color: #FF4500;
+            font-size: 15px;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 10px 25px;
+            border-radius: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .podium-section { grid-template-columns: 1fr; }
+            .podium-card.rank-1 { order: 1; }
+            .podium-card.rank-2 { order: 2; }
+            .podium-card.rank-3 { order: 3; }
         }
     </style>
 </head>
@@ -84,15 +232,19 @@
         <main class="content-wrapper">
             <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
                 <div>
-                    <h2 class="welcome-title-styled" style="background: linear-gradient(135deg, #fff, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0; font-size: 32px; font-weight: 900;">Class Performance</h2>
-                    <p style="color: var(--text-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px;">Tracking Linked Student Growth</p>
+                    <h2 style="background: linear-gradient(135deg, #fff, var(--primary)); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0; font-size: 38px; font-weight: 900;">Class Performance</h2>
+                    <p style="color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; margin-top: 5px;">Academic Wall of Fame</p>
                 </div>
-                <div class="stat-toggle" style="margin: 0;">
+                <div class="stat-toggle" style="display: flex; gap: 10px;">
                     <button class="toggle-btn active" id="btn-daily" onclick="switchType('daily')">Daily</button>
                     <button class="toggle-btn" id="btn-monthly" onclick="switchType('monthly')">Monthly</button>
                     <button class="toggle-btn" id="btn-yearly" onclick="switchType('yearly')">Yearly</button>
                 </div>
             </header>
+
+            <div id="podium-container" class="podium-section">
+                <!-- Dynamic Podium -->
+            </div>
 
             <div class="performance-card">
                 <table class="perf-table">
@@ -110,13 +262,13 @@
                         <!-- Dynamic -->
                     </tbody>
                 </table>
-                <div id="empty-state" style="display: none; text-align: center; padding: 40px; color: var(--text-muted);">
-                    No students have activated your banks yet.
+                <div id="empty-state" style="display: none; text-align: center; padding: 60px; color: var(--text-muted);">
+                    <div style="font-size: 40px; margin-bottom: 20px;">🏆</div>
+                    <p style="font-weight: 800; font-size: 18px; color: #fff;">No Rankings Found</p>
+                    <p style="font-size: 13px;">Rankings refresh every 24 hours. Keep pushing!</p>
                 </div>
             </div>
         </main>
-    </div>
-
     <script type="module">
         import { apiCall, guardTeacher, initPage } from '../../assets/js/bee-core.js';
 
@@ -125,25 +277,53 @@
         async function loadData() {
             const res = await apiCall(`/leaderboard/teacher?type=${currentType}`, 'GET');
             const tbody = document.getElementById('performance-body');
+            const podium = document.getElementById('podium-container');
             const empty = document.getElementById('empty-state');
             
             tbody.innerHTML = '';
+            podium.innerHTML = '';
             
             if (res && res.success && res.rankings && res.rankings.length > 0) {
                 empty.style.display = 'none';
-                res.rankings.forEach(r => {
+                
+                const rankings = res.rankings;
+                const top3 = rankings.slice(0, 3);
+                const rest = rankings.slice(3);
+
+                // Render Podium
+                const colors = ['var(--gold)', 'var(--silver)', 'var(--bronze)'];
+                const labels = ['Champion', 'Elite', 'Expert'];
+                
+                // Reorder for visual podium: 2, 1, 3
+                const displayOrder = [1, 0, 2];
+                displayOrder.forEach(idx => {
+                    const r = top3[idx];
+                    if (!r) return;
+                    podium.insertAdjacentHTML('beforeend', `
+                        <div class="podium-card rank-${idx + 1}">
+                            <div class="podium-badge" style="background: ${colors[idx]}; color: #000;">#${idx + 1} ${labels[idx]}</div>
+                            <img src="${r.photoUrl || '../../assets/images/default-avatar.png'}" class="podium-avatar" onerror="this.src='../../assets/images/default-avatar.png'">
+                            <div class="podium-name">${r.displayName}</div>
+                            <div class="podium-stat">${r.exp} <span style="font-size: 10px; opacity: 0.6;">XP</span></div>
+                        </div>
+                    `);
+                });
+
+                // Render Table
+                rankings.forEach(r => {
                     const tr = document.createElement('tr');
+                    tr.className = 'rank-row';
                     tr.innerHTML = `
-                        <td style="font-weight: 900; color: var(--text-muted);">#${r.rank}</td>
+                        <td style="font-weight: 900; color: var(--text-muted); font-size: 18px;">#${r.rank}</td>
                         <td>
                             <div class="student-pill">
                                 <img src="${r.photoUrl || '../../assets/images/default-avatar.png'}" class="student-avatar" onerror="this.src='../../assets/images/default-avatar.png'">
-                                <span style="font-weight: 700; color: #fff;">${r.displayName}</span>
+                                <span style="font-weight: 700; color: #fff; font-size: 15px;">${r.displayName}</span>
                             </div>
                         </td>
-                        <td style="font-weight: 800; font-size: 11px; color: var(--text-muted);">${r.className || 'N/A'}</td>
-                        <td class="streak-val">${r.streak} Days</td>
-                        <td style="font-weight: 600;">${r.testsCompleted || 0}</td>
+                        <td style="font-weight: 800; font-size: 12px; color: var(--text-muted);">${r.className || 'N/A'}</td>
+                        <td class="streak-val">🔥 ${r.streak} Days</td>
+                        <td style="font-weight: 700; color: #fff;">${r.testsCompleted || 0}</td>
                         <td style="text-align: right;">
                             <span class="exp-badge">${r.exp} XP</span>
                         </td>
