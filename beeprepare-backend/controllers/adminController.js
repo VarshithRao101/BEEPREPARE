@@ -18,6 +18,7 @@ const Bookmark = require('../models/Bookmark');
 const AccessRequest = require('../models/AccessRequest');
 const StudyCircle = require('../models/StudyCircle');
 const SystemConfig = require('../models/SystemConfig');
+const LeaderboardSnapshot = require('../models/LeaderboardSnapshot');
 const { db } = require('../config/firebase');
 const fs = require('fs');
 const path = require('path');
@@ -484,6 +485,7 @@ const updateUserName = async (req, res) => {
 
 const modifyLeaderboard = async (req, res) => {
     try {
+        await connectDB();
         const { userId, exp, dailyExp, monthlyExp, yearlyExp } = req.body;
         
         if (!userId) return error(res, 'User ID required', 'MISSING_UID', 400);
@@ -514,6 +516,38 @@ const modifyLeaderboard = async (req, res) => {
         console.error('modifyLeaderboard error:', err);
         return error(res, 'Failed to update stats', 'SERVER_ERROR', 500);
     }
+};
+
+const getLeaderboard = async (req, res) => {
+  try {
+    await connectDB();
+    const { type = 'daily' } = req.query;
+    const snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
+
+    if (!snapshot) {
+      return success(res, 'No snapshot available yet', { rankings: [] });
+    }
+
+    const rankings = snapshot.rankings.map(r => ({
+      rank: r.rank,
+      userId: r.userId,
+      displayName: r.displayName || r.name || 'Anonymous Student',
+      photoUrl: r.photoUrl || r.photo || '/assets/images/default-avatar.png',
+      className: r.className || r.class || 'N/A',
+      exp: r.exp || 0,
+      streak: r.streak || 0,
+      testsCompleted: r.testsCompleted || 0
+    }));
+
+    return success(res, 'Leaderboard data fetched', {
+      type: snapshot.type,
+      lastUpdated: snapshot.lastUpdated,
+      rankings
+    });
+  } catch (err) {
+    console.error('getLeaderboard error:', err);
+    return error(res, 'Failed to fetch leaderboard data', 'SERVER_ERROR', 500);
+  }
 };
 
 // ============ PAYMENT MANAGEMENT ============
@@ -1605,7 +1639,7 @@ module.exports = {
   removeAnnouncement, updateSystemKey,
   getLogs, clearLogs, restartServer,
   getBlacklist, addToBlacklist, removeFromBlacklist,
-  updateUserName, modifyLeaderboard, getActivity, getStorageStats,
+  updateUserName, modifyLeaderboard, getLeaderboard, getActivity, getStorageStats,
   bulkUploadQuestions, getTeachers, getTeacherBanks,
   deletePaymentRequest, deleteLicenseKey,
   getStudyCircles, deleteStudyCircle

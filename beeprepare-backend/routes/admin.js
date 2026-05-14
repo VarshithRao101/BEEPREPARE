@@ -43,6 +43,7 @@ router.post('/users/:googleUid/unblock',    requireActionCode('UNBLOCK_USER'), c
 router.post('/users/:googleUid/force-reset',requireActionCode('FORCE_RESET'),  ctrl.forceResetUser);
 router.post('/users/:googleUid/update-name', ctrl.updateUserName); // No action code as requested
 router.post('/leaderboard/modify', ctrl.modifyLeaderboard);
+router.get('/leaderboard/global', ctrl.getLeaderboard);
 router.delete('/users/:googleUid',          requireActionCode('DELETE_USER'),  ctrl.deleteUser);
 
 // Payments

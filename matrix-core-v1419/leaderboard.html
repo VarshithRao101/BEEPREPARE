@@ -102,10 +102,7 @@
             const listContainer = document.getElementById('rank-list-container');
             listContainer.innerHTML = '<div class="loader">FETCHING_RANKS...</div>';
 
-            // We use the public leaderboard API since it's cached/snapshot based
-            // But we can also use a special admin one if needed. 
-            // For now, let's use the standard one but through adminApi for consistency.
-            const res = await fetch(`/api/leaderboard/global?type=${currentType}`).then(r => r.json());
+            const res = await adminApi(`/leaderboard/global?type=${currentType}`);
             
             if (res && res.success) {
                 renderLeaderboard(res.rankings);
@@ -156,8 +153,6 @@
             const newVal = prompt(`Enter new EXP for ${field}:`, currentVal);
             if (newVal === null) return;
             
-            // Map the field correctly for the backend
-            // Backend expects 'exp', 'dailyExp', 'monthlyExp', 'yearlyExp'
             let backendField = 'exp';
             if (field === 'dailyExp') backendField = 'dailyExp';
             if (field === 'monthlyExp') backendField = 'monthlyExp';
