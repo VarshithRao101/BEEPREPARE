@@ -29,7 +29,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .main-bg {
@@ -291,18 +292,11 @@
           const provider = new GoogleAuthProvider();
           provider.setCustomParameters({ prompt: 'select_account' });
 
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-                        || window.innerWidth < 768;
-
           try {
             sessionStorage.setItem('_loginInProgress', '1');
-            if (isMobile) {
-              sessionStorage.setItem('_loginRedirectPending', '1');
-              await signInWithRedirect(auth, provider);
-            } else {
-              const result = await signInWithPopup(auth, provider);
-              await handleAuthResult(result);
-            }
+            // Standardizing on Popup for all devices to avoid Redirect state loss on mobile
+            const result = await signInWithPopup(auth, provider);
+            await handleAuthResult(result);
           } catch (err) {
             console.error('Login error:', err);
             btn.disabled = false;
