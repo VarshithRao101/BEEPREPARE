@@ -270,10 +270,10 @@
                 <label>Signal Type</label>
                 <div style="position: relative;">
                     <select id="signalType">
-                        <option value="bug">🐞 ARCHITECTURAL BUG</option>
-                        <option value="feature">💡 CORE FEATURE REQUEST</option>
-                        <option value="rating" selected>⭐ EXPERIENCE FEEDBACK</option>
-                        <option value="content">🧠 CURRICULUM DISCREPANCY</option>
+                        <option value="bug">ARCHITECTURAL BUG</option>
+                        <option value="feature">CORE FEATURE REQUEST</option>
+                        <option value="rating" selected>EXPERIENCE FEEDBACK</option>
+                        <option value="content">CURRICULUM DISCREPANCY</option>
                     </select>
                 </div>
             </div>
@@ -300,14 +300,6 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Evidence Vault (Optional)</label>
-                <div class="vault-upload-trigger" onclick="document.getElementById('filePayload').click()">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,215,0,0.4)" stroke-width="2.5" style="margin-bottom: 10px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    <div style="font-size: 12px; font-weight: 800; color: #888;">UPLOAD SCHEMATIC DATA</div>
-                    <input type="file" id="filePayload" style="display: none;">
-                </div>
-            </div>
 
             <button class="transmit-btn" id="transmitBtn" onclick="transmitSignal()">
                 Transmit Signal
@@ -367,26 +359,11 @@
             });
         }
 
-        // Vault Upload Sync
-        document.getElementById('filePayload').onchange = (e) => {
-            if(e.target.files.length > 0) {
-                const file = e.target.files[0];
-                if (file.size > 5 * 1024 * 1024) {
-                    Swal.fire({ icon: 'error', title: 'PAYLOAD OVERLOAD', text: 'File must be under 5MB.', background: '#080808', color: '#fff' });
-                    e.target.value = '';
-                    return;
-                }
-                const label = document.querySelector('.vault-upload-trigger div');
-                label.innerText = 'VAULTED: ' + file.name.toUpperCase();
-                label.style.color = 'var(--primary)';
-            }
-        };
 
         // Transmit Signal Sequence
         window.transmitSignal = async function() {
             const type = document.getElementById('signalType').value;
             const msg = document.getElementById('signalMsg').value.trim();
-            const fileInput = document.getElementById('filePayload');
             
             if(!msg && currentRating === 0) {
                 await Swal.fire({
@@ -405,30 +382,12 @@
             btn.disabled = true;
 
             try {
-                const formData = new FormData();
-                formData.append('feedbackType', type);
-                formData.append('message', msg);
-                formData.append('rating', currentRating);
-                
-                if (fileInput.files[0]) {
-                    formData.append('attachment', fileInput.files[0]);
-                }
-
-                // Hang Prevention: 10s Timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-                const token = await getFreshToken();
-                const response = await fetch(`${API_BASE}/feedback`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData,
-                    signal: controller.signal
+                const result = await apiCall('/feedback', 'POST', {
+                    feedbackType: type,
+                    message: msg,
+                    rating: currentRating
                 });
 
-                clearTimeout(timeoutId);
-
-                const result = await response.json();
                 if (result.success) {
                     document.getElementById('signalOverlay').style.display = 'flex';
                 } else {
