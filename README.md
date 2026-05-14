@@ -1,6 +1,6 @@
 # BEEPREPARE - The Ultimate Academic Preparation Node
 
-![BEEPREPARE Banner](assets/images/premium-bg.png)
+
 
 > **Institutional-grade preparation platform for students and educators.**  
 > Built with a high-security architecture, real-time synchronization, and AI-driven insights.

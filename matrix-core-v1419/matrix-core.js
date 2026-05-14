@@ -117,7 +117,7 @@ export async function showCodeModal(title, desc, isDangerous = false) {
         overlay.style.cssText = `
             position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             backdrop-filter: blur(10px); display: flex; align-items: center;
-            justify-content: center; z-index: 10000; font-family: 'Outfit', sans-serif;
+            justify-content: center; z-index: 200000; font-family: 'Outfit', sans-serif;
         `;
         overlay.innerHTML = `
             <div class="glass" style="

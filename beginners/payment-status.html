@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -186,6 +186,28 @@
             line-height: 1.6;
         }
         .contact-card b { color: var(--primary); }
+
+        /* SweetAlert2 Overrides — Ensure modals are above loaders/nav */
+        .swal2-container {
+            z-index: 1000000 !important;
+        }
+        .swal2-popup {
+            background: rgba(15, 15, 15, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid var(--primary) !important;
+            border-radius: 24px !important;
+            color: #fff !important;
+        }
+        .swal2-title { color: #fff !important; font-weight: 800 !important; }
+        .swal2-html-container { color: var(--text-muted) !important; font-weight: 500 !important; }
+        .swal2-confirm { 
+            background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+            color: #000 !important;
+            font-weight: 900 !important;
+            border-radius: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+        }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>

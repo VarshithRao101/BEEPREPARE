@@ -19,20 +19,18 @@ router.post('/submit',
 );
 
 // GET /api/payment/status/:utrNumber
-// Was public — now requires auth to prevent data harvesting
+// Public route - students check this without an account
 router.get('/status/:utrNumber',
-  requireAuth,                 // ← SECURED: was completely public
-  utrFormatHardening,          // ← validate UTR format even in GET
+  utrFormatHardening,          // ← validate UTR format
   ctrl.checkPaymentStatus
 );
 
-// GET /api/payment/config — public OK (no sensitive data, just UPI info)
+// GET /api/payment/config — public OK
 router.get('/config', ctrl.getPaymentConfig);
 
 // POST /api/payment/resend/:utrNumber
-// Was public — now requires auth
+// Public route
 router.post('/resend/:utrNumber',
-  requireAuth,                 // ← SECURED: was completely public
   utrFormatHardening,
   ctrl.resendApprovalEmail
 );

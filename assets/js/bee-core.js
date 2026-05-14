@@ -904,10 +904,7 @@ export const BP = {
         style.id = 'bee-loader-style-inline';
         style.textContent = `
             .bee-loader-overlay {
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(5, 5, 5, 0.95);
-                display: none; align-items: center; justify-content: center;
-                z-index: 999999; opacity: 0; transition: opacity 0.4s ease;
+                z-index: 100000; opacity: 0; transition: opacity 0.4s ease;
                 pointer-events: none; backdrop-filter: blur(10px);
             }
             .bee-loader-overlay.active { display: flex; opacity: 1; pointer-events: all; visibility: visible; }

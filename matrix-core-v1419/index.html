@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -567,27 +567,21 @@
         }
 
         async function loadQuickStats() {
-            const token = sessionStorage.getItem('admin_token');
             try {
-                const res = await fetch('/api/admin/overview', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById('stat-users').innerText = data.data.activeNodes || 0;
-                    document.getElementById('stat-payments').innerText = data.data.pendingPayments || 0;
-                    document.getElementById('stat-banks').innerText = data.data.totalBanks || 0;
+                const res = await adminApi('/overview');
+                if (res && res.success) {
+                    const data = res.data;
+                    document.getElementById('stat-users').innerText = data.activeNodes || 0;
+                    document.getElementById('stat-payments').innerText = data.pendingPayments || 0;
+                    document.getElementById('stat-banks').innerText = data.totalBanks || 0;
                     
-                    const keysRes = await fetch('/api/admin/keys/stats', {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                    const keysData = await keysRes.json();
-                    if (keysData.success) {
-                        // Sum both activation and redeem available keys
+                    // Fetch keys stats
+                    const keysData = await adminApi('/keys/stats');
+                    if (keysData && keysData.success) {
                         const avail = (keysData.data.activation?.available || 0) + 
                                      (keysData.data.redeem?.available || 0);
                         document.getElementById('stat-keys').innerText = avail;
-                        updateBadges(data.data, keysData.data);
+                        updateBadges(data, keysData.data);
                     }
                 }
             } catch (err) {

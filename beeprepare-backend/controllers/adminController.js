@@ -138,20 +138,33 @@ const verifySession = async (req, res) => {
 // ============ OVERVIEW ============
 
 const getDbHealth = async () => {
-  const { getMainConn, getQuestionsConn } = require('../config/db');
-  const mainConn = getMainConn();
-  const questionsConn = getQuestionsConn();
+  let mainStatus = 'disconnected';
+  let questionsStatus = 'disconnected';
+  let mainReadyState = 0;
+  let questionsReadyState = 0;
+
+  try {
+    const mainConn = getMainConn();
+    mainStatus = mainConn.readyState === 1 ? 'connected' : 'disconnected';
+    mainReadyState = mainConn.readyState;
+  } catch (e) {}
+
+  try {
+    const questionsConn = getQuestionsConn();
+    questionsStatus = questionsConn.readyState === 1 ? 'connected' : 'disconnected';
+    questionsReadyState = questionsConn.readyState;
+  } catch (e) {}
 
   return {
     mainDb: {
-      status: mainConn.readyState === 1 ? 'connected' : 'disconnected',
+      status: mainStatus,
       cluster: 'Cluster 2 (App State)',
-      readyState: mainConn.readyState
+      readyState: mainReadyState
     },
     questionsDb: {
-      status: questionsConn.readyState === 1 ? 'connected' : 'disconnected',
+      status: questionsStatus,
       cluster: 'Cluster 1 (Academic)',
-      readyState: questionsConn.readyState
+      readyState: questionsReadyState
     }
   };
 };
@@ -159,49 +172,45 @@ const getDbHealth = async () => {
 const getOverview = async (req, res) => {
   try {
     await connectDB();
+    // Fetch stats in two groups to avoid blocking main data if questions DB is slow
     const [
       totalUsers,
       totalTeachers,
       totalStudents,
       incompleteUsers,
       totalBanks,
-      totalQuestions,
-      totalTestsGenerated,
       pendingPayments,
       approvedPayments,
       recentSignups,
       maintSetting,
-      announcement,
-      dbHealth
+      announcement
     ] = await Promise.all([
-      User.countDocuments({
-        isActivated: true,
-        role: { $in: ['teacher', 'student'] }
-      }),
-      User.countDocuments({
-        isActivated: true,
-        role: 'teacher'
-      }),
-      User.countDocuments({
-        isActivated: true,
-        role: 'student'
-      }),
-      User.countDocuments({
-        $or: [
-          { isActivated: false },
-          { role: null }
-        ]
-      }),
+      User.countDocuments({ isActivated: true, role: { $in: ['teacher', 'student'] } }),
+      User.countDocuments({ isActivated: true, role: 'teacher' }),
+      User.countDocuments({ isActivated: true, role: 'student' }),
+      User.countDocuments({ $or: [{ isActivated: false }, { role: null }] }),
       Bank.countDocuments(),
-      Question.countDocuments(),
-      TestSession.countDocuments(),
       PaymentRequest.countDocuments({ status: 'pending' }),
       PaymentRequest.find({ status: 'approved' }).lean(),
       User.find().sort({ createdAt: -1 }).limit(10).select('email displayName role createdAt').lean(),
       AppSettings.findOne({ key: 'maintenance_mode' }).lean(),
-      Announcement.findOne({ isActive: true }).sort({ createdAt: -1 }).lean(),
-      getDbHealth()
+      Announcement.findOne({ isActive: true }).sort({ createdAt: -1 }).lean()
     ]);
+
+    // Group 2: Potentially slow or separate DBs
+    let totalQuestions = 0;
+    let totalTestsGenerated = 0;
+    let dbHealth = { mainDb: { status: 'unknown' }, questionsDb: { status: 'unknown' } };
+
+    try {
+      [totalQuestions, totalTestsGenerated, dbHealth] = await Promise.all([
+        Question.countDocuments().catch(() => 0),
+        TestSession.countDocuments().catch(() => 0),
+        getDbHealth()
+      ]);
+    } catch (err) {
+      console.warn('Non-critical overview data fetch failed:', err.message);
+    }
 
     const totalRevenue = approvedPayments.reduce((sum, p) => sum + p.amount, 0);
 
