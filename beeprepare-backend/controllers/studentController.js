@@ -681,57 +681,77 @@ const generateTest = async (req, res) => {
     const sectionDefs = [];
     const labels = ['A', 'B', 'C', 'D', 'E'];
 
-    // blueprint: [{ type: 'MCQ', marks: 1, count: 5 }, ...]
+    // Step 3: Blueprint processing
     blueprint.forEach((sectionReq, idx) => {
-      const typeName = sectionReq.type;
-      const needed = parseInt(sectionReq.count) || 0;
       const requestedMarks = parseInt(sectionReq.marks) || 1;
+      let sectionQuestions = [];
+      let subRequests = [];
 
-      if (needed === 0) return;
-
-      const foundPool = pools[typeName];
-      if (!foundPool || foundPool.questions.length === 0) return;
-
-      const importantPool = foundPool.questions.filter(q => q.isImportant || (q.tags && q.tags.includes('Important')));
-      const normalPool = foundPool.questions.filter(q => !q.isImportant && !(q.tags && q.tags.includes('Important')));
-
-      const importantNeeded = Math.ceil(needed * 0.70);
-      const normalNeeded = needed - importantNeeded;
-
-      let fromImportant, fromNormal;
-
-      if (importantPool.length < importantNeeded) {
-        const deficit = importantNeeded - importantPool.length;
-        fromImportant = importantPool;
-        fromNormal = shuffleArray(normalPool).slice(0, normalNeeded + deficit);
+      if (sectionReq.type === 'Custom' && sectionReq.customTypes) {
+        Object.entries(sectionReq.customTypes).forEach(([type, qty]) => {
+          if (qty > 0) subRequests.push({ type, qty });
+        });
       } else {
-        fromImportant = shuffleArray(importantPool).slice(0, importantNeeded);
-        fromNormal = shuffleArray(normalPool).slice(0, normalNeeded);
+        const needed = parseInt(sectionReq.count) || 0;
+        if (needed > 0) subRequests.push({ type: sectionReq.type, qty: needed });
       }
 
-      let typeSelected = [...fromImportant, ...fromNormal].slice(0, needed);
-      
-      // Map to session schema (cross-DB safe) and apply blueprint marks
-      typeSelected = typeSelected.map(q => {
-        const plain = q.toObject ? q.toObject() : q;
-        return {
-          questionId: String(plain._id),
-          questionText: plain.questionText,
-          questionType: plain.questionType,
-          marks: requestedMarks,
-          mcqOptions: plain.mcqOptions,
-          correctOption: plain.correctOption
-        };
+      if (subRequests.length === 0) return;
+
+      subRequests.forEach(subReq => {
+        const typeName = subReq.type;
+        const needed = subReq.qty;
+        const foundPool = pools[typeName];
+
+        if (!foundPool || foundPool.questions.length === 0) return;
+
+        const importantPool = foundPool.questions.filter(q => q.isImportant || (q.tags && q.tags.includes('Important')));
+        const normalPool = foundPool.questions.filter(q => !q.isImportant && !(q.tags && q.tags.includes('Important')));
+
+        const importantNeeded = Math.ceil(needed * 0.70);
+        const normalNeeded = needed - importantNeeded;
+
+        let fromImportant, fromNormal;
+
+        if (importantPool.length < importantNeeded) {
+          const deficit = importantNeeded - importantPool.length;
+          fromImportant = importantPool;
+          fromNormal = shuffleArray(normalPool).slice(0, normalNeeded + deficit);
+        } else {
+          fromImportant = shuffleArray(importantPool).slice(0, importantNeeded);
+          fromNormal = shuffleArray(normalPool).slice(0, normalNeeded);
+        }
+
+        let typeSelected = [...fromImportant, ...fromNormal].slice(0, needed);
+        
+        typeSelected = typeSelected.map(q => {
+          const plain = q.toObject ? q.toObject() : q;
+          return {
+            questionId: String(plain._id),
+            questionText: plain.questionText,
+            questionType: plain.questionType,
+            marks: requestedMarks,
+            mcqOptions: plain.mcqOptions,
+            correctOption: plain.correctOption,
+            imageUrl: plain.imageUrl,
+            pairs: plain.pairs,
+            rows: plain.rows,
+            columns: plain.columns,
+            subQuestions: plain.subQuestions
+          };
+        });
+        sectionQuestions.push(...typeSelected);
       });
 
-      if (typeSelected.length > 0) {
-        selected.push(...typeSelected);
+      if (sectionQuestions.length > 0) {
+        selected.push(...sectionQuestions);
         sectionDefs.push({
           label: labels[sectionDefs.length] || '?',
-          type: typeName,
+          type: sectionReq.type === 'Custom' ? 'Mixed Section' : sectionReq.type,
           marksEach: requestedMarks,
-          count: typeSelected.length,
-          total: typeSelected.length * requestedMarks
+          count: sectionQuestions.length,
+          total: sectionQuestions.length * requestedMarks,
+          questions: sectionQuestions
         });
       }
     });
@@ -778,8 +798,8 @@ const generateTest = async (req, res) => {
 
     let qNumber = 1;
     for (const [idx, section] of sectionDefs.entries()) {
-      const sectionQs = selected.filter(q => q.questionType === section.type);
-      if (sectionQs.length === 0) continue;
+      const sectionQs = section.questions;
+      if (!sectionQs || sectionQs.length === 0) continue;
 
       paperHtml += `
       <div style="text-align: center; font-weight: bold; text-transform: uppercase; padding: 5px; background: #f2f2f2; border: 1px solid #ccc; margin: 20px 0 10px 0; font-family: sans-serif; font-size: 14px;">
@@ -791,7 +811,7 @@ const generateTest = async (req, res) => {
 
       for (const q of sectionQs) {
         paperHtml += `
-        <div class="question-item" style="margin-bottom: 15px; font-family: 'Times New Roman', serif; position: relative;">
+        <div class="question-item" style="margin-bottom: 20px; font-family: 'Times New Roman', serif; position: relative; page-break-inside: avoid;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div style="flex: 1; padding-right: 30px;">
               <strong>Q${qNumber}.</strong> ${q.questionText}
@@ -801,9 +821,16 @@ const generateTest = async (req, res) => {
             </div>
           </div>`;
 
+        if (q.imageUrl) {
+          paperHtml += `
+          <div style="margin: 10px 0 10px 40px; text-align: left;">
+            <img src="${q.imageUrl}" alt="Diagram" style="max-width: 100%; max-height: 250px; border: 1px solid #ddd; border-radius: 4px;">
+          </div>`;
+        }
+
         if (q.questionType === 'MCQ' && q.mcqOptions) {
           paperHtml += `
-          <div class="mcq-options-grid" style="margin: 0.8em 0 0 2.5em; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5em 1.5em; font-size: 0.95em;">
+          <div class="mcq-options-grid" style="margin: 10px 0 0 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 20px; font-size: 0.95em;">
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(A)</span> <span>${q.mcqOptions.A || ''}</span></div>
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(B)</span> <span>${q.mcqOptions.B || ''}</span></div>
             <div style="display: flex; gap: 8px;"><span style="font-weight: bold;">(C)</span> <span>${q.mcqOptions.C || ''}</span></div>
@@ -812,56 +839,52 @@ const generateTest = async (req, res) => {
         }
 
         if (q.questionType === 'True or False') {
-          paperHtml += `<span style="float: right; margin-right: 15px; border-bottom: 1px dotted #999;">......................................... [ True / False ]</span>`;
+          paperHtml += `<div style="text-align: right; margin-top: 5px; font-style: italic; color: #666;">(Answer: True / False)</div>`;
         }
 
         if (q.questionType === 'Simple Matching' && q.pairs) {
           paperHtml += `
-          <div style="margin: 1.5em 0 0 2.5em; display: flex; gap: 50px;">
+          <div style="margin: 15px 0 0 40px; display: flex; gap: 40px;">
             <div style="flex: 1;">
-              ${q.pairs.map((p, i) => `<div style="margin-bottom: 8px;">${i+1}. ${p.left || ''}</div>`).join('')}
+              ${q.pairs.map((p, i) => `<div style="margin-bottom: 5px;">${i+1}. ${p.left || ''}</div>`).join('')}
             </div>
-            <div style="width: 50px; display: flex; flex-direction: column; gap: 8px;">
-              ${q.pairs.map(() => `<div>[ &nbsp; &nbsp; ]</div>`).join('')}
+            <div style="width: 40px; display: flex; flex-direction: column; gap: 5px; align-items: center;">
+              ${q.pairs.map(() => `<div>.....</div>`).join('')}
             </div>
             <div style="flex: 1;">
-              ${q.pairs.map((p, i) => `<div style="margin-bottom: 8px;">${String.fromCharCode(65+i)}. ${p.right || ''}</div>`).join('')}
+              ${q.pairs.map((p, i) => `<div style="margin-bottom: 5px;">${String.fromCharCode(65+i)}. ${p.right || ''}</div>`).join('')}
             </div>
           </div>`;
         }
 
         if (q.questionType === 'Matrix Matching' && q.rows && q.columns) {
           paperHtml += `
-          <div style="margin: 1.5em 0 0 2.5em; display: flex; gap: 50px;">
+          <div style="margin: 15px 0 0 40px; display: flex; gap: 40px;">
             <div style="flex: 1;">
-              ${q.rows.map((r, i) => `<div style="margin-bottom: 8px;">${i+1}. ${r}</div>`).join('')}
+              ${q.rows.map((r, i) => `<div style="margin-bottom: 5px;">${i+1}. ${r}</div>`).join('')}
             </div>
-            <div style="width: 50px; display: flex; flex-direction: column; gap: 8px;">
-              ${q.rows.map(() => `<div>[ &nbsp; &nbsp; ]</div>`).join('')}
+            <div style="width: 40px; display: flex; flex-direction: column; gap: 5px; align-items: center;">
+              ${q.rows.map(() => `<div>.....</div>`).join('')}
             </div>
             <div style="flex: 1;">
-              ${q.columns.map((c, i) => `<div style="margin-bottom: 8px;">${String.fromCharCode(65+i)}. ${c}</div>`).join('')}
+              ${q.columns.map((c, i) => `<div style="margin-bottom: 5px;">${String.fromCharCode(65+i)}. ${c}</div>`).join('')}
             </div>
           </div>`;
         }
 
         if (['Reading Passage', 'Case Study', 'Data Interpretation'].includes(q.questionType) && q.subQuestions) {
-          paperHtml += `<div style="margin: 1em 0 0 2.5em;">`;
+          paperHtml += `<div style="margin: 15px 0 0 40px; border-left: 2px solid #eee; padding-left: 15px;">`;
           q.subQuestions.forEach((sq, idx) => {
              paperHtml += `
-             <div style="margin-bottom: 0.8em; display: flex; justify-content: space-between;">
+             <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
                <div><strong>(${idx + 1})</strong> ${sq.questionText}</div>
-               <div>[${sq.marks || 1}]</div>
+               <div style="font-style: italic;">[${sq.marks || 1}]</div>
              </div>`;
           });
           paperHtml += `</div>`;
         }
 
-        paperHtml += `
-          <div class="q-actions" style="position: absolute; right: -30px; top: 0; display: none;">
-            <div class="action-icon" title="Delete">×</div>
-          </div>
-        </div>`;
+        paperHtml += `</div>`;
         qNumber++;
       }
     }

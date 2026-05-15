@@ -183,6 +183,137 @@
 
         .gen-overlay.active { display: flex; }
 
+        /* CUSTOM MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 11000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal-content {
+            background: #0a0a0a;
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 32px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            transform: translateY(20px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .modal-title {
+            font-size: 24px;
+            font-weight: 950;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .modal-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
+
+        .type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .type-grid::-webkit-scrollbar { width: 4px; }
+        .type-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .type-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .type-item:hover { border-color: var(--primary); background: rgba(255,215,0,0.02); }
+        .type-item.active { border-color: var(--primary); background: rgba(255,215,0,0.05); }
+
+        .type-name { font-size: 13px; font-weight: 800; color: #fff; }
+        .type-controls { display: flex; align-items: center; gap: 12px; }
+        .mini-cnt-btn {
+            width: 30px; height: 30px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            transition: 0.2s;
+        }
+        .mini-cnt-btn:hover { background: var(--primary); color: #000; }
+        .type-val { min-width: 22px; text-align: center; font-weight: 950; color: #fff; font-size: 15px; }
+
+        .modal-footer {
+            margin-top: 35px;
+            display: flex;
+            gap: 15px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 20px;
+            border-radius: 18px;
+            font-weight: 950;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 13px;
+        }
+        .btn-cancel { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; }
+        .btn-save { background: var(--primary); border: none; color: #000; box-shadow: 0 10px 20px rgba(255,215,0,0.2); }
+        .btn-save:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255,215,0,0.3); }
+
+        .customize-trigger {
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px dashed var(--primary);
+            background: rgba(255,215,0,0.05);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .customize-trigger:hover { background: var(--primary); color: #000; }
+
         @media (min-width: 769px) {
             .paper-layout {
                 display: grid;
@@ -318,6 +449,23 @@
         <div style="margin-top: 30px; font-weight: 900; color: var(--primary); letter-spacing: 4px; text-transform: uppercase;">Assembling Paper...</div>
     </div>
 
+    <!-- Custom Section Modal -->
+    <div class="modal-overlay" id="customModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Customize Section</h3>
+                <p class="modal-subtitle">Mix and match question types</p>
+            </div>
+            <div class="type-grid" id="typeGrid">
+                <!-- Injected by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn btn-cancel" onclick="window.closeModal()">Discard</button>
+                <button class="modal-btn btn-save" onclick="window.saveCustomConfig()">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { 
           apiCall, 
@@ -330,6 +478,15 @@
             { id: 'mcq', type: 'MCQ', marks: 1, count: 5 },
             { id: 'short', type: 'Short', marks: 2, count: 5 }
         ];
+
+        const QUESTION_TYPES = [
+            'MCQ', 'Very Short', 'Short', 'Long', 'Essay', 
+            'True or False', 'Fill in the Blanks', 'Simple Matching', 
+            'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'
+        ];
+
+        let activeCustomIdx = -1;
+        let tempCustomConfig = {};
 
         let availableChapters = [];
         let selectedChapters = [];
@@ -353,7 +510,59 @@
 
         window.updateBlueprint = (idx, key, val) => {
             blueprint[idx][key] = (key === 'marks') ? parseInt(val) : val;
+            
+            if (key === 'type' && val === 'Custom') {
+                if (!blueprint[idx].customTypes) {
+                    blueprint[idx].customTypes = {};
+                    QUESTION_TYPES.forEach(t => blueprint[idx].customTypes[t] = 0);
+                    const prevType = blueprint[idx].prevType || 'Short';
+                    blueprint[idx].customTypes[prevType] = blueprint[idx].count || 5;
+                }
+            } else if (key === 'type') {
+                blueprint[idx].prevType = val;
+            }
+            
             renderBlueprint();
+        };
+
+        window.openCustomizer = function(idx) {
+            activeCustomIdx = idx;
+            tempCustomConfig = JSON.parse(JSON.stringify(blueprint[idx].customTypes || {}));
+            renderTypeGrid();
+            document.getElementById('customModal').classList.add('active');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('customModal').classList.remove('active');
+        };
+
+        window.updateCustomTypeQty = function(type, diff) {
+            tempCustomConfig[type] = Math.max(0, (tempCustomConfig[type] || 0) + diff);
+            renderTypeGrid();
+        };
+
+        function renderTypeGrid() {
+            const grid = document.getElementById('typeGrid');
+            grid.innerHTML = QUESTION_TYPES.map(type => `
+                <div class="type-item ${tempCustomConfig[type] > 0 ? 'active' : ''}">
+                    <span class="type-name">${type}</span>
+                    <div class="type-controls">
+                        <button class="mini-cnt-btn" onclick="window.updateCustomTypeQty('${type}', -1)">−</button>
+                        <span class="type-val">${tempCustomConfig[type] || 0}</span>
+                        <button class="mini-cnt-btn" onclick="window.updateCustomTypeQty('${type}', 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.saveCustomConfig = function() {
+            if (activeCustomIdx !== -1) {
+                blueprint[activeCustomIdx].customTypes = tempCustomConfig;
+                const totalQty = Object.values(tempCustomConfig).reduce((a, b) => a + b, 0);
+                blueprint[activeCustomIdx].count = totalQty;
+                renderBlueprint();
+                window.closeModal();
+            }
         };
 
         async function loadBanks() {
@@ -417,10 +626,15 @@
                         <div>
                             <label style="display: block; font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Question Type</label>
                             <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'type', this.value)" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #fff; font-size: 13px; font-weight: 700;">
-                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
-                                <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
-                                <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
+                                ${QUESTION_TYPES.map(t => `<option value="${t}" ${sec.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+                                <option value="Custom" ${sec.type === 'Custom' ? 'selected' : ''}>Custom (Mixed)</option>
                             </select>
+
+                            ${sec.type === 'Custom' ? `
+                                <button class="customize-trigger" onclick="window.openCustomizer(${idx})">
+                                    ${sec.count > 0 ? `Configured: ${sec.count} Qs (Edit)` : 'Configure Mix'}
+                                </button>
+                            ` : ''}
                         </div>
                         <div>
                             <label style="display: block; font-size: 9px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Marks / Question</label>
@@ -430,11 +644,16 @@
                                 <option value="3" ${sec.marks == 3 ? 'selected' : ''}>3 Marks</option>
                                 <option value="4" ${sec.marks == 4 ? 'selected' : ''}>4 Marks</option>
                                 <option value="5" ${sec.marks == 5 ? 'selected' : ''}>5 Marks</option>
+                                <option value="6" ${sec.marks == 6 ? 'selected' : ''}>6 Marks</option>
+                                <option value="7" ${sec.marks == 7 ? 'selected' : ''}>7 Marks</option>
+                                <option value="8" ${sec.marks == 8 ? 'selected' : ''}>8 Marks</option>
+                                <option value="9" ${sec.marks == 9 ? 'selected' : ''}>9 Marks</option>
+                                <option value="10" ${sec.marks == 10 ? 'selected' : ''}>10 Marks</option>
                             </select>
                         </div>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.03);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.03); ${sec.type === 'Custom' ? 'opacity: 0.5; pointer-events: none;' : ''}">
                         <span style="font-size: 11px; font-weight: 800; color: #fff;">Quantity Selection</span>
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <button class="cnt-btn" onclick="window.updateQty(${idx}, -1)" style="width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--primary); cursor: pointer; font-weight: 900;">−</button>

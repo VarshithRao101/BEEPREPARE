@@ -306,6 +306,133 @@
             font-size: 13px; font-weight: 900; color: var(--primary); letter-spacing: 4px;
             text-transform: uppercase; text-align: center;
         }
+
+        /* CUSTOM MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            z-index: 11000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal-content {
+            background: #121212;
+            border: 1px solid var(--border);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 28px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            transform: translateY(20px);
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .modal-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .modal-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .modal-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .type-grid::-webkit-scrollbar { width: 4px; }
+        .type-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .type-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .type-item:hover { border-color: var(--primary); background: rgba(255,215,0,0.02); }
+        .type-item.active { border-color: var(--primary); background: rgba(255,215,0,0.05); }
+
+        .type-name { font-size: 13px; font-weight: 700; color: #fff; }
+        .type-controls { display: flex; align-items: center; gap: 12px; }
+        .mini-cnt-btn {
+            width: 28px; height: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            transition: 0.2s;
+        }
+        .mini-cnt-btn:hover { background: var(--primary); color: #000; }
+        .type-val { min-width: 20px; text-align: center; font-weight: 900; color: #fff; font-size: 14px; }
+
+        .modal-footer {
+            margin-top: 35px;
+            display: flex;
+            gap: 15px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 18px;
+            border-radius: 15px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-cancel { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; }
+        .btn-save { background: var(--primary); border: none; color: #000; }
+        .btn-save:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,215,0,0.2); }
+
+        .customize-trigger {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px dashed var(--primary);
+            background: rgba(255,215,0,0.05);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.3s;
+        }
+        .customize-trigger:hover { background: var(--primary); color: #000; }
+        .customize-trigger.disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
@@ -407,11 +534,11 @@
                         <!-- Blueprint cards injected by JS -->
                     </div>
 
-                    <button class="diff-btn" style="width: 100%; margin-top: 15px; border-style: dashed; background: rgba(255,215,0,0.03);" onclick="addSection()">
+                    <button class="diff-btn" style="width: 100%; margin-top: 15px; border-style: dashed; background: rgba(255,215,0,0.03);" onclick="window.addSection()">
                         + Add Another Section
                     </button>
 
-                    <button class="primary-action-btn" onclick="startGeneration()">
+                    <button class="primary-action-btn" onclick="window.startGeneration()">
                         Generate Paper →
                     </button>
                 </div>
@@ -458,6 +585,23 @@
         </a>
     </nav>
 
+    <!-- Custom Section Modal -->
+    <div class="modal-overlay" id="customModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Customize Section</h3>
+                <p class="modal-subtitle">Mix and match question types</p>
+            </div>
+            <div class="type-grid" id="typeGrid">
+                <!-- Injected by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn btn-cancel" onclick="window.closeModal()">Discard</button>
+                <button class="modal-btn btn-save" onclick="window.saveCustomConfig()">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import {
             apiCall,
@@ -489,14 +633,77 @@
             { id: 'essay', type: 'Essay', marks: 8, qty: 1 }
         ];
 
+        const QUESTION_TYPES = [
+            'MCQ', 'Very Short', 'Short', 'Long', 'Essay', 
+            'True or False', 'Fill in the Blanks', 'Simple Matching', 
+            'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'
+        ];
+
+        let activeCustomIdx = -1;
+        let tempCustomConfig = {};
+
         window.updateBlueprint = function(idx, key, val) {
             blueprint[idx][key] = (key === 'marks') ? parseInt(val) : val;
+            
+            if (key === 'type' && val === 'Custom') {
+                if (!blueprint[idx].customTypes) {
+                    blueprint[idx].customTypes = {};
+                    QUESTION_TYPES.forEach(t => blueprint[idx].customTypes[t] = 0);
+                    // Set current type as first entry if it wasn't custom before
+                    const prevType = blueprint[idx].prevType || 'Short';
+                    blueprint[idx].customTypes[prevType] = blueprint[idx].qty || 1;
+                }
+            } else if (key === 'type') {
+                blueprint[idx].prevType = val;
+            }
+            
             renderBlueprint();
         };
 
         window.updateQty = function(idx, diff) {
             blueprint[idx].qty = Math.max(0, blueprint[idx].qty + diff);
             renderBlueprint();
+        };
+
+        window.openCustomizer = function(idx) {
+            activeCustomIdx = idx;
+            tempCustomConfig = JSON.parse(JSON.stringify(blueprint[idx].customTypes || {}));
+            renderTypeGrid();
+            document.getElementById('customModal').classList.add('active');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('customModal').classList.remove('active');
+        };
+
+        window.updateCustomTypeQty = function(type, diff) {
+            tempCustomConfig[type] = Math.max(0, (tempCustomConfig[type] || 0) + diff);
+            renderTypeGrid();
+        };
+
+        function renderTypeGrid() {
+            const grid = document.getElementById('typeGrid');
+            grid.innerHTML = QUESTION_TYPES.map(type => `
+                <div class="type-item ${tempCustomConfig[type] > 0 ? 'active' : ''}">
+                    <span class="type-name">${type}</span>
+                    <div class="type-controls">
+                        <button class="mini-cnt-btn" onclick="window.updateCustomTypeQty('${type}', -1)">−</button>
+                        <span class="type-val">${tempCustomConfig[type] || 0}</span>
+                        <button class="mini-cnt-btn" onclick="window.updateCustomTypeQty('${type}', 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.saveCustomConfig = function() {
+            if (activeCustomIdx !== -1) {
+                blueprint[activeCustomIdx].customTypes = tempCustomConfig;
+                // Calculate total qty for the card display
+                const totalQty = Object.values(tempCustomConfig).reduce((a, b) => a + b, 0);
+                blueprint[activeCustomIdx].qty = totalQty;
+                renderBlueprint();
+                closeModal();
+            }
         };
 
         window.addSection = function() {
@@ -521,7 +728,7 @@
                             <div style="font-size: 10px; color: var(--text-muted); font-weight: 700; margin-top: 4px;">Configuration Node</div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 15px;">
-                            <div class="counter-overlay">
+                            <div class="counter-overlay" style="${sec.type === 'Custom' ? 'opacity: 0.5; pointer-events: none;' : ''}">
                                 <button class="cnt-btn" onclick="updateQty(${idx}, -1)">−</button>
                                 <span id="qty-${idx}" class="qty-value" style="min-width: 25px; text-align: center; font-weight: 950; color: var(--primary); font-size: 18px;">${sec.qty}</span>
                                 <button class="cnt-btn" onclick="updateQty(${idx}, 1)">+</button>
@@ -535,20 +742,16 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div>
                             <label class="field-label">Question Type</label>
-                            <select class="glass-select" onchange="updateBlueprint(${idx}, 'type', this.value)">
-                                <option value="MCQ" ${sec.type === 'MCQ' ? 'selected' : ''}>MCQ</option>
-                                <option value="Very Short" ${sec.type === 'Very Short' ? 'selected' : ''}>Very Short</option>
-                                <option value="Short" ${sec.type === 'Short' ? 'selected' : ''}>Short</option>
-                                <option value="Long" ${sec.type === 'Long' ? 'selected' : ''}>Long</option>
-                                <option value="Essay" ${sec.type === 'Essay' ? 'selected' : ''}>Essay</option>
-                                <option value="True or False" ${sec.type === 'True or False' ? 'selected' : ''}>True or False</option>
-                                <option value="Fill in the Blanks" ${sec.type === 'Fill in the Blanks' ? 'selected' : ''}>Fill in the Blanks</option>
-                                <option value="Simple Matching" ${sec.type === 'Simple Matching' ? 'selected' : ''}>Simple Matching</option>
-                                <option value="Matrix Matching" ${sec.type === 'Matrix Matching' ? 'selected' : ''}>Matrix Matching</option>
-                                <option value="Reading Passage" ${sec.type === 'Reading Passage' ? 'selected' : ''}>Reading Passage</option>
-                                <option value="Case Study" ${sec.type === 'Case Study' ? 'selected' : ''}>Case Study</option>
-                                <option value="Data Interpretation" ${sec.type === 'Data Interpretation' ? 'selected' : ''}>Data Interpretation</option>
+                            <select class="glass-select" onchange="window.updateBlueprint(${idx}, 'type', this.value)">
+                                ${QUESTION_TYPES.map(t => `<option value="${t}" ${sec.type === t ? 'selected' : ''}>${t}</option>`).join('')}
+                                <option value="Custom" ${sec.type === 'Custom' ? 'selected' : ''}>Custom (Mixed Types)</option>
                             </select>
+                            
+                            ${sec.type === 'Custom' ? `
+                                <button class="customize-trigger" onclick="window.openCustomizer(${idx})">
+                                    ${sec.qty > 0 ? `Configured: ${sec.qty} Qs (Edit)` : 'Click to Configure Section'}
+                                </button>
+                            ` : ''}
                         </div>
                         <div>
                             <label class="field-label">Credit Value (Marks)</label>

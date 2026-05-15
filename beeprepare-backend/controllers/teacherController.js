@@ -1019,98 +1019,95 @@ const generatePaper = async (req, res) => {
     // Step 3: Use Matrix Engine for sectional selection
     for (let i = 0; i < blueprint.length; i++) {
         const sectionReq = blueprint[i];
-        const needed = parseInt(sectionReq.qty) || 0;
         const requestedMarks = parseInt(sectionReq.marks) || 1;
-        if (needed === 0) continue;
+        
+        let sectionQuestions = [];
+        let typesToFetch = [];
 
-        try {
-            const engineParams = {
-                bankId,
-                totalQuestions: needed,
-                totalMarks: needed, 
-                easyPct: 30, mediumPct: 50, hardPct: 20,
-                tagDistribution: [
-                    { tag: 'important', pct: 40 },
-                    { tag: 'repeated',  pct: 30 },
-                    { tag: 'conceptual',pct: 20 },
-                    { tag: 'standard',  pct: 10 }
-                ],
-                chapterIndices,
-                chapterIds: selectedChapters,
-                typeFilter: TYPE_MAP[sectionReq.type] ?? 2,
-                seed: Math.floor(Math.random() * 0xFFFFFFFF),
-                bank // Pass bank for JS fallback to resolve chapter IDs
-            };
+        if (sectionReq.type === 'Custom' && sectionReq.customTypes) {
+            Object.entries(sectionReq.customTypes).forEach(([type, qty]) => {
+                if (qty > 0) typesToFetch.push({ type, qty });
+            });
+        } else {
+            const needed = parseInt(sectionReq.qty) || 0;
+            if (needed > 0) typesToFetch.push({ type: sectionReq.type, qty: needed });
+        }
 
-            let engineResult = null;
-            let usedWasm = false;
+        if (typesToFetch.length === 0) continue;
 
-            if (isEngineReady()) {
-                try {
-                    engineResult = await engineGeneratePaper(engineParams);
-                    usedWasm = true;
-                } catch (wasmErr) {
-                    console.warn(`[Matrix Engine] WASM execution failed for ${sectionReq.type}:`, wasmErr.message);
+        for (const fetchReq of typesToFetch) {
+            try {
+                const engineParams = {
+                    bankId,
+                    totalQuestions: fetchReq.qty,
+                    totalMarks: fetchReq.qty, 
+                    easyPct: 30, mediumPct: 50, hardPct: 20,
+                    tagDistribution: [
+                        { tag: 'important', pct: 40 },
+                        { tag: 'repeated',  pct: 30 },
+                        { tag: 'conceptual',pct: 20 },
+                        { tag: 'standard',  pct: 10 }
+                    ],
+                    chapterIndices,
+                    chapterIds: selectedChapters,
+                    typeFilter: TYPE_MAP[fetchReq.type] ?? 2,
+                    seed: Math.floor(Math.random() * 0xFFFFFFFF),
+                    bank
+                };
+
+                let engineResult = null;
+                let usedWasm = false;
+
+                if (isEngineReady()) {
+                    try {
+                        engineResult = await engineGeneratePaper(engineParams);
+                        usedWasm = true;
+                    } catch (wasmErr) {
+                        console.warn(`[Matrix Engine] WASM execution failed for ${fetchReq.type}:`, wasmErr.message);
+                    }
                 }
+
+                if (!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) {
+                    engineResult = await generatePaperJS(engineParams);
+                    if (engineResult?.error === 'NO_QUESTIONS' && (engineParams.chapterIds?.length || engineParams.chapterIndices?.length)) {
+                        const broaderParams = { ...engineParams, chapterIds: [], chapterIndices: [] };
+                        engineResult = await generatePaperJS(broaderParams);
+                    }
+                    if (engineResult?.questionIds?.length === 0) {
+                        const rescueParams = { ...engineParams, chapterIds: [], chapterIndices: [], typeFilter: -1 };
+                        engineResult = await generatePaperJS(rescueParams);
+                    }
+                }
+
+                if (engineResult && engineResult.questionIds && engineResult.questionIds.length > 0) {
+                    let fetchDocs;
+                    if (engineResult.questions && engineResult.questions.length > 0) {
+                        fetchDocs = engineResult.questions;
+                    } else {
+                        fetchDocs = await Question.find({ 
+                            numericId: { $in: engineResult.questionIds } 
+                        }).lean();
+                    }
+                    if (fetchDocs && fetchDocs.length > 0) {
+                        sectionQuestions.push(...fetchDocs.map(q => ({ ...q, marks: requestedMarks })));
+                    }
+                }
+            } catch (engineErr) {
+                console.error(`[Matrix Engine] Fault fetching ${fetchReq.type} for section ${i+1}:`, engineErr.message);
             }
+        }
 
-            // Fallback: If WASM is offline OR WASM returned 0 questions OR WASM threw an error
-            if (!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) {
-                if (usedWasm && engineResult?.questionIds?.length === 0) {
-                    console.log(`[Matrix Engine] WASM returned 0 questions for ${sectionReq.type}. Activating JS Fallback...`);
-                } else if (!usedWasm) {
-                    console.log(`[Matrix Engine] WASM node offline. Using JS Fallback for ${sectionReq.type}...`);
-                }
-                engineResult = await generatePaperJS(engineParams);
-                
-                // SECOND FALLBACK: If JS failed because of chapter constraints, try again across the WHOLE BANK
-                if (engineResult?.error === 'NO_QUESTIONS' && (engineParams.chapterIds?.length || engineParams.chapterIndices?.length)) {
-                    console.log(`[Matrix Engine] Section ${sectionReq.type} empty in chapters. Retrying across ALL chapters...`);
-                    const broaderParams = { ...engineParams, chapterIds: [], chapterIndices: [] };
-                    engineResult = await generatePaperJS(broaderParams);
-                }
-
-                // TERTIARY FALLBACK (RESCUE): If still 0, ignore type constraints as a last resort
-                if (engineResult?.questionIds?.length === 0) {
-                    console.warn(`[Matrix Engine] Section ${sectionReq.type} still empty. Performing RESCUE fallback (ignoring all filters)...`);
-                    const rescueParams = { ...engineParams, chapterIds: [], chapterIndices: [], typeFilter: -1 };
-                    engineResult = await generatePaperJS(rescueParams);
-                }
-            }
-
-            if (engineResult && engineResult.questionIds && engineResult.questionIds.length > 0) {
-                // Fetch full docs or use results from JS fallback
-                let sectionQuestions;
-                if (engineResult.questions && engineResult.questions.length > 0) {
-                    sectionQuestions = engineResult.questions;
-                } else {
-                    sectionQuestions = await Question.find({ 
-                        numericId: { $in: engineResult.questionIds } 
-                    }).lean();
-                }
-
-                if (!sectionQuestions || sectionQuestions.length === 0) {
-                    console.warn(`[Matrix Engine] Found numericIds but docs missing in DB for section ${sectionReq.type}`);
-                    continue;
-                }
-
-                // Apply requested marks (override bank defaults for this blueprint)
-                const mappedQs = sectionQuestions.map(q => ({ ...q, marks: requestedMarks }));
-                selected.push(...mappedQs);
-
-                sectionDefs.push({
-                    label: labels[sectionDefs.length] || '?',
-                    type: sectionReq.type,
-                    key: sectionReq.id,
-                    marksEach: requestedMarks,
-                    count: mappedQs.length,
-                    total: mappedQs.length * requestedMarks,
-                    questions: mappedQs
-                });
-            }
-        } catch (engineErr) {
-            console.error(`[Matrix Engine] Critical Fault in section ${sectionReq.type}:`, engineErr.message);
-            continue; 
+        if (sectionQuestions.length > 0) {
+            selected.push(...sectionQuestions);
+            sectionDefs.push({
+                label: labels[sectionDefs.length] || '?',
+                type: sectionReq.type === 'Custom' ? 'Mixed Section' : sectionReq.type,
+                key: sectionReq.id,
+                marksEach: requestedMarks,
+                count: sectionQuestions.length,
+                total: sectionQuestions.length * requestedMarks,
+                questions: sectionQuestions
+            });
         }
     }
 
