@@ -48,6 +48,10 @@
         const windowEl = document.getElementById('bee-chat-window');
         const backdropEl = document.getElementById('bee-chat-backdrop');
         const closeBtn = document.getElementById('bee-chat-close');
+        const input = document.getElementById('bee-chat-input');
+        const sendBtn = document.getElementById('bee-chat-send');
+        const messagesCont = document.getElementById('bee-chat-messages');
+        const statusEl = document.getElementById('bee-bot-status');
         
         const closeChat = () => {
             windowEl.classList.remove('active');
@@ -57,23 +61,55 @@
         closeBtn.onclick = closeChat;
         backdropEl.onclick = closeChat;
 
-        // Hijack Customer Care Button
+        // Hijack Customer Care Button & AI links
         function secureHijack() {
             const ccBtn = document.getElementById('customerCareBtn');
             if (ccBtn && !ccBtn.dataset.hijacked) {
                 ccBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
-                    
-                    // NO REDIRECT - Always open as popup
                     windowEl.classList.add('active');
                     backdropEl.classList.add('active');
-                    input.focus();
+                    setTimeout(() => input.focus(), 100);
                 }, true);
                 ccBtn.dataset.hijacked = "true";
                 ccBtn.title = "Chat with BEE AI Assistant";
                 ccBtn.style.cursor = "pointer";
             }
+
+            // Hijack all links pointing to ai-chat.html
+            const aiLinks = document.querySelectorAll('a[href*="ai-chat.html"], [onclick*="ai-chat.html"], #ai-hub-card');
+            aiLinks.forEach(link => {
+                if (!link.dataset.hijacked) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        windowEl.classList.add('active');
+                        backdropEl.classList.add('active');
+                        setTimeout(() => input.focus(), 100);
+                    }, true);
+                    link.dataset.hijacked = "true";
+                    link.style.cursor = "pointer";
+                    if (link.tagName === 'A') link.href = "javascript:void(0)";
+                }
+            });
+
+            // Hijack Profile Avatar as well
+            const avatars = document.querySelectorAll('.profile-avatar, .nav-avatar, .user-avatar-img, #profile-icon-btn');
+            avatars.forEach(av => {
+                if (!av.dataset.hijacked) {
+                    av.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        windowEl.classList.add('active');
+                        backdropEl.classList.add('active');
+                        setTimeout(() => input.focus(), 100);
+                    }, true);
+                    av.dataset.hijacked = "true";
+                    av.style.cursor = "pointer";
+                    av.title = "Chat with BEE AI";
+                }
+            });
         }
         setInterval(secureHijack, 1000);
 

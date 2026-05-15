@@ -283,9 +283,9 @@
         async function loadBanks() {
             try {
                 const res = await apiCall('/teacher/dashboard', 'GET');
-                if (res && res.success && res.subjects) {
+                if (res && res.success && res.data && res.data.subjects) {
                     const selector = document.getElementById('bank-selector');
-                    res.subjects.forEach(bank => {
+                    res.data.subjects.forEach(bank => {
                         const opt = document.createElement('option');
                         opt.value = bank.bankId;
                         opt.textContent = `${bank.subject} - ${bank.class}`;
