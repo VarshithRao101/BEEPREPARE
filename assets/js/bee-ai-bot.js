@@ -31,11 +31,11 @@
                     </div>
                 </div>
                 <div class="bee-chat-messages" id="bee-chat-messages">
-                    <div class="bee-msg bot">Hello, I am the BEE Assistant. How can I help you today?</div>
+                    <div class="bee-msg bot">Nexus 2.8 Online. Uplink Stable. I am the BEE Support Assistant. How can I help with your account or technical issues today?</div>
                 </div>
                 <div class="bee-chat-input-area">
                     <div class="bee-input-wrapper">
-                        <input type="text" class="bee-chat-input" id="bee-chat-input" placeholder="Ask anything academic...">
+                        <input type="text" class="bee-chat-input" id="bee-chat-input" placeholder="Ask about login, payments, account...">
                         <button class="bee-chat-send" id="bee-chat-send">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                         </button>

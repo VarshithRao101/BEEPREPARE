@@ -54,9 +54,9 @@ const KNOWLEDGE_BASE = [
 ];
 
 /**
- * Handle Support Bot Requests (Free)
+ * Handle Support Bot Requests (Free/Static)
  */
-const sendSupportMessage = async (req, res) => {
+const supportBotHandler = async (req, res) => {
   try {
     const { message } = req.body;
     if (!message || message.trim() === '') {
@@ -73,7 +73,7 @@ const sendSupportMessage = async (req, res) => {
     }
 
     if (!aiResponseText) {
-      aiResponseText = "I am the BEE Assistant. I can help you with questions about your login, payments, account activation, or managing your question banks. Is there something specific you would like to know about?";
+      aiResponseText = "I am the BEE Support Assistant. I can help you with questions about your login, payments, account activation, or managing your question banks. For academic doubt solving, please use the BEE AI Assistant in the sidebar!";
     }
 
     // Support bot is free - no credit deduction
@@ -94,7 +94,7 @@ const sendSupportMessage = async (req, res) => {
 /**
  * BEE AI ASSISTANT (BAI) — Academic AI using Groq (COSTS CREDITS)
  */
-const sendMessage = async (req, res) => {
+const academicAIHandler = async (req, res) => {
   try {
     const googleUid = req.user.googleUid;
     const { message, image } = req.body;
@@ -160,8 +160,8 @@ const sendMessage = async (req, res) => {
 };
 
 module.exports = {
-  sendMessage,
-  sendSupportMessage,
+  academicAIHandler,
+  supportBotHandler,
   getSessions: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
   getSessionMessages: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
   deleteSession: (req, res) => error(res, 'History disabled', 'DISABLED', 400),

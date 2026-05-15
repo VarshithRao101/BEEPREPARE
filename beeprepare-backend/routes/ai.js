@@ -8,8 +8,8 @@ const guard = [requireAuth, requireActivated];
 
 // router.get('/sessions', ...guard, aiController.getSessions);
 // router.get('/sessions/:sessionId', ...guard, aiController.getSessionMessages);
-router.post('/chat', ...guard, aiController.sendMessage);
-router.post('/support', ...guard, aiController.sendSupportMessage);
+router.post('/chat', ...guard, aiController.academicAIHandler);
+router.post('/support', ...guard, aiController.supportBotHandler);
 // router.delete('/sessions/:sessionId', ...guard, aiController.deleteSession);
 
 module.exports = router;
