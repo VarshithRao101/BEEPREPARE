@@ -274,7 +274,7 @@ app.get('/vault', async (req, res) => {
             <p id="status-msg">Identity Verification Required</p>
             
             <button id="login-btn" class="google-btn">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width="20">
                 Authorize with Google
             </button>
 
