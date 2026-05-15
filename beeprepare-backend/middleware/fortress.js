@@ -73,8 +73,10 @@ const INJECTION_PATTERNS = {
   ],
   // Command injection
   command: [
-    /[;&|`$(){}[\]]/,         // Shell metacharacters
-    /\|\s*(cat|ls|pwd|whoami|id|uname|wget|curl|nc|bash|sh|zsh|python|perl|ruby|php)/i,
+    // /[;&|`$(){}[\]]/,         // REMOVED: Too many false positives (e.g. parentheses in text)
+    /;\s*(?:cat|ls|pwd|whoami|id|uname|wget|curl|nc|bash|sh|zsh|python|perl|ruby|php|node)/i, // Chained commands
+    /&\s*(?:cat|ls|pwd|whoami|id|uname|wget|curl|nc|bash|sh|zsh|python|perl|ruby|php|node)/i, // Background commands
+    /\|\s*(?:cat|ls|pwd|whoami|id|uname|wget|curl|nc|bash|sh|zsh|python|perl|ruby|php|node)/i, // Pipe commands
     /`[^`]*`/,                 // Backtick execution
     /\$\([^)]*\)/,             // Command substitution
     /\beval\s*\(/i,

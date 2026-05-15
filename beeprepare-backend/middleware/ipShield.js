@@ -23,6 +23,18 @@ const ipShield = async (req, res, next) => {
                 strikes: bannedEntry.strikes
             });
 
+            // Return JSON for API requests to prevent frontend crashes
+            if (req.originalUrl.startsWith('/api')) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Your IP has been flagged for security violations.',
+                    error: {
+                        code: 'IP_BLOCKED',
+                        details: 'Multiple security anomalies detected from this node.'
+                    }
+                });
+            }
+
             return res.status(403).send(`
                 <!DOCTYPE html>
                 <html>
