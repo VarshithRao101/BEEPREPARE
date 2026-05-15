@@ -92,8 +92,10 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()
 ];
 
 // Auto-inject production domains
-if (process.env.VERCEL) {
+if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
     allowedOrigins.push('https://beeprepare.vercel.app');
+    allowedOrigins.push('https://beeprepare.in');
+    allowedOrigins.push('https://www.beeprepare.in');
 }
 
 
