@@ -124,11 +124,14 @@ const resendApprovalEmail = async (req, res) => {
         'NOT_FOUND', 404);
     }
 
-    await sendPaymentApproved(
+    // Trigger email in background (don't block UI)
+    sendPaymentApproved(
       payment.email,
       payment.assignedKey,
       payment.paymentType
-    );
+    ).catch(err => {
+      console.error('[Email Error] Resend Failed:', err);
+    });
 
     return success(res,
       'Email resent successfully', null);

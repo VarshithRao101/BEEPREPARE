@@ -619,14 +619,15 @@ const approvePayment = async (req, res) => {
   payment.reviewedAt = new Date();
   await payment.save();
 
-  // 5. Send approval email
-  try {
-    await sendPaymentApproved(payment.email, licenseKey, payment.paymentType);
-    if (payment.authEmail && payment.authEmail.toLowerCase() !== payment.email.toLowerCase()) {
-      await sendPaymentApproved(payment.authEmail, licenseKey, payment.paymentType);
-    }
-  } catch (err) {
-    console.error('Email Fail:', err);
+  // 5. Send approval email (Non-blocking)
+  sendPaymentApproved(payment.email, licenseKey, payment.paymentType).catch(err => {
+    console.error('Email Fail (Main):', err);
+  });
+
+  if (payment.authEmail && payment.authEmail.toLowerCase() !== payment.email.toLowerCase()) {
+    sendPaymentApproved(payment.authEmail, licenseKey, payment.paymentType).catch(err => {
+      console.error('Email Fail (Auth):', err);
+    });
   }
 
   await ActivityLog.create({
@@ -658,13 +659,14 @@ const rejectPayment = async (req, res) => {
   payment.reviewedAt = new Date();
   await payment.save();
 
-  try {
-    await sendPaymentRejected(payment.email, reason);
-    if (payment.authEmail && payment.authEmail.toLowerCase() !== payment.email.toLowerCase()) {
-      await sendPaymentRejected(payment.authEmail, reason);
-    }
-  } catch (err) {
-    console.error('Email Fail:', err);
+  sendPaymentRejected(payment.email, reason).catch(err => {
+    console.error('Email Fail (Main):', err);
+  });
+
+  if (payment.authEmail && payment.authEmail.toLowerCase() !== payment.email.toLowerCase()) {
+    sendPaymentRejected(payment.authEmail, reason).catch(err => {
+      console.error('Email Fail (Auth):', err);
+    });
   }
 
   return success(res, 'Payment rejected and email sent');
