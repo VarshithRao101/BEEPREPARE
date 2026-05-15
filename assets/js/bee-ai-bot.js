@@ -53,9 +53,17 @@
         const messagesCont = document.getElementById('bee-chat-messages');
         const statusEl = document.getElementById('bee-bot-status');
         
+        const toggleBottomNav = (show) => {
+            const btmNav = document.querySelector('.nav-bottom');
+            if (btmNav) {
+                btmNav.style.display = show ? '' : 'none';
+            }
+        };
+
         const closeChat = () => {
             windowEl.classList.remove('active');
             backdropEl.classList.remove('active');
+            toggleBottomNav(true);
         };
 
         closeBtn.onclick = closeChat;
@@ -70,6 +78,7 @@
                 e.stopImmediatePropagation();
                 windowEl.classList.add('active');
                 backdropEl.classList.add('active');
+                toggleBottomNav(false);
                 setTimeout(() => input.focus(), 100);
                 return false;
             };
