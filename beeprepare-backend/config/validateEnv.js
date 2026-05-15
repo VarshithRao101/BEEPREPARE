@@ -100,9 +100,12 @@ const validateEnv = () => {
     }
 
     // ── 6. Firebase private key format ──────────────────────────
-    if (!process.env.FIREBASE_PRIVATE_KEY.includes('-----BEGIN')) {
+    const fbKey = process.env.FIREBASE_PRIVATE_KEY;
+    if (fbKey && !fbKey.includes('-----BEGIN')) {
       console.error('⚠️  FIREBASE_PRIVATE_KEY does not look like a valid PEM key.');
       console.error('   Ensure newlines are escaped as \\n in the .env file.');
+    } else if (!fbKey) {
+      console.error('❌ FIREBASE_PRIVATE_KEY is completely missing!');
     }
   }
 
