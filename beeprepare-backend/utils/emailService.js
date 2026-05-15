@@ -103,42 +103,50 @@ const sendPaymentApproved = async (email, licenseKey, paymentType) => {
         <li style="margin-bottom: 8px;">Apply the key below to immediately expand your subject capacity.</li>
        </ul>`;
 
-  await resend.emails.send({
-    from: EMAIL_FROM,
-    to: email,
-    subject: `Authorization Credentials for BEEPREPARE Platform`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <body style="${EMAIL_STYLE}">
-        <div style="${CARD_STYLE}">
-          <div style="${HEADER_STYLE}">
-            <h1 style="color: ${ACCENT_COLOR}; margin: 0; font-size: 24px; letter-spacing: 2px; font-weight: 800; text-transform: uppercase;">BEEPREPARE</h1>
-          </div>
-          <div style="${BODY_STYLE}">
-            <h2 style="color: #10b981; font-size: 20px; margin-top: 0;">Verification Successful</h2>
-            <p>Your transaction has been formally verified. Your requested authorization key for <strong>${typeText}</strong> is now active and ready for deployment.</p>
-            
-            <div style="background-color: #020617; border: 1px dashed #10b981; border-radius: 8px; padding: 32px; text-align: center; margin: 32px 0;">
-              <p style="color: #94a3b8; margin: 0 0 12px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase;">Unique Authorization Key</p>
-              <p style="color: ${ACCENT_COLOR}; font-size: 32px; font-weight: 900; letter-spacing: 6px; margin: 0; font-family: 'Courier New', Courier, monospace;">${licenseKey}</p>
+  try {
+    const response = await resend.emails.send({
+      from: EMAIL_FROM,
+      to: email,
+      subject: `Authorization Credentials for BEEPREPARE Platform`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <body style="${EMAIL_STYLE}">
+          <div style="${CARD_STYLE}">
+            <div style="${HEADER_STYLE}">
+              <h1 style="color: ${ACCENT_COLOR}; margin: 0; font-size: 24px; letter-spacing: 2px; font-weight: 800; text-transform: uppercase;">BEEPREPARE</h1>
             </div>
+            <div style="${BODY_STYLE}">
+              <h2 style="color: #10b981; font-size: 20px; margin-top: 0;">Verification Successful</h2>
+              <p>Your transaction has been formally verified. Your requested authorization key for <strong>${typeText}</strong> is now active and ready for deployment.</p>
+              
+              <div style="background-color: #020617; border: 1px dashed #10b981; border-radius: 8px; padding: 32px; text-align: center; margin: 32px 0;">
+                <p style="color: #94a3b8; margin: 0 0 12px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase;">Unique Authorization Key</p>
+                <p style="color: ${ACCENT_COLOR}; font-size: 32px; font-weight: 900; letter-spacing: 6px; margin: 0; font-family: 'Courier New', Courier, monospace;">${licenseKey}</p>
+              </div>
 
-            <h3 style="color: #ffffff; font-size: 16px; margin-bottom: 12px;">${instructionHeader}</h3>
-            ${instructions}
+              <h3 style="color: #ffffff; font-size: 16px; margin-bottom: 12px;">${instructionHeader}</h3>
+              ${instructions}
 
-            <div style="background-color: #1e293b; border-radius: 8px; padding: 16px; margin-top: 32px;">
-              <p style="margin: 0; color: #94a3b8; font-size: 12px; font-style: italic;">Note: This credential is for single-point authentication and is bound to the first account that redeems it. Please maintain strict confidentiality.</p>
+              <div style="background-color: #1e293b; border-radius: 8px; padding: 16px; margin-top: 32px;">
+                <p style="margin: 0; color: #94a3b8; font-size: 12px; font-style: italic;">Note: This credential is for single-point authentication and is bound to the first account that redeems it. Please maintain strict confidentiality.</p>
+              </div>
+            </div>
+            <div style="${FOOTER_STYLE}">
+              <p style="margin: 0;">&copy; 2026 BEEPREPARE. All rights reserved.</p>
             </div>
           </div>
-          <div style="${FOOTER_STYLE}">
-            <p style="margin: 0;">&copy; 2026 BEEPREPARE. All rights reserved.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `
-  });
+        </body>
+        </html>
+      `
+    });
+    console.log('[RESEND] Email sent successfully:', response.id);
+  } catch (err) {
+    console.error('[RESEND] Failed to send email:', err.message);
+    if (err.response) {
+      console.error('[RESEND_ERROR_DATA]', err.response.data);
+    }
+  }
 };
 
 // Email 3: Payment rejected
