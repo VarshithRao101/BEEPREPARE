@@ -1,8 +1,14 @@
 const User = require('../models/User');
 const { success, error } = require('../utils/responseHelper');
+const Groq = require('groq-sdk');
+
+// Initialize Groq Client
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY
+});
 
 /**
- * BEE ASSISTANT — Human-Tone Local Resolver
+ * CUSTOMER SUPPORT CHATBOT — Static Human-Tone Resolver (FREE)
  */
 const KNOWLEDGE_BASE = [
   { 
@@ -27,7 +33,7 @@ const KNOWLEDGE_BASE = [
   },
   { 
     keys: ['ai', 'limit', 'quota', 'messages', 'neural', 'bot', 'chat'], 
-    ans: "You are currently chatting with the BEE Assistant. Free accounts have a limit of 30 messages per day, while activated accounts have full access to our academic support features." 
+    ans: "You are currently chatting with the BEE Assistant. Free accounts have a limit of 30 messages per day for academic support, but general support queries are always free!" 
   },
   { 
     keys: ['student', 'teacher', 'role', 'switch', 'change', 'profile'], 
@@ -47,11 +53,12 @@ const KNOWLEDGE_BASE = [
   }
 ];
 
-const sendMessage = async (req, res) => {
+/**
+ * Handle Support Bot Requests (Free)
+ */
+const sendSupportMessage = async (req, res) => {
   try {
-    const googleUid = req.user.googleUid;
     const { message } = req.body;
-
     if (!message || message.trim() === '') {
       return error(res, 'Message is required', 'EMPTY_CONTENT', 400);
     }
@@ -69,32 +76,87 @@ const sendMessage = async (req, res) => {
       aiResponseText = "I am the BEE Assistant. I can help you with questions about your login, payments, account activation, or managing your question banks. Is there something specific you would like to know about?";
     }
 
+    // Support bot is free - no credit deduction
+
+    return setTimeout(() => {
+      return success(res, 'Support response generated', {
+        aiMessage: aiResponseText,
+        isFree: true
+      });
+    }, 600);
+
+  } catch (err) {
+    console.error('Support Bot Error:', err);
+    return error(res, 'Support system offline', 'SERVER_ERROR', 500);
+  }
+};
+
+/**
+ * BEE AI ASSISTANT (BAI) — Academic AI using Groq (COSTS CREDITS)
+ */
+const sendMessage = async (req, res) => {
+  try {
+    const googleUid = req.user.googleUid;
+    const { message, image } = req.body;
+
+    if (!message || message.trim() === '') {
+      return error(res, 'Message is required', 'EMPTY_CONTENT', 400);
+    }
+
+    // 1. Check Limits
     let aiMessagesToday = req.user.aiMessagesToday || 0;
+    const limit = 30; // Standard limit
+
+    if (aiMessagesToday >= limit) {
+      return error(res, 'Daily neural limit reached. Please recharge tomorrow.', 'DAILY_LIMIT_REACHED', 403);
+    }
+
+    // 2. Prepare Groq Request
+    const systemPrompt = `You are BEE AI (BAI), a premium academic intelligence assistant for the BEEPREPARE platform. 
+    Your goal is to solve students' doubts, explain complex concepts, and help teachers with academic queries.
+    
+    GUIDELINES:
+    - Be professional, accurate, and encouraging.
+    - Use LaTeX or Markdown for mathematical formulas and structured data.
+    - If the user asks about BEEPREPARE system issues (payments, login, etc.), politely guide them to use the Support Bot in their profile.
+    - Keep responses concise but comprehensive.
+    - Your tone is 'Premium Academic Guru'.`;
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message }
+      ],
+      model: "llama-3.1-70b-versatile", // High quality Groq model
+      temperature: 0.7,
+      max_tokens: 1024,
+      top_p: 1
+    });
+
+    const aiResponseText = chatCompletion.choices[0]?.message?.content || "Neural link timeout. Please retry.";
+
+    // 3. Update Credits
     await User.updateOne({ googleUid }, { $inc: { aiMessagesToday: 1 } });
     aiMessagesToday += 1;
 
-    if (aiMessagesToday >= 5) {
-      aiResponseText += "\n\nSince we have been chatting for a while and I want to make sure you get the best help, please feel free to contact our support team directly if your issue is still not resolved. You can reach us on WhatsApp at 9059068384 or email beesociety101@gmail.com.";
-    }
-
+    // 4. Award EXP
     const { awardExp } = require('../utils/expService');
     awardExp(googleUid, 'AI_DOUBT_SOLVED'); 
 
-    return setTimeout(() => {
-      return success(res, 'Assistant response generated', {
-        aiMessage: aiResponseText,
-        messagesUsedToday: aiMessagesToday
-      });
-    }, 800);
+    return success(res, 'BAI response generated', {
+      aiMessage: aiResponseText,
+      messagesUsedToday: aiMessagesToday
+    });
 
   } catch (err) {
-    console.error('BEE Assistant Error:', err);
-    return error(res, 'System offline', 'SERVER_ERROR', 500);
+    console.error('BAI Groq Error:', err);
+    return error(res, 'Neural Core offline', 'SERVER_ERROR', 500);
   }
 };
 
 module.exports = {
   sendMessage,
+  sendSupportMessage,
   getSessions: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
   getSessionMessages: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
   deleteSession: (req, res) => error(res, 'History disabled', 'DISABLED', 400),

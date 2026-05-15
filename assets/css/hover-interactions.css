@@ -129,6 +129,19 @@ button.primary:after {
   }
 }
 
+/* Hide labels on press to ensure they vanish immediately */
+.btn-primary:active:after,
+.btn-adv:active:after,
+.btn-finish:active:after,
+.login-btn:active:after,
+.unlock-btn:active:after,
+.update-btn:active:after,
+.rename-confirm:active:after,
+button.primary:active:after {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
 @media (hover: hover) {
   .btn-primary:hover,
   .btn-adv:hover,
@@ -255,12 +268,24 @@ button.danger,
   pointer-events: none;
 }
 
-.logout-btn:hover:after,
-.btn-logout:hover:after,
-.btn-danger:hover:after,
-[class*="purge"]:hover:after,
-[class*="delete-btn"]:hover:after {
-  bottom: 0;
+@media (hover: hover) {
+  .logout-btn:hover:after,
+  .btn-logout:hover:after,
+  .btn-danger:hover:after,
+  [class*="purge"]:hover:after,
+  [class*="delete-btn"]:hover:after {
+    bottom: 0;
+  }
+}
+
+/* Clear destructive labels on click */
+.logout-btn:active:after,
+.btn-logout:active:after,
+.btn-danger:active:after,
+[class*="purge"]:active:after,
+[class*="delete-btn"]:active:after {
+  opacity: 0 !important;
+  transition: none !important;
 }
 
 @media (hover: hover) {
@@ -321,23 +346,32 @@ input[type="submit"],
   box-shadow: 0 0 10px #fff;
 }
 
-.confirm-btn:hover:before,
-.btn-confirm:hover:before {
-  transform: translateY(-50%) scale(1);
-}
-
-.confirm-btn:hover,
-.btn-confirm:hover,
-.rename-confirm:hover {
-  padding-left: 28px !important;
-  transition: all 0.3s var(--ease-smooth) !important;
-  animation: confirmPulse 600ms var(--ease-smooth) both !important;
-}
-
 @keyframes confirmPulse {
   0%   { box-shadow: 0 0 0 0 var(--gold-glow); }
   50%  { box-shadow: 0 0 0 8px rgba(255, 215, 0, 0); }
   100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+/* Wrap confirmation animations and indicators */
+@media (hover: hover) {
+  .confirm-btn:hover:before,
+  .btn-confirm:hover:before {
+    transform: translateY(-50%) scale(1);
+  }
+
+  .confirm-btn:hover,
+  .btn-confirm:hover,
+  .rename-confirm:hover {
+    padding-left: 28px !important;
+    transition: all 0.3s var(--ease-smooth) !important;
+    animation: confirmPulse 600ms var(--ease-smooth) both !important;
+  }
+}
+
+/* Reset on active */
+.confirm-btn:active:before,
+.btn-confirm:active:before {
+  transform: translateY(-50%) scale(0) !important;
 }
 
 /* ─── 7. CARDS ───────────────────────────────────────────────── */
@@ -375,8 +409,14 @@ input[type="submit"],
   letter-spacing: 2px;
 }
 
-.feature-card:hover:after {
-  opacity: 0.6;
+@media (hover: hover) {
+  .feature-card:hover:after {
+    opacity: 0.6;
+  }
+}
+
+.feature-card:active:after {
+  opacity: 0 !important;
 }
 
 .feature-card:hover .feature-icon {
@@ -516,10 +556,12 @@ input[type="submit"],
     padding-left var(--dur-base) var(--ease-smooth) !important;
 }
 
-.dropdown-content button:hover {
-  background: rgba(255, 215, 0, 0.06) !important;
-  color: var(--gold) !important;
-  padding-left: 18px !important;
+@media (hover: hover) {
+  .dropdown-content button:hover {
+    background: rgba(255, 215, 0, 0.06) !important;
+    color: var(--gold) !important;
+    padding-left: 18px !important;
+  }
 }
 
 /* ─── 10. TABLE ROWS ────────────────────────────────────────── */
@@ -528,8 +570,10 @@ tbody tr {
     background var(--dur-fast) var(--ease-smooth) !important;
 }
 
-tbody tr:hover {
-  background: rgba(255, 215, 0, 0.04) !important;
+@media (hover: hover) {
+  tbody tr:hover {
+    background: rgba(255, 215, 0, 0.04) !important;
+  }
 }
 
 /* Action "•••" button */
@@ -542,10 +586,12 @@ tbody tr:hover {
   padding: 6px 10px !important;
 }
 
-.action-btn:hover {
-  color: var(--gold) !important;
-  background: rgba(255, 215, 0, 0.08) !important;
-  transform: scale(1.2) !important;
+@media (hover: hover) {
+  .action-btn:hover {
+    color: var(--gold) !important;
+    background: rgba(255, 215, 0, 0.08) !important;
+    transform: scale(1.2) !important;
+  }
 }
 
 .action-btn:active {
@@ -561,9 +607,11 @@ tbody tr:hover {
   border-radius: 12px;
 }
 
-.nav-item:hover:not(.active) {
-  color: #fff !important;
-  transform: translateY(-3px) !important;
+@media (hover: hover) {
+  .nav-item:hover:not(.active) {
+    color: #fff !important;
+    transform: translateY(-3px) !important;
+  }
 }
 
 .nav-item:active {
@@ -602,16 +650,24 @@ tbody tr:hover {
   font-weight: 900;
 }
 
-.sidebar-link:hover:after {
-  opacity: 1;
-  transform: translateX(0);
+@media (hover: hover) {
+  .sidebar-link:hover:after {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.sidebar-link:hover svg {
-  color: var(--gold) !important;
-  transform: scale(1.15) !important;
-  transition: transform var(--dur-base) var(--ease-spring),
-              color      var(--dur-fast) var(--ease-smooth) !important;
+.sidebar-link:active:after {
+  opacity: 0 !important;
+}
+
+@media (hover: hover) {
+  .sidebar-link:hover svg {
+    color: var(--gold) !important;
+    transform: scale(1.15) !important;
+    transition: transform var(--dur-base) var(--ease-spring),
+                color      var(--dur-fast) var(--ease-smooth) !important;
+  }
 }
 
 /* Back button (header) */
@@ -640,10 +696,12 @@ textarea {
     background    var(--dur-base) var(--ease-smooth) !important;
 }
 
-input:not([type="checkbox"]):not([type="radio"]):hover,
-select:hover,
-textarea:hover {
-  border-color: rgba(255, 215, 0, 0.35) !important;
+@media (hover: hover) {
+  input:not([type="checkbox"]):not([type="radio"]):hover,
+  select:hover,
+  textarea:hover {
+    border-color: rgba(255, 215, 0, 0.35) !important;
+  }
 }
 
 input:not([type="checkbox"]):not([type="radio"]):focus,
@@ -757,11 +815,13 @@ textarea:focus {
     0 0 0 1px rgba(255, 215, 0, 0.12) !important;
 }
 
-.menu-item:hover .menu-arrow {
-  color: var(--gold) !important;
-  transform: translateX(6px) !important;
-  transition: transform var(--dur-base) var(--ease-spring),
-              color      var(--dur-fast) var(--ease-smooth) !important;
+@media (hover: hover) {
+  .menu-item:hover .menu-arrow {
+    color: var(--gold) !important;
+    transform: translateX(6px) !important;
+    transition: transform var(--dur-base) var(--ease-spring),
+                color      var(--dur-fast) var(--ease-smooth) !important;
+  }
 }
 
 /* ─── 18. STAT BOXES ────────────────────────────────────────── */
@@ -847,11 +907,20 @@ textarea:focus {
   pointer-events: none;
 }
 
-.logout-btn:hover:before,
-.btn-purge:hover:before,
-[class*="purge"]:hover:before {
-  opacity: 1;
-  animation: scanline 1.5s linear infinite;
+@media (hover: hover) {
+  .logout-btn:hover:before,
+  .btn-purge:hover:before,
+  [class*="purge"]:hover:before {
+    opacity: 1;
+    animation: scanline 1.5s linear infinite;
+  }
+}
+
+.logout-btn:active:before,
+.btn-purge:active:before,
+[class*="purge"]:active:before {
+  opacity: 0 !important;
+  animation: none !important;
 }
 
 /* ─── 21. ACCESSIBILITY: RESPECT MOTION PREFERENCE ─────────── */
@@ -871,4 +940,55 @@ textarea:focus {
   outline: 2px solid var(--gold) !important;
   outline-offset: 3px !important;
   border-radius: 6px;
+}
+
+/* ─── 23. GLOBAL HOVER-STICKINESS & TOUCH FIXES ─────────────── */
+/* Ensures hovers vanish on click/active and only show on mouse. */
+
+/* Reset all premium pseudo-labels and indicators on :active (click/touch) */
+.btn-primary:active:after,
+.btn-adv:active:after,
+.btn-finish:active:after,
+.login-btn:active:after,
+.logout-btn:active:after,
+.btn-danger:active:after,
+.confirm-btn:active:after,
+.confirm-btn:active:before,
+.btn-confirm:active:before,
+.feature-card:active:after,
+.sidebar-link:active:after,
+[class*="purge"]:active:after,
+[class*="delete"]:active:after,
+.swal2-confirm:active:after,
+.swal2-cancel:active:after,
+.swal2-deny:active:after,
+button:active:after,
+button:active:before {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Disable scale/lift on touch-only devices to prevent jitter/stickiness */
+@media (hover: none) {
+  .btn-primary:hover, 
+  .btn-adv:hover, 
+  .btn-outline:hover, 
+  .feature-card:hover, 
+  .adv-card:hover, 
+  .nav-item:hover,
+  .action-btn:hover,
+  .sidebar-link:hover,
+  .role-card:hover,
+  .selection-card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background: inherit !important;
+  }
+  
+  /* Clear backgrounds that might stick on mobile */
+  .btn-primary:hover, .btn-adv:hover, .btn-outline:hover {
+    background: inherit !important;
+  }
 }

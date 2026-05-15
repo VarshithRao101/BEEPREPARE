@@ -104,8 +104,8 @@
             statusEl.classList.add('processing');
 
             try {
-                // Use bee-core.js apiCall with showOverlay=false to prevent global loader
-                const response = await window.apiCall('/ai/chat', 'POST', { message: text }, true, false, false);
+                // Use /ai/support for free support bot
+                const response = await window.apiCall('/ai/support', 'POST', { message: text }, true, false, false);
 
                 removeTyping(typingId);
                 statusEl.innerText = "Online";
