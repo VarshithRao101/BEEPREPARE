@@ -382,6 +382,8 @@
         checkRedirectResult();
 
         async function handleAutoRedirect() {
+          // 0. If login is in progress, do nothing
+          if (sessionStorage.getItem('_loginInProgress') === 'true') return;
           // 1. Loop Protection — if we just came from a redirect, don't auto-redirect back
           const lastRedirect = parseInt(sessionStorage.getItem('_lastRedirectAt') || '0');
           if (Date.now() - lastRedirect < 3000) {

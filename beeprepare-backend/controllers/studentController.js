@@ -344,7 +344,7 @@ const requestAccess = async (req, res) => {
 
     await logActivity(
       studentId,
-      'bank_joined',
+      'bank_requested',
       'Bank Access Requested',
       `Requested access to ${bank.subject} - ${bank.class}`,
       '#3B82F6'
@@ -574,10 +574,10 @@ const getNotes = async (req, res) => {
     if (!bankId) return error(res, 'Syllabus node ID is required.', 'MISSING_BANKID', 400);
 
     const bank = await Bank.findById(bankId).select('approvedStudents subject class teacherName');
-    if (!bank) return error(res, 'Syllabus node not found.', 'BANK_NOT_FOUND', 404);
+    if (!bank) return error(res, 'Question bank not found.', 'BANK_NOT_FOUND', 404);
 
     if (!bank.approvedStudents.includes(studentId)) {
-      return error(res, 'Access denied to this vault node.', 'FORBIDDEN', 403);
+      return error(res, 'Access denied to this question bank.', 'FORBIDDEN', 403);
     }
 
     // 1. Fetch from Cloudinary Vault (Indexed in MongoDB)
@@ -1394,9 +1394,9 @@ const updateStreakActivity = async (req, res) => {
     // Log activity
     await logActivity(
       studentId, 
-      'practice_paper_download', 
-      'Paper Downloaded', 
-      'Student downloaded/printed a practice paper', 
+      'streak_update', 
+      'Activity Logged', 
+      'Student updated their learning streak through consistent activity', 
       '#FF4500'
     );
 

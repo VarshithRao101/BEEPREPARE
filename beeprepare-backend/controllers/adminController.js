@@ -231,7 +231,7 @@ const getOverview = async (req, res) => {
       systemHealth: {
         mainDb: dbHealth.mainDb.status,
         questionsDb: dbHealth.questionsDb.status,
-        firebase: 'connected',
+        firebase: require('firebase-admin').apps.length > 0 ? 'connected' : 'disconnected',
         gemini: process.env.GEMINI_API_KEY ? 'configured' : 'missing'
       }
     });
@@ -1442,12 +1442,9 @@ const bulkUploadQuestions = async (req, res) => {
       chapterId, questionsText, actionCode
     } = req.body;
 
-    // Security Gate: Bulk operations verification (Bypassed)
-    /*
     if (!verifyActionCode('bulk_upload', actionCode)) {
       return error(res, 'Invalid action code for bulk injection', 'INVALID_CODE', 403);
     }
-    */
 
     // Verify bank exists and get metadata
     const bank = await Bank.findById(bankId);

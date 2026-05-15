@@ -521,12 +521,39 @@
                     <div id="chapters-list">
                         <!-- Chapters loaded from Javascript hook -->
                     </div>
+
+                    <div class="section-divider">
+                        <span class="section-label">3. Knowledge Focus</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div class="bp-card">
+                        <label class="field-label">Question Priority Algorithm</label>
+                        <select id="focus-select" class="glass-select">
+                            <option value="balanced">Balanced Selection (Standard)</option>
+                            <option value="exam">Exam Oriented (PYQs & Repeated)</option>
+                            <option value="concept">Concept Mastery (Theory Focused)</option>
+                            <option value="revision">Strict Revision (Important & Tricky)</option>
+                        </select>
+                        <p style="font-size: 10px; color: var(--text-muted); margin-top: 10px; font-weight: 600;">Defines which question tags get higher priority during matrix selection.</p>
+                    </div>
+
+                    <div class="section-divider">
+                        <span class="section-label">4. Difficulty Balance</span>
+                        <div class="divider-line"></div>
+                    </div>
+                    <div class="bp-card">
+                        <div class="difficulty-row">
+                            <div class="diff-btn active" data-ratio="30-50-20" onclick="setDiffRatio(this)">3:5:2<br><span style="font-size: 8px; opacity: 0.6;">Standard</span></div>
+                            <div class="diff-btn" data-ratio="50-40-10" onclick="setDiffRatio(this)">5:4:1<br><span style="font-size: 8px; opacity: 0.6;">Beginner</span></div>
+                            <div class="diff-btn" data-ratio="10-40-50" onclick="setDiffRatio(this)">1:4:5<br><span style="font-size: 8px; opacity: 0.6;">Advanced</span></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Right: Blueprint -->
                 <div>
                     <div class="section-divider">
-                        <span class="section-label">3. Structure Format</span>
+                        <span class="section-label">5. Structure Format</span>
                         <div class="divider-line"></div>
                     </div>
 
@@ -663,6 +690,11 @@
         window.updateQty = function(idx, diff) {
             blueprint[idx].qty = Math.max(0, blueprint[idx].qty + diff);
             renderBlueprint();
+        };
+        
+        window.setDiffRatio = function(el) {
+            document.querySelectorAll('.difficulty-row .diff-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
         };
 
         window.openCustomizer = function(idx) {
@@ -893,10 +925,36 @@
             document.getElementById('genOverlay').classList.add('active');
 
             try {
+                const focus = document.getElementById('focus-select').value;
+                const ratios = document.querySelector('.diff-btn.active').dataset.ratio.split('-').map(Number);
+                
+                const focusMap = {
+                    'balanced': [
+                        { tag: 'important', pct: 40 }, { tag: 'repeated', pct: 30 },
+                        { tag: 'conceptual', pct: 20 }, { tag: 'standard', pct: 10 }
+                    ],
+                    'exam': [
+                        { tag: 'pyqs', pct: 60 }, { tag: 'repeated', pct: 30 },
+                        { tag: 'important', pct: 10 }
+                    ],
+                    'concept': [
+                        { tag: 'conceptual', pct: 70 }, { tag: 'formula', pct: 20 },
+                        { tag: 'standard', pct: 10 }
+                    ],
+                    'revision': [
+                        { tag: 'important', pct: 50 }, { tag: 'tricky', pct: 30 },
+                        { tag: 'conceptual', pct: 20 }
+                    ]
+                };
+
                 const result = await apiCall('/teacher/generate-paper', 'POST', {
                     bankId: selectedBankId,
                     selectedChapters,
-                    blueprint: bpData
+                    blueprint: bpData,
+                    easyPct: ratios[0],
+                    mediumPct: ratios[1],
+                    hardPct: ratios[2],
+                    tagDistribution: focusMap[focus]
                 });
 
                 if (result && result.success) {

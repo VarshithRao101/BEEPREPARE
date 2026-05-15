@@ -450,18 +450,20 @@ export async function apiCall(
 
   } catch (err) {
     console.groupEnd();
-    console.error('❌ API Failure:', endpoint, err);
     
-    // Don't show error popups on the login page itself
+    // Don't show error popups or logs on the login page itself for expected probes
     const onLoginPage = window.location.pathname === '/' || 
-                        window.location.pathname.includes('index.html');
+                        window.location.pathname.endsWith('index.html');
     
-    if (!onLoginPage && window.Swal && err.message === 'SERVER_BUSY') {
-      Swal.fire({
-        icon: 'warning', title: 'Server Busy',
-        text: 'High load detected. Try again later.',
-        background: '#1a1a2e', color: '#fff'
-      });
+    if (!onLoginPage) {
+        console.error('❌ API Failure:', endpoint, err);
+        if (window.Swal && err.message === 'SERVER_BUSY') {
+          Swal.fire({
+            icon: 'warning', title: 'Server Busy',
+            text: 'High load detected. Try again later.',
+            background: '#1a1a2e', color: '#fff'
+          });
+        }
     }
     return { success: false, message: err.message || 'Network error' };
   } finally {

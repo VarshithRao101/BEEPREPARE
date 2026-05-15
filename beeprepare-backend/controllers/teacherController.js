@@ -517,7 +517,7 @@ const addSubject = async (req, res) => {
 
     await logActivity(
       teacherId,
-      'question_added',
+      'bank_created',
       'Subject Bank Created',
       `Created ${subject} bank for ${className} (Code: ${bankCode})`,
       '#FFD700'
@@ -575,7 +575,7 @@ const deleteSubject = async (req, res) => {
 
     await logActivity(
       teacherId,
-      'question_added',
+      'bank_deleted',
       'Subject Bank Deleted',
       `Deleted ${bank.subject} bank for ${bank.class}`,
       '#FF4444'
@@ -1041,8 +1041,10 @@ const generatePaper = async (req, res) => {
                     bankId,
                     totalQuestions: fetchReq.qty,
                     totalMarks: fetchReq.qty, 
-                    easyPct: 30, mediumPct: 50, hardPct: 20,
-                    tagDistribution: [
+                    easyPct: req.body.easyPct ?? 30, 
+                    mediumPct: req.body.mediumPct ?? 50, 
+                    hardPct: req.body.hardPct ?? 20,
+                    tagDistribution: req.body.tagDistribution ?? [
                         { tag: 'important', pct: 40 },
                         { tag: 'repeated',  pct: 30 },
                         { tag: 'conceptual',pct: 20 },
@@ -1297,8 +1299,8 @@ const getNotes = async (req, res) => {
     const teacherId = req.user.googleUid;
 
     const bank = await Bank.findById(bankId).select('teacherId subject class chapters');
-    if (!bank) return error(res, 'Syllabus node not found in repository.', 'NOT_FOUND', 404);
-    if (bank.teacherId !== teacherId) return error(res, 'Access denied to this vault.', 'FORBIDDEN', 403);
+    if (!bank) return error(res, 'Question bank not found.', 'NOT_FOUND', 404);
+    if (bank.teacherId !== teacherId) return error(res, 'Access denied to this question bank.', 'FORBIDDEN', 403);
 
     // 1. Get the list of chapters defined in the Bank (Syllabus)
     const syllabusChapters = bank.chapters || [];

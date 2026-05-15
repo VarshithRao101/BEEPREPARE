@@ -220,7 +220,7 @@
         </div>
     </div>
 
-    <a href="../beginners/admin/" class="full-admin-link">Access Full Hive Control Dashboard ➔</a>
+    <a href="index.html" class="full-admin-link">Access Full Hive Control Dashboard ➔</a>
 
     <script type="module">
         import { adminApi, showToast, showCodeModal } from './matrix-core.js';
@@ -228,8 +228,8 @@
         async function init() {
             const stats = await adminApi('/overview');
             if (stats && stats.success) {
-                document.getElementById('db-text').innerText = stats.data.systemHealth.mongodb === 'connected' ? 'SECURED' : 'VOID';
-                document.getElementById('db-dot').className = stats.data.systemHealth.mongodb === 'connected' ? 'dot dot-green' : 'dot dot-red';
+                document.getElementById('db-text').innerText = stats.data.systemHealth.mainDb === 'connected' ? 'SECURED' : 'VOID';
+                document.getElementById('db-dot').className = stats.data.systemHealth.mainDb === 'connected' ? 'dot dot-green' : 'dot dot-red';
                 document.getElementById('fb-text').innerText = stats.data.systemHealth.firebase === 'connected' ? 'SYNCED' : 'VOID';
                 document.getElementById('fb-dot').className = stats.data.systemHealth.firebase === 'connected' ? 'dot dot-green' : 'dot dot-red';
                 document.getElementById('user-count').innerText = stats.data.activeNodes + ' Nodes';

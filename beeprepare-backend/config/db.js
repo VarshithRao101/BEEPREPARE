@@ -36,20 +36,15 @@ const connectDB = async () => {
       console.log('[Database] Main DB connected.');
 
       console.log('[Database] Connecting to Questions DB (Auxiliary)...');
-      // Use a separate connection for questions — non-blocking for the main app startup
-      mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts).asPromise()
-        .then(qConn => {
-          cached.questionsConn = qConn;
-          console.log('[Database] Questions DB connected.');
-          qConn.on('disconnected', () => {
-            console.error('[Database] Questions DB disconnected');
-            cached.questionsConn = null;
-          });
-          qConn.on('error', (err) => console.error('[Database] Questions DB error:', err.message));
-        })
-        .catch(err => {
-          console.error('[Database] Questions DB connection failed (Non-critical for startup):', err.message);
-        });
+      const qConn = await mongoose.createConnection(process.env.MONGODB_QUESTIONS_URI, opts).asPromise();
+      cached.questionsConn = qConn;
+      console.log('[Database] Questions DB connected.');
+
+      qConn.on('disconnected', () => {
+        console.error('[Database] Questions DB disconnected');
+        cached.questionsConn = null;
+      });
+      qConn.on('error', (err) => console.error('[Database] Questions DB error:', err.message));
 
       cached.mainConn.on('disconnected', () => {
         console.error('[Database] Main DB disconnected');
