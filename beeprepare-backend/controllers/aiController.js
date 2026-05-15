@@ -1,9 +1,10 @@
-const Groq = require('groq-sdk');
+const OpenAI = require('openai');
 const User = require('../models/User');
 const { success, error } = require('../utils/responseHelper');
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
+// Initialize OpenAI with the provided key (or env variable)
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const DAILY_LIMIT = 30;
@@ -29,10 +30,9 @@ const sendMessage = async (req, res) => {
 
     const now = new Date();
 
-    // RESET LOGIC: If never reset OR current time passed the reset mark
+    // RESET LOGIC
     if (!aiMessagesResetAt || now >= new Date(aiMessagesResetAt)) {
       aiMessagesToday = 0;
-      // Set reset to exactly 24 hours from the first message of the new cycle
       aiMessagesResetAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
       await User.updateOne({ googleUid }, { 
         $set: { 
@@ -42,13 +42,12 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    // PAID USER BYPASS: If account is activated, they get unlimited (or very high) limit
     const isPaidUser = req.user.isActivated || req.user.planType === 'active';
     
     if (!isPaidUser && aiMessagesToday >= DAILY_LIMIT) {
       return res.status(429).json({
         success: false,
-        message: `Daily AI usage limit reached (${DAILY_LIMIT}). ✨ Activate your account for unlimited academic help, advanced problem solving, and priority access!`,
+        message: `Daily AI usage limit reached (${DAILY_LIMIT}). ✨ Activate your account for unlimited help!`,
         error: { 
           code: 'DAILY_LIMIT_REACHED', 
           limit: DAILY_LIMIT,
@@ -57,27 +56,20 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    // Step 3: Build Context and System Instruction
+    // Step 3: Build System Instruction
     let systemInstruction = "";
     if (userRole === 'teacher') {
-      systemInstruction = `You are BEE AI, a professional academic assistant for teachers in BEEPREPARE.
-Help with question generation, marking schemes, chapter summaries, and lesson planning for Class 8-10 (CBSE/Indian boards).
-If an image is provided, analyze it to help the teacher.
-Be professional, structured, and helpful. Use Markdown.`;
+      systemInstruction = `You are BEE AI, a professional academic assistant for teachers in BEEPREPARE. Help with question generation, marking schemes, and lesson planning for Class 8-10. Be professional and use Markdown.`;
     } else {
-      systemInstruction = `You are BEE AI, a friendly academic assistant for students in BEEPREPARE.
-Help students understand Class 8-10 concepts (CBSE/Indian boards). If they provide a photo of a doubt or question, solve it step-by-step.
-Use simple language, mnemonics, and step-by-step solutions.
-Be encouraging and concise. Use Markdown.`;
+      systemInstruction = `You are BEE AI, a friendly academic assistant for students in BEEPREPARE. Help students understand Class 8-10 concepts. If they provide a photo, solve it step-by-step. Be concise and use Markdown.`;
     }
 
-    // Step 4: Build Groq Content (Support Vision)
+    // Step 4: Build OpenAI Content
     let userContent = [];
     if (cleanMessage) {
       userContent.push({ type: 'text', text: cleanMessage });
     }
     if (image) {
-      // If it's a Firebase URL, we need a signed URL for AI to access it
       let accessibleUrl = image;
       if (image.includes('firebasestorage') || image.includes('storage.googleapis.com')) {
           try {
@@ -85,11 +77,11 @@ Be encouraging and concise. Use Markdown.`;
               const path = decodeURIComponent(image.split('/o/')[1].split('?')[0]);
               const [signedUrl] = await bucket.file(path).getSignedUrl({
                   action: 'read',
-                  expires: Date.now() + 15 * 60 * 1000 // 15 mins
+                  expires: Date.now() + 15 * 60 * 1000 
               });
               accessibleUrl = signedUrl;
           } catch (e) {
-              console.warn('AI Signed URL failed, using raw:', e.message);
+              console.warn('AI Signed URL failed:', e.message);
           }
       }
       userContent.push({
@@ -99,78 +91,51 @@ Be encouraging and concise. Use Markdown.`;
     }
 
     try {
-      const VISION_MODELS = [
-        'llama-3.3-70b-versatile',
-        'llama-3.1-70b-versatile',
-        'llama-3.1-8b-instant',
-        'mixtral-8x7b-32768'
-      ];
-
+      const MODELS = ['gpt-4o-mini', 'gpt-4o']; 
       let completion = null;
       let lastError = null;
-      let successfulModel = '';
 
-      console.log('--- BEE AI SYNC START ---');
+      console.log('--- BEE AI OPENAI SYNC START ---');
       
-      for (const modelId of VISION_MODELS) {
+      for (const modelId of MODELS) {
         try {
-          console.log(`Attempting Sync with Model: ${modelId}...`);
-          completion = await groq.chat.completions.create({
+          console.log(`Attempting OpenAI: ${modelId}...`);
+          completion = await openai.chat.completions.create({
+            model: modelId,
             messages: [
               { role: 'system', content: systemInstruction },
               { role: 'user', content: userContent },
             ],
-            model: modelId,
             temperature: 0.7,
-            max_tokens: 1024,
+            max_tokens: 1500,
           });
-          
-          if (completion) {
-            successfulModel = modelId;
-            break; 
-          }
+          if (completion) break;
         } catch (err) {
           lastError = err;
-          console.warn(`Model ${modelId} failed/decommissioned. Trying next...`);
+          console.warn(`Model ${modelId} failed. Trying next...`);
         }
       }
 
-      if (!completion) {
-        throw lastError; // Pass to the groqError catch block
-      }
+      if (!completion) throw lastError;
 
       const aiResponseText = completion.choices[0]?.message?.content || "";
-      console.log(`--- BEE AI SYNC SUCCESS (${successfulModel}) ---`);
+      console.log('--- BEE AI OPENAI SUCCESS ---');
 
       // Step 6: Update User Limit and Award EXP
       const { awardExp } = require('../utils/expService');
       await User.updateOne({ googleUid }, { $inc: { aiMessagesToday: 1 } });
-      awardExp(googleUid, 'AI_DOUBT_SOLVED'); // Async non-blocking
+      awardExp(googleUid, 'AI_DOUBT_SOLVED'); 
 
       return success(res, 'AI Response successful', {
         aiMessage: aiResponseText,
         messagesUsedToday: aiMessagesToday + 1,
         dailyLimit: DAILY_LIMIT,
-        remainingToday: DAILY_LIMIT - (aiMessagesToday + 1),
         resetAt: aiMessagesResetAt
       });
 
-    } catch (groqError) {
-      console.error('CRITICAL: Groq API Error Detected!');
-      console.error('Error Code:', groqError.status || 'N/A');
-      console.error('Error Message:', groqError.message);
-      
-      const errorMsg = groqError.message || "";
-      
-      if (errorMsg.includes('429') || errorMsg.includes('quota') || groqError.status === 429) {
-        return error(res, 'BEE AI is currently processing high traffic. Please retry in 60 seconds.', 'QUOTA_EXHAUSTED', 429);
-      }
-
-      if (groqError.status === 401 || groqError.status === 403) {
-        return error(res, 'Neural Link Authentication Failed. Contact Admin.', 'AUTH_ERROR', 500);
-      }
-
-      return error(res, `AI Service Insight: ${errorMsg || 'Connection reset by peer.'}`, 'API_ERROR', 500);
+    } catch (apiError) {
+      console.error('OpenAI Error:', apiError.message);
+      return error(res, `Neural Link Error: ${apiError.message}`, 'API_ERROR', 500);
     }
   } catch (err) {
     console.error('sendMessage error:', err);
@@ -180,7 +145,6 @@ Be encouraging and concise. Use Markdown.`;
 
 module.exports = {
   sendMessage,
-  // Remaining empty handlers to avoid breaking route imports temporarily
   getSessions: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
   getSessionMessages: (req, res) => error(res, 'History disabled', 'DISABLED', 400),
   deleteSession: (req, res) => error(res, 'History disabled', 'DISABLED', 400),

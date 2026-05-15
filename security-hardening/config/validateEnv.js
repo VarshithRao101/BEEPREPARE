@@ -25,6 +25,7 @@ const validateEnv = () => {
     'FIREBASE_PRIVATE_KEY',
     'ADMIN_JWT_SECRET',
     'RESEND_API_KEY',
+    'OPENAI_API_KEY',
     'GROQ_API_KEY',
     'GEMINI_API_KEY',
     'CLOUDINARY_CLOUD_NAME',
