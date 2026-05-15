@@ -2,49 +2,48 @@ const User = require('../models/User');
 const { success, error } = require('../utils/responseHelper');
 
 /**
- * BEE ASSISTANT — High-Accuracy Local Resolver
- * Replaces external AI APIs with a robust, zero-latency support engine.
+ * BEE ASSISTANT — Human-Tone Local Resolver
  */
 const KNOWLEDGE_BASE = [
   { 
     keys: ['login', 'signin', 'sign in', 'access', 'redirect', 'loop', 'stuck', 'enter'], 
-    ans: "### 🔐 Login & Access Issues\nIf you're stuck in a redirect loop:\n1. **Clear Browser Cache**: Go to Settings > Privacy > Clear Browsing Data.\n2. **Check Google Account**: Ensure you're signed into the same Google account you used for registration.\n3. **Incognito Mode**: Try opening BEEPREPARE in an Incognito/Private window.\n4. **Internet**: Ensure you have a stable 4G/5G/Wi-Fi connection." 
+    ans: "If you are having trouble logging in or are stuck in a loop, it is usually best to clear your browser cache first. You should also check that you are signed into the correct Google account. If that does not work, trying an incognito window often fixes the issue." 
   },
   { 
     keys: ['payment', 'utr', 'screenshot', 'pay', 'transaction', 'upi', 'money', 'billing'], 
-    ans: "### 💳 Payment & UTR Help\n1. **Submit UTR**: After paying via the QR code, copy the 12-digit UTR number from your banking app (PhonePe/GPay/Paytm).\n2. **Wait Time**: Manual verification takes **1 to 4 hours**. Do not submit the same UTR twice.\n3. **Failed Payment**: If money was deducted but not updated, wait 24 hours for the bank to refund or the system to sync." 
+    ans: "To confirm your payment, please enter the 12-digit UTR number from your payment app into the system. Our team usually verifies these within 1 to 4 hours. There is no need to submit the same UTR more than once; we will get to it as quickly as possible." 
   },
   { 
     keys: ['activate', 'license', 'key', 'active', 'plan', 'price', 'subscription', 'unlock'], 
-    ans: "### 🚀 Account Activation\n*   **Activation Price**: ₹250 (One-time for full node access).\n*   **Extra Slots**: ₹100 per additional subject/exam.\n*   **Process**: Submit Payment > Get Approved > Key is auto-applied to your profile." 
+    ans: "To activate your account, you will need to submit your payment details for verification. Once we approve the transaction, your subjects will be unlocked and your license will be applied to your profile automatically." 
   },
   { 
     keys: ['question', 'bank', 'syllabus', 'chapters', 'marks', 'paper', 'generate', 'bulk'], 
-    ans: "### 📚 Question Bank & Paper Generation\n*   **Generate Paper**: Go to 'Practice' > Select Chapters > Set Difficulty > Click 'Generate'.\n*   **Bulk Upload**: Teachers can upload questions via the Admin Dashboard using Excel or Image Scanning.\n*   **Syllabus**: We currently support Class 8, 9, and 10 (SSC/CBSE/ICSE)." 
+    ans: "You can manage your questions in the Bank section. If you want to generate a paper, go to the Practice module and choose your chapters. For teachers, the bulk upload tool is available in the admin dashboard to add multiple questions at once." 
   },
   { 
     keys: ['error', 'fault', 'glitch', 'not working', 'crash', 'fault', 'broken', 'bug'], 
-    ans: "### 🛠️ Technical Troubleshooting\n*   **Refresh**: 90% of issues are fixed by a simple page refresh.\n*   **Update**: Ensure your browser (Chrome recommended) is updated to the latest version.\n*   **Report**: If a feature is broken, email **beesociety101@gmail.com** with a screenshot." 
+    ans: "If you encounter an error or the app crashes, please try refreshing the page first as that fixes most minor glitches. If the problem continues, it would be very helpful if you could send a screenshot of the error to beesociety101@gmail.com." 
   },
   { 
     keys: ['ai', 'limit', 'quota', 'messages', 'neural', 'bot', 'chat'], 
-    ans: "### 🤖 AI Assistant Quota\n*   **Free Users**: 30 messages/day limit.\n*   **Paid Users**: Unlimited AI support for academic doubts.\n*   **Status**: You are currently talking to the **BEE Support Resolver**." 
+    ans: "You are currently chatting with the BEE Assistant. Free accounts have a limit of 30 messages per day, while activated accounts have full access to our academic support features." 
   },
   { 
     keys: ['student', 'teacher', 'role', 'switch', 'change', 'profile'], 
-    ans: "### 👤 Profile & Role Management\n*   **Change Role**: Currently, roles cannot be changed manually. Please contact support if you registered as a Student but meant to be a Teacher.\n*   **Profile**: You can update your Name and School in the 'Profile' section." 
+    ans: "Roles are assigned when you first join the platform. If you have registered with the wrong role and need to switch, please reach out to our support team so we can assist you with that change." 
   },
   { 
     keys: ['mobile', 'app', 'android', 'ios', 'phone', 'install', 'pwa'], 
-    ans: "### 📱 Mobile Experience (PWA)\nBEEPREPARE is a Progressive Web App. To install it:\n1. Open Chrome on Android or Safari on iOS.\n2. Tap the **'Share'** or **'Menu'** button.\n3. Select **'Add to Home Screen'**." 
+    ans: "You can install BEEPREPARE on your phone for a better experience. Just open the site in Chrome or Safari and select Add to Home Screen from your browser menu to use it like a regular app." 
   },
   { 
     keys: ['security', 'blocked', 'ip', 'ban', 'flagged', 'strikes', 'fortress'], 
-    ans: "### 🛡️ Security Protocol\n*   **IP Block**: Happens if multiple invalid requests are detected. Wait **15 minutes** for the block to lift automatically.\n*   **Strikes**: Repeatedly trying to bypass security will result in a permanent ban." 
+    ans: "If your IP has been temporarily restricted, please wait about 15 minutes for the system to lift the block. This usually happens if there are too many rapid requests from your connection." 
   },
   { 
     keys: ['help', 'contact', 'support', 'assistance', 'customer', 'talk', 'human', 'call'], 
-    ans: "### 📞 Direct Support\n*   **WhatsApp**: 9059068384\n*   **Email**: beesociety101@gmail.com\n*   **Hours**: 9 AM to 9 PM IST" 
+    ans: "If you need to talk to us directly, you can reach out on WhatsApp at 9059068384 or email us at beesociety101@gmail.com. We are generally available from 9 AM to 9 PM." 
   }
 ];
 
@@ -58,7 +57,6 @@ const sendMessage = async (req, res) => {
     }
     const cleanMessage = message.trim().toLowerCase();
 
-    // ── STEP 1: KEYWORD MATCHING ──
     let aiResponseText = null;
     for (const entry of KNOWLEDGE_BASE) {
       if (entry.keys.some(k => cleanMessage.includes(k))) {
@@ -67,29 +65,21 @@ const sendMessage = async (req, res) => {
       }
     }
 
-    // Default Fallback
     if (!aiResponseText) {
-      aiResponseText = "I'm the BEE Assistant. I can help with **Login, Payments, Activation, or Question Banks**. Please try rephrasing your concern or asking about a specific feature!";
+      aiResponseText = "I am the BEE Assistant. I can help you with questions about your login, payments, account activation, or managing your question banks. Is there something specific you would like to know about?";
     }
 
-    // ── STEP 2: SESSION TRACKING & SUPPORT ESCALATION ──
     let aiMessagesToday = req.user.aiMessagesToday || 0;
-    
-    // Increment count
     await User.updateOne({ googleUid }, { $inc: { aiMessagesToday: 1 } });
     aiMessagesToday += 1;
 
-    // Suggest human support after 5 queries
     if (aiMessagesToday >= 5) {
-      aiResponseText += "\n\n---\n⚠️ **Note**: If your issue persists after " + aiMessagesToday + " queries, please contact our human support directly for faster resolution:\n📞 **WhatsApp**: 9059068384\n✉️ **Email**: beesociety101@gmail.com";
+      aiResponseText += "\n\nSince we have been chatting for a while and I want to make sure you get the best help, please feel free to contact our support team directly if your issue is still not resolved. You can reach us on WhatsApp at 9059068384 or email beesociety101@gmail.com.";
     }
 
-    // Award EXP
     const { awardExp } = require('../utils/expService');
     awardExp(googleUid, 'AI_DOUBT_SOLVED'); 
 
-    // ── STEP 3: RESPONSE ──
-    // Delaying response slightly to allow frontend 'dots' animation to feel natural
     return setTimeout(() => {
       return success(res, 'Assistant response generated', {
         aiMessage: aiResponseText,

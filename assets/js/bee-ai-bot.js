@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="bee-chat-messages" id="bee-chat-messages">
-                    <div class="bee-msg bot">Nexus 2.8 Online. Uplink Stable. I am BEE AI, your academic intelligence partner. How can I assist you today?</div>
+                    <div class="bee-msg bot">Hello, I am the BEE Assistant. How can I help you today?</div>
                 </div>
                 <div class="bee-chat-input-area">
                     <div class="bee-input-wrapper">
@@ -104,25 +104,19 @@
             statusEl.classList.add('processing');
 
             try {
-                // Use bee-core.js apiCall for authenticated backend communication
-                // This handles tokens, security, and consistent error reporting
-                const response = await window.apiCall('/ai/chat', 'POST', { message: text });
+                // Use bee-core.js apiCall with showOverlay=false to prevent global loader
+                const response = await window.apiCall('/ai/chat', 'POST', { message: text }, true, false, false);
 
                 removeTyping(typingId);
-                statusEl.innerText = "Online • Secure Node";
+                statusEl.innerText = "Online";
                 statusEl.classList.remove('processing');
 
                 if (response && response.success) {
                     const botText = response.data.aiMessage;
                     appendMessage('bot', botText);
-                    
-                    // Update limits UI if available
-                    if (response.data.remainingToday !== undefined) {
-                        console.log(`AI Credits: ${response.data.remainingToday}/${response.data.dailyLimit}`);
-                    }
                 } else {
-                    const errorMsg = response?.message || "Protocol synchronization failed.";
-                    appendMessage('bot', `⚠️ Uplink Warning: ${errorMsg}`);
+                    const errorMsg = response?.message || "There was a problem processing your request.";
+                    appendMessage('bot', `I am sorry, but I encountered an error: ${errorMsg}`);
                 }
             } catch (error) {
                 removeTyping(typingId);
