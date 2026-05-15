@@ -1,7 +1,7 @@
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const EMAIL_FROM = process.env.EMAIL_FROM || 'BEEPREPARE <onboarding@resend.dev>';
+const EMAIL_FROM = process.env.EMAIL_FROM || 'BEEPREPARE <info@beeprepare.in>';
 
 const EMAIL_STYLE = `
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
