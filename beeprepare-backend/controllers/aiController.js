@@ -112,6 +112,11 @@ const sendMessage = async (req, res) => {
     }
 
     // 2. Prepare Groq Request
+    if (!process.env.GROQ_API_KEY) {
+      console.error('CRITICAL: GROQ_API_KEY is missing from .env');
+      return error(res, 'AI Service Configuration Missing', 'CONFIG_ERROR', 500);
+    }
+
     const systemPrompt = `You are BEE AI (BAI), a premium academic intelligence assistant for the BEEPREPARE platform. 
     Your goal is to solve students' doubts, explain complex concepts, and help teachers with academic queries.
     
@@ -127,7 +132,7 @@ const sendMessage = async (req, res) => {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
       ],
-      model: "llama-3.1-70b-versatile", // High quality Groq model
+      model: "llama3-70b-8192", // More stable/widely available model ID
       temperature: 0.7,
       max_tokens: 1024,
       top_p: 1
@@ -149,8 +154,13 @@ const sendMessage = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('BAI Groq Error:', err);
-    return error(res, 'Neural Core offline', 'SERVER_ERROR', 500);
+    console.error('BAI Groq Error Details:', {
+      message: err.message,
+      stack: err.stack,
+      status: err.status,
+      code: err.code
+    });
+    return error(res, `Neural Core offline: ${err.message || 'Unknown error'}`, 'SERVER_ERROR', 500);
   }
 };
 
