@@ -592,16 +592,15 @@ const approvePayment = async (req, res) => {
 
   // 2. Find and claim unused key in MongoDB
   const keyType = payment.paymentType === 'extra_slot' ? 'redeem' : 'activation';
-  
   const keyDoc = await LicenseKey.findOneAndUpdate(
     { 
       type: keyType, 
-      isUsed: false 
+      isUsed: false,
+      isDispatched: false
     },
     { 
-      isUsed: true,
-      usedBy: `PENDING_RESERVE_${payment.email}`, // Temporary identifier until user activates
-      usedAt: new Date()
+      isDispatched: true,
+      dispatchedTo: payment.email.toLowerCase()
     },
     { new: true }
   );
@@ -882,8 +881,6 @@ const generateKeys = async (req, res) => {
           key: genKey(keyType),
           type: keyType || 'activation',
           isUsed: false
-          // NO plan field
-          // NO subjectSlots field
         })
       );
       await LicenseKey.insertMany(
@@ -1403,6 +1400,30 @@ const getStorageStats = async (req, res) => {
   }
 };
 
+const getDispatchLogs = async (req, res) => {
+  try {
+    const logs = await LicenseKey
+      .find({ isDispatched: true })
+      .sort({ updatedAt: -1 })
+      .lean();
+    return success(res, 'Dispatch logs fetched', logs);
+  } catch (err) {
+    return error(res, 'Failed to fetch logs', 'SERVER_ERROR', 500);
+  }
+};
+
+const getAllKeys = async (req, res) => {
+  try {
+    const keys = await LicenseKey
+      .find({})
+      .sort({ createdAt: -1 })
+      .lean();
+    return success(res, 'Key bank fetched', keys);
+  } catch (err) {
+    return error(res, 'Failed to fetch keys', 'SERVER_ERROR', 500);
+  }
+};
+
 const getActivity = async (req, res) => {
   try {
     const { limit = 50, userId } = req.query;
@@ -1716,5 +1737,6 @@ module.exports = {
   updateUserName, modifyLeaderboard, getLeaderboard, getActivity, getStorageStats,
   bulkUploadQuestions, getTeachers, getTeacherBanks,
   deletePaymentRequest, deleteLicenseKey,
-  getStudyCircles, deleteStudyCircle
+  getStudyCircles, deleteStudyCircle,
+  getDispatchLogs, getAllKeys
 };

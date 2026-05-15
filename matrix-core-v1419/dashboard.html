@@ -218,9 +218,22 @@
                 <button class="btn btn-danger" id="clearAnnBtn" style="background: transparent; border: 1.5px solid #ff4d4d;">VOID ALL</button>
             </div>
         </div>
+
+        <!-- KEY DISPATCH LOG (NEW) -->
+        <div class="card glass" style="grid-column: span 2;">
+            <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/></svg>
+                Key Dispatch Logs
+            </div>
+            <p style="font-size: 12px; color: #666; margin: 0 0 15px;">RECENTLY DISPATCHED AUTHORIZATION CREDENTIALS.</p>
+            <div class="status-table" id="keyLogTable">
+                <div style="text-align: center; padding: 20px; color: #555; font-size: 12px;">Syncing logs...</div>
+            </div>
+            <a href="keys.html" style="display: block; margin-top: 20px; text-align: right; color: var(--gold); font-size: 11px; font-weight: 900; text-decoration: none; text-transform: uppercase; letter-spacing: 1px;">Manage Key Bank ➔</a>
+        </div>
     </div>
 
-    <a href="index.html" class="full-admin-link">Access Full Hive Control Dashboard ➔</a>
+    <a href="users.html" class="full-admin-link">Access Full Hive Control Dashboard ➔</a>
 
     <script type="module">
         import { adminApi, showToast, showCodeModal } from './matrix-core.js';
@@ -237,6 +250,27 @@
                 document.getElementById('maint-toggle').checked = stats.data.maintenanceMode;
                 document.getElementById('m-label').innerText = stats.data.maintenanceMode ? 'MAINTENANCE_ACTIVE' : 'MAINTENANCE_OFF';
                 document.getElementById('m-label').style.color = stats.data.maintenanceMode ? '#ff4d4d' : '#00E676';
+            }
+            fetchKeyLogs();
+        }
+
+        async function fetchKeyLogs() {
+            const res = await adminApi('/keys/dispatch-logs');
+            const container = document.getElementById('keyLogTable');
+            if (res && res.success) {
+                if (res.data.length === 0) {
+                    container.innerHTML = '<div style="text-align:center; padding: 20px; color: #555; font-size:12px;">No keys dispatched yet.</div>';
+                    return;
+                }
+                container.innerHTML = res.data.slice(0, 5).map(log => `
+                    <div class="status-row">
+                        <span class="status-label" style="font-size: 11px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${log.dispatchedTo || 'Unknown'}</span>
+                        <span class="status-value">
+                            <span style="font-family: monospace; color: var(--gold); background: rgba(255,215,0,0.05); padding: 4px 8px; border-radius: 4px; font-size: 12px;">${log.key}</span>
+                            <span class="dot ${log.isUsed ? 'dot-green' : 'dot-red'}" title="${log.isUsed ? 'Activated' : 'Pending'}"></span>
+                        </span>
+                    </div>
+                `).join('');
             }
         }
 

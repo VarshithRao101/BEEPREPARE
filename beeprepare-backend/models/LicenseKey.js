@@ -16,6 +16,14 @@ const licenseKeySchema = new Schema({
     type: Boolean,
     default: false
   },
+  isDispatched: {
+    type: Boolean,
+    default: false
+  },
+  dispatchedTo: {
+    type: String,
+    default: null
+  },
   usedBy: {
     type: String,
     default: null

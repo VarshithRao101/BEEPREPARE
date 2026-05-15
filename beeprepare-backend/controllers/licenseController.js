@@ -16,11 +16,9 @@ const verifyKey = async (req, res) => {
     const keyTrimmed = licenseKey.trim().toUpperCase();
 
     // Atomic claim — prevents race conditions
-    const key = await LicenseKey
-      .findOneAndUpdate(
+    const key = await LicenseKey.findOneAndUpdate(
         {
           key: keyTrimmed,
-          type: 'activation',
           isUsed: false
         },
         {

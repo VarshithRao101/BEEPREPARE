@@ -28,7 +28,11 @@ const redeemCode = async (req, res) => {
         {
           key: codeTrimmed,
           type: 'redeem',
-          isUsed: false
+          isUsed: false,
+          $or: [
+            { assignedToEmail: null },
+            { assignedToEmail: req.user.email.toLowerCase() }
+          ]
         },
         {
           isUsed: true,

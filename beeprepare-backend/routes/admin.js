@@ -55,6 +55,8 @@ router.delete('/payments/:id',       requireActionCode('DELETE_PAYMENT'),  ctrl.
 
 // Keys
 router.get('/keys', ctrl.getKeys);
+router.get('/keys/all', ctrl.getAllKeys);
+router.get('/keys/dispatch-logs', ctrl.getDispatchLogs);
 router.get('/keys/stats', ctrl.getKeyStats);
 router.post('/keys/generate',     requireActionCode('GENERATE_KEYS'), ctrl.generateKeys);
 router.delete('/keys/:id',        requireActionCode('DELETE_KEY'),    ctrl.deleteLicenseKey);
