@@ -39,7 +39,13 @@
 
         /* --- SIDEBAR --- */
         .sidebar {
-            display: none;
+            width: var(--sidebar-width);
+            background: #000;
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s;
+            z-index: 1001;
         }
 
         .sidebar-header {
@@ -165,7 +171,7 @@
         }
 
         .sidebar-toggle {
-            display: none;
+            display: flex;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             color: #fff;
@@ -175,6 +181,12 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--gold-primary);
+            color: #000;
         }
 
         .header-title-group h2 {
@@ -219,6 +231,13 @@
             flex-direction: column;
             gap: 40px;
             scroll-behavior: smooth;
+            position: relative;
+        }
+
+        /* Center landing UI when no messages are present */
+        .messages-container:has(#landing-ui[style*="display: block"]) {
+            justify-content: center;
+            padding-bottom: 40px;
         }
 
         .message-row {
@@ -849,6 +868,7 @@
 
         <main class="chat-main">
             <header class="chat-header">
+                <div class="header-left">
                     <button class="sidebar-toggle" onclick="toggleSidebar()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -1027,7 +1047,11 @@
 
         window.toggleSidebar = () => {
             const sb = document.getElementById('sidebar');
-            sb.classList.toggle('mobile-active');
+            if (window.innerWidth <= 768) {
+                sb.classList.toggle('mobile-active');
+            } else {
+                sb.style.display = sb.style.display === 'none' ? 'flex' : 'none';
+            }
         };
 
         window.startNewSession = () => {
