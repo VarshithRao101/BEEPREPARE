@@ -438,6 +438,9 @@ app.use('/api/circles', requireAuth, require('./routes/circles'));
 // Payment (public submit with payment limiter + full security stack; status/resend locked)
 app.use('/api/payment', paymentLimiter, paymentRoutes);
 
+// Debug & Diagnostics
+app.use('/api/debug', require('./routes/debug'));
+
 // Admin (protected by rolling gateway)
 app.use('/api/admin', adminRoutes);
 
