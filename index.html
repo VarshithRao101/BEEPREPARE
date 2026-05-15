@@ -8,6 +8,12 @@
     <meta name="description" content="BEEPREPARE: The ultimate academic companion for teachers and students. Unlock premium resources, AI-driven doubt clearing, and seamless exam preparation.">
     <meta name="keywords" content="BEEPREPARE, exam preparation, AI education, teacher resources, student hub, academic excellence">
     
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#FFD700">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/assets/images/logo-192.png">
+
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://beeprepare.in/">
@@ -15,16 +21,16 @@
     <meta property="og:description" content="Empowering the next generation of learners with AI-driven academic tools and premium resources.">
     <meta property="og:image" content="https://beeprepare.in/assets/images/og-banner.png">
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://beeprepare.in/">
-    <meta property="twitter:title" content="BEEPREPARE - Smart Academic Excellence">
-    <meta property="twitter:description" content="Empowering the next generation of learners with AI-driven academic tools and premium resources.">
-    <meta property="twitter:image" content="https://beeprepare.in/assets/images/og-banner.png">
-
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="./assets/css/premium-student-ui.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
     <style>
         :root {
             --primary: #FFD700;
@@ -203,20 +209,9 @@
                 <span id="btnText">Continue with Google</span>
             </button>
 
-            <div class="trust-banner">
-                <div class="trust-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                    ENCRYPTED
-                </div>
-                <div class="trust-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                    SECURED
-                </div>
+            <div class="trust-banner" style="margin-top: 40px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 30px;">
+                <img src="/assets/images/trust-badges.png" alt="Security Trust Badges" style="width: 100%; filter: drop-shadow(0 0 10px rgba(255,215,0,0.1));">
+                <p style="font-size: 10px; color: var(--text-muted); margin-top: 15px; letter-spacing: 1px; font-weight: 600;">OFFICIAL ACADEMIC SECURITY PARTNER</p>
             </div>
 
             <div class="terms-text">
