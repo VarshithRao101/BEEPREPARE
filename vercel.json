@@ -40,6 +40,10 @@
     {
       "src": "google9255c89e0d761702.html",
       "use": "@vercel/static"
+    },
+    {
+      "src": "404.html",
+      "use": "@vercel/static"
     }
   ],
   "rewrites": [

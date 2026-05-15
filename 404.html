@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEEPREPARE - Path Not Found</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FFD700;
+            --bg: #000000;
+            --text: #ffffff;
+            --muted: #888888;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .main-bg {
+            position: fixed;
+            inset: 0;
+            background: url('/assets/images/premium-bg.png') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+            filter: brightness(0.3) blur(10px);
+        }
+        .container {
+            max-width: 500px;
+            padding: 40px;
+            z-index: 1;
+        }
+        .errorCode {
+            font-size: 120px;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+            margin-bottom: 20px;
+            text-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+        }
+        h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+        }
+        p {
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+        .btn {
+            background: var(--primary);
+            color: #000;
+            padding: 18px 40px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            display: inline-block;
+        }
+        .btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        .timer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-bg"></div>
+    <div class="container">
+        <div class="errorCode">404</div>
+        <h1>Trajectory Lost</h1>
+        <p>The coordinate you requested does not exist within the BEEPREPARE core. You are being redirected to safety.</p>
+        <a href="/index.html" class="btn">Return to Base</a>
+        <div class="timer">AUTO-REDIRECT IN <span id="sec">10</span>s</div>
+    </div>
+
+    <script>
+        let timeLeft = 10;
+        const timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById('sec').innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                window.location.href = '/index.html';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
