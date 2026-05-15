@@ -5,7 +5,7 @@ const { Resend } = require('resend');
 router.get('/email', async (req, res) => {
   try {
     const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.EMAIL_FROM || 'BEEPREPARE <info@beeprepare.in>';
+    const fromEmail = 'BEEPREPARE <info@beeprepare.in>';
     const toEmail = req.query.to || 'ravindarraodevarneni@gmail.com';
 
     if (!apiKey) {
