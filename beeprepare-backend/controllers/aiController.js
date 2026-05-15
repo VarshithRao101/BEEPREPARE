@@ -132,7 +132,7 @@ const sendMessage = async (req, res) => {
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
       ],
-      model: "llama3-70b-8192", // More stable/widely available model ID
+      model: "llama-3.3-70b-versatile", // Latest stable versatile model
       temperature: 0.7,
       max_tokens: 1024,
       top_p: 1
@@ -154,13 +154,8 @@ const sendMessage = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('BAI Groq Error Details:', {
-      message: err.message,
-      stack: err.stack,
-      status: err.status,
-      code: err.code
-    });
-    return error(res, `Neural Core offline: ${err.message || 'Unknown error'}`, 'SERVER_ERROR', 500);
+    console.error('BAI Groq Error:', err.message);
+    return error(res, `Neural Core offline: ${err.message}`, 'SERVER_ERROR', 500);
   }
 };
 
