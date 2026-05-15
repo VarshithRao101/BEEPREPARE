@@ -360,8 +360,12 @@ export async function apiCall(
     let data;
     try {
       data = JSON.parse(text);
-    } catch (e) {
-      console.error('[BEE CORE] Non-JSON Response from ' + endpoint, text.substring(0, 300));
+    } catch (err) {
+      console.error('[BEE CORE] Non-JSON Response from ' + endpoint, {
+        status: res.status,
+        body: text.substring(0, 1000) // Show first 1000 chars
+      });
+      console.groupEnd();
       throw new Error('SERVER_INTERNAL_FAULT');
     }
 
