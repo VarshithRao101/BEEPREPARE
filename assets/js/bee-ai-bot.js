@@ -61,10 +61,9 @@
         closeBtn.onclick = closeChat;
         backdropEl.onclick = closeChat;
 
-        // Hijack Customer Care Button & Avatars
+        // Hijack Customer Care Button
         function secureHijack() {
             const ccBtn = document.getElementById('customerCareBtn');
-            const avatars = document.querySelectorAll('.profile-avatar, .nav-avatar, .user-avatar-img');
 
             const triggerBot = (e) => {
                 e.preventDefault();
@@ -81,18 +80,6 @@
                 ccBtn.dataset.hijacked = "true";
                 ccBtn.style.cursor = "pointer";
             }
-
-            // WE NO LONGER HIJACK AI LINKS HERE. 
-            // The user wants them to redirect to the full ai-chat.html (the 0/30 credits page).
-
-            avatars.forEach(av => {
-                if (!av.dataset.hijacked) {
-                    av.addEventListener('click', triggerBot, true);
-                    av.addEventListener('touchstart', triggerBot, {passive: false});
-                    av.dataset.hijacked = "true";
-                    av.style.cursor = "pointer";
-                }
-            });
         }
         setInterval(secureHijack, 1000);
 
