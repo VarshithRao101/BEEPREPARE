@@ -77,7 +77,7 @@ const recordStrike = async (ip, reason) => {
     try {
         const entry = await Blacklist.findOneAndUpdate(
             { ip },
-            { 
+            {
                 $inc: { strikes: 1 },
                 $set: { lastAttempt: new Date(), reason: reason }
             },
