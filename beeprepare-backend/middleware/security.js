@@ -14,6 +14,8 @@ const securityHeaders = helmet({
         "https://www.gstatic.com",
         "https://apis.google.com",
         "https://cdn.sheetjs.com",
+        "https://www.googletagmanager.com",
+        "https://www.google-analytics.com",
         "blob:", 
         "'unsafe-inline'"
       ],
@@ -35,7 +37,8 @@ const securityHeaders = helmet({
         "data:",
         "https://storage.googleapis.com",
         "https://res.cloudinary.com",
-        "https://lh3.googleusercontent.com"
+        "https://lh3.googleusercontent.com",
+        "https://www.google-analytics.com"
       ],
       mediaSrc: ["'self'", "data:"],
       connectSrc: [
@@ -44,6 +47,11 @@ const securityHeaders = helmet({
         "https://*.googleapis.com",
         "https://identitytoolkit.googleapis.com",
         "https://securetoken.googleapis.com",
+        "https://*.google-analytics.com",
+        "https://*.analytics.google.com",
+        "https://www.google-analytics.com",
+        "https://beeprepare.in",
+        "https://www.beeprepare.in",
         "wss:"
       ],
       frameSrc: ["'self'", "https://*.firebaseapp.com", "https://*.google.com"],
