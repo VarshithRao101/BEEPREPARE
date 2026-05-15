@@ -168,7 +168,7 @@ export async function showCodeModal(title, desc, isDangerous = false) {
         confirmBtn.addEventListener('click', () => {
             const val = input.value;
             overlay.remove();
-            resolve(val);
+            setTimeout(() => resolve(val), 50);
         });
         
         input.addEventListener('keydown', (e) => {
