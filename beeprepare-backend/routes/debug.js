@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Resend } = require('resend');
 
-router.get('/debug-email', async (req, res) => {
+router.get('/email', async (req, res) => {
   try {
     const apiKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.EMAIL_FROM || 'BEEPREPARE <info@beeprepare.in>';
