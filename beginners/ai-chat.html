@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="../assets/css/premium-student-ui.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <script src="../assets/js/marked.min.js"></script>
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
     <style>
         :root {
             --sidebar-width: 280px;
@@ -1254,6 +1258,20 @@
             }
         };
 
+        function renderMath(element) {
+            if (window.renderMathInElement) {
+                renderMathInElement(element, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false},
+                        {left: '\\(', right: '\\)', display: false},
+                        {left: '\\[', right: '\\]', display: true}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
         function addMessageUI(role, text, animate = false) {
             const row = document.createElement('div');
             row.className = `message-row ${role}-msg`;
@@ -1270,6 +1288,8 @@
                 </div>
             `;
             stream.appendChild(row);
+            const bubble = row.querySelector('.bubble-chat');
+            renderMath(bubble);
             scrollToBottom();
         }
 
@@ -1299,6 +1319,8 @@
 
             // Final render to ensure correctness
             bubble.innerHTML = marked.parse(text);
+            renderMath(bubble);
+            
             const actions = document.createElement('div');
             actions.className = 'msg-actions';
             actions.innerHTML = '<span class="action-tool" onclick="copyText(this)">📋 Copy</span>';
