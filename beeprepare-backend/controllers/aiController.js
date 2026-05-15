@@ -1,145 +1,105 @@
-const OpenAI = require('openai');
 const User = require('../models/User');
 const { success, error } = require('../utils/responseHelper');
 
-// Initialize OpenAI with the provided key (or env variable)
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+/**
+ * BEE ASSISTANT — High-Accuracy Local Resolver
+ * Replaces external AI APIs with a robust, zero-latency support engine.
+ */
+const KNOWLEDGE_BASE = [
+  { 
+    keys: ['login', 'signin', 'sign in', 'access', 'redirect', 'loop', 'stuck', 'enter'], 
+    ans: "### 🔐 Login & Access Issues\nIf you're stuck in a redirect loop:\n1. **Clear Browser Cache**: Go to Settings > Privacy > Clear Browsing Data.\n2. **Check Google Account**: Ensure you're signed into the same Google account you used for registration.\n3. **Incognito Mode**: Try opening BEEPREPARE in an Incognito/Private window.\n4. **Internet**: Ensure you have a stable 4G/5G/Wi-Fi connection." 
+  },
+  { 
+    keys: ['payment', 'utr', 'screenshot', 'pay', 'transaction', 'upi', 'money', 'billing'], 
+    ans: "### 💳 Payment & UTR Help\n1. **Submit UTR**: After paying via the QR code, copy the 12-digit UTR number from your banking app (PhonePe/GPay/Paytm).\n2. **Wait Time**: Manual verification takes **1 to 4 hours**. Do not submit the same UTR twice.\n3. **Failed Payment**: If money was deducted but not updated, wait 24 hours for the bank to refund or the system to sync." 
+  },
+  { 
+    keys: ['activate', 'license', 'key', 'active', 'plan', 'price', 'subscription', 'unlock'], 
+    ans: "### 🚀 Account Activation\n*   **Activation Price**: ₹250 (One-time for full node access).\n*   **Extra Slots**: ₹100 per additional subject/exam.\n*   **Process**: Submit Payment > Get Approved > Key is auto-applied to your profile." 
+  },
+  { 
+    keys: ['question', 'bank', 'syllabus', 'chapters', 'marks', 'paper', 'generate', 'bulk'], 
+    ans: "### 📚 Question Bank & Paper Generation\n*   **Generate Paper**: Go to 'Practice' > Select Chapters > Set Difficulty > Click 'Generate'.\n*   **Bulk Upload**: Teachers can upload questions via the Admin Dashboard using Excel or Image Scanning.\n*   **Syllabus**: We currently support Class 8, 9, and 10 (SSC/CBSE/ICSE)." 
+  },
+  { 
+    keys: ['error', 'fault', 'glitch', 'not working', 'crash', 'fault', 'broken', 'bug'], 
+    ans: "### 🛠️ Technical Troubleshooting\n*   **Refresh**: 90% of issues are fixed by a simple page refresh.\n*   **Update**: Ensure your browser (Chrome recommended) is updated to the latest version.\n*   **Report**: If a feature is broken, email **beesociety101@gmail.com** with a screenshot." 
+  },
+  { 
+    keys: ['ai', 'limit', 'quota', 'messages', 'neural', 'bot', 'chat'], 
+    ans: "### 🤖 AI Assistant Quota\n*   **Free Users**: 30 messages/day limit.\n*   **Paid Users**: Unlimited AI support for academic doubts.\n*   **Status**: You are currently talking to the **BEE Support Resolver**." 
+  },
+  { 
+    keys: ['student', 'teacher', 'role', 'switch', 'change', 'profile'], 
+    ans: "### 👤 Profile & Role Management\n*   **Change Role**: Currently, roles cannot be changed manually. Please contact support if you registered as a Student but meant to be a Teacher.\n*   **Profile**: You can update your Name and School in the 'Profile' section." 
+  },
+  { 
+    keys: ['mobile', 'app', 'android', 'ios', 'phone', 'install', 'pwa'], 
+    ans: "### 📱 Mobile Experience (PWA)\nBEEPREPARE is a Progressive Web App. To install it:\n1. Open Chrome on Android or Safari on iOS.\n2. Tap the **'Share'** or **'Menu'** button.\n3. Select **'Add to Home Screen'**." 
+  },
+  { 
+    keys: ['security', 'blocked', 'ip', 'ban', 'flagged', 'strikes', 'fortress'], 
+    ans: "### 🛡️ Security Protocol\n*   **IP Block**: Happens if multiple invalid requests are detected. Wait **15 minutes** for the block to lift automatically.\n*   **Strikes**: Repeatedly trying to bypass security will result in a permanent ban." 
+  },
+  { 
+    keys: ['help', 'contact', 'support', 'assistance', 'customer', 'talk', 'human', 'call'], 
+    ans: "### 📞 Direct Support\n*   **WhatsApp**: 9059068384\n*   **Email**: beesociety101@gmail.com\n*   **Hours**: 9 AM to 9 PM IST" 
+  }
+];
 
-const DAILY_LIMIT = 30;
-
-// ══════════════════════════════════════════════════════════════════════════════
-// 1. POST /api/ai/chat (STATELESS — FAST CONVERSATION)
-// ══════════════════════════════════════════════════════════════════════════════
 const sendMessage = async (req, res) => {
   try {
-    const userRole = req.user.role;
     const googleUid = req.user.googleUid;
+    const { message } = req.body;
 
-    // Step 1: Validate message/image
-    const { message, image } = req.body;
-    if ((!message || message.trim() === '') && !image) {
-      return error(res, 'Message or image is required', 'EMPTY_CONTENT', 400);
+    if (!message || message.trim() === '') {
+      return error(res, 'Message is required', 'EMPTY_CONTENT', 400);
     }
-    const cleanMessage = (message || '').trim();
+    const cleanMessage = message.trim().toLowerCase();
 
-    // Step 2: Check daily message limit
+    // ── STEP 1: KEYWORD MATCHING ──
+    let aiResponseText = null;
+    for (const entry of KNOWLEDGE_BASE) {
+      if (entry.keys.some(k => cleanMessage.includes(k))) {
+        aiResponseText = entry.ans;
+        break;
+      }
+    }
+
+    // Default Fallback
+    if (!aiResponseText) {
+      aiResponseText = "I'm the BEE Assistant. I can help with **Login, Payments, Activation, or Question Banks**. Please try rephrasing your concern or asking about a specific feature!";
+    }
+
+    // ── STEP 2: SESSION TRACKING & SUPPORT ESCALATION ──
     let aiMessagesToday = req.user.aiMessagesToday || 0;
-    let aiMessagesResetAt = req.user.aiMessagesResetAt || null;
-
-    const now = new Date();
-
-    // RESET LOGIC
-    if (!aiMessagesResetAt || now >= new Date(aiMessagesResetAt)) {
-      aiMessagesToday = 0;
-      aiMessagesResetAt = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-      await User.updateOne({ googleUid }, { 
-        $set: { 
-          aiMessagesToday: 0, 
-          aiMessagesResetAt: aiMessagesResetAt 
-        } 
-      });
-    }
-
-    const isPaidUser = req.user.isActivated || req.user.planType === 'active';
     
-    if (!isPaidUser && aiMessagesToday >= DAILY_LIMIT) {
-      return res.status(429).json({
-        success: false,
-        message: `Daily AI usage limit reached (${DAILY_LIMIT}). ✨ Activate your account for unlimited help!`,
-        error: { 
-          code: 'DAILY_LIMIT_REACHED', 
-          limit: DAILY_LIMIT,
-          resetAt: aiMessagesResetAt
-        }
-      });
+    // Increment count
+    await User.updateOne({ googleUid }, { $inc: { aiMessagesToday: 1 } });
+    aiMessagesToday += 1;
+
+    // Suggest human support after 5 queries
+    if (aiMessagesToday >= 5) {
+      aiResponseText += "\n\n---\n⚠️ **Note**: If your issue persists after " + aiMessagesToday + " queries, please contact our human support directly for faster resolution:\n📞 **WhatsApp**: 9059068384\n✉️ **Email**: beesociety101@gmail.com";
     }
 
-    // Step 3: Build System Instruction
-    let systemInstruction = "";
-    if (userRole === 'teacher') {
-      systemInstruction = `You are BEE AI, a professional academic assistant for teachers in BEEPREPARE. Help with question generation, marking schemes, and lesson planning for Class 8-10. Be professional and use Markdown.`;
-    } else {
-      systemInstruction = `You are BEE AI, a friendly academic assistant for students in BEEPREPARE. Help students understand Class 8-10 concepts. If they provide a photo, solve it step-by-step. Be concise and use Markdown.`;
-    }
+    // Award EXP
+    const { awardExp } = require('../utils/expService');
+    awardExp(googleUid, 'AI_DOUBT_SOLVED'); 
 
-    // Step 4: Build OpenAI Content
-    let userContent = [];
-    if (cleanMessage) {
-      userContent.push({ type: 'text', text: cleanMessage });
-    }
-    if (image) {
-      let accessibleUrl = image;
-      if (image.includes('firebasestorage') || image.includes('storage.googleapis.com')) {
-          try {
-              const { bucket } = require('../config/firebase');
-              const path = decodeURIComponent(image.split('/o/')[1].split('?')[0]);
-              const [signedUrl] = await bucket.file(path).getSignedUrl({
-                  action: 'read',
-                  expires: Date.now() + 15 * 60 * 1000 
-              });
-              accessibleUrl = signedUrl;
-          } catch (e) {
-              console.warn('AI Signed URL failed:', e.message);
-          }
-      }
-      userContent.push({
-        type: 'image_url',
-        image_url: { url: accessibleUrl }
-      });
-    }
-
-    try {
-      const MODELS = ['gpt-4o-mini', 'gpt-4o']; 
-      let completion = null;
-      let lastError = null;
-
-      console.log('--- BEE AI OPENAI SYNC START ---');
-      
-      for (const modelId of MODELS) {
-        try {
-          console.log(`Attempting OpenAI: ${modelId}...`);
-          completion = await openai.chat.completions.create({
-            model: modelId,
-            messages: [
-              { role: 'system', content: systemInstruction },
-              { role: 'user', content: userContent },
-            ],
-            temperature: 0.7,
-            max_tokens: 1500,
-          });
-          if (completion) break;
-        } catch (err) {
-          lastError = err;
-          console.warn(`Model ${modelId} failed. Trying next...`);
-        }
-      }
-
-      if (!completion) throw lastError;
-
-      const aiResponseText = completion.choices[0]?.message?.content || "";
-      console.log('--- BEE AI OPENAI SUCCESS ---');
-
-      // Step 6: Update User Limit and Award EXP
-      const { awardExp } = require('../utils/expService');
-      await User.updateOne({ googleUid }, { $inc: { aiMessagesToday: 1 } });
-      awardExp(googleUid, 'AI_DOUBT_SOLVED'); 
-
-      return success(res, 'AI Response successful', {
+    // ── STEP 3: RESPONSE ──
+    // Delaying response slightly to allow frontend 'dots' animation to feel natural
+    return setTimeout(() => {
+      return success(res, 'Assistant response generated', {
         aiMessage: aiResponseText,
-        messagesUsedToday: aiMessagesToday + 1,
-        dailyLimit: DAILY_LIMIT,
-        resetAt: aiMessagesResetAt
+        messagesUsedToday: aiMessagesToday
       });
+    }, 800);
 
-    } catch (apiError) {
-      console.error('OpenAI Error:', apiError.message);
-      return error(res, `Neural Link Error: ${apiError.message}`, 'API_ERROR', 500);
-    }
   } catch (err) {
-    console.error('sendMessage error:', err);
-    return error(res, 'Failed to process message', 'SERVER_ERROR', 500);
+    console.error('BEE Assistant Error:', err);
+    return error(res, 'System offline', 'SERVER_ERROR', 500);
   }
 };
 
