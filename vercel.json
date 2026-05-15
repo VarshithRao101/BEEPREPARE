@@ -48,6 +48,9 @@
     { "source": "/gate/(.*)", "destination": "/beeprepare-backend/server.js" },
     { "source": "/vault", "destination": "/beeprepare-backend/server.js" },
     { "source": "/health", "destination": "/beeprepare-backend/server.js" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/google9255c89e0d761702.html", "destination": "/google9255c89e0d761702.html" },
     { "source": "/(index.html)?", "destination": "/index.html" },
     { "source": "/beginners/(.*)", "destination": "/beginners/$1" }
   ],
