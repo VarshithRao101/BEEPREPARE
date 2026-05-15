@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /assets/
+Allow: /beginners/
+Disallow: /matrix-core-v1419/
+Disallow: /beeprepare-backend/
+Disallow: /node_modules/
+Disallow: /.git/
+Disallow: /.env
+
+Sitemap: https://beeprepare.in/sitemap.xml
