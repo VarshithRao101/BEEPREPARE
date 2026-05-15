@@ -6,9 +6,13 @@ const logger = require('../utils/logger');
  * Blocks requests from IPs found in the Blacklist database.
  */
 const ipShield = async (req, res, next) => {
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
     try {
+        const ip = req.ip || 
+                   req.headers['x-forwarded-for'] || 
+                   req.socket?.remoteAddress || 
+                   req.connection?.remoteAddress || 
+                   'unknown';
+
         const mongoose = require('mongoose');
         // If DB not connected, skip the check (don't block legitimate users)
         if (mongoose.connection.readyState !== 1) {
