@@ -135,11 +135,16 @@
             const msg = document.createElement('div');
             msg.className = `bee-msg ${role}`;
             
+            let content = text;
+            if (role === 'bot') {
+                content += "\n\n---\n*This is a static bot. Contact customer care if your issue is not resolved.*";
+            }
+
             // Render Markdown if marked is available
             if (role === 'bot' && window.marked) {
-                msg.innerHTML = window.marked.parse(text);
+                msg.innerHTML = window.marked.parse(content);
             } else {
-                msg.innerText = text;
+                msg.innerText = content;
             }
             
             messagesCont.appendChild(msg);

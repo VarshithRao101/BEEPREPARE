@@ -169,13 +169,17 @@
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
 }
 
-/* Input Area */
 .bee-chat-input-area {
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
     border-top: 1px solid var(--bot-border);
+}
+
+.bee-input-wrapper {
     display: flex;
+    align-items: center;
     gap: 10px;
+    width: 100%;
 }
 
 .bee-chat-input {
@@ -197,8 +201,9 @@
 }
 
 .bee-chat-send {
-    width: 45px;
-    height: 45px;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
     background: var(--bot-primary);
     border: none;
     border-radius: 12px;
@@ -206,7 +211,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .bee-chat-send:hover {
@@ -244,23 +249,24 @@
 
 @media (max-width: 768px) {
     .bee-chat-window {
-        width: 92%;
-        height: 75vh;
-        top: 50%;
-        left: 50%;
-        right: auto;
-        bottom: auto;
-        transform: translate(-50%, -50%) scale(0.9);
-        border-radius: 35px;
-        box-shadow: 0 40px 120px rgba(0,0,0,0.9);
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: translateY(100%);
+        border-radius: 0;
+        box-shadow: none;
     }
     
     .bee-chat-window.active {
-        transform: translate(-50%, -50%) scale(1);
+        transform: translateY(0);
     }
 
     .bee-chat-header {
         padding: 15px 20px;
+        border-radius: 0;
     }
 
     .bee-chat-messages {
@@ -270,10 +276,12 @@
     .bee-msg {
         max-width: 90%;
         font-size: 13px;
+        padding: 10px 14px;
     }
 
     .bee-chat-input-area {
-        padding: 15px;
+        padding: 12px 15px;
+        padding-bottom: env(safe-area-inset-bottom, 12px);
     }
 }
 
