@@ -39,13 +39,7 @@
 
         /* --- SIDEBAR --- */
         .sidebar {
-            width: var(--sidebar-width);
-            background: #000;
-            border-right: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
-            transition: 0.3s;
-            z-index: 1001;
+            display: none !important;
         }
 
         .sidebar-header {
@@ -171,17 +165,7 @@
         }
 
         .sidebar-toggle {
-            display: flex;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            color: #fff;
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: 0.2s;
+            display: none !important;
         }
 
         .sidebar-toggle:hover {
@@ -232,6 +216,9 @@
             gap: 40px;
             scroll-behavior: smooth;
             position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         /* Center landing UI when no messages are present */
@@ -732,24 +719,19 @@
             }
 
             .sidebar {
-                display: flex;
-                position: fixed;
-                left: -280px;
-                top: 0;
-                bottom: 0;
-                width: 280px;
-                z-index: 2000;
-                background: #000;
-                transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-
-            .sidebar.mobile-active {
-                left: 0;
-                box-shadow: 20px 0 100px rgba(0,0,0,0.8);
+                display: none !important;
             }
 
             .messages-container {
                 padding: 20px 15px 140px;
+            }
+            
+            .suggestion-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .header-title-group h2 {
+                font-size: 14px !important;
             }
 
             .input-bar-container {
@@ -869,26 +851,27 @@
         <main class="chat-main">
             <header class="chat-header">
                 <div class="header-left">
-                    <button class="sidebar-toggle" onclick="toggleSidebar()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="3" y1="12" x2="21" y2="12"></line>
-                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                            <line x1="3" y1="18" x2="21" y2="18"></line>
-                        </svg>
-                    </button>
                     <button class="btn-send"
                         style="background: rgba(255,255,255,0.08); color: #fff; width: 38px; height: 38px; border-radius: 12px;"
-                        onclick="goHome()">
+                        onclick="goHome()" title="Return to Hub">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="3">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </button>
-                    <div class="header-title-group" style="margin-left: 5px;">
+                    <button class="btn-send"
+                        style="background: var(--gold-primary); color: #000; width: 38px; height: 38px; border-radius: 12px; margin-left: 10px;"
+                        onclick="startNewSession()" title="New Study Session">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                    <div class="header-title-group" style="margin-left: 15px;">
                         <h2 style="font-size: 16px;">BEE AI <span
                                 style="background: var(--gold-primary); color:#000; font-size:9px; font-weight:900; padding:2px 6px; border-radius:4px; margin-left:8px;">GEN-V</span>
                         </h2>
-                        <p style="font-size: 10px; margin-top:2px;">Advanced Academic Intelligence</p>
+                        <p style="font-size: 10px; margin-top:2px; opacity: 0.6;">Advanced Academic Intelligence</p>
                     </div>
                 </div>
 
