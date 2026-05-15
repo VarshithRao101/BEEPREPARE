@@ -245,16 +245,18 @@
 @media (max-width: 768px) {
     .bee-chat-window {
         width: 92%;
-        height: 70vh;
-        bottom: 50%;
-        right: 4%;
-        transform: scale(0.8) translate(0, 50%);
-        border-radius: 40px;
-        box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+        height: 75vh;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        bottom: auto;
+        transform: translate(-50%, -50%) scale(0.9);
+        border-radius: 35px;
+        box-shadow: 0 40px 120px rgba(0,0,0,0.9);
     }
     
     .bee-chat-window.active {
-        transform: scale(1) translate(0, 50%);
+        transform: translate(-50%, -50%) scale(1);
     }
 
     .bee-chat-header {
