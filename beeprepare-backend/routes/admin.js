@@ -74,6 +74,7 @@ router.delete('/feedback/:id',             requireActionCode('DELETE_FEEDBACK'),
 
 // Banks
 router.get('/banks', ctrl.getBanks);
+router.post('/banks/copy-questions', ctrl.copyQuestionsBetweenBanks);
 router.post('/banks/:bankId/deactivate', requireActionCode('DEACTIVATE_BANK'), ctrl.deactivateBank);
 router.delete('/banks/:bankId',          requireActionCode('DELETE_BANK'),      ctrl.deleteBank);
 

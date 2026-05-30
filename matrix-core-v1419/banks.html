@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -93,6 +93,80 @@
         .btn-act { padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; }
         .btn-deact { background: var(--warning); color: #000; }
         .btn-del { background: var(--danger); color: #fff; }
+
+        .merge-card {
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 20px;
+            align-items: end;
+        }
+        
+        @media (max-width: 768px) {
+            .merge-card {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+        }
+
+        .merge-card input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .merge-card input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn-merge {
+            background: var(--gold);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            border: 1px solid var(--gold);
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-merge:hover {
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-merge:active {
+            transform: translateY(0);
+        }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
@@ -111,6 +185,18 @@
     </header>
 
     <div class="container">
+        <div class="glass merge-card">
+            <div class="input-group">
+                <label for="sourceBankInput">Initial Bank Code / ID</label>
+                <input id="sourceBankInput" type="text" placeholder="e.g. MATH101 or 60f7e1b5c3b123456789abcd">
+            </div>
+            <div class="input-group">
+                <label for="targetBankInput">Target Bank Code / ID</label>
+                <input id="targetBankInput" type="text" placeholder="e.g. PHYS202 or 60f7e1b5c3b123456789efgh">
+            </div>
+            <button id="btnMerge" class="btn-merge" onclick="handleMerge()">Copy & Merge Questions</button>
+        </div>
+
         <div class="search-box">
             <input type="text" placeholder="Filter by subject or teacher..." oninput="handleSearch(this.value)">
         </div>
@@ -190,6 +276,40 @@
             if (code) {
                 const res = await adminApi(`/banks/${id}`, 'DELETE', { actionCode: code });
                 if (res && res.success) { showToast("Bank purged", "success"); fetchBanks(); }
+            }
+        };
+
+        window.handleMerge = async () => {
+            const sourceBankInput = document.getElementById('sourceBankInput');
+            const targetBankInput = document.getElementById('targetBankInput');
+            const btnMerge = document.getElementById('btnMerge');
+
+            const sourceBankId = sourceBankInput.value.trim();
+            const targetBankId = targetBankInput.value.trim();
+
+            if (!sourceBankId || !targetBankId) {
+                showToast("Please enter both Initial and Target Bank ID/Code", "error");
+                return;
+            }
+
+            btnMerge.disabled = true;
+            btnMerge.innerText = "MERGING...";
+
+            try {
+                const res = await adminApi('/banks/copy-questions', 'POST', { sourceBankId, targetBankId });
+                if (res && res.success) {
+                    showToast(res.message || "Questions successfully merged!", "success");
+                    sourceBankInput.value = "";
+                    targetBankInput.value = "";
+                    fetchBanks();
+                } else {
+                    showToast(res?.message || "Failed to merge banks", "error");
+                }
+            } catch (err) {
+                showToast("Network error or server failed", "error");
+            } finally {
+                btnMerge.disabled = false;
+                btnMerge.innerText = "Copy & Merge Questions";
             }
         };
 

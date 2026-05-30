@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const { connectDB } = require('../config/db');
+const { connectDB, getMainConn, getQuestionsConn } = require('../config/db');
 const LicenseKey = require('../models/LicenseKey');
 const Bank = require('../models/Bank');
 const Question = require('../models/Question');
@@ -1717,6 +1717,155 @@ const deleteStudyCircle = async (req, res) => {
   }
 };
 
+const copyQuestionsBetweenBanks = async (req, res) => {
+  try {
+    await connectDB();
+    const { sourceBankId, targetBankId } = req.body;
+
+    if (!sourceBankId || !targetBankId) {
+      return error(res, 'Both initial and target bank IDs/Codes are required', 'MISSING_FIELDS', 400);
+    }
+
+    const mongoose = require('mongoose');
+
+    // Helper to find a bank by ID or bankCode
+    const findBank = async (idOrCode) => {
+      if (!idOrCode) return null;
+      let bank = null;
+      if (mongoose.Types.ObjectId.isValid(idOrCode)) {
+        bank = await Bank.findById(idOrCode);
+      }
+      if (!bank) {
+        bank = await Bank.findOne({ bankCode: idOrCode });
+      }
+      return bank;
+    };
+
+    const sourceBank = await findBank(sourceBankId);
+    if (!sourceBank) {
+      return error(res, `Initial bank "${sourceBankId}" not found`, 'NOT_FOUND', 404);
+    }
+
+    const targetBank = await findBank(targetBankId);
+    if (!targetBank) {
+      return error(res, `Target bank "${targetBankId}" not found`, 'NOT_FOUND', 404);
+    }
+
+    if (sourceBank._id.toString() === targetBank._id.toString()) {
+      return error(res, 'Initial and target bank must be different', 'INVALID_OPERATION', 400);
+    }
+
+    // Fetch all questions from the source bank
+    const sourceQuestions = await Question.find({ bankId: sourceBank._id.toString() }).lean();
+    if (sourceQuestions.length === 0) {
+      return success(res, 'Initial bank has no questions to copy.', { copiedCount: 0 });
+    }
+
+    // Get next numericId for auto-incrementing
+    const lastQ = await Question.findOne({}, { numericId: 1 }).sort({ numericId: -1 }).lean();
+    let nextNumericId = (lastQ && lastQ.numericId) ? lastQ.numericId + 1 : 1;
+
+    const targetChapters = targetBank.chapters || [];
+    const chapterCountMap = {};
+
+    const finalizedQuestions = sourceQuestions.map(q => {
+      const newQ = { ...q };
+      delete newQ._id;
+      delete newQ.id;
+      delete newQ.createdAt;
+      delete newQ.updatedAt;
+
+      // Assign unique numericId
+      newQ.numericId = nextNumericId++;
+
+      // Remap hierarchy/owner fields
+      newQ.bankId = targetBank._id.toString();
+      newQ.teacherId = targetBank.teacherId;
+      newQ.class = targetBank.class;
+      newQ.subject = targetBank.subject;
+      newQ.createdBy = targetBank.teacherId;
+
+      // Remap chapters
+      let mappedChapterId = 'general';
+      let mappedChapterName = 'General';
+      let mappedChapterIndex = 0;
+
+      if (targetChapters.length > 0) {
+        const match = targetChapters.find(c => 
+          (q.chapterId && c.chapterId === q.chapterId) || 
+          (q.chapterName && c.chapterName.toLowerCase() === q.chapterName.toLowerCase())
+        );
+        if (match) {
+          mappedChapterId = match.chapterId;
+          mappedChapterName = match.chapterName;
+          mappedChapterIndex = targetChapters.indexOf(match);
+        } else {
+          mappedChapterId = targetChapters[0].chapterId;
+          mappedChapterName = targetChapters[0].chapterName;
+          mappedChapterIndex = 0;
+        }
+      }
+
+      newQ.chapterId = mappedChapterId;
+      newQ.chapterName = mappedChapterName;
+      newQ.chapterIndex = mappedChapterIndex;
+
+      // Count for updates
+      chapterCountMap[mappedChapterId] = (chapterCountMap[mappedChapterId] || 0) + 1;
+
+      return newQ;
+    });
+
+    // Save cloned questions to Cluster 1
+    const savedQuestions = await Question.insertMany(finalizedQuestions);
+
+    // Update target Bank document
+    for (const ch of targetBank.chapters) {
+      if (chapterCountMap[ch.chapterId]) {
+        ch.questionCount = (ch.questionCount || 0) + chapterCountMap[ch.chapterId];
+      }
+    }
+    targetBank.totalQuestions = (targetBank.totalQuestions || 0) + savedQuestions.length;
+    await targetBank.save();
+
+    // Update target teacher total questions
+    await User.updateOne(
+      { googleUid: targetBank.teacherId },
+      { $inc: { totalQuestions: savedQuestions.length } }
+    );
+
+    // Refresh Matrix Engine pool
+    try {
+      const { bootMatrixEngine } = require('./matrixController');
+      bootMatrixEngine().catch(err => console.warn('[Matrix Engine] Post-copy boot failed:', err.message));
+    } catch (e) {
+      console.warn('[Matrix Engine] matrixController not found or boot failed:', e.message);
+    }
+
+    // Log Activity
+    try {
+      await ActivityLog.create({
+        userId: `ADMIN_${req.admin?.adminId || 'UNKNOWN'}`,
+        type: 'bank_copy_questions',
+        title: 'Questions Copied',
+        description: `Copied ${savedQuestions.length} questions from bank "${sourceBank.bankCode}" to bank "${targetBank.bankCode}".`,
+        ip: req.ip,
+        color: '#9b59b6'
+      });
+    } catch (logErr) {
+      console.warn('Activity log failed for copyQuestions:', logErr.message);
+    }
+
+    return success(res, `Successfully copied ${savedQuestions.length} questions to bank "${targetBank.bankCode}"!`, {
+      copiedCount: savedQuestions.length
+    });
+
+  } catch (err) {
+    console.error('copyQuestionsBetweenBanks error:', err.message);
+    return error(res, 'Failed to copy questions: ' + err.message, 'SERVER_ERROR', 500);
+  }
+};
+
 module.exports = {
   adminLogin, adminLogout, verifySession,
   getOverview, getUsers, getUserDetail,
@@ -1735,5 +1884,6 @@ module.exports = {
   bulkUploadQuestions, getTeachers, getTeacherBanks,
   deletePaymentRequest, deleteLicenseKey,
   getStudyCircles, deleteStudyCircle,
-  getDispatchLogs, getAllKeys
+  getDispatchLogs, getAllKeys,
+  copyQuestionsBetweenBanks
 };
