@@ -54,7 +54,7 @@ const KNOWLEDGE_BASE = [
 ];
 
 /**
- * Handle Support Bot Requests (Free/Static)
+ * Handle Support Bot Requests (Free/Dynamic)
  */
 const supportBotHandler = async (req, res) => {
   try {
@@ -62,28 +62,75 @@ const supportBotHandler = async (req, res) => {
     if (!message || message.trim() === '') {
       return error(res, 'Message is required', 'EMPTY_CONTENT', 400);
     }
-    const cleanMessage = message.trim().toLowerCase();
+    const cleanMessage = message.trim();
 
     let aiResponseText = null;
-    for (const entry of KNOWLEDGE_BASE) {
-      if (entry.keys.some(k => cleanMessage.includes(k))) {
-        aiResponseText = entry.ans;
-        break;
+
+    // 1. Try to use Groq for dynamic, highly-trained answers
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const systemPrompt = `You are the BEE Support Assistant, a friendly, intelligent customer care agent for the BEEPREPARE platform.
+Your job is to assist users with their non-academic platform support, payments, activation, login, security, role switching, and contact queries.
+
+BEEPREPARE SYSTEM INFORMATION:
+1. LOGIN STUCK / LOOP: Clear browser cache, ensure the correct Google account is selected, or open an incognito/private browser tab.
+2. CONFIRM PAYMENTS & UTR: Users must submit their 12-digit UTR number from their UPI/banking app (PhonePe, GPay, Paytm) into the app's billing portal. Verification takes 1-4 hours. Do not submit UTR multiple times.
+3. ACCOUNT ACTIVATION / LICENSE: Unlock is automated once the UTR is verified by the admin team.
+4. NATIVE MOBILE APP / PWA: Install BEEPREPARE on Android or iOS by opening Chrome or Safari and selecting "Add to Home Screen" from the menu.
+5. SECURITY LOCKS: The "Fortress" security blocks IPs for 15 minutes if rate-limited. Wait 15 minutes to let it auto-lift.
+6. WRONG ROLE (STUDENT vs TEACHER): If a user selected the wrong role, guide them to contact support via email or WhatsApp to switch roles.
+7. ACADEMIC SOLVING: If the user asks general academic, math, science, or doubt questions, politely remind them that you are the Support Bot, and guide them to use the "BEE AI Assistant" in their sidebar (which is trained specifically for academic doubt-solving).
+
+BEEPREPARE EMERGENCY CONTACTS:
+- Main Support Email: beesociety101@gmail.com
+- Main WhatsApp Support: 9059068384 (Ravindar Rao Devarneni - Priority 1)
+- Support Phone 2: 9154267518 (Priority 2)
+- Support Phone 3: 9391691094 (Priority 3)
+- Support Phone 4: 7569064222 (Mani Kanta Reddy - Priority 4)
+- Instagram: @beesociety101 and @vars.101
+
+RULES:
+- Be extremely polite, concise, professional, and empathetic.
+- Provide direct, helpful answers based strictly on the BEEPREPARE ecosystem.
+- Avoid overly generic or robotic filler phrases. Speak like a premium human care representative.`;
+
+        const chatCompletion = await groq.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: cleanMessage }
+          ],
+          model: "llama-3.3-70b-versatile",
+          temperature: 0.5, // lower temperature for more precise/factual support answers
+          max_tokens: 512,
+          top_p: 1
+        });
+
+        aiResponseText = chatCompletion.choices[0]?.message?.content;
+      } catch (groqErr) {
+        console.warn('[Support Bot] Groq dynamic completion failed, falling back to static resolver:', groqErr.message);
       }
     }
 
+    // 2. Fallback to keyword matching knowledge base if Groq is missing or fails
     if (!aiResponseText) {
-      aiResponseText = "I am the BEE Support Assistant. I can help you with questions about your login, payments, account activation, or managing your question banks. For academic doubt solving, please use the BEE AI Assistant in the sidebar!";
+      const lowerMsg = cleanMessage.toLowerCase();
+      for (const entry of KNOWLEDGE_BASE) {
+        if (entry.keys.some(k => lowerMsg.includes(k))) {
+          aiResponseText = entry.ans;
+          break;
+        }
+      }
     }
 
-    // Support bot is free - no credit deduction
+    // 3. Absolute catch-all fallback
+    if (!aiResponseText) {
+      aiResponseText = "I am the BEE Support Assistant. I can help you with questions about your login, payments, account activation, or managing your question banks. For direct assistance, WhatsApp us at 9059068384 or email beesociety101@gmail.com!";
+    }
 
-    return setTimeout(() => {
-      return success(res, 'Support response generated', {
-        aiMessage: aiResponseText,
-        isFree: true
-      });
-    }, 600);
+    return success(res, 'Support response generated', {
+      aiMessage: aiResponseText,
+      isFree: true
+    });
 
   } catch (err) {
     console.error('Support Bot Error:', err);
