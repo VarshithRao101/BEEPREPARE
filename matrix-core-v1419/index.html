@@ -374,6 +374,48 @@
             .stats-bar { grid-template-columns: 1fr; }
             .header { flex-direction: column; gap: 20px; text-align: center; }
         }
+        .merge-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 20px;
+            align-items: end;
+        }
+        
+        @media (max-width: 768px) {
+            .merge-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        .btn-merge {
+            background: var(--gold);
+            color: #000;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            border: 1px solid var(--gold);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 48px;
+        }
+
+        .btn-merge:hover {
+            background: #fff;
+            border-color: #fff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-merge:active {
+            transform: translateY(0);
+        }
     </style>
 <link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
@@ -454,6 +496,23 @@
             <div class="stat-item">
                 <span class="stat-val" id="stat-banks">0</span>
                 <span class="stat-lbl">Central Banks</span>
+            </div>
+        </div>
+
+        <div class="glass" style="margin-bottom: 40px; padding: 30px;">
+            <h2 style="font-size: 16px; font-weight: 900; color: var(--gold); margin-bottom: 20px; letter-spacing: -0.5px; text-transform: uppercase;">
+                Copy & Merge Academic Resource Clusters
+            </h2>
+            <div class="merge-grid">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Initial Bank Code or ID</label>
+                    <input id="sourceBankInput" type="text" placeholder="e.g. MATH101 or 60f7e1b5..." style="background: rgba(255,255,255,0.04); border: 1px solid var(--border);">
+                </div>
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label>Target Bank Code or ID</label>
+                    <input id="targetBankInput" type="text" placeholder="e.g. PHYS202 or 60f7e1b5..." style="background: rgba(255,255,255,0.04); border: 1px solid var(--border);">
+                </div>
+                <button id="btnMerge" class="btn-merge" onclick="handleMerge()">Copy & Merge Questions</button>
             </div>
         </div>
 
@@ -664,6 +723,40 @@
                 });
             }
         });
+
+        window.handleMerge = async () => {
+            const sourceBankInput = document.getElementById('sourceBankInput');
+            const targetBankInput = document.getElementById('targetBankInput');
+            const btnMerge = document.getElementById('btnMerge');
+
+            const sourceBankId = sourceBankInput.value.trim();
+            const targetBankId = targetBankInput.value.trim();
+
+            if (!sourceBankId || !targetBankId) {
+                alert("Please enter both Initial and Target Bank ID/Code");
+                return;
+            }
+
+            btnMerge.disabled = true;
+            btnMerge.innerText = "MERGING...";
+
+            try {
+                const res = await adminApi('/banks/copy-questions', 'POST', { sourceBankId, targetBankId });
+                if (res && res.success) {
+                    alert(res.message || "Questions successfully merged!");
+                    sourceBankInput.value = "";
+                    targetBankInput.value = "";
+                    await loadQuickStats(); // reload stats counts!
+                } else {
+                    alert(res?.message || "Failed to merge banks");
+                }
+            } catch (err) {
+                alert("Network error or server failed");
+            } finally {
+                btnMerge.disabled = false;
+                btnMerge.innerText = "Copy & Merge Questions";
+            }
+        };
 
         checkAdminEntry();
     </script>
