@@ -700,6 +700,7 @@
         let selectedPlan = null;
         let selectedAmount = 0;
         let paymentConfig = { upiId: '...', upiName: '...' };
+        const getLookupStorageKey = (utr) => `bp_payment_lookup_${utr}`;
 
         async function init() {
             // Check if Teacher
@@ -821,7 +822,13 @@
             });
 
             if(res?.success) {
-                document.getElementById('btn-status-link').onclick = () => window.location.href = `../payment-status.html?utr=${utr}`;
+                if (res.data?.lookupToken) {
+                    localStorage.setItem(getLookupStorageKey(utr), JSON.stringify({
+                        lookupToken: res.data.lookupToken,
+                        savedAt: Date.now()
+                    }));
+                }
+                document.getElementById('btn-status-link').onclick = () => window.location.href = `../payment-status.html?utr=${encodeURIComponent(utr)}`;
                 nextStep('success');
             } else {
                 btn.disabled = false;

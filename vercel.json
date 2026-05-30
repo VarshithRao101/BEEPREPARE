@@ -56,7 +56,8 @@
     { "source": "/robots.txt", "destination": "/robots.txt" },
     { "source": "/google9255c89e0d761702.html", "destination": "/google9255c89e0d761702.html" },
     { "source": "/(index.html)?", "destination": "/index.html" },
-    { "source": "/beginners/(.*)", "destination": "/beginners/$1" }
+    { "source": "/beginners/(.*)", "destination": "/beginners/$1" },
+    { "source": "/(.*)", "destination": "/404.html" }
   ],
   "headers": [
     {

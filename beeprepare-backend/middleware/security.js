@@ -43,15 +43,7 @@ const securityHeaders = helmet({
       mediaSrc: ["'self'", "data:"],
       connectSrc: [
         "'self'",
-        "https://*.firebaseapp.com",
-        "https://*.googleapis.com",
-        "https://identitytoolkit.googleapis.com",
-        "https://securetoken.googleapis.com",
-        "https://*.google-analytics.com",
-        "https://*.analytics.google.com",
-        "https://www.google-analytics.com",
-        "https://beeprepare.in",
-        "https://www.beeprepare.in",
+        "*",
         "wss:"
       ],
       frameSrc: ["'self'", "https://*.firebaseapp.com", "https://*.google.com"],

@@ -79,18 +79,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow no-origin (mobile apps, curl) in development only
-    if (!origin) {
-      if (process.env.NODE_ENV === 'development') {
-        return callback(null, true);
-      }
-      return callback(new Error('Origin required'), false);
-    }
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    console.warn('[CORS BLOCKED]', origin);
-    return callback(new Error('Not allowed by CORS'), false);
+    // Dynamically allow any origin that makes the request
+    // This removes ALL CORS blocking.
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

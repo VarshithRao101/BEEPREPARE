@@ -2,10 +2,14 @@
   "name": "BEEPREPARE",
   "short_name": "BEEPREPARE",
   "description": "Smart Academic Excellence Platform",
+  "id": "/",
   "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#FFD700",
+  "orientation": "any",
+  "lang": "en",
   "icons": [
     {
       "src": "/assets/images/logo-192.png",

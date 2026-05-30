@@ -211,11 +211,13 @@ const fraudFingerprinting = (req, res, next) => {
  * Reject anything that doesn't match precisely.
  */
 const utrFormatHardening = (req, res, next) => {
-  const { utrNumber } = req.body;
+  const utrNumber = req.body?.utrNumber ?? req.params?.utrNumber;
   if (!utrNumber) return next();
 
+  const normalizedUtr = String(utrNumber).trim();
+
   // Must be exactly 12 digits, no spaces, no letters
-  if (!/^\d{12}$/.test(String(utrNumber).trim())) {
+  if (!/^\d{12}$/.test(normalizedUtr)) {
     return res.status(400).json({
       success: false,
       message: 'UTR must be exactly 12 digits.',
@@ -224,7 +226,12 @@ const utrFormatHardening = (req, res, next) => {
   }
 
   // Sanitize
-  req.body.utrNumber = String(utrNumber).trim();
+  if (req.body && req.body.utrNumber !== undefined) {
+    req.body.utrNumber = normalizedUtr;
+  }
+  if (req.params && req.params.utrNumber !== undefined) {
+    req.params.utrNumber = normalizedUtr;
+  }
   next();
 };
 

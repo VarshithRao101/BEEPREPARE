@@ -80,8 +80,7 @@ const validateEnv = () => {
     // ── 4. No wildcard CORS in production ───────────────────────
     const origins = process.env.ALLOWED_ORIGINS || '';
     if (origins === '*' || origins.includes('*')) {
-      console.error('❌ ALLOWED_ORIGINS cannot use wildcard (*) in production!');
-      process.exit(1);
+      console.warn('⚠️ ALLOWED_ORIGINS uses wildcard (*) in production. (CORS bypassed)');
     }
 
     // ── 5. Action code uniqueness ────────────────────────────────

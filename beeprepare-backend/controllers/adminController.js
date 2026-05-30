@@ -27,6 +27,7 @@ const {
   generateAdminToken,
   verifyActionCode
 } = require('../utils/adminAuth');
+const { verifyCaptchaChallenge } = require('../utils/adminCaptcha');
 const { bindSession } = require('../middleware/adminFortress');
 const {
   sendPaymentApproved,
@@ -60,22 +61,16 @@ const adminLogin = async (req, res) => {
         return error(res, 'Security challenge incomplete', 'CAPTCHA_REQUIRED', 400);
     }
 
-    const [tokenPart, expectedSum, expiry] = captchaToken.split(':');
-    const crypto = require('crypto');
-    const verifyToken = crypto.createHmac('sha256', process.env.ADMIN_JWT_SECRET)
-        .update(`${expectedSum}-${expiry}`)
-        .digest('hex');
-
-    if (tokenPart !== verifyToken || Date.now() > parseInt(expiry) || parseInt(captcha) !== parseInt(expectedSum)) {
+    if (!verifyCaptchaChallenge(captchaToken, captcha)) {
+        req.recordFailedLogin?.();
         return error(res, 'Security challenge failed or expired', 'INVALID_CAPTCHA', 403);
     }
 
     // 2. Authentication Logic
-    const { verifyAdminCredentials, generateAdminToken } = require('../utils/adminAuth');
     const authResult = await verifyAdminCredentials(adminId.trim(), password.trim());
 
     if (!authResult) {
-      // Failed attempts are now recorded by the 'adminBruteForceGuard' middleware via req.recordFailedLogin()
+      req.recordFailedLogin?.();
       return error(res, 'Invalid admin credentials', 'INVALID_CREDENTIALS', 401);
     }
 
@@ -106,6 +101,8 @@ const adminLogin = async (req, res) => {
     } catch (logErr) {
         console.warn('Login logging failed:', logErr.message);
     }
+
+    req.recordSuccessfulLogin?.();
 
     return success(res, 'Login successful', {
       token: tokenJwt,

@@ -279,13 +279,59 @@
     </div>
 
     <script type="module">
-        import { apiCall } from '../assets/js/bee-core.js';
+        import { API_BASE, getFreshToken } from '../assets/js/bee-core.js';
 
         let autoRefreshTimer = null;
+        const getLookupStorageKey = (utr) => `bp_payment_lookup_${utr}`;
+
+        const getStoredLookupToken = (utr) => {
+            try {
+                const raw = localStorage.getItem(getLookupStorageKey(utr));
+                if (!raw) return '';
+                const parsed = JSON.parse(raw);
+                return parsed?.lookupToken || '';
+            } catch (err) {
+                return '';
+            }
+        };
+
+        const buildPaymentHeaders = async () => {
+            const headers = { 'Content-Type': 'application/json' };
+            try {
+                const token = await getFreshToken(false);
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (err) {}
+            return headers;
+        };
+
+        const securePaymentRequest = async (endpoint, method = 'GET', body = null) => {
+            const headers = await buildPaymentHeaders();
+            const options = { method, headers };
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}${endpoint}`, options);
+                const text = await res.text();
+                return JSON.parse(text);
+            } catch (err) {
+                return { success: false, message: err.message || 'Network error' };
+            }
+        };
 
         async function init() {
             const params = new URLSearchParams(window.location.search);
             const utr = params.get('utr');
+            const lookup = params.get('lookup');
+            if (utr && lookup) {
+                localStorage.setItem(getLookupStorageKey(utr), JSON.stringify({
+                    lookupToken: lookup,
+                    savedAt: Date.now()
+                }));
+            }
             if(utr) {
                 document.getElementById('srch-utr').value = utr;
                 checkStatus();
@@ -303,15 +349,26 @@
             btn.textContent = 'FETCHING...';
             if(refreshBtn) refreshBtn.textContent = 'REFRESHING...';
 
-            const res = await apiCall(`/payment/status/${utr}`);
+            const lookupToken = getStoredLookupToken(utr);
+            const query = lookupToken ? `?lookup=${encodeURIComponent(lookupToken)}` : '';
+            const res = await securePaymentRequest(`/payment/status/${encodeURIComponent(utr)}${query}`);
             
             btn.disabled = false;
             btn.textContent = 'Fetch Status';
             if(refreshBtn) refreshBtn.textContent = 'Refresh Status';
 
             if(!res?.success) {
+                clearInterval(autoRefreshTimer);
+                autoRefreshTimer = null;
                 if(res?.error?.code === 'NOT_FOUND') {
                     return Swal.fire('Not Found', 'No payment record found with this UTR. Ensure you submitted it first.', 'warning');
+                }
+                if(res?.error?.code === 'PAYMENT_ACCESS_REQUIRED' || res?.error?.code === 'PAYMENT_ACCESS_DENIED') {
+                    return Swal.fire(
+                        'Secure Access Required',
+                        'Open this page from the same device used for submission or sign in with the original BEEPREPARE account.',
+                        'warning'
+                    );
                 }
                 return Swal.fire('Error', 'Failed to retrieve status', 'error');
             }
@@ -331,10 +388,12 @@
                 }
             } else if(data.status === 'approved') {
                 clearInterval(autoRefreshTimer);
+                autoRefreshTimer = null;
                 document.getElementById('state-approved').classList.add('active');
                 document.getElementById('lbl-a-utr').textContent = utr;
             } else if(data.status === 'rejected') {
                 clearInterval(autoRefreshTimer);
+                autoRefreshTimer = null;
                 document.getElementById('state-rejected').classList.add('active');
                 document.getElementById('lbl-r-reason').textContent = data.rejectionReason || 'Manual Rejection';
             }
@@ -346,12 +405,17 @@
             btn.disabled = true;
             btn.textContent = 'RESENDING...';
 
-            const res = await apiCall(`/payment/resend/${utr}`, 'POST');
+            const lookupToken = getStoredLookupToken(utr);
+            const res = await securePaymentRequest(`/payment/resend/${encodeURIComponent(utr)}`, 'POST', {
+                lookupToken
+            });
             btn.disabled = false;
             btn.textContent = 'Resend Key Email';
 
             if(res?.success) {
                 Swal.fire('Sent', 'The access key has been resent to your email.', 'success');
+            } else if(res?.error?.code === 'PAYMENT_ACCESS_REQUIRED' || res?.error?.code === 'PAYMENT_ACCESS_DENIED') {
+                Swal.fire('Secure Access Required', 'Please sign in with the original account or reopen the secure payment status link.', 'warning');
             } else {
                 Swal.fire('Failed', 'Could not resend email', 'error');
             }

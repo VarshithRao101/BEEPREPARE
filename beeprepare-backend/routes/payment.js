@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/paymentController');
 const { validatePaymentSubmit } = require('../middleware/validators');
-const requireAuth = require('../middleware/requireAuth');
+const optionalAuth = require('../middleware/optionalAuth');
 const {
   paymentSecurityStack,
   utrFormatHardening
@@ -11,26 +11,25 @@ const {
 router.use(express.json());
 
 // POST /api/payment/submit
-// Full security stack: UTR format → fraud fingerprint → idempotency → price integrity → UTR dedup → validation → controller
 router.post('/submit',
-  paymentSecurityStack,        // ← UTR dedup, fraud fingerprint, idempotency, price tamper check
-  validatePaymentSubmit,       // ← existing input validation
+  paymentSecurityStack,
+  validatePaymentSubmit,
   ctrl.submitPayment
 );
 
 // GET /api/payment/status/:utrNumber
-// Public route - students check this without an account
 router.get('/status/:utrNumber',
-  utrFormatHardening,          // ← validate UTR format
+  optionalAuth,
+  utrFormatHardening,
   ctrl.checkPaymentStatus
 );
 
-// GET /api/payment/config — public OK
+// GET /api/payment/config
 router.get('/config', ctrl.getPaymentConfig);
 
 // POST /api/payment/resend/:utrNumber
-// Public route
 router.post('/resend/:utrNumber',
+  optionalAuth,
   utrFormatHardening,
   ctrl.resendApprovalEmail
 );

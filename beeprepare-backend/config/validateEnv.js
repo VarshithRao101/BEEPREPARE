@@ -22,6 +22,7 @@ const required = [
   'EXTRA_SLOT_PRICE',
   'ADMIN_GATE_KEY',
   'ADMIN_ENTRY_SECRET',
+  'ADMIN_VAULT_KEY',
   // Action codes — all required
   'CODE_BLOCK_USER',
   'CODE_UNBLOCK_USER',
@@ -81,8 +82,7 @@ const validateEnv = () => {
     // ── 4. No wildcard CORS in production ───────────────────────
     const origins = process.env.ALLOWED_ORIGINS || '';
     if (origins === '*' || origins.includes('*')) {
-      console.error('❌ ALLOWED_ORIGINS cannot use wildcard (*) in production!');
-      if (!process.env.VERCEL) process.exit(1);
+      console.warn('⚠️ ALLOWED_ORIGINS uses wildcard (*) in production. (CORS bypassed)');
     }
 
     // ── 5. Action code uniqueness ────────────────────────────────

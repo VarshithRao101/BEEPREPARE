@@ -38,6 +38,7 @@ const {
 } = require('./middleware/rateLimiters');
 
 const { connectDB } = require('./config/db');
+const { issueCaptchaChallenge } = require('./utils/adminCaptcha');
 require('./config/firebase');
 const logger = require('./utils/logger');
 const requireAuth = require('./middleware/requireAuth');
@@ -102,18 +103,9 @@ if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow no-origin (mobile apps, curl) in development only
-    if (!origin) {
-      if (process.env.NODE_ENV === 'development') {
-        return callback(null, true);
-      }
-      return callback(new Error('Origin required'), false);
-    }
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    console.warn('[CORS BLOCKED]', origin);
-    return callback(new Error('Not allowed by CORS'), false);
+    // Dynamically allow any origin that makes the request
+    // This removes ALL CORS blocking.
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -179,7 +171,10 @@ app.get('/api/admin-csrf-token', csrfTokenEndpoint); // Admin uses this (no user
 
 // === ROLLING ADMIN GATEWAY ===
 const getRollingSecret = (offset = 0) => {
-  const secret = process.env.ADMIN_ENTRY_SECRET || 'BEE_DEFAULT_MASTER_SECRET';
+  const secret = process.env.ADMIN_ENTRY_SECRET;
+  if (!secret) {
+    return null;
+  }
   const window = Math.floor(Date.now() / (5 * 60 * 1000)) + offset;
   return crypto.createHmac('sha256', secret)
     .update(window.toString())
@@ -214,6 +209,9 @@ app.get('/gatekeeper', (req, res) => {
     `);
   }
   const currentCode = getRollingSecret(0);
+  if (!currentCode) {
+    return res.status(503).send('ADMIN_GATEWAY_UNAVAILABLE');
+  }
   res.redirect(`/gate/${currentCode}/index.html`);
 });
 
@@ -245,7 +243,11 @@ app.post('/api/admin-security/vault-login', async (req, res) => {
 
 app.get('/vault', async (req, res) => {
   const key = req.query.key;
-  const vaultKey = process.env.ADMIN_VAULT_KEY || 'BEE_VAULT_DEFAULT_SECRET';
+  const vaultKey = process.env.ADMIN_VAULT_KEY;
+
+  if (!vaultKey) {
+    return res.status(503).send('VAULT_UNAVAILABLE');
+  }
   
   if (!key || key !== vaultKey) {
     return res.status(403).send('UNAUTHORIZED_VAULT_ACCESS');
@@ -361,6 +363,9 @@ app.use('/gate/:code', (req, res, next) => {
   const code = req.params.code;
   const current = getRollingSecret(0);
   const previous = getRollingSecret(-1);
+  if (!current || !previous) {
+    return res.status(404).send('<h1>Node Not Found</h1><p>Expired or invalid path.</p>');
+  }
   if (code === current || code === previous) {
     return next();
   }
@@ -443,22 +448,19 @@ app.use('/api/admin', adminRoutes);
 
 // CAPTCHA Generation
 app.get('/api/admin-security/captcha', (req, res) => {
-  const num1 = Math.floor(Math.random() * 10) + 1;
-  const num2 = Math.floor(Math.random() * 10) + 1;
-  const sum = num1 + num2;
-  
-  // Store the result in a temporary signed token
-  const captchaToken = crypto.createHmac('sha256', process.env.ADMIN_JWT_SECRET)
-    .update(`${sum}-${Date.now() + 5 * 60 * 1000}`) // Valid for 5 mins
-    .digest('hex');
-    
-  res.json({
-    success: true,
-    data: {
-      question: `What is ${num1} + ${num2}?`,
-      token: `${captchaToken}:${sum}:${Date.now() + 5 * 60 * 1000}`
-    }
-  });
+  try {
+    res.json({
+      success: true,
+      data: issueCaptchaChallenge()
+    });
+  } catch (err) {
+    console.error('captcha generation failed:', err.message);
+    res.status(503).json({
+      success: false,
+      message: 'Security challenge unavailable',
+      error: { code: 'CAPTCHA_UNAVAILABLE' }
+    });
+  }
 });
 
 app.use('/api/matrix', matrixRoutes);

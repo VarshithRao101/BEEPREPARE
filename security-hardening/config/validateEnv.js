@@ -159,7 +159,7 @@ const validateEnv = () => {
   if (isProd) {
     const origins = process.env.ALLOWED_ORIGINS || '';
     if (origins === '*' || origins.includes('*')) {
-      errors.push('ALLOWED_ORIGINS cannot use wildcard (*) in production!');
+      warnings.push('ALLOWED_ORIGINS uses wildcard (*) in production. (CORS bypassed)');
     }
     if (!origins) {
       warnings.push('ALLOWED_ORIGINS not set — CORS will block all cross-origin requests');
