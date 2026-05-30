@@ -493,8 +493,22 @@ const modifyLeaderboard = async (req, res) => {
         if (monthlyExp !== undefined) updateData.monthlyExp = monthlyExp;
         if (yearlyExp !== undefined) updateData.yearlyExp = yearlyExp;
 
-        const user = await User.findOneAndUpdate({ googleUid: userId }, { $set: updateData }, { new: true });
+        let query = { googleUid: userId };
+        const mongoose = require('mongoose');
+        if (mongoose.Types.ObjectId.isValid(userId)) {
+            query = { $or: [{ _id: userId }, { googleUid: userId }] };
+        }
+
+        const user = await User.findOneAndUpdate(query, { $set: updateData }, { new: true });
         if (!user) return error(res, 'User not found', 'NOT_FOUND', 404);
+
+        // Synchronize changes directly in the active snapshots immediately
+        try {
+            const leaderboardController = require('./leaderboardController');
+            await leaderboardController.rebuildActiveSnapshots();
+        } catch (syncErr) {
+            console.error('[Leaderboard] Realtime rebuild failed:', syncErr.message);
+        }
 
         // Log Activity
         try {
@@ -508,7 +522,7 @@ const modifyLeaderboard = async (req, res) => {
             });
         } catch (e) {}
 
-        return success(res, 'User stats updated. Changes will reflect in the next 24h snapshot.');
+        return success(res, 'User stats updated. Changes synchronized instantly.');
     } catch (err) {
         console.error('modifyLeaderboard error:', err);
         return error(res, 'Failed to update stats', 'SERVER_ERROR', 500);

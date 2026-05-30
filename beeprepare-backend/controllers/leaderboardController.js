@@ -243,22 +243,92 @@ exports.getTeacherLeaderboard = async (req, res) => {
 };
 
 /**
+ * REBUILD ACTIVE SNAPSHOTS IN-PLACE (without resetting active user EXP fields)
+ */
+exports.rebuildActiveSnapshots = async () => {
+    try {
+        const types = ['daily', 'monthly', 'yearly'];
+        
+        for (const type of types) {
+            const students = await User.find({ role: 'student' }).select('googleUid displayName photoUrl class exp dailyExp monthlyExp yearlyExp');
+            const heap = new MinHeap(100); // Keep top 100
+
+            for (const s of students) {
+                const streak = await Streak.findOne({ userId: s.googleUid });
+                const tests = await TestSession.countDocuments({ studentId: s.googleUid, status: 'completed' });
+                
+                let currentExp = s.exp || 0;
+                if (type === 'daily') currentExp = s.dailyExp || 0;
+                if (type === 'monthly') currentExp = s.monthlyExp || 0;
+                if (type === 'yearly') currentExp = s.yearlyExp || 0;
+
+                heap.push({
+                    userId: s.googleUid,
+                    displayName: s.displayName,
+                    photoUrl: s.photoUrl,
+                    className: s.class,
+                    exp: currentExp,
+                    streak: streak ? streak.currentStreak : 0,
+                    testsCompleted: tests
+                });
+            }
+
+            const rankings = heap.getSorted().map((item, index) => ({
+                ...item,
+                rank: index + 1
+            }));
+
+            // Find the latest snapshot of this type and update it, or create if none exists
+            const latestSnapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
+            if (latestSnapshot) {
+                latestSnapshot.rankings = rankings;
+                latestSnapshot.lastUpdated = new Date();
+                await latestSnapshot.save();
+            } else {
+                await LeaderboardSnapshot.create({
+                    type,
+                    rankings,
+                    lastUpdated: new Date()
+                });
+            }
+        }
+        console.log('[Leaderboard] Active snapshots successfully rebuilt.');
+        return true;
+    } catch (err) {
+        console.error('[Leaderboard] Failed to rebuild snapshots:', err);
+        return false;
+    }
+};
+
+/**
  * ADMIN: MODIFY STUDENT STATS
  */
 exports.adminModifyStats = async (req, res) => {
     try {
         const { userId, exp, dailyExp, monthlyExp, yearlyExp } = req.body;
-        
+        if (!userId) return res.status(400).json({ success: false, message: 'User ID required' });
+
         const updateData = {};
         if (exp !== undefined) updateData.exp = exp;
         if (dailyExp !== undefined) updateData.dailyExp = dailyExp;
         if (monthlyExp !== undefined) updateData.monthlyExp = monthlyExp;
         if (yearlyExp !== undefined) updateData.yearlyExp = yearlyExp;
 
-        await User.findOneAndUpdate({ googleUid: userId }, updateData);
+        let query = { googleUid: userId };
+        const mongoose = require('mongoose');
+        if (mongoose.Types.ObjectId.isValid(userId)) {
+            query = { $or: [{ _id: userId }, { googleUid: userId }] };
+        }
+
+        const user = await User.findOneAndUpdate(query, { $set: updateData }, { new: true });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        // Synchronize changes directly in the active snapshots immediately
+        await exports.rebuildActiveSnapshots();
         
-        res.json({ success: true, message: 'User stats updated. Changes will reflect in the next 24h snapshot.' });
+        res.json({ success: true, message: 'User stats updated. Changes synchronized instantly.' });
     } catch (error) {
+        console.error('adminModifyStats error:', error);
         res.status(500).json({ success: false, message: 'Update failed' });
     }
 };

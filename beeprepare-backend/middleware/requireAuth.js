@@ -71,6 +71,18 @@ const requireAuth = async (req, res, next) => {
         'USER_NOT_FOUND', 401);
     }
 
+    // Daily limit auto-reset (rolling 24 hours)
+    const now = new Date();
+    if (!user.aiMessagesResetAt || now >= new Date(user.aiMessagesResetAt)) {
+      const nextReset = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      await User.updateOne(
+        { googleUid: user.googleUid },
+        { $set: { aiMessagesToday: 0, aiMessagesResetAt: nextReset } }
+      );
+      user.aiMessagesToday = 0;
+      user.aiMessagesResetAt = nextReset;
+    }
+
     // Check if blocked
     if (user.isBlocked) {
       return error(res,
