@@ -42,6 +42,14 @@
       "use": "@vercel/static"
     },
     {
+      "src": "manifest.json",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "sw.js",
+      "use": "@vercel/static"
+    },
+    {
       "src": "404.html",
       "use": "@vercel/static"
     }
@@ -55,6 +63,8 @@
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
     { "source": "/robots.txt", "destination": "/robots.txt" },
     { "source": "/google9255c89e0d761702.html", "destination": "/google9255c89e0d761702.html" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/sw.js", "destination": "/sw.js" },
     { "source": "/(index.html)?", "destination": "/index.html" },
     { "source": "/beginners/(.*)", "destination": "/beginners/$1" },
     { "source": "/(.*)", "destination": "/404.html" }
