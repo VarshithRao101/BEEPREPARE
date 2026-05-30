@@ -370,6 +370,9 @@ const deleteUser = async (req, res) => {
       return error(res, 'Invalid action code', 'INVALID_CODE', 403);
     }
 
+    // Warm up connections
+    await connectDB();
+
     // Find user first
     const user = await User.findOne({ googleUid });
     if (!user) {
@@ -379,6 +382,39 @@ const deleteUser = async (req, res) => {
     // Get all banks owned by this user (if teacher)
     const banks = await Bank.find({ teacherId: googleUid });
     const bankIds = banks.map(b => b._id.toString());
+
+    // Fetch and delete question diagrams from Cloudinary
+    if (bankIds.length > 0) {
+      const questionsWithImages = await Question.find({
+        bankId: { $in: bankIds },
+        imagePublicId: { $exists: true, $ne: null }
+      }).select('imagePublicId').lean();
+
+      for (const q of questionsWithImages) {
+        if (q.imagePublicId) {
+          try {
+            const { cloudinary } = require('../utils/cloudinaryHelper');
+            await cloudinary.uploader.destroy(q.imagePublicId);
+          } catch (err) {
+            console.warn(`Failed to delete question diagram:`, err.message);
+          }
+        }
+      }
+    }
+
+    // Fetch and delete PDF notes from Cloudinary
+    const notes = await Note.find({ teacherId: googleUid }).lean();
+    for (const note of notes) {
+      if (note.public_id) {
+        try {
+          const { cloudinary } = require('../utils/cloudinaryHelper');
+          await cloudinary.uploader.destroy(note.public_id, { resource_type: note.resource_type || 'raw' });
+          await cloudinary.uploader.destroy(note.public_id, { resource_type: note.resource_type === 'raw' ? 'image' : 'raw' });
+        } catch (err) {
+          console.warn(`Failed to delete note from Cloudinary:`, err.message);
+        }
+      }
+    }
 
     // === DELETE FROM QUESTIONS DB (Cluster 1) ===
     if (bankIds.length > 0) {
@@ -1051,9 +1087,43 @@ const deleteBank = async (req, res) => {
       return error(res, 'Invalid action code', 'INVALID_CODE', 403);
     }
 
+    // Warm up connections
+    await connectDB();
+
     const bank = await Bank.findById(bankId);
     if (!bank) {
       return error(res, 'Bank not found', 'NOT_FOUND', 404);
+    }
+
+    // Fetch and delete question diagrams from Cloudinary
+    const questionsWithImages = await Question.find({ 
+      bankId: bankId.toString(), 
+      imagePublicId: { $exists: true, $ne: null } 
+    }).select('imagePublicId').lean();
+    
+    for (const q of questionsWithImages) {
+      if (q.imagePublicId) {
+        try {
+          const { cloudinary } = require('../utils/cloudinaryHelper');
+          await cloudinary.uploader.destroy(q.imagePublicId);
+        } catch (err) {
+          console.warn(`Failed to delete question diagram:`, err.message);
+        }
+      }
+    }
+
+    // Fetch and delete PDF notes from Cloudinary
+    const notes = await Note.find({ bankId }).lean();
+    for (const note of notes) {
+      if (note.public_id) {
+        try {
+          const { cloudinary } = require('../utils/cloudinaryHelper');
+          await cloudinary.uploader.destroy(note.public_id, { resource_type: note.resource_type || 'raw' });
+          await cloudinary.uploader.destroy(note.public_id, { resource_type: note.resource_type === 'raw' ? 'image' : 'raw' });
+        } catch (err) {
+          console.warn(`Failed to delete note from Cloudinary:`, err.message);
+        }
+      }
     }
 
     // Delete from Questions DB

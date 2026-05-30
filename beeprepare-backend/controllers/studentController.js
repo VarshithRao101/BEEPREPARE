@@ -1176,6 +1176,9 @@ const submitDoubt = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getDoubtMessages = async (req, res) => {
   try {
+    // Warm up DB connections
+    await connectDB();
+
     const { id } = req.params;
     const studentId = req.user.googleUid;
 
@@ -1196,10 +1199,15 @@ const getDoubtMessages = async (req, res) => {
              const parts = urlObj.pathname.split('/');
              const uploadIndex = parts.findIndex(p => p === 'upload');
              if (uploadIndex !== -1) {
-                 const publicIdWithExt = parts.slice(uploadIndex + 2).join('/');
-                 const fullPublicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.'));
+                 let remainingParts = parts.slice(uploadIndex + 1);
+                 if (remainingParts[0] && /^v\d+$/.test(remainingParts[0])) {
+                   remainingParts = remainingParts.slice(1);
+                 }
+                 const publicIdWithExt = remainingParts.join('/');
+                 const fullPublicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.')) || publicIdWithExt;
                  const { cloudinary } = require('../utils/cloudinaryHelper');
-                 await cloudinary.uploader.destroy(fullPublicId);
+                 await cloudinary.uploader.destroy(fullPublicId, { resource_type: 'image' });
+                 await cloudinary.uploader.destroy(fullPublicId, { resource_type: 'raw' });
              }
            } catch(e) { console.error('Cloudinary cleanup error (student):', e); }
          }

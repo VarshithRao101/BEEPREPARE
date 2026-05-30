@@ -56,18 +56,47 @@ const logActivity = async (userId, type, title, description, color = '#FFD700') 
   }
 };
 
-// ─── Firebase Storage Delete Helper ───────────────────────────────────────
+// ─── Cloudinary URL/PublicID Parser Helper ─────────────────────────────────
+const extractPublicId = (url) => {
+  try {
+    const urlObj = new URL(url);
+    const parts = urlObj.pathname.split('/');
+    const uploadIndex = parts.findIndex(p => p === 'upload');
+    if (uploadIndex === -1) return null;
+    let remainingParts = parts.slice(uploadIndex + 1);
+    if (remainingParts[0] && /^v\d+$/.test(remainingParts[0])) {
+      remainingParts = remainingParts.slice(1);
+    }
+    const publicIdWithExt = remainingParts.join('/');
+    const lastDotIdx = publicIdWithExt.lastIndexOf('.');
+    return lastDotIdx !== -1 ? publicIdWithExt.substring(0, lastDotIdx) : publicIdWithExt;
+  } catch (e) {
+    return null;
+  }
+};
+
 // ─── Cloudinary/Storage Delete Helper ───────────────────────────────────────
 const deleteFromStorage = async (identifier, resource_type = 'raw') => {
   if (!identifier) return;
   try {
-    // If it's a Cloudinary public_id (doesn't contain http/https) or we explicitly pass resource_type
-    if (!identifier.startsWith('http')) {
-      await cloudinary.uploader.destroy(identifier, { resource_type: resource_type });
+    // 1. If it's a full Cloudinary URL
+    if (identifier.includes('cloudinary.com')) {
+      const parsedPublicId = extractPublicId(identifier);
+      if (parsedPublicId) {
+        await cloudinary.uploader.destroy(parsedPublicId, { resource_type: 'raw' });
+        await cloudinary.uploader.destroy(parsedPublicId, { resource_type: 'image' });
+      }
       return;
     }
 
-    // Legacy Firebase URL cleanup
+    // 2. If it's a Cloudinary public_id (doesn't contain http/https)
+    if (!identifier.startsWith('http')) {
+      await cloudinary.uploader.destroy(identifier, { resource_type: 'raw' });
+      await cloudinary.uploader.destroy(identifier, { resource_type: 'image' });
+      return;
+    }
+
+    // 3. Legacy Firebase URL cleanup
     const url = new URL(identifier);
     const pathMatch = url.pathname.match(/\/o\/(.+)/);
     if (pathMatch) {
@@ -234,6 +263,7 @@ const getProfile = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const updateProfile = async (req, res) => {
   try {
+    await connectDB();
     const { displayName, phone, subjects, classes, chapters } = req.body;
     const teacherId = req.user.googleUid;
     const user = req.user;
@@ -330,12 +360,31 @@ const updateProfile = async (req, res) => {
       
       const deleteOps = banksToDelete.map(async (bank) => {
         try {
+          // Warm up auxiliary database
+          await connectDB();
+
+          // Query and delete question diagram images from Cloudinary
+          const questionsWithImages = await Question.find({
+            bankId: String(bank._id),
+            imagePublicId: { $exists: true, $ne: null }
+          }).select('imagePublicId').lean();
+
+          for (const q of questionsWithImages) {
+            if (q.imagePublicId) {
+              try {
+                await cloudinary.uploader.destroy(q.imagePublicId);
+              } catch (err) {
+                console.warn(`Failed to delete question diagram from Cloudinary:`, err.message);
+              }
+            }
+          }
+
           const notes = await Note.find({ bankId: bank._id }).lean();
           
           // Cascading storage cleanup
-          notes.forEach(note => {
-            if (note.fileUrl) deleteFromStorage(note.fileUrl);
-          });
+          for (const note of notes) {
+            if (note.fileUrl) await deleteFromStorage(note.fileUrl, note.resource_type || 'raw');
+          }
 
           return Promise.all([
             Question.deleteMany({ bankId: String(bank._id) }),
@@ -426,6 +475,12 @@ const updateProfile = async (req, res) => {
       }
 
       await Promise.all([...deleteOps, ...syncOps]);
+
+      // Sync teacher totalQuestions count by subtracting deleted banks' questions
+      const totalQuestionsToSubtract = banksToDelete.reduce((sum, b) => sum + (b.totalQuestions || 0), 0);
+      if (totalQuestionsToSubtract > 0) {
+        await User.updateOne({ googleUid: teacherId }, { $inc: { totalQuestions: -totalQuestionsToSubtract } });
+      }
     }
     // ── End Bank Sync ───────────────────────────────────────────────────────
 
@@ -543,14 +598,33 @@ const deleteSubject = async (req, res) => {
     const { bankId } = req.params;
     const teacherId = req.user.googleUid;
 
+    // Warm up connections
+    await connectDB();
+
     const bank = await Bank.findById(bankId);
     if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
     if (bank.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
 
-    // Delete all notes files from Firebase Storage
+    // Fetch and delete question diagrams from Cloudinary
+    const questionsWithImages = await Question.find({ 
+      bankId: String(bankId), 
+      imagePublicId: { $exists: true, $ne: null } 
+    }).select('imagePublicId').lean();
+    
+    for (const q of questionsWithImages) {
+      if (q.imagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(q.imagePublicId);
+        } catch (err) {
+          console.warn(`Failed to delete question diagram:`, err.message);
+        }
+      }
+    }
+
+    // Delete all notes files from Cloudinary Storage
     const notes = await Note.find({ bankId });
     for (const note of notes) {
-      if (note.fileUrl) await deleteFromStorage(note.fileUrl);
+      if (note.fileUrl) await deleteFromStorage(note.fileUrl, note.resource_type || 'raw');
     }
 
     // Delete all related MongoDB documents in parallel
@@ -570,7 +644,11 @@ const deleteSubject = async (req, res) => {
 
     await User.updateOne(
       { googleUid: teacherId },
-      { subjects: usedSubjects, classes: usedClasses }
+      { 
+        subjects: usedSubjects, 
+        classes: usedClasses,
+        $inc: { totalQuestions: -bank.totalQuestions }
+      }
     );
 
     await logActivity(
@@ -670,6 +748,9 @@ const deleteChapter = async (req, res) => {
     const { bankId, chapterId } = req.params;
     const teacherId = req.user.googleUid;
 
+    // Warm up connections
+    await connectDB();
+
     const bank = await Bank.findById(bankId);
     if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
     if (bank.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
@@ -684,14 +765,43 @@ const deleteChapter = async (req, res) => {
     bank.chapters.splice(chapterIndex, 1);
     await bank.save();
 
-    // 2. Remove questions and notes in parallel
+    // 2. Query and delete question diagram images from Cloudinary
+    const questionsWithImages = await Question.find({
+      bankId: String(bankId),
+      chapterId,
+      imagePublicId: { $exists: true, $ne: null }
+    }).select('imagePublicId').lean();
+
+    for (const q of questionsWithImages) {
+      if (q.imagePublicId) {
+        try {
+          await cloudinary.uploader.destroy(q.imagePublicId);
+        } catch (err) {
+          console.warn(`Failed to delete question diagram:`, err.message);
+        }
+      }
+    }
+
+    // 3. Remove notes in parallel
     const notes = await Note.find({ bankId, chapterId }).lean();
-    notes.forEach(note => { if (note.fileUrl) deleteFromStorage(note.fileUrl); });
+    for (const note of notes) {
+      if (note.fileUrl) await deleteFromStorage(note.fileUrl, note.resource_type || 'raw');
+    }
+
+    const deletedCount = await Question.countDocuments({ bankId: String(bankId), chapterId });
 
     await Promise.all([
       Question.deleteMany({ bankId: String(bankId), chapterId }), // String — cross-DB safe
       Note.deleteMany({ bankId, chapterId })
     ]);
+
+    // Decrement totalQuestions counts on bank and user
+    if (deletedCount > 0) {
+      await Promise.all([
+        Bank.updateOne({ _id: bankId }, { $inc: { totalQuestions: -deletedCount } }),
+        User.updateOne({ googleUid: teacherId }, { $inc: { totalQuestions: -deletedCount } })
+      ]);
+    }
 
     // 3. Keep User profile in sync
     const normalizedClass = bank.class.startsWith('Class ') ? bank.class : `Class ${bank.class}`;
@@ -922,6 +1032,9 @@ const deleteQuestion = async (req, res) => {
   try {
     const { id } = req.params;
     const teacherId = req.user.googleUid;
+
+    // Warm up connections
+    await connectDB();
 
     const question = await Question.findById(id);
     if (!question) return error(res, 'Question not found', 'NOT_FOUND', 404);
