@@ -57,7 +57,10 @@ exports.generateSnapshots = async (req, res) => {
         const types = ['daily', 'monthly', 'yearly'];
         
         for (const type of types) {
-            const students = await User.find({ role: 'student' }).select('googleUid displayName photoUrl class exp dailyExp monthlyExp yearlyExp');
+            const students = await User.find({ role: 'student' })
+                .select('googleUid displayName photoUrl class exp dailyExp monthlyExp yearlyExp')
+                .limit(500)
+                .lean();
             const heap = new MinHeap(100); // Keep top 100
 
             for (const s of students) {
@@ -116,8 +119,14 @@ exports.generateSnapshots = async (req, res) => {
 exports.getGlobalLeaderboard = async (req, res) => {
     try {
         const { type = 'daily' } = req.query;
-        const snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
+        let snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
         
+        if (!snapshot) {
+            console.log(`[Leaderboard] No global snapshot found for ${type}. Rebuilding active snapshots inline...`);
+            await exports.rebuildActiveSnapshots();
+            snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
+        }
+
         if (!snapshot) {
             return res.status(200).json({ success: true, rankings: [], message: 'No snapshot available yet' });
         }
@@ -172,7 +181,8 @@ exports.getTeacherLeaderboard = async (req, res) => {
                 Streak.find({ userId: { $in: studentUids } }).select('userId currentStreak').lean(),
                 TestSession.aggregate([
                     { $match: { studentId: { $in: studentUids }, status: 'completed' } },
-                    { $group: { _id: '$studentId', count: { $sum: 1 } } }
+                    { $group: { _id: '$studentId', count: { $sum: 1 } } },
+                    { $limit: 100 }
                 ])
             ]);
 
@@ -210,12 +220,17 @@ exports.getTeacherLeaderboard = async (req, res) => {
         // ══════════════════════════════════════════════════════════════════════════════
         // CASE 2: GLOBAL TEACHER LEADERBOARD (Uses Snapshot)
         // ══════════════════════════════════════════════════════════════════════════════
-        const snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
+        let snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
+        if (!snapshot) {
+            console.log(`[Leaderboard] No teacher snapshot found for ${type}. Rebuilding active snapshots inline...`);
+            await exports.rebuildActiveSnapshots();
+            snapshot = await LeaderboardSnapshot.findOne({ type }).sort({ lastUpdated: -1 });
+        }
         if (!snapshot) return res.json({ success: true, rankings: [] });
 
         const linkedUsers = await User.find({ 
             'activeBanks.teacherId': teacherId 
-        }).select('googleUid');
+        }).select('googleUid').limit(500).lean();
         const linkedIds = new Set(linkedUsers.map(u => u.googleUid));
 
         const filteredRankings = snapshot.rankings
@@ -250,7 +265,10 @@ exports.rebuildActiveSnapshots = async () => {
         const types = ['daily', 'monthly', 'yearly'];
         
         for (const type of types) {
-            const students = await User.find({ role: 'student' }).select('googleUid displayName photoUrl class exp dailyExp monthlyExp yearlyExp');
+            const students = await User.find({ role: 'student' })
+                .select('googleUid displayName photoUrl class exp dailyExp monthlyExp yearlyExp')
+                .limit(500)
+                .lean();
             const heap = new MinHeap(100); // Keep top 100
 
             for (const s of students) {

@@ -3,14 +3,15 @@ const router = express.Router();
 const requireAuth = require('../middleware/requireAuth');
 const { googleLogin, setRole, logout, wipeData, verifySession } = require('../controllers/authController');
 const { validateGoogleLogin, validateSetRole } = require('../middleware/validators');
+const { authLimiter } = require('../middleware/rateLimiters');
 
 /**
  * @route   POST /api/auth/google-login
  * @desc    Authenticate with Firebase ID Token
  * @access  Public
  */
-router.post('/google-login', validateGoogleLogin, googleLogin);
-router.post('/google_login', validateGoogleLogin, googleLogin); // Alias for underscore version
+router.post('/google-login', authLimiter, validateGoogleLogin, googleLogin);
+router.post('/google_login', authLimiter, validateGoogleLogin, googleLogin); // Alias for underscore version
 
 /**
  * @route   POST /api/auth/set-role

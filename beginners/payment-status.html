@@ -302,7 +302,9 @@
                 if (token) {
                     headers.Authorization = `Bearer ${token}`;
                 }
-            } catch (err) {}
+            } catch (err) {
+                console.error('[payment-status:buildPaymentHeaders]', err.message);
+            }
             return headers;
         };
 

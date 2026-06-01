@@ -108,7 +108,6 @@ questionSchema.index({ metaTags: 1, difficulty: 1 });
 questionSchema.index({ teacherId: 1, class: 1, subject: 1, questionType: 1 });
 questionSchema.index({ bankId: 1, questionType: 1, isImportant: 1 });
 questionSchema.index({ bankId: 1, chapterId: 1, questionType: 1, isImportant: 1 });
-questionSchema.index({ bankId: 1 });
 questionSchema.index({ createdBy: 1 });
 
 // ── Register on Questions connection (lazy — after connectDB()) ─────────────

@@ -160,14 +160,17 @@ const deepScan = (value, path = '', depth = 0) => {
 
   if (typeof value === 'string') {
     // Decode common encoding tricks before scanning
-    let decoded = value;
     try {
       decoded = decodeURIComponent(value);
-    } catch (_) {}
+    } catch (e) {
+      decoded = value;
+    }
     // Double-decode
     try {
       decoded = decodeURIComponent(decoded);
-    } catch (_) {}
+    } catch (e) {
+      // Keep decoded as-is
+    }
     // HTML entity decode (basic)
     decoded = decoded
       .replace(/&lt;/gi, '<')

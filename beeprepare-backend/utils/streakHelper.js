@@ -99,9 +99,10 @@ const updateStreak = async (userId) => {
 
     await streak.save();
 
-    // Award EXP for daily activity
+    // Award EXP for daily activity based on streak logic: (currentStreak * 15) / 2
     const { awardExp } = require('./expService');
-    awardExp(userId, 'DAILY_STREAK');
+    const streakExp = Math.round((streak.currentStreak * 15) / 2);
+    awardExp(userId, 'DAILY_STREAK', streakExp);
 
     return streak;
 

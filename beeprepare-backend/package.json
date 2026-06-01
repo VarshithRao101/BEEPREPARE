@@ -14,7 +14,6 @@
     "cloudinary": "^2.9.0",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
-    "crypto": "^1.0.1",
     "dompurify": "^3.4.0",
     "dotenv": "^17.3.1",
     "express": "^4.22.1",
@@ -35,8 +34,10 @@
     "resend": "^6.10.0",
     "uuid": "^13.0.0",
     "winston": "^3.19.0",
-    "xss-clean": "^0.1.4",
     "zod": "^4.3.6"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

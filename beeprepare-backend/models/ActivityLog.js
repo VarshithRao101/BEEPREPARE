@@ -11,6 +11,7 @@ const activityLogSchema = new Schema({
 }, { timestamps: true });
 
 activityLogSchema.index({ userId: 1, createdAt: -1 });
+activityLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 15 * 24 * 60 * 60 }); // 15 Days TTL
 
 let _ActivityLog = null;
 module.exports = new Proxy(function() {}, {

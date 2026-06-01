@@ -23,7 +23,7 @@ paymentRequestSchema.index({ status: 1 });
 paymentRequestSchema.index({ email: 1 });
 paymentRequestSchema.index({ createdAt: -1 });
 paymentRequestSchema.index({ status: 1, createdAt: -1 });
-paymentRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, partialFilterExpression: { status: 'pending' } });
+paymentRequestSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, sparse: true });
 
 let _PaymentRequest = null;
 module.exports = new Proxy(function() {}, {

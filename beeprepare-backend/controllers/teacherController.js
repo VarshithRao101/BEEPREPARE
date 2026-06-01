@@ -237,6 +237,7 @@ const getProfile = async (req, res) => {
       subjectLimit: user.subjectLimit,
       isActivated: user.isActivated,
       aiMessagesToday: user.aiMessagesToday || 0,
+      resetAt: user.aiMessagesResetAt,
       licenseActivatedAt: user.licenseActivatedAt,
       licenseExpiresAt: user.licenseExpiresAt,
       subjects: user.subjects || [],
@@ -363,11 +364,21 @@ const updateProfile = async (req, res) => {
           // Warm up auxiliary database
           await connectDB();
 
-          // Query and delete question diagram images from Cloudinary
-          const questionsWithImages = await Question.find({
-            bankId: String(bank._id),
+          // Query and delete question diagram images from Cloudinary (supporting String & ObjectId bankId)
+          const mongoose = require('mongoose');
+          const qQuery = {
+            $or: [
+              { bankId: String(bank._id) }
+            ]
+          };
+          if (mongoose.Types.ObjectId.isValid(bank._id)) {
+            qQuery.$or.push({ bankId: new mongoose.Types.ObjectId(bank._id) });
+          }
+
+          const questionsWithImages = await Question.collection.find({
+            ...qQuery,
             imagePublicId: { $exists: true, $ne: null }
-          }).select('imagePublicId').lean();
+          }, { projection: { imagePublicId: 1 } }).toArray();
 
           for (const q of questionsWithImages) {
             if (q.imagePublicId) {
@@ -387,7 +398,7 @@ const updateProfile = async (req, res) => {
           }
 
           return Promise.all([
-            Question.deleteMany({ bankId: String(bank._id) }),
+            Question.collection.deleteMany(qQuery),
             Note.deleteMany({ bankId: bank._id }),
             AccessRequest.deleteMany({ bankId: bank._id }),
             Bank.findByIdAndDelete(bank._id),
@@ -605,11 +616,21 @@ const deleteSubject = async (req, res) => {
     if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
     if (bank.teacherId !== teacherId) return error(res, 'Access denied', 'FORBIDDEN', 403);
 
-    // Fetch and delete question diagrams from Cloudinary
-    const questionsWithImages = await Question.find({ 
-      bankId: String(bankId), 
+    // Fetch and delete question diagrams from Cloudinary (supporting String & ObjectId bankId)
+    const mongoose = require('mongoose');
+    const qQuery = {
+      $or: [
+        { bankId: String(bankId) }
+      ]
+    };
+    if (mongoose.Types.ObjectId.isValid(bankId)) {
+      qQuery.$or.push({ bankId: new mongoose.Types.ObjectId(bankId) });
+    }
+
+    const questionsWithImages = await Question.collection.find({ 
+      ...qQuery, 
       imagePublicId: { $exists: true, $ne: null } 
-    }).select('imagePublicId').lean();
+    }, { projection: { imagePublicId: 1 } }).toArray();
     
     for (const q of questionsWithImages) {
       if (q.imagePublicId) {
@@ -629,7 +650,7 @@ const deleteSubject = async (req, res) => {
 
     // Delete all related MongoDB documents in parallel
     await Promise.all([
-      Question.deleteMany({ bankId: String(bankId) }), // String — cross-DB safe
+      Question.collection.deleteMany(qQuery),
       Note.deleteMany({ bankId }),
       AccessRequest.deleteMany({ bankId })
     ]);
@@ -765,12 +786,21 @@ const deleteChapter = async (req, res) => {
     bank.chapters.splice(chapterIndex, 1);
     await bank.save();
 
-    // 2. Query and delete question diagram images from Cloudinary
-    const questionsWithImages = await Question.find({
-      bankId: String(bankId),
-      chapterId,
+    // 2. Query and delete question diagram images from Cloudinary (supporting String & ObjectId bankId)
+    const mongoose = require('mongoose');
+    const qQuery = {
+      $or: [
+        { bankId: String(bankId), chapterId }
+      ]
+    };
+    if (mongoose.Types.ObjectId.isValid(bankId)) {
+      qQuery.$or.push({ bankId: new mongoose.Types.ObjectId(bankId), chapterId });
+    }
+
+    const questionsWithImages = await Question.collection.find({
+      ...qQuery,
       imagePublicId: { $exists: true, $ne: null }
-    }).select('imagePublicId').lean();
+    }, { projection: { imagePublicId: 1 } }).toArray();
 
     for (const q of questionsWithImages) {
       if (q.imagePublicId) {
@@ -788,10 +818,10 @@ const deleteChapter = async (req, res) => {
       if (note.fileUrl) await deleteFromStorage(note.fileUrl, note.resource_type || 'raw');
     }
 
-    const deletedCount = await Question.countDocuments({ bankId: String(bankId), chapterId });
+    const deletedCount = await Question.collection.countDocuments(qQuery);
 
     await Promise.all([
-      Question.deleteMany({ bankId: String(bankId), chapterId }), // String — cross-DB safe
+      Question.collection.deleteMany(qQuery),
       Note.deleteMany({ bankId, chapterId })
     ]);
 
@@ -1201,7 +1231,7 @@ const generatePaper = async (req, res) => {
                     } else {
                         fetchDocs = await Question.find({ 
                             numericId: { $in: engineResult.questionIds } 
-                        }).lean();
+                        }).limit(200).lean();
                     }
                     if (fetchDocs && fetchDocs.length > 0) {
                         sectionQuestions.push(...fetchDocs.map(q => ({ ...q, marks: requestedMarks })));
@@ -1531,7 +1561,11 @@ const uploadNote = async (req, res) => {
     return error(res, `Cloudinary vault synchronization failed: ${err.message || 'Unknown fault'}`, 'SERVER_ERROR', 500);
   } finally {
     if (tempFilePath && fs.existsSync(tempFilePath)) {
-      try { fs.unlinkSync(tempFilePath); } catch (e) {}
+      try { 
+        fs.unlinkSync(tempFilePath); 
+      } catch (e) {
+        console.error('[teacherController:uploadNote:unlinkSync]', e.message);
+      }
     }
   }
 };
@@ -1913,7 +1947,8 @@ const getActivity = async (req, res) => {
 
     const logs = await ActivityLog.find({ userId: teacherId })
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(100)
+      .lean();
 
     return success(res, 'Activity log fetched', { activities: logs });
   } catch (err) {

@@ -509,10 +509,10 @@ input[type="submit"],
   to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
 
-.rename-card,
-.detail-card,
-.custom-modal,
-.swal2-popup {
+.rename-card:not(.hide),
+.detail-card:not(.hide),
+.custom-modal:not(.hide),
+.swal2-popup:not(.swal2-hide) {
   animation: modalSlideUp var(--dur-slow) var(--ease-spring) both !important;
 }
 

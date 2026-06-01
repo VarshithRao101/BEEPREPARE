@@ -7,6 +7,7 @@ const {
   adminSessionBindingCheck,
   requireActionCode
 } = require('../middleware/adminFortress');
+const { requireCsrf } = require('../middleware/csrf');
 
 // ─── Rate limiter specifically for admin routes ───────────────────
 const rateLimit = require('express-rate-limit');
@@ -27,10 +28,10 @@ router.post('/logout', requireAdmin, ctrl.adminLogout);
 router.get('/verify', requireAdmin, ctrl.verifySession);
 router.get('/verify-session', requireAdmin, ctrl.verifySession);
 
-// ─── All routes below: requireAdmin + session binding ───────────
+// ─── All routes below: requireAdmin + session binding + CSRF check ───────────
 // Session binding ensures the token can only be used from the
 // device fingerprint that created it (blocks token theft).
-router.use(requireAdmin, adminSessionBindingCheck);
+router.use(requireAdmin, adminSessionBindingCheck, requireCsrf);
 
 // Overview
 router.get('/overview', ctrl.getOverview);

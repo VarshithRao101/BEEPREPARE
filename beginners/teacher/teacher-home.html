@@ -479,7 +479,9 @@
         async function pulse() {
             try {
                 await loadDashboard(false);
-            } catch(e) {}
+            } catch(e) {
+                console.warn('[teacher-home:pulse]', e.message);
+            }
             setTimeout(pulse, 15000);
         }
         setTimeout(pulse, 15000);

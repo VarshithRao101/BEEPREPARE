@@ -37,6 +37,7 @@ const testSessionSchema = new Schema({
 }, { timestamps: true });
 
 testSessionSchema.index({ studentId: 1, status: 1, createdAt: -1 });
+testSessionSchema.index({ createdAt: 1 }, { expireAfterSeconds: 30 * 24 * 60 * 60 }); // 30 Days TTL
 
 let _TestSession = null;
 module.exports = new Proxy(function() {}, {

@@ -7,11 +7,13 @@ const {
   paymentSecurityStack,
   utrFormatHardening
 } = require('../middleware/paymentSecurity');
+const { paymentLimiter } = require('../middleware/rateLimiters');
 
 router.use(express.json());
 
 // POST /api/payment/submit
 router.post('/submit',
+  paymentLimiter,
   paymentSecurityStack,
   validatePaymentSubmit,
   ctrl.submitPayment

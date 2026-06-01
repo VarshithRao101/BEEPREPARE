@@ -145,13 +145,17 @@ const getDbHealth = async () => {
     const mainConn = getMainConn();
     mainStatus = mainConn.readyState === 1 ? 'connected' : 'disconnected';
     mainReadyState = mainConn.readyState;
-  } catch (e) {}
+  } catch (e) {
+    console.error('[adminController:getDbHealth:mainConn]', e.message);
+  }
 
   try {
     const questionsConn = getQuestionsConn();
     questionsStatus = questionsConn.readyState === 1 ? 'connected' : 'disconnected';
     questionsReadyState = questionsConn.readyState;
-  } catch (e) {}
+  } catch (e) {
+    console.error('[adminController:getDbHealth:questionsConn]', e.message);
+  }
 
   return {
     mainDb: {
@@ -383,12 +387,22 @@ const deleteUser = async (req, res) => {
     const banks = await Bank.find({ teacherId: googleUid });
     const bankIds = banks.map(b => b._id.toString());
 
-    // Fetch and delete question diagrams from Cloudinary
-    if (bankIds.length > 0) {
-      const questionsWithImages = await Question.find({
-        bankId: { $in: bankIds },
+    // Fetch and delete question diagrams from Cloudinary (supporting String & ObjectId bankId)
+    const mongoose = require('mongoose');
+    const orConditions = [];
+    for (const bId of bankIds) {
+      orConditions.push({ bankId: String(bId) });
+      if (mongoose.Types.ObjectId.isValid(bId)) {
+        orConditions.push({ bankId: new mongoose.Types.ObjectId(bId) });
+      }
+    }
+    const qQuery = orConditions.length > 0 ? { $or: orConditions } : null;
+
+    if (bankIds.length > 0 && qQuery) {
+      const questionsWithImages = await Question.collection.find({
+        ...qQuery,
         imagePublicId: { $exists: true, $ne: null }
-      }).select('imagePublicId').lean();
+      }, { projection: { imagePublicId: 1 } }).toArray();
 
       for (const q of questionsWithImages) {
         if (q.imagePublicId) {
@@ -417,10 +431,8 @@ const deleteUser = async (req, res) => {
     }
 
     // === DELETE FROM QUESTIONS DB (Cluster 1) ===
-    if (bankIds.length > 0) {
-      await Question.deleteMany({
-        bankId: { $in: bankIds }
-      });
+    if (bankIds.length > 0 && qQuery) {
+      await Question.collection.deleteMany(qQuery);
       console.log(`Deleted questions for ${bankIds.length} banks`);
     }
 
@@ -556,7 +568,9 @@ const modifyLeaderboard = async (req, res) => {
                 ip: req.ip,
                 color: '#f1c40f'
             });
-        } catch (e) {}
+        } catch (e) {
+            console.error('[adminController:modifyLeaderboard:activityLog]', e.message);
+        }
 
         return success(res, 'User stats updated. Changes synchronized instantly.');
     } catch (err) {
@@ -1095,11 +1109,21 @@ const deleteBank = async (req, res) => {
       return error(res, 'Bank not found', 'NOT_FOUND', 404);
     }
 
-    // Fetch and delete question diagrams from Cloudinary
-    const questionsWithImages = await Question.find({ 
-      bankId: bankId.toString(), 
+    // Fetch and delete question diagrams from Cloudinary (supporting String & ObjectId bankId)
+    const mongoose = require('mongoose');
+    const qQuery = {
+      $or: [
+        { bankId: String(bankId) }
+      ]
+    };
+    if (mongoose.Types.ObjectId.isValid(bankId)) {
+      qQuery.$or.push({ bankId: new mongoose.Types.ObjectId(bankId) });
+    }
+
+    const questionsWithImages = await Question.collection.find({ 
+      ...qQuery, 
       imagePublicId: { $exists: true, $ne: null } 
-    }).select('imagePublicId').lean();
+    }, { projection: { imagePublicId: 1 } }).toArray();
     
     for (const q of questionsWithImages) {
       if (q.imagePublicId) {
@@ -1127,9 +1151,7 @@ const deleteBank = async (req, res) => {
     }
 
     // Delete from Questions DB
-    await Question.deleteMany({
-      bankId: bankId.toString()
-    });
+    await Question.collection.deleteMany(qQuery);
 
     // Delete from Main DB
     await Promise.all([

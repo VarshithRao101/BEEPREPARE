@@ -43,7 +43,9 @@ const getStoragePath = (fileUrl) => {
     const url = new URL(fileUrl);
     const pathMatch = url.pathname.match(/\/o\/(.+)/);
     if (pathMatch) return decodeURIComponent(pathMatch[1]);
-  } catch (_) {}
+  } catch (err) {
+    // Safe fallback if fileUrl is already a plain path
+  }
   // Already a plain path
   return fileUrl;
 };
@@ -175,6 +177,7 @@ const getProfile = async (req, res) => {
       syncStreak(studentId),
       TestSession.aggregate([
         { $match: { studentId, status: 'completed' } },
+        { $limit: 500 },
         { $group: { _id: null, count: { $sum: 1 }, avgScore: { $avg: '$scorePercent' } } }
       ]),
       Doubt.countDocuments({ studentId })
@@ -215,6 +218,7 @@ const getProfile = async (req, res) => {
       planType: user.planType,
       isActivated: user.isActivated,
       aiMessagesToday: user.aiMessagesToday || 0,
+      resetAt: user.aiMessagesResetAt,
       activeBanks: user.activeBanks || [],
       streak: streak
         ? { currentStreak: streak.currentStreak, bestStreak: streak.bestStreak, totalActiveDays: streak.totalActiveDays }
@@ -515,6 +519,10 @@ const verifyOTP = async (req, res) => {
       })
     ]);
 
+    // Award EXP for adding a bank (+15 XP)
+    const { awardExp } = require('../utils/expService');
+    await awardExp(studentId, 'BANK_ADDED');
+
     await logActivity(
       studentId,
       'bank_joined',
@@ -646,7 +654,7 @@ const generateTest = async (req, res) => {
     const allQuestions = await Question.find({
       bankId,
       chapterId: { $in: selectedChapters }
-    });
+    }).limit(200).lean();
 
     const pools = {
       MCQ: { key: 'MCQ', questions: [] },
@@ -889,13 +897,18 @@ const generateTest = async (req, res) => {
       }
     }
 
+    const sessionQuestions = selected.map(q => ({
+      questionId: q.questionId,
+      marks: q.marks
+    }));
+
     const session = await TestSession.create({
       studentId,
       bankId: bank._id,
       teacherId: bank.teacherId,
       subject: bank.subject,
       class: bank.class,
-      questions: selected,
+      questions: sessionQuestions,
       blueprint,
       totalMarks,
       status: 'in_progress',
@@ -936,15 +949,35 @@ const submitTest = async (req, res) => {
     let correctCount = 0;
     let incorrectCount = 0;
 
+    // Fetch full question documents if the session only stored references
+    const needsFullFetch = session.questions.some(q => !q.questionType);
+    const fullQuestionsMap = new Map();
+    if (needsFullFetch) {
+      const qIds = session.questions.map(q => q.questionId);
+      const dbQuestions = await Question.find({ _id: { $in: qIds } }).lean();
+      dbQuestions.forEach(q => {
+        fullQuestionsMap.set(String(q._id), q);
+      });
+    }
+
     const gradedAnswers = answers.map(ans => {
-      const question = session.questions.find(q => q.questionId?.toString() === ans.questionId?.toString());
-      if (!question) return { questionId: ans.questionId, studentAnswer: ans.studentAnswer, isCorrect: null };
+      const sessionQ = session.questions.find(q => q.questionId?.toString() === ans.questionId?.toString());
+      if (!sessionQ) return { questionId: ans.questionId, studentAnswer: ans.studentAnswer, isCorrect: null };
+
+      // Resolve question type and correct option either from legacy session copy or freshly fetched doc
+      const qType = sessionQ.questionType 
+        ? sessionQ.questionType 
+        : fullQuestionsMap.get(String(sessionQ.questionId))?.questionType;
+
+      const correctOption = sessionQ.correctOption
+        ? sessionQ.correctOption
+        : fullQuestionsMap.get(String(sessionQ.questionId))?.correctOption;
 
       let isCorrect = null;
-      if (question.questionType === 'MCQ') {
-        isCorrect = ans.studentAnswer === question.correctOption;
+      if (qType === 'MCQ') {
+        isCorrect = ans.studentAnswer === correctOption;
         if (isCorrect) {
-          score += question.marks || 1;
+          score += sessionQ.marks || 1;
           correctCount++;
         } else if (ans.studentAnswer) {
           incorrectCount++;

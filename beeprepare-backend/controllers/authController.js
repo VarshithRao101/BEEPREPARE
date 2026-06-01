@@ -117,7 +117,9 @@ const googleLogin = async (req, res) => {
       const { logLogin } =
         require('../services/logService');
       logLogin(uid);
-    } catch (fErr) {}
+    } catch (fErr) {
+      console.error('[authController:googleLogin:logLogin]', fErr.message);
+    }
 
     return success(res, 'Login successful', {
       user: {
@@ -229,11 +231,17 @@ const wipeData = async (req, res) => {
     const banks = await Bank.find({ teacherId: googleUid }).select('_id').lean();
     const bankIds = banks.map(b => b._id.toString());
 
-    // Delete from Questions DB (Cluster 1)
+    // Delete from Questions DB (Cluster 1) (supporting String & ObjectId bankId)
     if (bankIds.length > 0) {
-      await Question.deleteMany({
-        bankId: { $in: bankIds }
-      });
+      const mongoose = require('mongoose');
+      const orConditions = [];
+      for (const bId of bankIds) {
+        orConditions.push({ bankId: String(bId) });
+        if (mongoose.Types.ObjectId.isValid(bId)) {
+          orConditions.push({ bankId: new mongoose.Types.ObjectId(bId) });
+        }
+      }
+      await Question.collection.deleteMany({ $or: orConditions });
     }
 
     // Delete all main DB data (Cluster 2)

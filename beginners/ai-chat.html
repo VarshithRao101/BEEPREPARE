@@ -1051,7 +1051,7 @@
 
         async function updateLimits() {
             const role = localStorage.getItem(BP.ROLE);
-            const res = await apiCall(`/${role}/profile`);
+            const res = await apiCall(`/${role}/profile`, 'GET', null, true, false, false, true);
             if (res?.success) {
                 const used = res.data.aiMessagesToday || 0;
                 const limit = 30;

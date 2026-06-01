@@ -249,10 +249,11 @@ export async function apiCall(
   body = null,
   needsAuth = true,
   isRetry = false,
-  showOverlay = true
+  showOverlay = true,
+  forceRefresh = false
 ) {
   // 1. Cache Check (Immediate return, no loader)
-  if (method === 'GET') {
+  if (method === 'GET' && !forceRefresh) {
     const ttl = CACHE_TTL[endpoint] || 0;
     if (ttl > 0) {
       try {
@@ -266,6 +267,10 @@ export async function apiCall(
         }
       } catch (e) { console.warn('Cache error', e); }
     }
+  }
+
+  if (forceRefresh && method === 'GET') {
+    sessionStorage.removeItem(CACHE_PREFIX + endpoint);
   }
 
   // Only show loader for actual network calls
@@ -443,7 +448,7 @@ export async function apiCall(
       if (ttl > 0) sessionStorage.setItem(CACHE_PREFIX + endpoint, JSON.stringify({ data, at: Date.now() }));
     } else if (method !== 'GET' && data?.success) {
       // Invalidate relevant caches
-      ['/teacher/dashboard', '/student/dashboard', '/student/banks'].forEach(k => sessionStorage.removeItem(CACHE_PREFIX + k));
+      ['/teacher/dashboard', '/student/dashboard', '/student/banks', '/student/profile', '/teacher/profile'].forEach(k => sessionStorage.removeItem(CACHE_PREFIX + k));
     }
 
     return data;

@@ -82,8 +82,32 @@ app.use(ipShield);
 // === COMPRESSION — SPEED OPTIMIZATION ===
 app.use(compression());
 
+// === REQUEST PARSING WITH LIMITS (MUST come before security scanning so req.body is populated) ===
+app.use(express.json({
+  limit: '2mb',
+  strict: true
+}));
+app.use(express.urlencoded({
+  extended: true,
+  limit: '2mb'
+}));
+
+// ═══════════════════════════════════════════════════════════════
+// FORTRESS — 12-Layer Security Stack
+// Blocks: SQLi, NoSQLi, XSS, SSTI, XXE, Command Injection,
+//         Path Traversal, Prototype Pollution, Header Injection,
+//         JSON Bombs, Scanner Bots, URL Overflow, Hard-blocked IPs
+// ═══════════════════════════════════════════════════════════════
+app.use(fortressStack);
+
+// === SECURITY HEADERS ===
+app.use(securityHeaders);
+
 // === CORS — LOCKED DOWN ===
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || [
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ?.split(',')
+  .map(o => o.trim())
+  .filter(Boolean) || [
   'http://localhost:5500',
   'http://127.0.0.1:5500',
   'http://localhost:5000',
@@ -99,38 +123,32 @@ if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
     allowedOrigins.push('https://www.beeprepare.in');
 }
 
-
-
 app.use(cors({
   origin: (origin, callback) => {
-    // Dynamically allow any origin that makes the request
-    // This removes ALL CORS blocking.
-    return callback(null, true);
+    // Allow requests with no origin only in development
+    // (mobile apps, curl, server-to-server)
+    if (!origin) {
+      if (process.env.NODE_ENV === 'production') {
+        return callback(new Error('Origin required in production'), false);
+      }
+      return callback(null, true);
+    }
+
+    // Strictly check against allowedOrigins list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Block everything else — never reflect unknown origins
+    console.warn('[CORS BLOCKED]', origin);
+    return callback(new Error('Not allowed by CORS'), false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-CSRF-Token', 'Idempotency-Key']
-}));
-
-// ═══════════════════════════════════════════════════════════════
-// FORTRESS — 12-Layer Security Stack (MUST be first middleware)
-// Blocks: SQLi, NoSQLi, XSS, SSTI, XXE, Command Injection,
-//         Path Traversal, Prototype Pollution, Header Injection,
-//         JSON Bombs, Scanner Bots, URL Overflow, Hard-blocked IPs
-// ═══════════════════════════════════════════════════════════════
-app.use(fortressStack);
-
-// === SECURITY HEADERS FIRST ===
-app.use(securityHeaders);
-
-// === REQUEST PARSING WITH LIMITS ===
-app.use(express.json({
-  limit: '2mb',
-  strict: true
-}));
-app.use(express.urlencoded({
-  extended: true,
-  limit: '2mb'
+  allowedHeaders: [
+    'Content-Type', 'Authorization', 
+    'X-Request-Id', 'X-CSRF-Token', 'Idempotency-Key'
+  ]
 }));
 
 // ─── CORE ROUTES ───────────────────────────────────────────────────
@@ -544,8 +562,20 @@ const startApp = async () => {
   try {
     // Only block startup on DB failure if NOT on Vercel
     // On Vercel, we want the function to stay alive to report errors
-    await connectDB().then(() => {
+    await connectDB().then(async () => {
         bootMatrixEngine();
+        
+        // ── PURGE LEGACY AI CHATS ON STARTUP ──
+        try {
+            const { getMainConn } = require('./config/db');
+            const mainConn = getMainConn();
+            const deleted = await mainConn.db.collection('aichats').deleteMany({});
+            if (deleted && deleted.deletedCount > 0) {
+                console.log(`[Clean Up] Permanently deleted ${deleted.deletedCount} legacy AI chat logs from database.`);
+            }
+        } catch (chatErr) {
+            console.warn('[Clean Up] Failed to purge legacy AI chats:', chatErr.message);
+        }
     }).catch(err => {
         logger.error('DB CONNECTION DELAYED OR FAILED:', err);
     });
