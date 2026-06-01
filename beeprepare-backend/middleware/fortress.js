@@ -160,6 +160,7 @@ const deepScan = (value, path = '', depth = 0) => {
 
   if (typeof value === 'string') {
     // Decode common encoding tricks before scanning
+    let decoded;
     try {
       decoded = decodeURIComponent(value);
     } catch (e) {
