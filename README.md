@@ -1,13 +1,17 @@
 # BeePrepare
 
-<p align="center">
-  <img src="https://beeprepare.in/banner.png" alt="BeePrepare Banner" width="100%">
-</p>
+![BeePrepare Banner](assets/images/og-banner.png)
 
 <p align="center">
   <strong>AI-Powered Academic Management Platform</strong><br>
   Modernizing academic workflows through intelligent assessment, secure resource management, and AI-assisted educational tools.
 </p>
+## Platform Modules
+
+| Teacher Portal | Student Portal |
+| :---: | :---: |
+| ![Teacher Dashboard](assets/images/teacher.png) | ![Student Dashboard](assets/images/student.png) |
+| **Comprehensive bank curation, custom question types, and automated exam paper generation.** | **Practice paper matrix generator, interactive doubt logs, and study vaults.** |
 
 ---
 
@@ -412,6 +416,7 @@ Their insights help us improve the platform and build solutions that create mean
 
 <p align="center">
 
+![BEEPREPARE Quality](assets/images/trust-badges.png)
 **BeePrepare**
 
 AI-Powered Academic Management Platform

@@ -25,6 +25,7 @@ const userSchema = new Schema({
   subjectLimit:       { type: Number, default: 1 },
   redeemCodes:        [{ type: String }],
   lastLoginAt:        { type: Date, default: null },
+  customQuestionTypes: [{ type: String }],
   // Teacher fields
   subjects:           [{ type: String }],
   classes:            [{ type: String }],

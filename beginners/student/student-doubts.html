@@ -414,7 +414,6 @@
         let allDoubts = [];
         let pollTimer = null;
         let pendingFileBase64 = null;
-
         const initLab = async () => {
             if (!(await guardStudent())) return;
 
@@ -428,6 +427,17 @@
             });
 
             await refreshData();
+
+            // Auto-open chat if a bank ID is stored in localStorage
+            const autoBankId = localStorage.getItem('bp_current_bank_id');
+            if (autoBankId) {
+                const autoBank = allBanks.find(b => b.bankId === autoBankId);
+                if (autoBank) {
+                    const doubt = allDoubts.find(d => d.bankId === autoBankId);
+                    openChat(autoBank.bankId, doubt ? doubt.doubtId : '', autoBank.subject, autoBank.teacherName);
+                }
+                localStorage.removeItem('bp_current_bank_id');
+            }
         };
 
         const refreshData = async () => {

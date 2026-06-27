@@ -803,6 +803,23 @@
             document.getElementById('total-marks').innerText = t;
         }
 
+        async function loadCustomTypes() {
+            try {
+                const res = await apiCall('/teacher/custom-question-types');
+                if (res && res.success) {
+                    const customTypes = res.data;
+                    customTypes.forEach(t => {
+                        if (!QUESTION_TYPES.includes(t)) {
+                            QUESTION_TYPES.push(t);
+                        }
+                    });
+                    renderBlueprint();
+                }
+            } catch (err) {
+                console.error('Failed to load custom question types:', err);
+            }
+        }
+
         async function loadDashboard() {
             const result = await apiCall('/teacher/dashboard');
             if (result && result.success) {
@@ -1007,6 +1024,7 @@
         }
         BP.syncTeacherSignals();
         renderBlueprint();
+        loadCustomTypes();
         loadDashboard();
     </script>
 <script src="/assets/js/ripple.js"></script>

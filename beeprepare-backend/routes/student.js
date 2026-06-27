@@ -21,6 +21,7 @@ router.post('/banks/verify-otp',            otpLimiter, ...guard, studentControl
 router.get('/banks',                        ...guard, studentController.getMyBanks);
 router.delete('/banks/:bankId',             ...guard, studentController.deleteBank);
 router.get('/banks/:bankId/chapters',       ...guard, studentController.getBankChapters);
+router.get('/banks/:bankId/custom-question-types', ...guard, studentController.getBankCustomQuestionTypes);
 
 // Notes
 router.get('/notes',                        ...guard, studentController.getNotes);

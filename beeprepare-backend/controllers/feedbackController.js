@@ -58,6 +58,12 @@ const submitFeedback = async (req, res) => {
       if (!allowedMime.includes(req.file.mimetype)) {
         return error(res, 'Only PDF, JPG, JPEG, PNG files are accepted', 'INVALID_FILE_TYPE', 400);
       }
+
+      const name = req.file.originalname.toLowerCase();
+      const dangerousExtensions = ['.exe', '.sh', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.php', '.py', '.rb', '.pl', '.zip', '.rar', '.tar', '.gz', '.7z'];
+      if (dangerousExtensions.some(e => name.includes(e))) {
+        return error(res, 'Suspicious file detected.', 'SUSPICIOUS_FILE', 400);
+      }
       
       const extMap = {
         'application/pdf': 'pdf',

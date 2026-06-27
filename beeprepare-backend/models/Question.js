@@ -16,7 +16,7 @@ const questionSchema = new Schema({
   teacherId:    { type: String, required: true, index: true },
   class:        { type: String, required: true, index: true },   
   subject:      { type: String, required: true, index: true },   
-  questionType: { type: String, required: true, enum: ['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'], index: true },
+  questionType: { type: String, required: true, index: true },
 
   // ── Question Content ────────────────────────────────────────────────────
   questionText:  { type: String, required: true, minlength: 10, maxlength: 5000 },
@@ -111,13 +111,12 @@ questionSchema.index({ bankId: 1, chapterId: 1, questionType: 1, isImportant: 1 
 questionSchema.index({ createdBy: 1 });
 
 // ── Register on Questions connection (lazy — after connectDB()) ─────────────
-let _Question = null;
-
 const getQuestion = () => {
-  if (!_Question) {
-    _Question = getQuestionsConn().model('Question', questionSchema);
+  const conn = getQuestionsConn();
+  if (conn.models.Question) {
+    return conn.models.Question;
   }
-  return _Question;
+  return conn.model('Question', questionSchema);
 };
 
 // Proxy so existing `require('../models/Question')` still works as a Model

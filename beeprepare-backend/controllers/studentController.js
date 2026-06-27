@@ -15,7 +15,7 @@ const { updateStreak, syncStreak } = require('../utils/streakHelper');
 const Note = require('../models/Note');
 const Quote = require('../models/Quote');
 const { success, error } = require('../utils/responseHelper');
-const { generatePdfUrl } = require('../utils/cloudinaryHelper');
+const { generatePdfUrl, deleteFromStorage } = require('../utils/cloudinaryHelper');
 const getChapterId = require('../utils/getChapterId');
 
 
@@ -674,10 +674,23 @@ const generateTest = async (req, res) => {
     const normalizeType = (t) => {
       const type = (t || '').trim();
       if (pools[type]) return type;
-      // Fallbacks
+      // Fallbacks for standard types
       if (type.toLowerCase().includes('mcq')) return 'MCQ';
       if (type.toLowerCase().includes('very short')) return 'Very Short';
-      return 'Short'; // Default
+      if (type.toLowerCase().includes('short')) return 'Short';
+      if (type.toLowerCase().includes('long')) return 'Long';
+      if (type.toLowerCase().includes('essay')) return 'Essay';
+      if (type.toLowerCase().includes('true or false')) return 'True or False';
+      if (type.toLowerCase().includes('fill in the blanks')) return 'Fill in the Blanks';
+      if (type.toLowerCase().includes('simple matching')) return 'Simple Matching';
+      if (type.toLowerCase().includes('matrix matching')) return 'Matrix Matching';
+      if (type.toLowerCase().includes('reading passage')) return 'Reading Passage';
+      if (type.toLowerCase().includes('case study')) return 'Case Study';
+      if (type.toLowerCase().includes('data interpretation')) return 'Data Interpretation';
+      
+      // Dynamically initialize custom type pool
+      pools[type] = { key: type, questions: [] };
+      return type;
     };
 
     for (const q of allQuestions) {
@@ -688,6 +701,7 @@ const generateTest = async (req, res) => {
     const selected = [];
     const sectionDefs = [];
     const labels = ['A', 'B', 'C', 'D', 'E'];
+    const usedQuestionIds = new Set();
 
     // Step 3: Blueprint processing
     blueprint.forEach((sectionReq, idx) => {
@@ -713,8 +727,22 @@ const generateTest = async (req, res) => {
 
         if (!foundPool || foundPool.questions.length === 0) return;
 
-        const importantPool = foundPool.questions.filter(q => q.isImportant || (q.tags && q.tags.includes('Important')));
-        const normalPool = foundPool.questions.filter(q => !q.isImportant && !(q.tags && q.tags.includes('Important')));
+        // 1. Exclude already used questions to prevent repeats
+        let candidates = foundPool.questions.filter(q => !usedQuestionIds.has(String(q._id)));
+
+        // 2. Prioritize exact marks matching
+        let exactCandidates = candidates.filter(q => q.marks === requestedMarks);
+        let poolToUse = exactCandidates;
+
+        if (exactCandidates.length < needed) {
+          // Fallback to any marks of this type
+          poolToUse = candidates;
+        }
+
+        if (poolToUse.length === 0) return;
+
+        const importantPool = poolToUse.filter(q => q.isImportant || (q.tags && q.tags.includes('Important')));
+        const normalPool = poolToUse.filter(q => !q.isImportant && !(q.tags && q.tags.includes('Important')));
 
         const importantNeeded = Math.ceil(needed * 0.70);
         const normalNeeded = needed - importantNeeded;
@@ -732,6 +760,8 @@ const generateTest = async (req, res) => {
 
         let typeSelected = [...fromImportant, ...fromNormal].slice(0, needed);
         
+        typeSelected.forEach(q => usedQuestionIds.add(String(q._id)));
+
         typeSelected = typeSelected.map(q => {
           const plain = q.toObject ? q.toObject() : q;
           return {
@@ -1228,20 +1258,7 @@ const getDoubtMessages = async (req, res) => {
          // Perform Cloudinary deletion if it's a cloudinary URL
          if (msg.imageUrl.includes('cloudinary.com')) {
            try {
-             const urlObj = new URL(msg.imageUrl);
-             const parts = urlObj.pathname.split('/');
-             const uploadIndex = parts.findIndex(p => p === 'upload');
-             if (uploadIndex !== -1) {
-                 let remainingParts = parts.slice(uploadIndex + 1);
-                 if (remainingParts[0] && /^v\d+$/.test(remainingParts[0])) {
-                   remainingParts = remainingParts.slice(1);
-                 }
-                 const publicIdWithExt = remainingParts.join('/');
-                 const fullPublicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.')) || publicIdWithExt;
-                 const { cloudinary } = require('../utils/cloudinaryHelper');
-                 await cloudinary.uploader.destroy(fullPublicId, { resource_type: 'image' });
-                 await cloudinary.uploader.destroy(fullPublicId, { resource_type: 'raw' });
-             }
+             await deleteFromStorage(msg.imageUrl, 'image');
            } catch(e) { console.error('Cloudinary cleanup error (student):', e); }
          }
          msg.imageUrl = 'EXPIRED';
@@ -1473,5 +1490,33 @@ module.exports = {
   addBookmark,
   deleteBookmark,
   getStreak,
-  updateStreakActivity
+  updateStreakActivity,
+  getBankCustomQuestionTypes
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 10. GET /api/student/banks/:bankId/custom-question-types
+// ══════════════════════════════════════════════════════════════════════════════
+const getBankCustomQuestionTypes = async (req, res) => {
+  try {
+    const { bankId } = req.params;
+    const studentId = req.user.googleUid;
+    const AccessRequest = require('../models/AccessRequest');
+    const Bank = require('../models/Bank');
+
+    // Validate access
+    const request = await AccessRequest.findOne({ bankId, studentId, status: 'active' });
+    if (!request) return error(res, 'You do not have access to this bank', 'FORBIDDEN', 403);
+
+    const bank = await Bank.findById(bankId);
+    if (!bank) return error(res, 'Bank not found', 'BANK_NOT_FOUND', 404);
+
+    const User = require('../models/User').getUser();
+    const teacher = await User.findOne({ googleUid: bank.teacherId }).lean();
+    
+    return success(res, 'Bank custom question types fetched', teacher?.customQuestionTypes || []);
+  } catch (err) {
+    console.error('getBankCustomQuestionTypes error:', err);
+    return error(res, 'Failed to fetch custom types', 'SERVER_ERROR', 500);
+  }
 };

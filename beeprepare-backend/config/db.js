@@ -31,7 +31,7 @@ const connectDB = async () => {
       if (!process.env.MONGODB_QUESTIONS_URI) throw new Error('MONGODB_QUESTIONS_URI missing');
 
       console.log('[Database] Connecting to Main DB...');
-      const mainConnMongoose = await mongoose.connect(process.env.MONGODB_URI, opts);
+      await mongoose.connect(process.env.MONGODB_URI, opts);
       cached.mainConn = mongoose.connection;
       console.log('[Database] Main DB connected.');
 
@@ -43,21 +43,27 @@ const connectDB = async () => {
       qConn.on('disconnected', () => {
         console.error('[Database] Questions DB disconnected');
         cached.questionsConn = null;
+        cached.promise = null; // Clean promise cache so next request reconnects both DBs
       });
       qConn.on('error', (err) => console.error('[Database] Questions DB error:', err.message));
 
-      cached.mainConn.on('disconnected', () => {
-        console.error('[Database] Main DB disconnected');
-        cached.mainConn = null;
-        cached.promise = null;
-      });
+      if (mongoose.connection.listenerCount('disconnected') === 0) {
+        mongoose.connection.on('disconnected', () => {
+          console.error('[Database] Main DB disconnected');
+          cached.mainConn = null;
+          cached.promise = null; // Clean promise cache so next request reconnects both DBs
+        });
+      }
 
-      cached.mainConn.on('error', (err) => console.error('[Database] Main DB error:', err.message));
+      if (mongoose.connection.listenerCount('error') === 0) {
+        mongoose.connection.on('error', (err) => console.error('[Database] Main DB error:', err.message));
+      }
 
-      return { mainConn: cached.mainConn, questionsConn: null }; 
+      return { mainConn: cached.mainConn, questionsConn: cached.questionsConn }; 
     } catch (err) {
       cached.promise = null;
       cached.mainConn = null;
+      cached.questionsConn = null;
       console.error('[Database] MongoDB main connection failed:', err.message);
       throw err;
     }

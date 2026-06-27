@@ -17,11 +17,12 @@ async function generatePaperJS(options) {
     subjectId,
     bankId,
     typeFilter, // numeric type from TYPE_MAP
+    marks, // Filter by exact marks requested
+    excludeIds = [], // Exclude these question IDs to avoid repeats
     bank // already fetched bank object (optional)
   } = options;
 
-  const conn = getQuestionsConn();
-  const Question = conn.model('Question');
+  const Question = require('../models/Question');
   const Bank = require('../models/Bank');
 
   let activeBank = bank;
@@ -56,7 +57,22 @@ async function generatePaperJS(options) {
   };
 
   if (typeFilter !== undefined && typeFilter !== -1) {
-    filter.questionType = TYPE_MAP_REV[typeFilter];
+    if (typeof typeFilter === 'number') {
+      filter.questionType = TYPE_MAP_REV[typeFilter];
+    } else {
+      filter.questionType = typeFilter;
+    }
+  }
+
+  if (marks !== undefined && marks !== null) {
+    filter.marks = marks;
+  }
+
+  if (excludeIds && excludeIds.length > 0) {
+    const mongoose = require('mongoose');
+    filter._id = {
+      $nin: excludeIds.map(id => mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id)
+    };
   }
 
   // Fetch all candidate questions

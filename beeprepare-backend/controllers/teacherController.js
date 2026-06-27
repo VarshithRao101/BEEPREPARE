@@ -12,7 +12,7 @@ const ActivityLog = require('../models/ActivityLog');
 const generateSyncCode = require('../utils/generateSyncCode');
 const generateOTP = require('../utils/generateOTP');
 const { success, error } = require('../utils/responseHelper');
-const { cloudinary, generatePdfUrl } = require('../utils/cloudinaryHelper');
+const { cloudinary, generatePdfUrl, extractPublicId, deleteFromStorage } = require('../utils/cloudinaryHelper');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -56,57 +56,7 @@ const logActivity = async (userId, type, title, description, color = '#FFD700') 
   }
 };
 
-// ─── Cloudinary URL/PublicID Parser Helper ─────────────────────────────────
-const extractPublicId = (url) => {
-  try {
-    const urlObj = new URL(url);
-    const parts = urlObj.pathname.split('/');
-    const uploadIndex = parts.findIndex(p => p === 'upload');
-    if (uploadIndex === -1) return null;
-    let remainingParts = parts.slice(uploadIndex + 1);
-    if (remainingParts[0] && /^v\d+$/.test(remainingParts[0])) {
-      remainingParts = remainingParts.slice(1);
-    }
-    const publicIdWithExt = remainingParts.join('/');
-    const lastDotIdx = publicIdWithExt.lastIndexOf('.');
-    return lastDotIdx !== -1 ? publicIdWithExt.substring(0, lastDotIdx) : publicIdWithExt;
-  } catch (e) {
-    return null;
-  }
-};
 
-// ─── Cloudinary/Storage Delete Helper ───────────────────────────────────────
-const deleteFromStorage = async (identifier, resource_type = 'raw') => {
-  if (!identifier) return;
-  try {
-    // 1. If it's a full Cloudinary URL
-    if (identifier.includes('cloudinary.com')) {
-      const parsedPublicId = extractPublicId(identifier);
-      if (parsedPublicId) {
-        await cloudinary.uploader.destroy(parsedPublicId, { resource_type: 'raw' });
-        await cloudinary.uploader.destroy(parsedPublicId, { resource_type: 'image' });
-      }
-      return;
-    }
-
-    // 2. If it's a Cloudinary public_id (doesn't contain http/https)
-    if (!identifier.startsWith('http')) {
-      await cloudinary.uploader.destroy(identifier, { resource_type: 'raw' });
-      await cloudinary.uploader.destroy(identifier, { resource_type: 'image' });
-      return;
-    }
-
-    // 3. Legacy Firebase URL cleanup
-    const url = new URL(identifier);
-    const pathMatch = url.pathname.match(/\/o\/(.+)/);
-    if (pathMatch) {
-      const filePath = decodeURIComponent(pathMatch[1]);
-      await bucket.file(filePath).delete();
-    }
-  } catch (e) {
-    console.warn(`Storage delete failed for ${identifier}: ${e.message}`);
-  }
-};
 
 // ══════════════════════════════════════════════════════════════════════════════
 // 1. GET /api/teacher/dashboard
@@ -383,7 +333,7 @@ const updateProfile = async (req, res) => {
           for (const q of questionsWithImages) {
             if (q.imagePublicId) {
               try {
-                await cloudinary.uploader.destroy(q.imagePublicId);
+                await deleteFromStorage(q.imagePublicId, 'image');
               } catch (err) {
                 console.warn(`Failed to delete question diagram from Cloudinary:`, err.message);
               }
@@ -472,14 +422,21 @@ const updateProfile = async (req, res) => {
                 `Automated sync engine established a new ${subject} terminal for ${normalizedClass}.`, '#4CAF50');
             })());
           } else {
-            // Update existing bank with new chapters and potential name change
+            // ── BUG FIX: Preserve existing DB chapters when payload sends an empty list ──
+            // Chapters are managed by their own endpoints (POST/DELETE /teacher/chapters/:bankId).
+            // When activeChapters was not rebuilt from bank data before calling PUT /teacher/profile,
+            // syncChapters ends up empty — which would silently wipe all real chapters from the bank.
+            // Fix: only update chapters if the payload explicitly provides a non-empty list.
+            const bankUpdateFields = { teacherName, isActive: true };
+            if (syncChapters.length > 0) {
+              // Payload has chapter data → trust it and apply
+              bankUpdateFields.chapters = syncChapters;
+            }
+            // else: bank already has chapters from dedicated chapter APIs → leave them untouched
+
             syncOps.push(Bank.updateOne(
               { _id: bank._id },
-              { 
-                chapters: syncChapters,
-                teacherName,
-                isActive: true
-              }
+              bankUpdateFields
             ));
           }
         }
@@ -635,7 +592,7 @@ const deleteSubject = async (req, res) => {
     for (const q of questionsWithImages) {
       if (q.imagePublicId) {
         try {
-          await cloudinary.uploader.destroy(q.imagePublicId);
+          await deleteFromStorage(q.imagePublicId, 'image');
         } catch (err) {
           console.warn(`Failed to delete question diagram:`, err.message);
         }
@@ -805,7 +762,7 @@ const deleteChapter = async (req, res) => {
     for (const q of questionsWithImages) {
       if (q.imagePublicId) {
         try {
-          await cloudinary.uploader.destroy(q.imagePublicId);
+          await deleteFromStorage(q.imagePublicId, 'image');
         } catch (err) {
           console.warn(`Failed to delete question diagram:`, err.message);
         }
@@ -931,9 +888,14 @@ const addQuestion = async (req, res) => {
     // Normalize difficulty casing
     const normalizedDifficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
 
-    const validTypes = ['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'];
-    if (!validTypes.includes(questionType)) {
-      return error(res, `Invalid question type. Must be one of: ${validTypes.join(', ')}`, 'INVALID_TYPE', 400);
+    const standardTypes = ['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'];
+    const User = require('../models/User').getUser();
+    const userDoc = await User.findOne({ googleUid: teacherId }).lean();
+    const customTypes = userDoc?.customQuestionTypes || [];
+    const allValidTypes = [...standardTypes, ...customTypes];
+
+    if (!allValidTypes.includes(questionType)) {
+      return error(res, `Invalid question type. Must be one of: ${allValidTypes.join(', ')}`, 'INVALID_TYPE', 400);
     }
 
     const validMarks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -1074,8 +1036,7 @@ const deleteQuestion = async (req, res) => {
 
     if (question.imagePublicId) {
       try {
-        const { cloudinary } = require('../utils/cloudinaryHelper');
-        await cloudinary.uploader.destroy(question.imagePublicId);
+        await deleteFromStorage(question.imagePublicId, 'image');
       } catch (e) {
         console.error('Failed to delete question diagram', e);
       }
@@ -1160,6 +1121,7 @@ const generatePaper = async (req, res) => {
     }
 
     // Step 3: Use Matrix Engine for sectional selection
+    const usedQuestionIds = new Set();
     for (let i = 0; i < blueprint.length; i++) {
         const sectionReq = blueprint[i];
         const requestedMarks = parseInt(sectionReq.marks) || 1;
@@ -1183,7 +1145,7 @@ const generatePaper = async (req, res) => {
                 const engineParams = {
                     bankId,
                     totalQuestions: fetchReq.qty,
-                    totalMarks: fetchReq.qty, 
+                    totalMarks: fetchReq.qty * requestedMarks, 
                     easyPct: req.body.easyPct ?? 30, 
                     mediumPct: req.body.mediumPct ?? 50, 
                     hardPct: req.body.hardPct ?? 20,
@@ -1195,33 +1157,31 @@ const generatePaper = async (req, res) => {
                     ],
                     chapterIndices,
                     chapterIds: selectedChapters,
-                    typeFilter: TYPE_MAP[fetchReq.type] ?? 2,
+                    typeFilter: TYPE_MAP[fetchReq.type] !== undefined ? TYPE_MAP[fetchReq.type] : fetchReq.type,
                     seed: Math.floor(Math.random() * 0xFFFFFFFF),
+                    marks: requestedMarks,
+                    excludeIds: Array.from(usedQuestionIds),
                     bank
                 };
 
-                let engineResult = null;
-                let usedWasm = false;
+                let engineResult = await generatePaperJS(engineParams);
 
-                if (isEngineReady()) {
-                    try {
-                        engineResult = await engineGeneratePaper(engineParams);
-                        usedWasm = true;
-                    } catch (wasmErr) {
-                        console.warn(`[Matrix Engine] WASM execution failed for ${fetchReq.type}:`, wasmErr.message);
-                    }
+                // Fallback 1: If no questions match with requested marks, relax marks filter
+                if (!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) {
+                    const fallbackParams = { ...engineParams, marks: undefined };
+                    engineResult = await generatePaperJS(fallbackParams);
                 }
 
+                // Fallback 2: If still no questions, relax chapter constraint
+                if ((!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) && (engineParams.chapterIds?.length || engineParams.chapterIndices?.length)) {
+                    const broaderParams = { ...engineParams, chapterIds: [], chapterIndices: [], marks: undefined };
+                    engineResult = await generatePaperJS(broaderParams);
+                }
+
+                // Fallback 3: If still no questions, relax type filter
                 if (!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) {
-                    engineResult = await generatePaperJS(engineParams);
-                    if (engineResult?.error === 'NO_QUESTIONS' && (engineParams.chapterIds?.length || engineParams.chapterIndices?.length)) {
-                        const broaderParams = { ...engineParams, chapterIds: [], chapterIndices: [] };
-                        engineResult = await generatePaperJS(broaderParams);
-                    }
-                    if (engineResult?.questionIds?.length === 0) {
-                        const rescueParams = { ...engineParams, chapterIds: [], chapterIndices: [], typeFilter: -1 };
-                        engineResult = await generatePaperJS(rescueParams);
-                    }
+                    const rescueParams = { ...engineParams, chapterIds: [], chapterIndices: [], typeFilter: -1, marks: undefined };
+                    engineResult = await generatePaperJS(rescueParams);
                 }
 
                 if (engineResult && engineResult.questionIds && engineResult.questionIds.length > 0) {
@@ -1234,6 +1194,7 @@ const generatePaper = async (req, res) => {
                         }).limit(200).lean();
                     }
                     if (fetchDocs && fetchDocs.length > 0) {
+                        fetchDocs.forEach(q => usedQuestionIds.add(String(q._id)));
                         sectionQuestions.push(...fetchDocs.map(q => ({ ...q, marks: requestedMarks })));
                     }
                 }
@@ -1819,20 +1780,12 @@ const getDoubtMessages = async (req, res) => {
 
     for (let msg of doubt.messages) {
       if (msg.imageUrl && msg.imageUrl !== 'EXPIRED' && msg.timestamp <= expiryTime) {
-         // Perform Cloudinary deletion if it's a cloudinary URL
-         if (msg.imageUrl.includes('cloudinary.com')) {
-           try {
-             const urlObj = new URL(msg.imageUrl);
-             const parts = urlObj.pathname.split('/');
-             const uploadIndex = parts.findIndex(p => p === 'upload');
-             if (uploadIndex !== -1) {
-                 const publicIdWithExt = parts.slice(uploadIndex + 2).join('/');
-                 const fullPublicId = publicIdWithExt.substring(0, publicIdWithExt.lastIndexOf('.'));
-                 const { cloudinary } = require('../utils/cloudinaryHelper');
-                 await cloudinary.uploader.destroy(fullPublicId);
-             }
-           } catch(e) { console.error('Cloudinary cleanup error (teacher):', e.message); }
-         }
+          // Perform Cloudinary deletion if it's a cloudinary URL
+          if (msg.imageUrl.includes('cloudinary.com')) {
+            try {
+              await deleteFromStorage(msg.imageUrl, 'image');
+            } catch(e) { console.error('Cloudinary cleanup error (teacher):', e.message); }
+          }
          msg.imageUrl = 'EXPIRED';
          modified = true;
       }
@@ -1986,6 +1939,97 @@ const downloadNote = async (req, res) => {
   }
 };
 
+// ══════════════════════════════════════════════════════════════════════════════
+// 21. Custom Question Types Management (Teacher Limit: 10)
+// ══════════════════════════════════════════════════════════════════════════════
+const getCustomQuestionTypes = async (req, res) => {
+  try {
+    const teacherId = req.user.googleUid;
+    const User = require('../models/User').getUser();
+    const user = await User.findOne({ googleUid: teacherId }).lean();
+    return success(res, 'Custom question types fetched', user?.customQuestionTypes || []);
+  } catch (err) {
+    console.error('getCustomQuestionTypes error:', err);
+    return error(res, 'Failed to fetch custom types', 'SERVER_ERROR', 500);
+  }
+};
+
+const addCustomQuestionType = async (req, res) => {
+  try {
+    const teacherId = req.user.googleUid;
+    let { name } = req.body;
+
+    if (!name || typeof name !== 'string') {
+      return error(res, 'Name parameter is required and must be a string.', 'INVALID_PARAMS', 400);
+    }
+
+    name = name.trim();
+    if (name.length < 2 || name.length > 50) {
+      return error(res, 'Name must be between 2 and 50 characters.', 'INVALID_LENGTH', 400);
+    }
+
+    const standardTypes = ['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'];
+    if (standardTypes.some(t => t.toLowerCase() === name.toLowerCase())) {
+      return error(res, 'Name conflicts with built-in standard question types.', 'CONFLICT', 400);
+    }
+
+    const User = require('../models/User').getUser();
+    const user = await User.findOne({ googleUid: teacherId });
+    if (!user) return error(res, 'User not found.', 'NOT_FOUND', 404);
+
+    const customTypes = user.customQuestionTypes || [];
+    if (customTypes.length >= 10) {
+      return error(res, 'Strict limit reached. You can only create up to 10 custom question types.', 'LIMIT_REACHED', 400);
+    }
+
+    if (customTypes.some(t => t.toLowerCase() === name.toLowerCase())) {
+      return error(res, 'This custom question type already exists.', 'DUPLICATE', 400);
+    }
+
+    user.customQuestionTypes = customTypes;
+    user.customQuestionTypes.push(name);
+    await user.save();
+
+    await logActivity(teacherId, 'custom_type_added', 'Custom Type Created', `Added custom question type: "${name}"`, '#00E676');
+
+    return success(res, 'Custom question type added successfully', user.customQuestionTypes);
+  } catch (err) {
+    console.error('addCustomQuestionType error:', err);
+    return error(res, 'Failed to add custom type', 'SERVER_ERROR', 500);
+  }
+};
+
+const deleteCustomQuestionType = async (req, res) => {
+  try {
+    const teacherId = req.user.googleUid;
+    const { name } = req.params;
+
+    if (!name) return error(res, 'Name parameter is required.', 'INVALID_PARAMS', 400);
+
+    const User = require('../models/User').getUser();
+    const user = await User.findOne({ googleUid: teacherId });
+    if (!user) return error(res, 'User not found.', 'NOT_FOUND', 404);
+
+    const customTypes = user.customQuestionTypes || [];
+    const index = customTypes.findIndex(t => t.toLowerCase() === name.toLowerCase());
+
+    if (index === -1) {
+      return error(res, 'Custom question type not found.', 'NOT_FOUND', 404);
+    }
+
+    customTypes.splice(index, 1);
+    user.customQuestionTypes = customTypes;
+    await user.save();
+
+    await logActivity(teacherId, 'custom_type_deleted', 'Custom Type Deleted', `Removed custom question type: "${name}"`, '#ff4d4d');
+
+    return success(res, 'Custom question type deleted successfully', user.customQuestionTypes);
+  } catch (err) {
+    console.error('deleteCustomQuestionType error:', err);
+    return error(res, 'Failed to delete custom type', 'SERVER_ERROR', 500);
+  }
+};
+
 module.exports = {
   upload,
   getDashboard,
@@ -2011,5 +2055,8 @@ module.exports = {
   getDoubts,
   getDoubtMessages,
   replyToDoubt,
-  getActivity
+  getActivity,
+  getCustomQuestionTypes,
+  addCustomQuestionType,
+  deleteCustomQuestionType
 };

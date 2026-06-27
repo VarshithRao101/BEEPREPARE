@@ -18,6 +18,9 @@ router.delete('/subjects/:bankId',         ...guard, teacherHandlers.deleteSubje
 router.get('/chapters/:bankId',            ...guard, teacherHandlers.getChapters);
 router.post('/chapters/:bankId',           ...guard, teacherHandlers.addChapter);
 router.delete('/chapters/:bankId/:chapterId', ...guard, teacherHandlers.deleteChapter);
+router.get('/custom-question-types',          ...guard, teacherHandlers.getCustomQuestionTypes);
+router.post('/custom-question-types',         ...guard, teacherHandlers.addCustomQuestionType);
+router.delete('/custom-question-types/:name', ...guard, teacherHandlers.deleteCustomQuestionType);
 router.get('/questions',                   ...guard, teacherHandlers.getQuestions);
 router.post('/questions',                  ...guard, validateQuestion, teacherHandlers.addQuestion);
 router.delete('/questions/:id',            ...guard, teacherHandlers.deleteQuestion);

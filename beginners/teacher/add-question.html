@@ -268,7 +268,13 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div class="field-group">
-                        <label class="field-label">Complexity Type</label>
+                        <label class="field-label" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Complexity Type</span>
+                            <button onclick="createCustomType()" type="button" 
+                                    style="background: none; border: none; color: var(--primary); font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; padding: 0;">
+                                + Add Custom Type
+                            </button>
+                        </label>
                         <select class="glass-select" id="complexitySelect" onchange="toggleType(this.value)">
                             <option value="Very Short">Very Short</option>
                             <option value="Short">Short</option>
@@ -732,10 +738,77 @@
         if (!(await guardTeacher())) throw new Error('Unauthorized');
         BP.syncTeacherSignals();
 
+        // Load streak & custom question types on load
+        loadCustomTypes();
+
         if (subject && cls && chapterName) {
             const subTitle = document.querySelector('header p');
             subTitle.innerHTML = `${subject} (Class ${cls}) • <span style="color: var(--primary)">${chapterName}</span>`;
         }
+
+        async function loadCustomTypes() {
+            try {
+                const res = await apiCall('/teacher/custom-question-types');
+                if (res && res.success) {
+                    const customTypes = res.data;
+                    const select = document.getElementById('complexitySelect');
+                    customTypes.forEach(type => {
+                        if (!Array.from(select.options).some(o => o.value === type)) {
+                            const opt = document.createElement('option');
+                            opt.value = type;
+                            opt.textContent = type;
+                            select.appendChild(opt);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load custom question types:', err);
+            }
+        }
+
+        window.createCustomType = async function() {
+            const { value: typeName } = await Swal.fire({
+                title: 'New Question Type',
+                input: 'text',
+                inputLabel: 'Enter the heading/name of the custom question type',
+                inputPlaceholder: 'e.g., Short Answer MCQ, Assertion Reasoning',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                    if (!value) return 'You need to type a heading!';
+                    if (value.trim().length < 2 || value.trim().length > 50) return 'Must be between 2 and 50 characters.';
+                },
+                background: '#0a0a1a',
+                color: '#fff',
+                confirmButtonColor: '#FFD700'
+            });
+
+            if (typeName) {
+                Swal.fire({
+                    title: 'Creating Question Type...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); },
+                    background: '#0a0a1a', color: '#fff'
+                });
+
+                const res = await apiCall('/teacher/custom-question-types', 'POST', { name: typeName });
+                Swal.close();
+
+                if (res && res.success) {
+                    Swal.fire({ icon: 'success', title: 'Question Type Created', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, background: '#0a0a1a', color: '#fff' });
+                    
+                    // Reload select options
+                    const select = document.getElementById('complexitySelect');
+                    const opt = document.createElement('option');
+                    opt.value = typeName.trim();
+                    opt.textContent = typeName.trim();
+                    select.appendChild(opt);
+                    select.value = typeName.trim();
+                    toggleType(typeName.trim());
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Action Failed', text: res?.message || 'Could not create question type.', background: '#0a0a1a', color: '#fff' });
+                }
+            }
+        };
     </script>
 </body>
 </html>

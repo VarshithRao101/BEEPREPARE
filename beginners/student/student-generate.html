@@ -479,11 +479,13 @@
             { id: 'short', type: 'Short', marks: 2, count: 5 }
         ];
 
-        const QUESTION_TYPES = [
+        const STANDARD_QUESTION_TYPES = [
             'MCQ', 'Very Short', 'Short', 'Long', 'Essay', 
             'True or False', 'Fill in the Blanks', 'Simple Matching', 
             'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'
         ];
+
+        let QUESTION_TYPES = [...STANDARD_QUESTION_TYPES];
 
         let activeCustomIdx = -1;
         let tempCustomConfig = {};
@@ -582,10 +584,29 @@
 
         async function loadChapters(bankId) {
             if (!bankId) return;
+
+            // Reset to standard types first
+            QUESTION_TYPES = [...STANDARD_QUESTION_TYPES];
+
+            // Fetch custom types for this specific bank
+            try {
+                const customRes = await apiCall(`/student/banks/${bankId}/custom-question-types`);
+                if (customRes && customRes.success) {
+                    customRes.data.forEach(t => {
+                        if (!QUESTION_TYPES.includes(t)) {
+                            QUESTION_TYPES.push(t);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load custom question types:', err);
+            }
+
             const res = await apiCall(`/student/banks/${bankId}/chapters`);
             if (res.success) {
                 availableChapters = res.data.chapters;
                 renderChapters();
+                renderBlueprint();
             }
         }
 

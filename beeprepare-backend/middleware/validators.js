@@ -63,8 +63,18 @@ const validateQuestion = [
     .isLength({ min: 5, max: 5000 })
     .withMessage('Question 5-5000 chars'),
   body('questionType')
-    .isIn(['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'])
-    .withMessage('Invalid question type'),
+    .custom(async (value, { req }) => {
+      const standardTypes = ['MCQ', 'Very Short', 'Short', 'Long', 'Essay', 'True or False', 'Fill in the Blanks', 'Simple Matching', 'Matrix Matching', 'Reading Passage', 'Case Study', 'Data Interpretation'];
+      if (standardTypes.includes(value)) {
+        return true;
+      }
+      const User = require('../models/User').getUser();
+      const user = await User.findOne({ googleUid: req.user.googleUid }).lean();
+      if (user && user.customQuestionTypes && user.customQuestionTypes.includes(value)) {
+        return true;
+      }
+      throw new Error('Invalid question type');
+    }),
   body('marks')
     .isInt({ min: 1, max: 10 })
     .withMessage('Marks must be 1-10'),

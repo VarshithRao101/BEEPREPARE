@@ -1146,7 +1146,23 @@
             }
 
             appState.isActiveUser = (appState.planType === 'active');
-            activeChapters = appState.chapters || {};
+
+            // ── BUG FIX: Build activeChapters from real Bank data, not legacy User-doc string map ──
+            // appState.chapters is a legacy object-map of plain strings on the User document.
+            // appState.ownBanks contains the real chapter objects from Bank documents in DB.
+            // Using ownBanks ensures we send accurate chapter data in saveAndClose() and
+            // prevents profile save from silently overwriting chapters.
+            activeChapters = {};
+            if (appState.ownBanks && appState.ownBanks.length > 0) {
+                appState.ownBanks.forEach(bank => {
+                    const normalizedClass = bank.class.startsWith('Class ') ? bank.class : 'Class ' + bank.class;
+                    const key = `${normalizedClass}-${bank.subject}`;
+                    activeChapters[key] = (bank.chapters || []).map(ch => ch.chapterName || ch);
+                });
+            } else {
+                // Fallback: use legacy chapters map if ownBanks not yet populated
+                activeChapters = appState.chapters || {};
+            }
 
             const editModal = document.getElementById('editProfileModal');
             editModal.style.display = 'flex';
@@ -1180,11 +1196,31 @@
                 const subjectsArray = Array.isArray(appState.subjects) ? appState.subjects : Object.values(appState.subjects || {});
                 const classesArray = Array.isArray(appState.classes) ? appState.classes : Object.values(appState.classes || {});
 
+                // ── BUG FIX: Rebuild activeChapters from real Bank data before saving ──
+                // This ensures we never send a stale/empty chapter map that would
+                // overwrite chapters already stored in Bank documents via the chapter API.
+                const chaptersToSend = {};
+                if (appState.ownBanks && appState.ownBanks.length > 0) {
+                    appState.ownBanks.forEach(bank => {
+                        const normalizedClass = bank.class.startsWith('Class ') ? bank.class : 'Class ' + bank.class;
+                        const key = `${normalizedClass}-${bank.subject}`;
+                        // Merge: prefer current activeChapters (may have unsaved new additions)
+                        // but fall back to bank chapters if no in-memory data exists
+                        if (activeChapters[key] && activeChapters[key].length > 0) {
+                            chaptersToSend[key] = activeChapters[key];
+                        } else if (bank.chapters && bank.chapters.length > 0) {
+                            chaptersToSend[key] = bank.chapters.map(ch => ch.chapterName || ch);
+                        }
+                    });
+                } else {
+                    Object.assign(chaptersToSend, activeChapters);
+                }
+
                 const res = await apiCall('/teacher/profile', 'PUT', {
                     displayName: name,
                     classes: classesArray,
                     subjects: subjectsArray,
-                    chapters: activeChapters
+                    chapters: chaptersToSend
                 });
 
                 if (res && res.success) {
@@ -1650,7 +1686,17 @@
 
                 if (bank) {
                     const res = await apiCall(`/teacher/chapters/${bank.bankId}/${chapterId}`, 'DELETE');
-                    if (res && res.success) loadChapters();
+                    if (res && res.success) {
+                        // ── Sync appState.ownBanks so saveAndClose() sends accurate data ──
+                        if (appState.ownBanks) {
+                            const ownBank = appState.ownBanks.find(b => b.bankId === bank.bankId);
+                            if (ownBank) {
+                                ownBank.chapters = (ownBank.chapters || []).filter(ch => ch.chapterId !== chapterId);
+                            }
+                        }
+                        activeChapters[key] = (activeChapters[key] || []).filter(c => c !== name);
+                        loadChapters();
+                    }
                 } else {
                     activeChapters[key] = (activeChapters[key] || []).filter(c => c !== name);
                     loadChapters();
@@ -1674,6 +1720,13 @@
                 const res = await apiCall(`/teacher/chapters/${bank.bankId}`, 'POST', { chapterName: name });
                 if (res && res.success) {
                     nameInput.value = '';
+                    // ── Sync appState.ownBanks so saveAndClose() sends accurate data ──
+                    if (appState.ownBanks) {
+                        const ownBank = appState.ownBanks.find(b => b.bankId === bank.bankId);
+                        if (ownBank) ownBank.chapters = res.data.chapters;
+                    }
+                    // Also sync activeChapters so key is up to date
+                    activeChapters[key] = res.data.chapters.map(ch => ch.chapterName);
                     loadChapters();
                 } else {
                     Swal.fire({ icon: 'error', title: res.message || 'Add Failed', background: '#111', color: '#fff' });

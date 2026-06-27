@@ -45,7 +45,8 @@ const validateUpload = (req, res, next) => {
   const dangerousExtensions = [
     '.exe', '.sh', '.bat', '.cmd',
     '.ps1', '.vbs', '.js', '.php',
-    '.py', '.rb', '.pl'
+    '.py', '.rb', '.pl', '.zip',
+    '.rar', '.tar', '.gz', '.7z'
   ];
   if (dangerousExtensions.some(e => name.includes(e))) {
     return error(res,

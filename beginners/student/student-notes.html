@@ -264,6 +264,13 @@
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg></button>
                     <h2 class="welcome-title">Material & Note Vault</h2>
+                    <button id="ask-doubt-btn" class="btn-adv" onclick="window.goToDoubts()"
+                        style="padding: 0 15px; height: 40px; border-color: var(--primary); color: var(--primary); background: rgba(255,215,0,0.05); font-size: 11px; font-weight: 900; border-radius: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.3s; margin-left: 10px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        ASK DOUBT TO TEACHER
+                    </button>
                 </div>
                 <div style="display: flex; gap: 20px; align-items: center;">
                     <div id="streak-fire-container" style="display: flex; align-items: center; gap: 8px; background: rgba(255, 69, 0, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255, 69, 0, 0.2); cursor: default;" title="Learning Streak">
@@ -385,7 +392,9 @@
                     renderTabs(activeBanks);
 
                     if (activeBanks.length > 0) {
-                        selectBank(activeBanks[0]._id);
+                        const savedBankId = localStorage.getItem('bp_current_bank_id');
+                        const bankToSelect = activeBanks.find(b => b.bankId === savedBankId) ? savedBankId : activeBanks[0].bankId;
+                        selectBank(bankToSelect);
                     } else {
                         nodesContainer.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No active banks found.</div>';
                     }
@@ -397,14 +406,15 @@
 
         function renderTabs(banks) {
             tabsContainer.innerHTML = banks.map(bank => `
-                <div class="vault-tab" data-id="${bank._id}" onclick="selectBank('${bank._id}')">
-                    ${bank.subjectName || bank.name}
+                <div class="vault-tab" data-id="${bank.bankId}" onclick="selectBank('${bank.bankId}')">
+                    ${bank.subject} Hub
                 </div>
             `).join('');
         }
 
         window.selectBank = async function (bankId) {
             activeBankId = bankId;
+            localStorage.setItem('bp_current_bank_id', bankId);
 
             // UI Update
             document.querySelectorAll('.vault-tab').forEach(t => {
@@ -412,6 +422,15 @@
             });
 
             await loadNotes(bankId);
+        };
+
+        window.goToDoubts = function() {
+            if (activeBankId) {
+                localStorage.setItem('bp_current_bank_id', activeBankId);
+                window.location.href = 'student-doubts.html';
+            } else {
+                Swal.fire({ icon: 'warning', title: 'No Bank Selected', text: 'Please select a matrix hub first.', background: '#0a0a1a', color: '#fff' });
+            }
         };
 
         async function loadNotes(bankId, chapterId = '') {

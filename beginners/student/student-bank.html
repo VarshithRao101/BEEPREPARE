@@ -538,19 +538,17 @@
                     </div>
                     ${bank.status === 'approved' ? `<button class="auth-btn" style="width:100%; margin-top:15px; padding:10px; font-size:10px;">UNLOCK NOW</button>` : ''}
                 `;
-
                 card.onclick = () => {
                     if (bank.status === 'active') {
                         localStorage.setItem('bp_current_bank_id', bank.bankId);
-                        openBank(bank.subject + ' Matrix');
+                        window.location.href = 'student-notes.html';
                     } else if (bank.status === 'approved') {
                         localStorage.setItem('bp_otp_request_id', bank.requestId);
                         window.location.href = 'student-bank-auth.html';
                     } else {
                         Swal.fire({ icon: 'info', title: 'Node Restricted', text: 'Waiting for teacher authorization.', background: '#0a0a1a', color: '#fff' });
                     }
-                };
-                grid.appendChild(card);
+                };                grid.appendChild(card);
             });
         }
 

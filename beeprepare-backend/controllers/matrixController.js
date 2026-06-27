@@ -76,7 +76,7 @@ const sendToWorker = (type, payload) => {
 
 const syncQuestions = async () => {
     try {
-        const Question = getQuestionsConn().model('Question');
+        const Question = require('../models/Question');
         const Bank = require('../models/Bank');
         const banks = await Bank.find({}).lean();
         
@@ -128,7 +128,8 @@ const bootMatrixEngine = async () => {
         let retries = 0;
         while (retries < 10) {
             try {
-                Question = getQuestionsConn().model('Question');
+                await connectDB();
+                Question = require('../models/Question');
                 if (Question) break;
             } catch (e) {
                 retries++;
@@ -184,12 +185,12 @@ const generatePaperCtrl = async (req, res) => {
     // Fetch full docs if not already provided by JS fallback
     let fullQuestions = result.questions;
     if (!fullQuestions) {
-       const Question = getQuestionsConn().model('Question');
+       const Question = require('../models/Question');
        fullQuestions = await Question.find({ numericId: { $in: result.questionIds } }).lean();
     }
 
     // Mark questions as lastUsed (fire and forget)
-    const Question = getQuestionsConn().model('Question');
+    const Question = require('../models/Question');
     Question.updateMany(
       { _id: { $in: fullQuestions.map(q => q._id) } },
       { $set: { lastUsed: new Date() } }
