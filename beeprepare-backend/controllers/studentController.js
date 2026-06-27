@@ -1468,32 +1468,6 @@ const updateStreakActivity = async (req, res) => {
   }
 };
 
-module.exports = {
-  getDashboard,
-  getProfile,
-  updateProfile,
-  searchBank,
-  requestAccess,
-  getMyBanks,
-  deleteBank,
-  verifyOTP,
-  getBankChapters,
-  getNotes,
-  generateTest,
-  submitTest,
-  getTestHistory,
-  getDoubts,
-  submitDoubt,
-  getDoubtMessages,
-  sendDoubtMessage,
-  getBookmarks,
-  addBookmark,
-  deleteBookmark,
-  getStreak,
-  updateStreakActivity,
-  getBankCustomQuestionTypes
-};
-
 // ══════════════════════════════════════════════════════════════════════════════
 // 10. GET /api/student/banks/:bankId/custom-question-types
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1520,3 +1494,30 @@ const getBankCustomQuestionTypes = async (req, res) => {
     return error(res, 'Failed to fetch custom types', 'SERVER_ERROR', 500);
   }
 };
+
+module.exports = {
+  getDashboard,
+  getProfile,
+  updateProfile,
+  searchBank,
+  requestAccess,
+  getMyBanks,
+  deleteBank,
+  verifyOTP,
+  getBankChapters,
+  getNotes,
+  generateTest,
+  submitTest,
+  getTestHistory,
+  getDoubts,
+  submitDoubt,
+  getDoubtMessages,
+  sendDoubtMessage,
+  getBookmarks,
+  addBookmark,
+  deleteBookmark,
+  getStreak,
+  updateStreakActivity,
+  getBankCustomQuestionTypes
+};
+

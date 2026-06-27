@@ -1682,6 +1682,10 @@
             if (confirm.isConfirmed) {
                 const [cls, sub] = key.split('-');
                 const dashboardRes = await apiCall('/teacher/dashboard');
+                if (!dashboardRes || !dashboardRes.success || !dashboardRes.data) {
+                    Swal.fire({ icon: 'error', title: 'Sync Failed', text: 'Could not fetch dashboard data. Please try again.', background: '#1a1a2e', color: '#fff' });
+                    return;
+                }
                 const bank = dashboardRes.data.subjects.find(b => b.subject === sub && b.class.includes(cls));
 
                 if (bank) {
@@ -1714,6 +1718,10 @@
 
             const [cls, sub] = key.split('-');
             const dashboardRes = await apiCall('/teacher/dashboard');
+            if (!dashboardRes || !dashboardRes.success || !dashboardRes.data) {
+                Swal.fire({ icon: 'error', title: 'Sync Failed', text: 'Could not fetch dashboard data. Please try again.', background: '#1a1a2e', color: '#fff' });
+                return;
+            }
             const bank = dashboardRes.data.subjects.find(b => b.subject === sub && b.class.includes(cls));
 
             if (bank) {
