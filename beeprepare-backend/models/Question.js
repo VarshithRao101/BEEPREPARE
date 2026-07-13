@@ -19,7 +19,7 @@ const questionSchema = new Schema({
   questionType: { type: String, required: true, index: true },
 
   // ── Question Content ────────────────────────────────────────────────────
-  questionText:  { type: String, required: true, minlength: 10, maxlength: 5000 },
+  questionText:  { type: String, required: true, minlength: 5, maxlength: 5000 },
   imageUrl:      { type: String }, // For diagram uploads
   imagePublicId: { type: String }, // For Cloudinary persistent storage
   marks:         { type: Number, required: true },
@@ -120,8 +120,11 @@ const getQuestion = () => {
 };
 
 // Proxy so existing `require('../models/Question')` still works as a Model
-module.exports = new Proxy(function() {}, {
-  get(_, prop) {
+const proxy = new Proxy(function() {}, {
+  get(target, prop) {
+    if (prop === 'getQuestion') {
+      return getQuestion;
+    }
     return getQuestion()[prop];
   },
   construct(_, args) {
@@ -129,5 +132,6 @@ module.exports = new Proxy(function() {}, {
   }
 });
 
+module.exports = proxy;
 // Also export the getter directly for explicit use
 module.exports.getQuestion = getQuestion;

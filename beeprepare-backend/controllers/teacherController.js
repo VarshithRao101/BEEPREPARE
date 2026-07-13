@@ -245,8 +245,8 @@ const updateProfile = async (req, res) => {
         console.warn(`[updateProfile] Invalid subjects format from user ${teacherId}:`, subjects);
         return error(res, 'Subjects must be an array', 'INVALID_SUBJECTS', 400);
       }
-      if (subjectsArray.length > (req.user.subjectLimit || 1)) {
-        return error(res, `Subject limit reached (${req.user.subjectLimit || 1}). ✨ Activate your account to manage more subjects and expand your academic reach!`, 'LIMIT_EXCEEDED', 403);
+      if (subjectsArray.length > 1) {
+        return error(res, 'Subject limit reached (1). Complete universal limit is 1.', 'LIMIT_EXCEEDED', 403);
       }
       const validSubjects = ['Physics', 'Chemistry', 'Mathematics', 'Maths', 'Biology', 'English', 'Telugu', 'Hindi', 'Social', 'Social Studies', 'Science', 'EVS', 'Computer', 'History', 'Geography'];
       if (!subjectsArray.every(s => validSubjects.includes(s))) {
@@ -262,6 +262,9 @@ const updateProfile = async (req, res) => {
       }
       if (!Array.isArray(classesArray)) {
         return error(res, 'Classes must be an array', 'INVALID_CLASSES', 400);
+      }
+      if (classesArray.length > 1) {
+        return error(res, 'Class limit reached (1). Complete universal limit is 1.', 'LIMIT_EXCEEDED', 403);
       }
       const validClasses = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
       if (!classesArray.every(c => validClasses.includes(c))) {
@@ -502,8 +505,8 @@ const addSubject = async (req, res) => {
       const existingBanks = await Bank.find({ teacherId });
       const uniqueUsed = [...new Set(existingBanks.map(b => b.subject))];
       
-      if (!uniqueUsed.includes(subject) && uniqueUsed.length >= (req.user.subjectLimit || 1)) {
-        return error(res, `Subject limit reached (${req.user.subjectLimit || 1}). ✨ Activate your account to create more subject banks and connect with more students!`, 'LIMIT_EXCEEDED', 403);
+      if (!uniqueUsed.includes(subject) && uniqueUsed.length >= 1) {
+        return error(res, `Subject limit reached (1). Complete universal limit is 1.`, 'LIMIT_EXCEEDED', 403);
       }
     }
 
@@ -709,6 +712,20 @@ const addChapter = async (req, res) => {
     bank.chapters.push(newChapter);
     await bank.save();
 
+    // Keep User profile in sync
+    const normalizedClass = bank.class.startsWith('Class ') ? bank.class : `Class ${bank.class}`;
+    const chapterKey = `${normalizedClass}-${bank.subject}`;
+    const userDoc = await User.findOne({ googleUid: teacherId }).lean();
+    if (userDoc) {
+      const currentList = userDoc.chapters?.[chapterKey] || [];
+      if (!currentList.includes(chapterName.trim())) {
+        const updatedList = [...currentList, chapterName.trim()];
+        const userUpdates = {};
+        userUpdates[`chapters.${chapterKey}`] = updatedList;
+        await User.updateOne({ googleUid: teacherId }, { $set: userUpdates });
+      }
+    }
+
     return success(res, 'Chapter added successfully', {
       chapters: bank.chapters.sort((a, b) => a.order - b.order)
     }, 201);
@@ -824,6 +841,7 @@ const deleteChapter = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getQuestions = async (req, res) => {
   try {
+    await connectDB();
     const { bankId, chapterId, type, difficulty, page = 1, limit = 20 } = req.query;
     const teacherId = req.user.googleUid;
 
@@ -862,6 +880,7 @@ const getQuestions = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const addQuestion = async (req, res) => {
   try {
+    await connectDB();
     const {
       bankId, chapterId, chapterName,
       questionText, questionType, marks,
@@ -1071,6 +1090,7 @@ const deleteQuestion = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const generatePaper = async (req, res) => {
   try {
+    await connectDB();
     let { bankId, selectedChapters, blueprint, layout } = req.body;
     const teacherId = req.user.googleUid;
     const paperId = crypto.randomUUID();
@@ -1399,6 +1419,7 @@ const generatePaper = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const getNotes = async (req, res) => {
   try {
+    await connectDB();
     const { bankId } = req.params;
     const teacherId = req.user.googleUid;
 
@@ -1447,6 +1468,7 @@ const getNotes = async (req, res) => {
 const uploadNote = async (req, res) => {
   let tempFilePath = null;
   try {
+    await connectDB();
     const { bankId, chapterId, chapterName, noteType } = req.body;
     const teacherId = req.user.googleUid;
 
@@ -1536,6 +1558,7 @@ const uploadNote = async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 const deleteNote = async (req, res) => {
   try {
+    await connectDB();
     const { id } = req.params;
     const teacherId = req.user.googleUid;
 
@@ -1914,6 +1937,7 @@ const https = require('https');
 
 const downloadNote = async (req, res) => {
   try {
+    await connectDB();
     const { id } = req.params;
     const teacherId = req.user.googleUid;
 

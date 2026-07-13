@@ -68,6 +68,7 @@ const validateQuestion = [
       if (standardTypes.includes(value)) {
         return true;
       }
+      await require('../config/db').connectDB();
       const User = require('../models/User').getUser();
       const user = await User.findOne({ googleUid: req.user.googleUid }).lean();
       if (user && user.customQuestionTypes && user.customQuestionTypes.includes(value)) {

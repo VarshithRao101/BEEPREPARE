@@ -27,8 +27,12 @@ bankSchema.index({ teacherId: 1, subject: 1, class: 1 }, { unique: true });
 bankSchema.index({ approvedStudents: 1 });
 
 let _Bank = null;
-module.exports = new Proxy(function() {}, {
-  get(_, prop) {
+const proxy = new Proxy(function() {}, {
+  get(target, prop) {
+    if (prop === 'getBank') {
+      if (!_Bank) _Bank = getMainConn().model('Bank', bankSchema);
+      return () => _Bank;
+    }
     if (!_Bank) _Bank = getMainConn().model('Bank', bankSchema);
     return _Bank[prop];
   },
@@ -38,6 +42,7 @@ module.exports = new Proxy(function() {}, {
   }
 });
 
+module.exports = proxy;
 module.exports.getBank = () => {
   if (!_Bank) _Bank = getMainConn().model('Bank', bankSchema);
   return _Bank;

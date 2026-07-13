@@ -59,8 +59,12 @@ userSchema.index({ role: 1 });
 userSchema.index({ createdAt: -1 });
 
 let _User = null;
-module.exports = new Proxy(function() {}, {
-  get(_, prop) {
+const proxy = new Proxy(function() {}, {
+  get(target, prop) {
+    if (prop === 'getUser') {
+      if (!_User) _User = getMainConn().model('User', userSchema);
+      return () => _User;
+    }
     if (!_User) _User = getMainConn().model('User', userSchema);
     return _User[prop];
   },
@@ -70,6 +74,7 @@ module.exports = new Proxy(function() {}, {
   }
 });
 
+module.exports = proxy;
 module.exports.getUser = () => {
   if (!_User) _User = getMainConn().model('User', userSchema);
   return _User;

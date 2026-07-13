@@ -576,29 +576,29 @@ const startApp = async () => {
         } catch (chatErr) {
             console.warn('[Clean Up] Failed to purge legacy AI chats:', chatErr.message);
         }
+
+        // Start automated 70-hour background cleanup
+        const { run70HourCleanup } = require('./utils/cleanupService');
+        run70HourCleanup();
+        setInterval(run70HourCleanup, 60 * 60 * 1000); // Check every hour
+
+        // Start Daily Leaderboard Sync (Runs on cold-starts/boot)
+        const { generateSnapshots } = require('./controllers/leaderboardController');
+        const LeaderboardSnapshot = require('./models/LeaderboardSnapshot');
+        
+        LeaderboardSnapshot.findOne().sort({ lastUpdated: -1 }).then(lastSnapshot => {
+            const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+            if (!lastSnapshot || (new Date() - new Date(lastSnapshot.lastUpdated)) > TWENTY_FOUR_HOURS) {
+                console.log('[Leaderboard] Initiating 24h Snapshot Sync...');
+                generateSnapshots();
+            } else {
+                console.log('[Leaderboard] Snapshot is fresh. Next sync in ' + 
+                    Math.round((TWENTY_FOUR_HOURS - (new Date() - new Date(lastSnapshot.lastUpdated))) / 3600000) + 'h');
+            }
+        }).catch(err => console.error('[Leaderboard] Boot Sync Error:', err));
     }).catch(err => {
         logger.error('DB CONNECTION DELAYED OR FAILED:', err);
     });
-
-    // Start automated 70-hour background cleanup
-    const { run70HourCleanup } = require('./utils/cleanupService');
-    run70HourCleanup();
-    setInterval(run70HourCleanup, 60 * 60 * 1000); // Check every hour
-
-    // Start Daily Leaderboard Sync (Runs on cold-starts/boot)
-    const { generateSnapshots } = require('./controllers/leaderboardController');
-    const LeaderboardSnapshot = require('./models/LeaderboardSnapshot');
-    
-    LeaderboardSnapshot.findOne().sort({ lastUpdated: -1 }).then(lastSnapshot => {
-        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-        if (!lastSnapshot || (new Date() - new Date(lastSnapshot.lastUpdated)) > TWENTY_FOUR_HOURS) {
-            console.log('[Leaderboard] Initiating 24h Snapshot Sync...');
-            generateSnapshots();
-        } else {
-            console.log('[Leaderboard] Snapshot is fresh. Next sync in ' + 
-                Math.round((TWENTY_FOUR_HOURS - (new Date() - new Date(lastSnapshot.lastUpdated))) / 3600000) + 'h');
-        }
-    }).catch(err => console.error('[Leaderboard] Boot Sync Error:', err));
 
     if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
         const server = app.listen(PORT, () => {

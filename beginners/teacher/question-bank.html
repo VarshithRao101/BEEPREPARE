@@ -425,6 +425,27 @@
             });
 
             if (confirm.isConfirmed) {
+                // OPTIMISTIC UPDATE: Save current DOM states for rollback
+                const select = document.getElementById('chapter-select');
+                const inventoryList = document.getElementById('chapter-inventory-list');
+                const originalSelectHtml = select.innerHTML;
+                const originalInventoryHtml = inventoryList.innerHTML;
+
+                // Optimistically remove from dropdown selection
+                const optToRemove = select.querySelector(`option[value="${chapterId}"]`);
+                if (optToRemove) optToRemove.remove();
+                if (select.options.length <= 1) {
+                    select.innerHTML = '<option value="">No chapters yet — add in Edit Profile</option>';
+                }
+
+                // Optimistically remove from inventory list
+                const items = Array.from(inventoryList.querySelectorAll('.chapter-inventory-item'));
+                const itemToRemove = items.find(item => item.innerHTML.includes(`deleteChapter('${chapterId}'`));
+                if (itemToRemove) itemToRemove.remove();
+                if (!inventoryList.children.length) {
+                    inventoryList.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No chapters found.</div>';
+                }
+
                 const res = await apiCall(`/teacher/chapters/${selectedBankId}/${chapterId}`, 'DELETE');
                 if (res && res.success) {
                     Swal.fire({ 
@@ -435,13 +456,24 @@
                         toast: true, position: 'top-end'
                     });
                     
-                    // Refresh the selected bank manually
+                    // Refresh the selected bank in the background
                     const resBank = await apiCall(`/teacher/dashboard`);
                     if (resBank && resBank.success) {
                         allBanks = resBank.data.subjects;
                         const updatedBank = allBanks.find(b => b.bankId === selectedBankId);
                         if (updatedBank) selectBank(updatedBank);
                     }
+                } else {
+                    // Rollback on failure
+                    select.innerHTML = originalSelectHtml;
+                    inventoryList.innerHTML = originalInventoryHtml;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Delete Failed',
+                        text: res?.message || 'Could not delete the chapter from server. Reverting changes.',
+                        background: '#080808',
+                        color: '#fff'
+                    });
                 }
             }
         };

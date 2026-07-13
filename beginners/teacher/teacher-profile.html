@@ -1681,29 +1681,44 @@
 
             if (confirm.isConfirmed) {
                 const [cls, sub] = key.split('-');
-                const dashboardRes = await apiCall('/teacher/dashboard');
-                if (!dashboardRes || !dashboardRes.success || !dashboardRes.data) {
-                    Swal.fire({ icon: 'error', title: 'Sync Failed', text: 'Could not fetch dashboard data. Please try again.', background: '#1a1a2e', color: '#fff' });
-                    return;
-                }
-                const bank = dashboardRes.data.subjects.find(b => b.subject === sub && b.class.includes(cls));
+                
+                // OPTIMISTIC UPDATE: Save current state and filter chapter instantly
+                const previousChapters = [...(activeChapters[key] || [])];
+                activeChapters[key] = (activeChapters[key] || []).filter(c => c !== name);
+                loadChapters();
 
-                if (bank) {
-                    const res = await apiCall(`/teacher/chapters/${bank.bankId}/${chapterId}`, 'DELETE');
-                    if (res && res.success) {
-                        // ── Sync appState.ownBanks so saveAndClose() sends accurate data ──
-                        if (appState.ownBanks) {
-                            const ownBank = appState.ownBanks.find(b => b.bankId === bank.bankId);
-                            if (ownBank) {
-                                ownBank.chapters = (ownBank.chapters || []).filter(ch => ch.chapterId !== chapterId);
+                const dashboardRes = await apiCall('/teacher/dashboard');
+                if (dashboardRes && dashboardRes.success && dashboardRes.data) {
+                    const bank = dashboardRes.data.subjects.find(b => b.subject === sub && b.class.includes(cls));
+
+                    if (bank) {
+                        const res = await apiCall(`/teacher/chapters/${bank.bankId}/${chapterId}`, 'DELETE');
+                        if (res && res.success) {
+                            // ── Sync appState.ownBanks so saveAndClose() sends accurate data ──
+                            if (appState.ownBanks) {
+                                const ownBank = appState.ownBanks.find(b => b.bankId === bank.bankId);
+                                if (ownBank) {
+                                    ownBank.chapters = (ownBank.chapters || []).filter(ch => ch.chapterId !== chapterId);
+                                }
                             }
+                        } else {
+                            // Rollback on failure
+                            activeChapters[key] = previousChapters;
+                            loadChapters();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Delete Failed',
+                                text: (res && res.message) || 'Failed to remove chapter from backend. Reverting changes.',
+                                background: '#111',
+                                color: '#fff'
+                            });
                         }
-                        activeChapters[key] = (activeChapters[key] || []).filter(c => c !== name);
-                        loadChapters();
                     }
                 } else {
-                    activeChapters[key] = (activeChapters[key] || []).filter(c => c !== name);
+                    // Rollback on failure
+                    activeChapters[key] = previousChapters;
                     loadChapters();
+                    Swal.fire({ icon: 'error', title: 'Sync Failed', text: 'Could not fetch dashboard data. Reverting deletion.', background: '#1a1a2e', color: '#fff' });
                 }
             }
         };
@@ -1717,9 +1732,20 @@
             if (!key || key === 'Select Class/Subject first') return;
 
             const [cls, sub] = key.split('-');
+            
+            // OPTIMISTIC UPDATE: Save current state and add chapter instantly
+            const previousChapters = [...(activeChapters[key] || [])];
+            activeChapters[key] = activeChapters[key] || [];
+            activeChapters[key].push(name);
+            nameInput.value = '';
+            loadChapters();
+
             const dashboardRes = await apiCall('/teacher/dashboard');
             if (!dashboardRes || !dashboardRes.success || !dashboardRes.data) {
-                Swal.fire({ icon: 'error', title: 'Sync Failed', text: 'Could not fetch dashboard data. Please try again.', background: '#1a1a2e', color: '#fff' });
+                // Rollback if dashboard sync fails
+                activeChapters[key] = previousChapters;
+                loadChapters();
+                Swal.fire({ icon: 'error', title: 'Sync Failed', text: 'Could not fetch dashboard data. Reverting chapter addition.', background: '#1a1a2e', color: '#fff' });
                 return;
             }
             const bank = dashboardRes.data.subjects.find(b => b.subject === sub && b.class.includes(cls));
@@ -1727,23 +1753,28 @@
             if (bank) {
                 const res = await apiCall(`/teacher/chapters/${bank.bankId}`, 'POST', { chapterName: name });
                 if (res && res.success) {
-                    nameInput.value = '';
                     // ── Sync appState.ownBanks so saveAndClose() sends accurate data ──
                     if (appState.ownBanks) {
                         const ownBank = appState.ownBanks.find(b => b.bankId === bank.bankId);
                         if (ownBank) ownBank.chapters = res.data.chapters;
                     }
-                    // Also sync activeChapters so key is up to date
+                    // Also sync activeChapters with final server response containing generated IDs
                     activeChapters[key] = res.data.chapters.map(ch => ch.chapterName);
                     loadChapters();
                 } else {
-                    Swal.fire({ icon: 'error', title: res.message || 'Add Failed', background: '#111', color: '#fff' });
+                    // Rollback on failure
+                    activeChapters[key] = previousChapters;
+                    loadChapters();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Add Failed',
+                        text: (res && res.message) || 'Failed to add chapter to server. Reverting changes.',
+                        background: '#111',
+                        color: '#fff'
+                    });
                 }
             } else {
-                activeChapters[key] = activeChapters[key] || [];
-                activeChapters[key].push(name);
-                nameInput.value = '';
-                loadChapters();
+                // No bank registered yet, client-only tracking (chaptersToSend will create it on save)
             }
         };
 

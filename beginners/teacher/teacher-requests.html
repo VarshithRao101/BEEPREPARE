@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -479,14 +479,36 @@
             });
 
             if (confirm.isConfirmed) {
+                const card = document.getElementById(`req-${requestId}`);
+                let previousDisplay = '';
+                
+                // OPTIMISTIC UPDATE: Animate and hide immediately
+                if (card) {
+                    previousDisplay = card.style.display;
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        if (card.style.opacity === '0') card.style.display = 'none';
+                    }, 500);
+                }
+
                 const result = await apiCall(`/teacher/requests/${requestId}/reject`, 'POST');
                 if (result && result.success) {
-                    const card = document.getElementById(`req-${requestId}`);
+                    if (card) card.remove();
+                } else {
+                    // Rollback on failure
                     if (card) {
-                        card.style.opacity = '0';
-                        card.style.transform = 'scale(0.9)';
-                        setTimeout(() => card.remove(), 1000);
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                        card.style.display = previousDisplay;
                     }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ACTION FAILED',
+                        text: result?.message || 'Could not reject request. Reverting changes.',
+                        background: '#0a0a1a',
+                        color: '#fff'
+                    });
                 }
             }
         };

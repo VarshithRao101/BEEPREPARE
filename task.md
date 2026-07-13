@@ -1,0 +1,32 @@
+# Task List - Resolve Critical Bugs & Verification Phases
+
+- [x] Modify `teacher-profile.html` (Strict 1 limit & chapter sync fix)
+- [x] Modify `teacherController.js` (Strict backend limits, sync added chapters, warm up DB connections)
+- [x] Modify `validators.js` (Warm up DB connections)
+- [x] Modify `models/Question.js` (Align questionText min length)
+- [x] Fix Server Connection Race Conditions in `server.js`
+- [x] Implement Optimistic UI Updates:
+  - [x] Chapters Add/Remove in Teacher Profile
+  - [x] Custom Question Type Dropdown appending
+  - [x] Chapter Purging from Question Bank catalog
+  - [x] Authorization Rejection in Student Requests
+- [x] Phase 1: Teacher Profile Setup & Profile Synchronization (Verified)
+- [x] Phase 2: Question Management & Bank Population (Verified)
+- [x] Phase 3: Paper Generation & 70/30 Distribution (Verified)
+- [x] Phase 4: Vault Notes & PDF Upload/Retrieve (Verified)
+- [x] Phase 5: Student Profile Setup & Dashboard Search (Verified)
+- [x] Phase 6: Student Access Request & Teacher Approval (Verified)
+- [x] Phase 7: Student Syllabus Vault Sync (Verified)
+- [x] Phase 8: Practice Engine Test Session Init (Verified)
+- [x] Phase 9: Practice Test Session Submit & Auto-Grading (Verified)
+- [x] Phase 10: Performance Snapshot & History (Verified)
+- [x] Phase 11: Student Doubts & Teacher Resolution (Verified)
+- [x] Phase 12: Student Bookmarks & Streak Tracking (Verified)
+- [x] Phase 13: Teacher Activity Audit Logs (Verified)
+- [x] Phase 14: Upload Security & File Validation Middleware (Verified)
+- [x] Phase 15: Rate Limiting & Speed Limiting Middleware (Verified)
+- [x] Phase 16: User License Verification & Activation (Verified)
+- [x] Phase 17: Academic AI & Support Bot (Verified)
+- [x] Phase 18: Payment Submission & UTR Validation (Verified)
+- [x] Phase 19: Study Circles (Verified)
+- [x] Phase 20: Leaderboards & Snapshots (Verified)

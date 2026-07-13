@@ -783,29 +783,41 @@
             });
 
             if (typeName) {
-                Swal.fire({
-                    title: 'Creating Question Type...',
-                    allowOutsideClick: false,
-                    didOpen: () => { Swal.showLoading(); },
-                    background: '#0a0a1a', color: '#fff'
-                });
+                const cleanedName = typeName.trim();
+                const select = document.getElementById('complexitySelect');
+                
+                // Save original value to support rollback
+                const originalValue = select.value;
+                
+                // OPTIMISTIC UPDATE: Add option to dropdown and select it instantly
+                const opt = document.createElement('option');
+                opt.value = cleanedName;
+                opt.textContent = cleanedName;
+                opt.dataset.optimistic = "true"; // Mark it as optimistic
+                select.appendChild(opt);
+                select.value = cleanedName;
+                toggleType(cleanedName);
 
-                const res = await apiCall('/teacher/custom-question-types', 'POST', { name: typeName });
-                Swal.close();
+                // Perform the backend sync in the background
+                const res = await apiCall('/teacher/custom-question-types', 'POST', { name: cleanedName });
 
                 if (res && res.success) {
+                    // Success: remove optimistic flag and show success toast
+                    delete opt.dataset.optimistic;
                     Swal.fire({ icon: 'success', title: 'Question Type Created', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, background: '#0a0a1a', color: '#fff' });
-                    
-                    // Reload select options
-                    const select = document.getElementById('complexitySelect');
-                    const opt = document.createElement('option');
-                    opt.value = typeName.trim();
-                    opt.textContent = typeName.trim();
-                    select.appendChild(opt);
-                    select.value = typeName.trim();
-                    toggleType(typeName.trim());
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Action Failed', text: res?.message || 'Could not create question type.', background: '#0a0a1a', color: '#fff' });
+                    // Rollback: Remove the appended option and restore select value
+                    opt.remove();
+                    select.value = originalValue;
+                    toggleType(originalValue);
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Action Failed',
+                        text: res?.message || 'Could not create question type. Reverting changes.',
+                        background: '#0a0a1a',
+                        color: '#fff'
+                    });
                 }
             }
         };
