@@ -1206,7 +1206,7 @@
                         const key = `${normalizedClass}-${bank.subject}`;
                         // Merge: prefer current activeChapters (may have unsaved new additions)
                         // but fall back to bank chapters if no in-memory data exists
-                        if (activeChapters[key] && activeChapters[key].length > 0) {
+                        if (activeChapters[key] !== undefined) {
                             chaptersToSend[key] = activeChapters[key];
                         } else if (bank.chapters && bank.chapters.length > 0) {
                             chaptersToSend[key] = bank.chapters.map(ch => ch.chapterName || ch);

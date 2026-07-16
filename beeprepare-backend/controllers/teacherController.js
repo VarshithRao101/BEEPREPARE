@@ -717,14 +717,14 @@ const addChapter = async (req, res) => {
     // Keep User profile in sync
     const normalizedClass = bank.class.startsWith('Class ') ? bank.class : `Class ${bank.class}`;
     const chapterKey = `${normalizedClass}-${bank.subject}`;
-    const userDoc = await User.findOne({ googleUid: teacherId }).lean();
+    const userDoc = await User.findOne({ googleUid: teacherId });
     if (userDoc) {
-      const currentList = userDoc.chapters?.[chapterKey] || [];
+      if (!userDoc.chapters) userDoc.chapters = {};
+      const currentList = userDoc.chapters[chapterKey] || [];
       if (!currentList.includes(chapterName.trim())) {
-        const updatedList = [...currentList, chapterName.trim()];
-        const userUpdates = {};
-        userUpdates[`chapters.${chapterKey}`] = updatedList;
-        await User.updateOne({ googleUid: teacherId }, { $set: userUpdates });
+        userDoc.chapters[chapterKey] = [...currentList, chapterName.trim()];
+        userDoc.markModified('chapters');
+        await userDoc.save();
       }
     }
 
@@ -813,12 +813,11 @@ const deleteChapter = async (req, res) => {
     const normalizedClass = bank.class.startsWith('Class ') ? bank.class : `Class ${bank.class}`;
     const chapterKey = `${normalizedClass}-${bank.subject}`;
     
-    const user = await User.findOne({ googleUid: teacherId }).lean();
-    if (user && user.chapters && user.chapters[chapterKey]) {
-      const updatedList = user.chapters[chapterKey].filter(c => c !== chapterName);
-      const updates = {};
-      updates[`chapters.${chapterKey}`] = updatedList;
-      await User.updateOne({ googleUid: teacherId }, { $set: updates });
+    const userDoc = await User.findOne({ googleUid: teacherId });
+    if (userDoc && userDoc.chapters && userDoc.chapters[chapterKey]) {
+      userDoc.chapters[chapterKey] = userDoc.chapters[chapterKey].filter(c => c !== chapterName);
+      userDoc.markModified('chapters');
+      await userDoc.save();
     }
 
     await logActivity(

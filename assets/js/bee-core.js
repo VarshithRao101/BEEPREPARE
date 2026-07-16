@@ -471,16 +471,17 @@ export async function apiCall(
         '/teacher/dashboard', '/student/dashboard', '/student/banks', '/student/profile', '/teacher/profile',
         '/teacher/chapters', '/teacher/questions', '/circles'
       ];
+      const keysToRemove = [];
       for (let i = 0; i < sessionStorage.length; i++) {
         const key = sessionStorage.key(i);
         if (key && key.startsWith(CACHE_PREFIX)) {
           const cachedEndpoint = key.slice(CACHE_PREFIX.length);
           if (prefixesToClear.some(p => cachedEndpoint.startsWith(p))) {
-            sessionStorage.removeItem(key);
-            i--; // Adjust index since key was removed
+            keysToRemove.push(key);
           }
         }
       }
+      keysToRemove.forEach(k => sessionStorage.removeItem(k));
     }
 
     return data;
