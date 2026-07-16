@@ -1565,7 +1565,7 @@ const bulkUploadQuestions = async (req, res) => {
   try {
     const {
       teacherUid, bankId,
-      chapterId, questionsText, actionCode
+      chapterId, questionsText, questions, actionCode
     } = req.body;
 
     if (!verifyActionCode('bulk_upload', actionCode)) {
@@ -1693,13 +1693,87 @@ const bulkUploadQuestions = async (req, res) => {
       });
     };
 
-    let parsed;
-    try {
-      parsed = await parseQuestions(questionsText);
-    } catch (parseErr) {
-      return error(res,
-        parseErr.message,
-        'PARSE_ERROR', 400);
+    let parsed = [];
+    if (questions && Array.isArray(questions)) {
+      const lastQ = await Question.findOne({}, { numericId: 1 }).sort({ numericId: -1 }).lean();
+      let nextId = (lastQ && lastQ.numericId) ? lastQ.numericId + 1 : 1;
+
+      for (let idx = 0; idx < questions.length; idx++) {
+        const item = questions[idx];
+        if (!item.questionText) continue;
+
+        const q = {
+          bankId: bankId.toString(),
+          chapterId: chapterId || 'general',
+          teacherId: bank.teacherId,
+          class: bank.class,
+          subject: bank.subject,
+          createdBy: teacherUid || bank.teacherId,
+          isImportant: false,
+          numericId: nextId++,
+          chapterIndex: bank.chapters.findIndex(c => c.chapterId === chapterId),
+          metaTags: [],
+          tags: []
+        };
+        if (q.chapterIndex < 0) q.chapterIndex = 0;
+
+        q.questionText = item.questionText;
+        const rawType = (item.questionType || 'Short').toLowerCase();
+        const typeMap = {
+          'mcq': 'MCQ',
+          'short': 'Short',
+          'very_short': 'Very Short', 'very short': 'Very Short',
+          'long': 'Long', 'essay': 'Essay',
+          'true_false': 'True or False', 'true or false': 'True or False',
+          'fill_blanks': 'Fill in the Blanks', 'fill in the blanks': 'Fill in the Blanks',
+          'simple_matching': 'Simple Matching', 'simple matching': 'Simple Matching',
+          'matrix_matching': 'Matrix Matching', 'matrix matching': 'Matrix Matching',
+          'reading_passage': 'Reading Passage', 'reading passage': 'Reading Passage',
+          'case_study': 'Case Study', 'case study': 'Case Study',
+          'data_interpretation': 'Data Interpretation', 'data interpretation': 'Data Interpretation'
+        };
+        q.questionType = typeMap[rawType] || item.questionType || 'Short';
+        q.marks = parseInt(item.marks) || 1;
+        
+        const rawDiff = (item.difficulty || 'Medium').toLowerCase();
+        q.difficulty = rawDiff.charAt(0).toUpperCase() + rawDiff.slice(1) || 'Medium';
+
+        // Parse tags
+        if (item.tags) {
+          const rawTags = Array.isArray(item.tags) ? item.tags : String(item.tags).split(',').map(t => t.trim());
+          q.tags = rawTags.filter(t => ['Important', 'Repeated', 'Exam Focus', 'Formula Based', 'Conceptual', 'Tricky'].includes(t));
+          q.isImportant = q.tags.includes('Important') || q.tags.includes('Repeated');
+          
+          // Map to Matrix Engine metaTags
+          const metaMap = {
+            'Important': 'important', 'Repeated': 'repeated', 'Exam Focus': 'pyqs',
+            'Formula Based': 'formula', 'Conceptual': 'conceptual', 'Tricky': 'tricky'
+          };
+          q.metaTags = q.tags.map(t => metaMap[t]).filter(Boolean);
+        }
+        if (q.metaTags.length === 0) q.metaTags.push('standard');
+
+        // Handle MCQ options
+        if (q.questionType === 'MCQ' && item.mcqOptions) {
+          q.mcqOptions = {
+            A: item.mcqOptions.A || '',
+            B: item.mcqOptions.B || '',
+            C: item.mcqOptions.C || '',
+            D: item.mcqOptions.D || ''
+          };
+          q.correctOption = item.correctOption || null;
+        }
+
+        q.imageUrl = item.imageUrl || null;
+
+        parsed.push(q);
+      }
+    } else {
+      try {
+        parsed = await parseQuestions(questionsText);
+      } catch (parseErr) {
+        return error(res, parseErr.message, 'PARSE_ERROR', 400);
+      }
     }
 
       // Process Images & Finalize Payload

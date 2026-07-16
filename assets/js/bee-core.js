@@ -101,17 +101,34 @@ export function getIndexPath() {
 
 const CACHE_PREFIX = 'bp_cache_';
 const CACHE_TTL = {
-  '/auth/verify-session': 8 * 60 * 1000,    // 8 min (was 2 min)
-  '/teacher/dashboard':   60 * 1000,          // 60s  (was 30s)
-  '/student/dashboard':   60 * 1000,          // 60s  (was 30s)
-  '/student/banks':       2 * 60 * 1000,      // 2 min (was 30s)
-  '/student/profile':     5 * 60 * 1000,      // 5 min (was 1 min)
-  '/teacher/profile':     5 * 60 * 1000,      // NEW
-  '/circles':             2 * 60 * 1000,      // 2 min (was 30s)
-  '/announcements/active':10 * 60 * 1000,     // 10 min (was 5 min)
-  '/quotes':              30 * 60 * 1000,     // 30 min (was 10 min)
-  '/system/maintenance':  2 * 60 * 1000,      // 2 min (was 30s)
+  '/auth/verify-session': 8 * 60 * 1000,    // 8 min
+  '/teacher/dashboard':   60 * 1000,          // 60s
+  '/student/dashboard':   60 * 1000,          // 60s
+  '/student/banks':       2 * 60 * 1000,      // 2 min
+  '/student/profile':     5 * 60 * 1000,      // 5 min
+  '/teacher/profile':     5 * 60 * 1000,
+  '/circles':             2 * 60 * 1000,      // 2 min
+  '/announcements/active':10 * 60 * 1000,     // 10 min
+  '/quotes':              30 * 60 * 1000,     // 30 min
+  '/system/maintenance':  2 * 60 * 1000,      // 2 min
+  '/student/banks/*/chapters':              60 * 1000,      // Cache student chapters for 60s
+  '/student/banks/*/custom-question-types': 5 * 60 * 1000,  // Cache custom types for 5 min
+  '/teacher/chapters/*':                    60 * 1000,      // Cache teacher chapters for 60s
+  '/teacher/custom-question-types':         5 * 60 * 1000,  // Cache custom types for 5 min
+  '/teacher/questions?bankId=*':            60 * 1000,      // Cache question list for 60s
 };
+
+export function getCacheTTL(endpoint) {
+  for (const [pattern, value] of Object.entries(CACHE_TTL)) {
+    const regexStr = '^' + pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&').replace(/\\\*/g, '[^/?]+') + '$';
+    try {
+      if (new RegExp(regexStr).test(endpoint)) {
+        return value;
+      }
+    } catch (e) {}
+  }
+  return 0;
+}
 
 // Session cache — lives in memory for the browser session
 let _sessionCache = null;
@@ -254,7 +271,7 @@ export async function apiCall(
 ) {
   // 1. Cache Check (Immediate return, no loader)
   if (method === 'GET' && !forceRefresh) {
-    const ttl = CACHE_TTL[endpoint] || 0;
+    const ttl = getCacheTTL(endpoint);
     if (ttl > 0) {
       try {
         const cachedStr = sessionStorage.getItem(CACHE_PREFIX + endpoint);
@@ -273,14 +290,16 @@ export async function apiCall(
     sessionStorage.removeItem(CACHE_PREFIX + endpoint);
   }
 
-  // Only show loader for actual network calls
-  // Change showOverlay default — don't show for fast endpoints
+  // Only show loader for actual network calls if it takes more than 500ms (Loader Debouncing)
   let loaderShown = false;
+  let loaderTimeout = null;
   if (showOverlay && !endpoint.includes('verify-session') 
                   && !endpoint.includes('maintenance')
                   && !endpoint.includes('announcements')) {
-    BP.showLoader();
-    loaderShown = true;
+    loaderTimeout = setTimeout(() => {
+      BP.showLoader();
+      loaderShown = true;
+    }, 500);
   }
 
   console.groupCollapsed(`📡 API: ${method} ${endpoint}`);
@@ -444,11 +463,24 @@ export async function apiCall(
 
     // 8. Success: Update Cache
     if (method === 'GET' && data?.success) {
-      const ttl = CACHE_TTL[endpoint] || 0;
+      const ttl = getCacheTTL(endpoint);
       if (ttl > 0) sessionStorage.setItem(CACHE_PREFIX + endpoint, JSON.stringify({ data, at: Date.now() }));
     } else if (method !== 'GET' && data?.success) {
-      // Invalidate relevant caches
-      ['/teacher/dashboard', '/student/dashboard', '/student/banks', '/student/profile', '/teacher/profile'].forEach(k => sessionStorage.removeItem(CACHE_PREFIX + k));
+      // Invalidate relevant caches dynamically
+      const prefixesToClear = [
+        '/teacher/dashboard', '/student/dashboard', '/student/banks', '/student/profile', '/teacher/profile',
+        '/teacher/chapters', '/teacher/questions', '/circles'
+      ];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith(CACHE_PREFIX)) {
+          const cachedEndpoint = key.slice(CACHE_PREFIX.length);
+          if (prefixesToClear.some(p => cachedEndpoint.startsWith(p))) {
+            sessionStorage.removeItem(key);
+            i--; // Adjust index since key was removed
+          }
+        }
+      }
     }
 
     return data;
@@ -473,6 +505,7 @@ export async function apiCall(
     return { success: false, message: err.message || 'Network error' };
   } finally {
     console.groupEnd();
+    if (loaderTimeout) clearTimeout(loaderTimeout);
     if (loaderShown) BP.hideLoader();
   }
 }

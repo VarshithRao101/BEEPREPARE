@@ -8,8 +8,8 @@
     <style>
         :root {
             --gold: #FFD700;
-            --surface: rgba(8, 8, 10, 0.2);
-            --surface2: rgba(10, 10, 12, 0.15);
+            --surface: rgba(8, 8, 10, 0.4);
+            --surface2: rgba(10, 10, 12, 0.25);
             --border: rgba(255, 215, 0, 0.2);
             --text: #ffffff;
             --muted: #888;
@@ -24,67 +24,61 @@
             background: #000 url('/assets/images/abstract-bg.png') no-repeat center center fixed;
             background-size: cover;
             z-index: -1;
-            filter: brightness(1.0);
+            filter: brightness(0.6);
         }
 
         header {
             position: fixed; top: 0; left: 0; right: 0; height: 80px;
-            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px);
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border); display: flex; align-items: center;
             padding: 0 40px; justify-content: space-between; z-index: 100;
         }
 
-        .back-link { color: var(--gold); text-decoration: none; font-weight: 700; font-size: 14px; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .back-link { color: var(--gold); text-decoration: none; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
         .glass-card {
             background: var(--surface); border: 1px solid var(--border);
             border-radius: 30px; padding: 40px; margin-bottom: 30px;
             backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
         }
 
         .step-title { font-size: 18px; font-weight: 900; color: var(--gold); margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
-        .step-num { width: 30px; height: 30px; background: var(--gold); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .step-num { width: 30px; height: 30px; background: var(--gold); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 900; }
 
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .input-group label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group label { display: block; font-size: 10px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
         .form-input {
-            width: 100%; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-            border-radius: 12px; color: #fff; outline: none; transition: 0.3s;
+            width: 100%; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+            border-radius: 12px; color: #fff; outline: none; transition: 0.3s; font-size: 14px;
         }
-        .form-input:focus { border-color: var(--gold); }
+        .form-input:focus { border-color: var(--gold); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
 
-        .format-reminder {
-            background: rgba(255, 215, 0, 0.05); border: 1px dashed var(--border);
-            padding: 20px; border-radius: 12px; font-family: monospace; font-size: 12px;
-            color: var(--gold); line-height: 1.6; margin-bottom: 20px;
+        .chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-
-        .bulk-textarea {
-            width: 100%; height: 300px; padding: 20px; background: rgba(0,0,0,0.4);
-            border: 1px solid var(--border); border-radius: 20px; color: #fff;
-            font-family: 'Outfit', sans-serif; resize: none; margin-bottom: 10px;
-            outline: none;
-        }
-
-        .stats { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); padding: 0 10px; }
-
-        .preview-area { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-        .preview-card {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-            padding: 20px; border-radius: 15px;
-        }
+        .chip:hover { border-color: rgba(255, 215, 0, 0.4); color: #fff; }
+        .chip.active { background: rgba(255, 215, 0, 0.1) !important; color: var(--gold) !important; border-color: var(--gold) !important; }
 
         .btn-action {
-            width: 100%; padding: 20px; background: var(--gold); color: #000;
-            border: none; border-radius: 15px; font-weight: 900; cursor: pointer;
+            width: 100%; padding: 18px; background: var(--gold); color: #000;
+            border: none; border-radius: 15px; font-weight: 950; cursor: pointer;
             text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-            margin-top: 20px;
         }
-        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2); }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); }
         .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
-<link rel="stylesheet" href="/assets/css/hover-interactions.css">
 </head>
 <body>
 
@@ -97,7 +91,7 @@
 
     <div class="container">
         
-        <!-- STEP 1 -->
+        <!-- STEP 1: Bank & Chapter Sync -->
         <div class="glass-card">
             <div class="step-title"><span class="step-num">1</span> TARGET ACQUISITION</div>
             <div class="form-grid" style="grid-template-columns: 2fr 1fr;">
@@ -118,60 +112,21 @@
             <div id="bankMeta" style="font-size:12px; color:var(--gold); margin-top:10px; font-weight:700;"></div>
         </div>
 
-        <!-- STEP 2 -->
+        <!-- STEP 2: 10 Slots Payload -->
         <div class="glass-card">
-            <div class="step-title"><span class="step-num">2</span> PAYLOAD INJECTION</div>
-            <div style="display:flex; gap:20px; margin-bottom:20px;">
-                <div style="flex:1;">
-                    <div class="format-reminder">
-                        Q: Your question here<br>
-                        TYPE: mcq/short/long<br>
-                        A: Option A ✓ (tick for correct)<br>
-                        B: Option B<br>
-                        MARKS: 1<br>
-                        DIFFICULTY: medium<br>
-                        --- (separator)
-                    </div>
-                </div>
-                <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; border:1px dashed var(--border); border-radius:15px; background:rgba(255,215,0,0.02);">
-                    <p style="font-size:11px; color:var(--muted); margin-bottom:10px; text-transform:uppercase;">Excel/CSV Protocol</p>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <div class="step-title" style="margin-bottom:0;"><span class="step-num">2</span> 10 QUESTION SLOTS</div>
+                <div style="display:flex; gap:12px; align-items:center;">
                     <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelUpload(event)">
-                    <button class="btn-action" style="margin-top:0; width:180px; background:#222; border:1px solid var(--gold); color:var(--gold);" onclick="document.getElementById('excelFile').click()">CHOOSE FILE</button>
-                    <p style="font-size:10px; color:#555; margin-top:10px;">Supported: .xlsx, .csv</p>
-                </div>
-            </div>
-            <textarea class="bulk-textarea" id="pushData" placeholder="Paste question blocks here..." oninput="updateStats()"></textarea>
-            <div class="stats">
-                <span id="charCount">Characters: 0</span>
-                <span id="blockCount">Detected Blocks: 0 / 200</span>
-            </div>
-        </div>
-
-        <!-- STEP 3 -->
-        <div class="glass-card">
-            <div class="step-title"><span class="step-num">3</span> EXECUTION & MEDIA</div>
-            
-            <!-- Summary Bar -->
-            <div id="detectionSummary" style="display:none; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:15px; padding:20px; margin-bottom:20px; display:flex; justify-content:space-around; align-items:center; text-align:center;">
-                <div>
-                    <div style="font-size:24px; font-weight:900; color:#fff;" id="sumTotal">0</div>
-                    <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Nodes Detected</div>
-                </div>
-                <div style="width:1px; height:30px; background:var(--border);"></div>
-                <div>
-                    <div style="font-size:24px; font-weight:900; color:var(--primary);" id="sumMedia">0</div>
-                    <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Diagrams Linked</div>
-                </div>
-                <div style="width:1px; height:30px; background:var(--border);"></div>
-                <div>
-                    <div style="font-size:24px; font-weight:900; color:#ff4d4d;" id="sumMissing">0</div>
-                    <div style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;">Media Required</div>
+                    <button class="btn-action" style="margin-top:0; width:220px; padding:12px; font-size:11px; background:#111; border:1px solid var(--gold); color:var(--gold);" onclick="document.getElementById('excelFile').click()">POPULATE FROM EXCEL/CSV</button>
                 </div>
             </div>
 
-            <div id="previewArea" class="preview-area"></div>
-            
-            <button class="btn-action" id="uploadBtn" onclick="handleUpload()">COMMENCE UPLOAD</button>
+            <!-- Slots Form Container -->
+            <div id="slotsContainer" style="display:flex; flex-direction:column; gap:25px; margin-bottom:30px;"></div>
+
+            <!-- COMMENCE UPLOAD -->
+            <button class="btn-action" id="uploadBtn" style="padding: 22px; font-size: 16px; margin-top: 10px;" onclick="handleUpload()">COMMENCE BULK INJECTION</button>
         </div>
 
     </div>
@@ -181,14 +136,15 @@
         import { adminApi, showToast, showCodeModal } from './matrix-core.js';
 
         let activeBank = null;
-        let stagedQuestions = [];
+        const stagedImages = Array(10).fill(null);
+        const AVAILABLE_TAGS = ['Important', 'Repeated', 'Exam Focus', 'Formula Based', 'Conceptual', 'Tricky'];
 
         window.loadBankContext = async () => {
             const bankId = document.getElementById('bankIdInput').value.trim();
             if(!bankId) return showToast("Enter Bank ID", "warning");
 
             const res = await adminApi(`/banks`); 
-            if(res.success) {
+            if(res && res.success) {
                 const bank = res.data.find(b => b._id === bankId || b.bankCode === bankId);
                 if(bank) {
                     activeBank = bank;
@@ -205,6 +161,83 @@
             }
         };
 
+        window.toggleMCQBlock = (idx) => {
+            const type = document.getElementById(`slot-type-${idx}`).value;
+            const mcqBlock = document.getElementById(`mcq-block-${idx}`);
+            if (type === 'MCQ') {
+                mcqBlock.style.display = 'flex';
+            } else {
+                mcqBlock.style.display = 'none';
+            }
+        };
+
+        window.toggleSlotTag = (chip) => {
+            chip.classList.toggle('active');
+        };
+
+        window.triggerSlotImage = (idx) => {
+            document.getElementById(`slot-file-${idx}`).click();
+        };
+
+        window.handleSlotImageAttach = (e, idx) => {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            if (file.size > 1.5 * 1024 * 1024) {
+                showToast("Photo exceeds 1.5MB limit", "warning");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const base64 = event.target.result;
+                stagedImages[idx] = base64;
+                
+                document.getElementById(`slot-preview-placeholder-${idx}`).style.display = 'none';
+                const img = document.getElementById(`slot-preview-img-${idx}`);
+                img.src = base64;
+                img.style.display = 'block';
+
+                showToast(`Diagram linked to Slot #${idx + 1}`, "success");
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.clearSlot = (idx) => {
+            document.getElementById(`slot-qtext-${idx}`).value = '';
+            document.getElementById(`slot-type-${idx}`).value = 'Short';
+            document.getElementById(`slot-marks-${idx}`).value = '5';
+            document.getElementById(`slot-diff-${idx}`).value = 'Medium';
+            
+            // MCQ Clear
+            document.getElementById(`slot-opt-A-${idx}`).value = '';
+            document.getElementById(`slot-opt-B-${idx}`).value = '';
+            document.getElementById(`slot-opt-C-${idx}`).value = '';
+            document.getElementById(`slot-opt-D-${idx}`).value = '';
+            document.getElementById(`slot-correct-${idx}`).value = '';
+            
+            // Hide MCQ block
+            document.getElementById(`mcq-block-${idx}`).style.display = 'none';
+            
+            // Clear tags
+            const chips = document.querySelectorAll(`#slot-tags-${idx} .chip`);
+            chips.forEach(c => c.classList.remove('active'));
+            
+            // Clear image
+            stagedImages[idx] = null;
+            document.getElementById(`slot-file-${idx}`).value = '';
+            document.getElementById(`slot-preview-img-${idx}`).src = '';
+            document.getElementById(`slot-preview-img-${idx}`).style.display = 'none';
+            document.getElementById(`slot-preview-placeholder-${idx}`).style.display = 'block';
+            
+            // Reset card highlights
+            const card = document.getElementById(`slot-card-${idx}`);
+            card.style.borderColor = 'var(--border)';
+            card.style.background = 'rgba(255, 255, 255, 0.02)';
+            
+            showToast(`Cleared Slot #${idx + 1}`, "info");
+        };
+
         window.handleExcelUpload = (event) => {
             const file = event.target.files[0];
             if(!file) return;
@@ -216,206 +249,299 @@
                 const firstSheet = workbook.SheetNames[0];
                 const rows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheet]);
                 
-                const text = rows.map(r => {
-                    let s = `Q: ${r.Question || r.question || ''}\n`;
-                    s += `TYPE: ${r.Type || r.type || 'mcq'}\n`;
-                    if(r.A) s += `A: ${r.A}${String(r.Correct).toUpperCase() === 'A' ? ' ✓' : ''}\n`;
-                    if(r.B) s += `B: ${r.B}${String(r.Correct).toUpperCase() === 'B' ? ' ✓' : ''}\n`;
-                    if(r.C) s += `C: ${r.C}${String(r.Correct).toUpperCase() === 'C' ? ' ✓' : ''}\n`;
-                    if(r.D) s += `D: ${r.D}${String(r.Correct).toUpperCase() === 'D' ? ' ✓' : ''}\n`;
-                    s += `MARKS: ${r.Marks || r.marks || 1}\n`;
-                    s += `DIFFICULTY: ${r.Difficulty || r.difficulty || 'Medium'}\n`;
-                    if(r.Tags || r.tags) s += `TAGS: ${r.Tags || r.tags}\n`;
-                    if(r.Pairs || r.pairs) s += `PAIRS: ${r.Pairs || r.pairs}\n`;
-                    if(r.Subquestions || r.subquestions) s += `SUBQ: ${r.Subquestions || r.subquestions}\n`;
-                    return s;
-                }).join('---\n');
-                
-                document.getElementById('pushData').value = text;
-                updateStats();
                 showToast(`Excel processed: ${rows.length} rows`, "info");
-                generatePreview();
+                
+                // Populate up to 10 slots
+                for (let idx = 0; idx < 10; idx++) {
+                    if (idx < rows.length) {
+                        const r = rows[idx];
+                        
+                        // Question Text
+                        document.getElementById(`slot-qtext-${idx}`).value = r.Question || r.question || '';
+                        
+                        // Type
+                        const typeVal = r.Type || r.type || 'Short';
+                        const selectType = document.getElementById(`slot-type-${idx}`);
+                        selectType.value = typeVal;
+                        toggleMCQBlock(idx);
+                        
+                        // Marks
+                        const marksVal = String(r.Marks || r.marks || '5');
+                        document.getElementById(`slot-marks-${idx}`).value = marksVal;
+                        
+                        // Difficulty
+                        const diffVal = r.Difficulty || r.difficulty || 'Medium';
+                        const capitalizedDiff = diffVal.charAt(0).toUpperCase() + diffVal.slice(1).toLowerCase();
+                        document.getElementById(`slot-diff-${idx}`).value = capitalizedDiff;
+                        
+                        // MCQ Options
+                        if (typeVal === 'MCQ') {
+                            document.getElementById(`slot-opt-A-${idx}`).value = r.A || '';
+                            document.getElementById(`slot-opt-B-${idx}`).value = r.B || '';
+                            document.getElementById(`slot-opt-C-${idx}`).value = r.C || '';
+                            document.getElementById(`slot-opt-D-${idx}`).value = r.D || '';
+                            
+                            const correctVal = String(r.Correct || r.correct || '').toUpperCase();
+                            if (['A', 'B', 'C', 'D'].includes(correctVal)) {
+                                document.getElementById(`slot-correct-${idx}`).value = correctVal;
+                            }
+                        }
+                        
+                        // Tags
+                        if (r.Tags || r.tags) {
+                            const rowTags = String(r.Tags || r.tags).split(',').map(t => t.trim());
+                            const chips = document.querySelectorAll(`#slot-tags-${idx} .chip`);
+                            chips.forEach(chip => {
+                                const tagVal = chip.dataset.tag;
+                                if (rowTags.includes(tagVal)) {
+                                    chip.classList.add('active');
+                                }
+                            });
+                        }
+
+                        // Attach photo if diagram link/base64 is present
+                        if (r.IMG || r.img || r.Image || r.image) {
+                            const imgData = r.IMG || r.img || r.Image || r.image;
+                            stagedImages[idx] = imgData;
+                            document.getElementById(`slot-preview-placeholder-${idx}`).style.display = 'none';
+                            const img = document.getElementById(`slot-preview-img-${idx}`);
+                            img.src = imgData;
+                            img.style.display = 'block';
+                        }
+
+                        // Highlight card
+                        const card = document.getElementById(`slot-card-${idx}`);
+                        card.style.borderColor = 'var(--gold)';
+                        card.style.background = 'rgba(255, 215, 0, 0.01)';
+                    }
+                }
             };
             reader.readAsArrayBuffer(file);
         };
 
-        window.updateStats = () => {
-            const text = document.getElementById('pushData').value;
-            document.getElementById('charCount').textContent = `Characters: ${text.length}`;
-            const blocks = text.split('---').filter(b => b.trim().length > 0);
-            document.getElementById('blockCount').textContent = `Detected Blocks: ${blocks.length} / 200`;
-
-            // Auto-detect after small delay
-            clearTimeout(window.detectTimeout);
-            window.detectTimeout = setTimeout(() => generatePreview(), 800);
-        };
-
-        window.generatePreview = () => {
-            const text = document.getElementById('pushData').value.trim();
-            const summaryBar = document.getElementById('detectionSummary');
-            
-            if(!text) {
-                stagedQuestions = [];
-                summaryBar.style.display = 'none';
-                renderStaging();
-                return;
-            }
-
-            const rawBlocks = text.split('---');
-            const filtered = [];
-            
-            rawBlocks.forEach((block, index) => {
-                const trimmed = block.trim();
-                if(trimmed.length > 0) {
-                    const lines = trimmed.split('\n').map(l => l.trim());
-                    const q = { rawIndex: index, image: null };
-                    lines.forEach(line => {
-                        if(line.startsWith('Q:')) q.text = line.substring(2).trim();
-                        if(line.startsWith('TYPE:')) q.type = line.substring(5).trim();
-                        if(line.startsWith('MARKS:')) q.marks = line.substring(6).trim();
-                        if(line.startsWith('DIFFICULTY:')) q.diff = line.substring(11).trim();
-                        if(line.startsWith('IMG:')) q.image = line.substring(4).trim();
-                    });
-                    filtered.push(q);
-                }
-            });
-
-            stagedQuestions = filtered;
-            
-            // Update Summary Bar
-            summaryBar.style.display = 'flex';
-            const mediaCount = stagedQuestions.filter(q => q.image).length;
-            document.getElementById('sumTotal').textContent = stagedQuestions.length;
-            document.getElementById('sumMedia').textContent = mediaCount;
-            document.getElementById('sumMissing').textContent = stagedQuestions.length - mediaCount;
-
-            renderStaging();
-        };
-
-        function renderStaging() {
-            const area = document.getElementById('previewArea');
-            if(stagedQuestions.length === 0) {
-                area.innerHTML = '';
-                return;
-            }
-
-            area.innerHTML = `
-                <div style="margin-bottom:20px; font-weight:800; color:var(--gold); font-size:14px; text-transform:uppercase; letter-spacing:1px;">Media Injection Slots (${stagedQuestions.length})</div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                    ${stagedQuestions.map((q, i) => `
-                        <div class="preview-card" style="position:relative; ${q.image ? 'border-color:var(--gold); background:rgba(255,215,0,0.02);' : ''}">
-                            <div style="font-size:10px; color:var(--gold); margin-bottom:5px; display:flex; justify-content:space-between;">
-                                <span>SLOT #${i + 1} — ${q.type || 'Short'}</span>
-                                ${q.image ? '<span style="color:#4dff88;">[LINKED]</span>' : '<span style="color:#ff4d4d;">[NO IMAGE]</span>'}
-                            </div>
-                            <div style="font-size:13px; font-weight:600; margin-bottom:15px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${(q.text || 'Untitled Question Node').replace(/</g, '&lt;')}</div>
-                            
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <div id="imgPreview_${i}" style="width:60px; height:60px; border:1px solid var(--border); border-radius:12px; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                                    ${q.image ? `<img src="${q.image}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:24px; opacity:0.1;">🖼️</span>'}
-                                </div>
-                                <div style="flex:1;">
-                                    <button onclick="triggerImageUpload(${i})" style="width:100%; padding:10px; font-size:10px; background:${q.image ? 'rgba(77,255,136,0.1)' : 'rgba(255,215,0,0.1)'}; border:1px solid ${q.image ? '#4dff88' : 'var(--gold)'}; color:${q.image ? '#4dff88' : 'var(--gold)'}; border-radius:8px; cursor:pointer; font-weight:800; text-transform:uppercase;">
-                                        ${q.image ? 'Change Diagram' : 'Attach Photo'}
-                                    </button>
-                                    <div style="font-size:9px; color:var(--muted); margin-top:5px; text-align:center;">Cloud Storage Slot Ready</div>
-                                </div>
-                            </div>
-                            <input type="file" id="file_${i}" accept="image/*" style="display:none;" onchange="handleImageAttach(event, ${i})">
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        }
-
-        window.triggerImageUpload = (i) => document.getElementById(`file_${i}`).click();
-
-        window.handleImageAttach = (e, i) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const base64 = event.target.result;
-                const target = stagedQuestions[i];
-                target.image = base64;
-                
-                const text = document.getElementById('pushData').value;
-                const blocks = text.split('---');
-                const rawIdx = target.rawIndex;
-                
-                if(blocks[rawIdx] !== undefined) {
-                    let content = blocks[rawIdx].split('\n').filter(l => !l.trim().startsWith('IMG:')).join('\n');
-                    blocks[rawIdx] = content.trim() + `\nIMG: ${base64}\n`;
-                }
-                document.getElementById('pushData').value = blocks.join('---');
-                
-                // Update Summary without full generatePreview call to preserve state
-                const mediaCount = stagedQuestions.filter(q => q.image).length;
-                document.getElementById('sumMedia').textContent = mediaCount;
-                document.getElementById('sumMissing').textContent = stagedQuestions.length - mediaCount;
-                
-                renderStaging();
-                showToast(`Diagram linked to Slot #${i + 1}`, "success");
-            };
-            reader.readAsDataURL(file);
-        };
-
         window.handleUpload = async () => {
             if(!activeBank) return showToast("Sync bank first", "warning");
-            const text = document.getElementById('pushData').value.trim();
-            if(!text) return showToast("No payload detected", "warning");
 
-            const blocks = text.split('---').filter(b => b.trim().length > 0);
-            
+            // Gather populated slots
+            const questions = [];
+            for (let idx = 0; idx < 10; idx++) {
+                const questionText = document.getElementById(`slot-qtext-${idx}`).value.trim();
+                if (!questionText) continue;
+
+                const questionType = document.getElementById(`slot-type-${idx}`).value;
+                const marks = parseInt(document.getElementById(`slot-marks-${idx}`).value) || 5;
+                const difficulty = document.getElementById(`slot-diff-${idx}`).value;
+
+                // Tags
+                const tags = Array.from(document.querySelectorAll(`#slot-tags-${idx} .chip.active`))
+                    .map(c => c.dataset.tag);
+
+                const q = {
+                    questionText,
+                    questionType,
+                    marks,
+                    difficulty,
+                    tags,
+                    imageUrl: stagedImages[idx] || null
+                };
+
+                if (questionType === 'MCQ') {
+                    q.mcqOptions = {
+                        A: document.getElementById(`slot-opt-A-${idx}`).value.trim(),
+                        B: document.getElementById(`slot-opt-B-${idx}`).value.trim(),
+                        C: document.getElementById(`slot-opt-C-${idx}`).value.trim(),
+                        D: document.getElementById(`slot-opt-D-${idx}`).value.trim()
+                    };
+                    q.correctOption = document.getElementById(`slot-correct-${idx}`).value;
+
+                    if (!q.mcqOptions.A || !q.mcqOptions.B || !q.mcqOptions.C || !q.mcqOptions.D || !q.correctOption) {
+                        return showToast(`Slot #${idx + 1} (MCQ) option inputs or correct answer is incomplete`, "warning");
+                    }
+                }
+
+                questions.push(q);
+            }
+
+            if (questions.length === 0) return showToast("Enter at least one question slot", "warning");
+
+            // Secure action code check
+            const code = await showCodeModal("Inject Bulk Nodes", "Enter action code to authorize question injection", false);
+            if (!code) return;
+
             const btn = document.getElementById('uploadBtn');
             btn.disabled = true;
-            btn.textContent = `INJECTING ${blocks.length} NODES...`;
+            btn.textContent = `INJECTING ${questions.length} NODES...`;
 
             try {
                 const res = await adminApi('/questions/bulk-upload', 'POST', {
                     teacherUid: activeBank.teacherId?._id || activeBank.teacherId,
                     bankId: activeBank._id,
                     chapterId: document.getElementById('chapterSelect').value,
-                    questionsText: text
+                    questions,
+                    actionCode: code
                 });
 
-                if(res.success) {
+                if(res && res.success) {
                     showToast(res.message, "success");
-                    document.getElementById('pushData').value = '';
-                    stagedQuestions = [];
-                    document.getElementById('detectionSummary').style.display = 'none';
-                    renderStaging();
-                    updateStats();
+                    // Reset all slots
+                    for (let idx = 0; idx < 10; idx++) {
+                        clearSlot(idx);
+                    }
                 } else {
-                    showToast(res.message || "Injection failed", "error");
+                    showToast(res ? res.message : "Injection failed", "error");
                 }
             } catch(e) {
                 showToast("System Link Error", "error");
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'COMMENCE UPLOAD';
+                btn.textContent = 'COMMENCE BULK INJECTION';
             }
         };
 
-        document.getElementById('pushData').addEventListener('input', () => {
-            updateStats();
-        });
+        function renderSlots() {
+            const container = document.getElementById('slotsContainer');
+            container.innerHTML = '';
+            
+            for (let idx = 0; idx < 10; idx++) {
+                const slotCard = document.createElement('div');
+                slotCard.className = 'glass-card slot-card';
+                slotCard.id = `slot-card-${idx}`;
+                slotCard.style.cssText = `
+                    border: 1px solid var(--border);
+                    border-radius: 20px;
+                    padding: 25px;
+                    background: rgba(255, 255, 255, 0.02);
+                    transition: all 0.3s ease;
+                    position: relative;
+                `;
+                
+                slotCard.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,215,0,0.1); padding-bottom:10px;">
+                        <h4 style="font-weight:900; color:var(--gold); font-size:15px; letter-spacing:1px; text-transform:uppercase;">SLOT #${idx + 1}</h4>
+                        <button type="button" class="back-link" style="background:none; border:none; cursor:pointer; font-size:11px;" onclick="clearSlot(${idx})">CLEAR SLOT</button>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:25px;">
+                        <!-- Left: Question Text -->
+                        <div style="display:flex; flex-direction:column; gap:15px;">
+                            <div class="input-group">
+                                <label>Question Text</label>
+                                <textarea class="form-input slot-qtext" id="slot-qtext-${idx}" placeholder="Type question text..." style="height:120px; resize:none; font-size:14px;"></textarea>
+                            </div>
+                            
+                            <!-- MCQ Options Block (Shown dynamically) -->
+                            <div id="mcq-block-${idx}" style="display:none; background:rgba(255,215,0,0.02); border:1px dashed var(--border); padding:20px; border-radius:15px; gap:12px; flex-direction:column;">
+                                <label style="font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-weight:800;">MCQ Options</label>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                    <input type="text" class="form-input slot-opt-A" placeholder="Option A" id="slot-opt-A-${idx}">
+                                    <input type="text" class="form-input slot-opt-B" placeholder="Option B" id="slot-opt-B-${idx}">
+                                    <input type="text" class="form-input slot-opt-C" placeholder="Option C" id="slot-opt-C-${idx}">
+                                    <input type="text" class="form-input slot-opt-D" placeholder="Option D" id="slot-opt-D-${idx}">
+                                </div>
+                                <div style="margin-top:5px;">
+                                    <label style="font-size:9px; color:var(--muted); font-weight:800;">CORRECT OPTION</label>
+                                    <select class="form-input slot-correct" id="slot-correct-${idx}" style="padding:10px;">
+                                        <option value="">Select Correct Option</option>
+                                        <option value="A">Option A</option>
+                                        <option value="B">Option B</option>
+                                        <option value="C">Option C</option>
+                                        <option value="D">Option D</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Metadata & Image -->
+                        <div style="display:flex; flex-direction:column; gap:15px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div class="input-group">
+                                    <label>Question Type</label>
+                                    <select class="form-input slot-type" id="slot-type-${idx}" onchange="toggleMCQBlock(${idx})">
+                                        <option value="Short">Short</option>
+                                        <option value="MCQ">MCQ</option>
+                                        <option value="Very Short">Very Short</option>
+                                        <option value="Long">Long</option>
+                                        <option value="Essay">Essay</option>
+                                        <option value="True or False">True or False</option>
+                                        <option value="Fill in the Blanks">Fill in the Blanks</option>
+                                        <option value="Simple Matching">Simple Matching</option>
+                                        <option value="Matrix Matching">Matrix Matching</option>
+                                        <option value="Reading Passage">Reading Passage</option>
+                                        <option value="Case Study">Case Study</option>
+                                        <option value="Data Interpretation">Data Interpretation</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Marks</label>
+                                    <select class="form-input slot-marks" id="slot-marks-${idx}">
+                                        <option value="1">1 Mark</option>
+                                        <option value="2">2 Marks</option>
+                                        <option value="3">3 Marks</option>
+                                        <option value="4">4 Marks</option>
+                                        <option value="5" selected>5 Marks</option>
+                                        <option value="6">6 Marks</option>
+                                        <option value="7">7 Marks</option>
+                                        <option value="8">8 Marks</option>
+                                        <option value="9">9 Marks</option>
+                                        <option value="10">10 Marks</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+                                <div class="input-group">
+                                    <label>Difficulty</label>
+                                    <select class="form-input slot-diff" id="slot-diff-${idx}">
+                                        <option value="Easy">Easy</option>
+                                        <option value="Medium" selected>Medium</option>
+                                        <option value="Hard">Hard</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Diagram Upload -->
+                            <div style="display:flex; align-items:center; gap:12px; border:1px solid rgba(255,255,255,0.05); padding:12px; border-radius:12px; background:rgba(0,0,0,0.2);">
+                                <div id="slot-preview-container-${idx}" style="width:45px; height:45px; border-radius:8px; border:1px solid var(--border); overflow:hidden; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5);">
+                                    <span id="slot-preview-placeholder-${idx}" style="font-size:16px; opacity:0.2;">🖼️</span>
+                                    <img id="slot-preview-img-${idx}" style="width:100%; height:100%; object-fit:cover; display:none;">
+                                </div>
+                                <div style="flex:1;">
+                                    <button type="button" class="btn-action" style="margin-top:0; padding:8px 12px; font-size:9px; font-weight:800; border:1px solid var(--border); background:rgba(255,215,0,0.05); color:var(--gold);" onclick="triggerSlotImage(${idx})">Attach Photo</button>
+                                    <input type="file" id="slot-file-${idx}" accept="image/*" style="display:none;" onchange="handleSlotImageAttach(event, ${idx})">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tags Selection (Full Width Row) -->
+                    <div style="margin-top:20px;">
+                        <label style="display:block; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Tags Selection</label>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;" id="slot-tags-${idx}">
+                            ${AVAILABLE_TAGS.map(t => `
+                                <button type="button" class="chip" data-tag="${t}" onclick="toggleSlotTag(this)">${t}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(slotCard);
 
-        // Setup UI
-        const pushArea = document.querySelector('.stats')?.parentNode;
-        if(pushArea) {
-            const previewBtn = document.createElement('button');
-            previewBtn.className = 'btn-action';
-            previewBtn.style.background = '#222';
-            previewBtn.style.color = '#fff';
-            previewBtn.style.border = '1px solid #333';
-            previewBtn.style.marginTop = '10px';
-            previewBtn.style.padding = '10px';
-            previewBtn.style.fontSize = '12px';
-            previewBtn.textContent = 'REBUILD DETECTION MAPPING';
-            previewBtn.onclick = () => generatePreview();
-            pushArea.appendChild(previewBtn);
+                // Add active content highlight
+                document.getElementById(`slot-qtext-${idx}`).addEventListener('input', (e) => {
+                    const card = document.getElementById(`slot-card-${idx}`);
+                    if (e.target.value.trim().length > 0) {
+                        card.style.borderColor = 'var(--gold)';
+                        card.style.background = 'rgba(255, 215, 0, 0.01)';
+                    } else {
+                        card.style.borderColor = 'var(--border)';
+                        card.style.background = 'rgba(255, 255, 255, 0.02)';
+                    }
+                });
+            }
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSlots();
+        });
     </script>
 <script src="/assets/js/ripple.js"></script>
 </body>

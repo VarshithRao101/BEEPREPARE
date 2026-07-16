@@ -1224,6 +1224,8 @@
                 });
 
                 if (res && res.success) {
+                    localStorage.setItem(BP.NAME, name);
+                    appState.name = name;
                     await initProfile();
                     Swal.fire({
                         icon: 'success',
@@ -1260,7 +1262,10 @@
                     appState = { ...appState, ...res.data };
                     appState.subjects = Array.isArray(appState.subjects) ? appState.subjects : [];
                     appState.classes = Array.isArray(appState.classes) ? appState.classes : [];
-                    
+                    if (res.data.displayName) {
+                        localStorage.setItem(BP.NAME, res.data.displayName);
+                        appState.name = res.data.displayName;
+                    }
                     localStorage.setItem(BP.SUBJECT_LIMIT, res.data.subjectLimit || 1);
                     
                     // Fetch dashboard data once for BOTH banks list and signal dots
@@ -1513,6 +1518,17 @@
             if (appState.classes.includes(cls)) {
                 appState.classes = appState.classes.filter(c => c !== cls);
             } else {
+                if (appState.classes.length >= 4) {
+                    Swal.fire({
+                        title: 'Limit Reached',
+                        text: 'You can select a maximum of 4 classes.',
+                        icon: 'warning',
+                        background: '#1a1a2e',
+                        color: '#fff',
+                        confirmButtonColor: '#ffc107'
+                    });
+                    return;
+                }
                 appState.classes.push(cls);
             }
             renderClasses();

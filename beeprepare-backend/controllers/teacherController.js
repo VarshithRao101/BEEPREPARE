@@ -245,8 +245,9 @@ const updateProfile = async (req, res) => {
         console.warn(`[updateProfile] Invalid subjects format from user ${teacherId}:`, subjects);
         return error(res, 'Subjects must be an array', 'INVALID_SUBJECTS', 400);
       }
-      if (subjectsArray.length > 1) {
-        return error(res, 'Subject limit reached (1). Complete universal limit is 1.', 'LIMIT_EXCEEDED', 403);
+      const subjectLimit = user.subjectLimit || 1;
+      if (subjectsArray.length > subjectLimit) {
+        return error(res, `Subject limit reached (${subjectLimit}). Redeem code for more slots.`, 'LIMIT_EXCEEDED', 403);
       }
       const validSubjects = ['Physics', 'Chemistry', 'Mathematics', 'Maths', 'Biology', 'English', 'Telugu', 'Hindi', 'Social', 'Social Studies', 'Science', 'EVS', 'Computer', 'History', 'Geography'];
       if (!subjectsArray.every(s => validSubjects.includes(s))) {
@@ -263,8 +264,8 @@ const updateProfile = async (req, res) => {
       if (!Array.isArray(classesArray)) {
         return error(res, 'Classes must be an array', 'INVALID_CLASSES', 400);
       }
-      if (classesArray.length > 1) {
-        return error(res, 'Class limit reached (1). Complete universal limit is 1.', 'LIMIT_EXCEEDED', 403);
+      if (classesArray.length > 4) {
+        return error(res, 'Class limit reached. Maximum allowed classes is 4.', 'LIMIT_EXCEEDED', 403);
       }
       const validClasses = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'Class 11', 'Class 12'];
       if (!classesArray.every(c => validClasses.includes(c))) {
@@ -505,8 +506,9 @@ const addSubject = async (req, res) => {
       const existingBanks = await Bank.find({ teacherId });
       const uniqueUsed = [...new Set(existingBanks.map(b => b.subject))];
       
-      if (!uniqueUsed.includes(subject) && uniqueUsed.length >= 1) {
-        return error(res, `Subject limit reached (1). Complete universal limit is 1.`, 'LIMIT_EXCEEDED', 403);
+      const limit = req.user.subjectLimit || 1;
+      if (!uniqueUsed.includes(subject) && uniqueUsed.length >= limit) {
+        return error(res, `Subject limit reached (${limit}). Redeem code for more slots.`, 'LIMIT_EXCEEDED', 403);
       }
     }
 

@@ -692,7 +692,7 @@
                     columns,
                     subQuestions,
                     imageUrl: diagramBase64
-                });
+                }, true, false, false);
 
                 if (result && result.success) {
                     const overlay = document.getElementById('successOverlay');
@@ -748,7 +748,7 @@
 
         async function loadCustomTypes() {
             try {
-                const res = await apiCall('/teacher/custom-question-types');
+                const res = await apiCall('/teacher/custom-question-types', 'GET', null, true, false, false);
                 if (res && res.success) {
                     const customTypes = res.data;
                     const select = document.getElementById('complexitySelect');
@@ -799,7 +799,7 @@
                 toggleType(cleanedName);
 
                 // Perform the backend sync in the background
-                const res = await apiCall('/teacher/custom-question-types', 'POST', { name: cleanedName });
+                const res = await apiCall('/teacher/custom-question-types', 'POST', { name: cleanedName }, true, false, false);
 
                 if (res && res.success) {
                     // Success: remove optimistic flag and show success toast
