@@ -59,11 +59,28 @@ const verifyCsrfToken = (token, sessionId) => {
   }
 };
 
+// Helper to resolve consistent session ID for CSRF validation
+const resolveSessionId = (req) => {
+  if (req.admin?.adminId) return req.admin.adminId;
+  
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    try {
+      const token = req.headers.authorization.split('Bearer ')[1];
+      const { verifyAdminToken } = require('../utils/adminAuth');
+      const decoded = verifyAdminToken(token);
+      if (decoded?.adminId) return decoded.adminId;
+    } catch (_) {}
+  }
+
+  if (req.user?.googleUid) return req.user.googleUid;
+  return req.ip;
+};
+
 // ── Endpoint: GET /api/csrf-token ─────────────────────────────────
 // Call this from your admin panel before any state-changing request.
 
 const csrfTokenEndpoint = (req, res) => {
-  const sessionId = req.admin?.adminId || req.user?.googleUid || req.ip;
+  const sessionId = resolveSessionId(req);
   const { token, expiresAt } = generateCsrfToken(sessionId);
   res.json({ success: true, data: { csrfToken: token, expiresAt } });
 };
@@ -88,7 +105,7 @@ const requireCsrf = (req, res, next) => {
     });
   }
 
-  const sessionId = req.admin?.adminId || req.user?.googleUid || req.ip;
+  const sessionId = resolveSessionId(req);
 
   if (!verifyCsrfToken(token, sessionId)) {
     logger.warn('[CSRF] Invalid or expired CSRF token', {
