@@ -164,15 +164,8 @@ const generatePaperCtrl = async (req, res) => {
   try {
     await connectDB();
     
-    let result;
-    if (engineReady) {
-      // Execute the backtracking optimization search in the background thread
-      const response = await sendToWorker('GENERATE_PAPER', { options: req.body });
-      result = response.result;
-    } else {
-      console.log('[Matrix Engine] WASM offline, using JS Fallback on main thread');
-      result = await generatePaperJS(req.body);
-    }
+    // Always use pure JS random selection, bypassing WASM optimization search
+    const result = await generatePaperJS(req.body);
 
     if (!result.success) {
       return res.status(404).json({

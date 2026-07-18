@@ -364,10 +364,6 @@
 
             if (questions.length === 0) return showToast("Enter at least one question slot", "warning");
 
-            // Secure action code check
-            const code = await showCodeModal("Inject Bulk Nodes", "Enter action code to authorize question injection", false);
-            if (!code) return;
-
             const btn = document.getElementById('uploadBtn');
             btn.disabled = true;
             btn.textContent = `INJECTING ${questions.length} NODES...`;
@@ -377,8 +373,7 @@
                     teacherUid: activeBank.teacherId?._id || activeBank.teacherId,
                     bankId: activeBank._id,
                     chapterId: document.getElementById('chapterSelect').value,
-                    questions,
-                    actionCode: code
+                    questions
                 });
 
                 if(res && res.success) {

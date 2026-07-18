@@ -88,132 +88,21 @@ async function generatePaperJS(options) {
     return { questionIds: [], success: false, error: 'NO_QUESTIONS' };
   }
 
-  // STAGE 1 — Compute priority score
-  const now = Date.now() / 1000;
-  allQuestions.forEach(q => {
-    const daysSince = q.lastUsed 
-      ? (now - new Date(q.lastUsed).getTime()/1000) / 86400 
-      : 999;
-    const recencyBonus = daysSince > 30 ? 15 : daysSince * 0.5;
-    const diff = (q.difficulty || 'easy').toLowerCase();
-    q._priority = (q.importance || 5) * 10
-                + (q.examFrequency || 5) * 5
-                + recencyBonus
-                - (diff === 'hard' ? 3 : diff === 'medium' ? 2 : 1) * 2;
-  });
-
-  allQuestions.sort((a, b) => b._priority - a._priority);
-
-  // STAGE 2 — Tag Quotas
-  let dist = tagDistribution;
-  if (!dist || dist.length === 0) {
-    dist = [{ tag: 'important', pct: 40 }, { tag: 'standard', pct: 60 }];
-  }
-
-  const pctSum = dist.reduce((s, d) => s + d.pct, 0);
-  if (pctSum !== 100) {
-    dist = dist.map(d => ({ ...d, pct: Math.round(d.pct * 100 / pctSum) }));
-  }
-
-  const quotas = dist.map(d => ({
-    tag: d.tag,
-    quota: Math.max(1, Math.floor(totalQuestions * d.pct / 100))
-  }));
-
-  const quotaSum = quotas.reduce((s, q) => s + q.quota, 0);
-  if (quotaSum < totalQuestions) {
-    quotas[0].quota += (totalQuestions - quotaSum);
-  }
-
-  // STAGE 3 — Selection
-  const selected = [];
-  const usedIds = new Set();
-  let coveredBits = BigInt(0);
-
-  for (const slot of quotas) {
-    const tagPool = allQuestions.filter(q => 
-      !usedIds.has(String(q._id)) &&
-      (q.metaTags || []).includes(slot.tag)
-    );
-
-    let filled = 0;
-    const overflow = [];
-
-    for (const q of tagPool) {
-      if (filled >= slot.quota) break;
-      const qBits = BigInt(q.subtopicBitmask || 0);
-      if (qBits !== BigInt(0) && (coveredBits & qBits) !== BigInt(0)) {
-        overflow.push(q);
-        continue;
-      }
-      selected.push(q);
-      usedIds.add(String(q._id));
-      coveredBits |= qBits;
-      filled++;
-    }
-
-    for (const q of overflow) {
-      if (filled >= slot.quota) break;
-      if (usedIds.has(String(q._id))) continue;
-      selected.push(q);
-      usedIds.add(String(q._id));
-      filled++;
-    }
-
-    if (filled < slot.quota) {
-      for (const q of allQuestions) {
-        if (filled >= slot.quota) break;
-        if (usedIds.has(String(q._id))) continue;
-        selected.push(q);
-        usedIds.add(String(q._id));
-        filled++;
-      }
-    }
-  }
-
-  // STAGE 4 — Difficulty Split
-  const easyTarget   = Math.round(selected.length * easyPct   / 100);
-  const mediumTarget = Math.round(selected.length * mediumPct / 100);
-
-  const easyQs   = selected.filter(q => (q.difficulty || '').toLowerCase() === 'easy');
-  const mediumQs = selected.filter(q => (q.difficulty || '').toLowerCase() === 'medium');
-  const hardQs   = selected.filter(q => (q.difficulty || '').toLowerCase() === 'hard');
-
-  const finalPool = [
-    ...easyQs.slice(0, easyTarget),
-    ...mediumQs.slice(0, mediumTarget),
-    ...hardQs.slice(0, selected.length - easyTarget - mediumTarget)
-  ];
-
-  // Pad if needed
-  if (finalPool.length < totalQuestions) {
-    const usedFinalIds = new Set(finalPool.map(q => String(q._id)));
-    for (const q of selected) {
-      if (finalPool.length >= totalQuestions) break;
-      if (!usedFinalIds.has(String(q._id))) finalPool.push(q);
-    }
-  }
-
-  // Fisher-Yates
-  for (let i = finalPool.length - 1; i > 0; i--) {
+  // Shuffle allQuestions using Fisher-Yates algorithm
+  for (let i = allQuestions.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [finalPool[i], finalPool[j]] = [finalPool[j], finalPool[i]];
+    [allQuestions[i], allQuestions[j]] = [allQuestions[j], allQuestions[i]];
   }
 
-  const tagSatisfaction = {};
-  dist.forEach(d => {
-    const needed = Math.floor(totalQuestions * d.pct / 100);
-    const got = finalPool.filter(q => (q.metaTags || []).includes(d.tag)).length;
-    tagSatisfaction[d.tag] = needed > 0 ? Math.round(got * 100 / needed) : 100;
-  });
+  const finalPool = allQuestions.slice(0, totalQuestions);
 
   return {
     success: true,
     questionIds: finalPool.map(q => q.numericId),
     questions: finalPool,
     totalMarksAchieved: finalPool.reduce((s, q) => s + (q.marks || 1), 0),
-    tagSatisfaction,
-    report: `Generated ${finalPool.length} questions | JS Fallback`
+    tagSatisfaction: {},
+    report: `Generated ${finalPool.length} questions | Random Selection`
   };
 }
 

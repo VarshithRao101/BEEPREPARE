@@ -1565,12 +1565,8 @@ const bulkUploadQuestions = async (req, res) => {
   try {
     const {
       teacherUid, bankId,
-      chapterId, questionsText, questions, actionCode
+      chapterId, questionsText, questions
     } = req.body;
-
-    if (!verifyActionCode('bulk_upload', actionCode)) {
-      return error(res, 'Invalid action code for bulk injection', 'INVALID_CODE', 403);
-    }
 
     // Verify bank exists and get metadata
     const bank = await Bank.findById(bankId);
