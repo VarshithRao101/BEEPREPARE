@@ -862,7 +862,7 @@ const generateTest = async (req, res) => {
         if (q.imageUrl) {
           paperHtml += `
           <div style="margin: 10px 0 10px 40px; text-align: left;">
-            <img src="${q.imageUrl}" alt="Diagram" style="max-width: 100%; max-height: 250px; border: 1px solid #ddd; border-radius: 4px;">
+            <img src="${q.imageUrl}" crossorigin="anonymous" alt="Diagram" style="max-width: 100%; max-height: 250px; border: 1px solid #ddd; border-radius: 4px;">
           </div>`;
         }
 

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -699,7 +699,7 @@
                 margin: [15, 0, 20, 0], 
                 filename: `Practice_Paper_${new Date().getTime()}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
+                html2canvas: { scale: 2, useCORS: true, allowTaint: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
@@ -719,6 +719,7 @@
                 }
             }).save().then(() => {
                 paper.style.transform = originalTransform;
+                paper.style.margin = originalMargin;
                 // STREAK PULSE: Record activity
                 Swal.showLoading();
                 apiCall('/student/streak/activity', 'POST').then(res => {

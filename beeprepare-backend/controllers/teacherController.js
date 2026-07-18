@@ -1318,7 +1318,7 @@ const generatePaper = async (req, res) => {
         if (q.imageUrl) {
           paperHtml += `
           <div style="margin: 1em 0 0 2.5em; text-align: left;">
-            <img src="${q.imageUrl}" alt="Diagram" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #ccc;">
+            <img src="${q.imageUrl}" crossorigin="anonymous" alt="Diagram" style="max-width: 100%; max-height: 250px; border-radius: 6px; border: 1px solid #ccc;">
           </div>`;
         }
 

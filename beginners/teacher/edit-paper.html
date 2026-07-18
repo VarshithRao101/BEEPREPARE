@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -436,8 +436,22 @@
         };
 
         window.downloadPDF = () => {
-            const opt = { margin: 10, filename: 'paper.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-            html2pdf().set(opt).from(paper).save();
+            const originalTransform = paper.style.transform;
+            const originalMargin = paper.style.margin;
+            paper.style.transform = 'none';
+            paper.style.margin = '0';
+
+            const opt = { 
+                margin: 10, 
+                filename: 'paper.pdf', 
+                image: { type: 'jpeg', quality: 0.98 }, 
+                html2canvas: { scale: 2, useCORS: true, allowTaint: true }, 
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+            };
+            html2pdf().set(opt).from(paper).save().then(() => {
+                paper.style.transform = originalTransform;
+                paper.style.margin = originalMargin;
+            });
         };
 
         async function initPaper() {

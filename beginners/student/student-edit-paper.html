@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -292,37 +292,53 @@
         };
 
         window.downloadPDF = async () => {
+            const originalTransform = paper.style.transform;
+            const originalMargin = paper.style.margin;
+            paper.style.transform = 'none';
+            paper.style.margin = '0';
+
             const opt = { 
                 margin: 0, 
                 filename: 'practice_paper.pdf', 
                 image: { type: 'jpeg', quality: 0.98 }, 
-                html2canvas: { scale: 2 }, 
+                html2canvas: { scale: 2, useCORS: true, allowTaint: true }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
             };
-            html2pdf().set(opt).from(paper).save();
-            
-            // Increment Streak Activity
-            const res = await apiCall('/student/streak/activity', 'POST');
-            if (res && res.success) {
-                const streakVal = document.getElementById('streak-val-header');
-                if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
-                BP.initStreakFlame('streak-canvas');
-            }
+            html2pdf().set(opt).from(paper).save().then(async () => {
+                paper.style.transform = originalTransform;
+                paper.style.margin = originalMargin;
+                
+                // Increment Streak Activity
+                const res = await apiCall('/student/streak/activity', 'POST');
+                if (res && res.success) {
+                    const streakVal = document.getElementById('streak-val-header');
+                    if (streakVal) streakVal.textContent = res.data.currentStreak || 0;
+                    BP.initStreakFlame('streak-canvas');
+                }
+            });
         };
 
 
 
         window.printPaper = async () => {
+            const originalTransform = paper.style.transform;
+            const originalMargin = paper.style.margin;
+            paper.style.transform = 'none';
+            paper.style.margin = '0';
+
             const opt = { 
                 margin: 0, 
                 filename: 'practice_paper.pdf', 
                 image: { type: 'jpeg', quality: 0.98 }, 
-                html2canvas: { scale: 2 }, 
+                html2canvas: { scale: 2, useCORS: true, allowTaint: true }, 
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
             };
             html2pdf().from(paper).toPdf().get('pdf').then(async function (pdf) {
                 window.open(pdf.output('bloburl'), '_blank');
                 
+                paper.style.transform = originalTransform;
+                paper.style.margin = originalMargin;
+
                 // Increment Streak Activity
                 const res = await apiCall('/student/streak/activity', 'POST');
                 if (res && res.success) {
