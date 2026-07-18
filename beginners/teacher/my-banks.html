@@ -266,7 +266,7 @@
                     document.getElementById('class-dropdown').value = first.class;
                     updateSubjectsList();
                     document.getElementById('subject-dropdown').value = first.subject;
-                    onSelectionChange();
+                    updateChaptersList();
                 } else {
                     document.getElementById('questions-grid').innerHTML = `
                          <div class="zero-state">
@@ -341,7 +341,7 @@
             grid.style.opacity = '0.3';
             loader.style.display = 'block';
 
-            let url = `/teacher/questions?bankId=${bankId}`;
+            let url = `/teacher/questions?bankId=${bankId}&limit=500`;
             if (chapterId) url += `&chapterId=${chapterId}`;
 
             const res = await apiCall(url);

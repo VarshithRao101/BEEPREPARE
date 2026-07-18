@@ -1193,18 +1193,6 @@ const generatePaper = async (req, res) => {
                     engineResult = await generatePaperJS(fallbackParams);
                 }
 
-                // Fallback 2: If still no questions, relax chapter constraint
-                if ((!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) && (engineParams.chapterIds?.length || engineParams.chapterIndices?.length)) {
-                    const broaderParams = { ...engineParams, chapterIds: [], chapterIndices: [], marks: undefined };
-                    engineResult = await generatePaperJS(broaderParams);
-                }
-
-                // Fallback 3: If still no questions, relax type filter
-                if (!engineResult || !engineResult.questionIds || engineResult.questionIds.length === 0) {
-                    const rescueParams = { ...engineParams, chapterIds: [], chapterIndices: [], typeFilter: -1, marks: undefined };
-                    engineResult = await generatePaperJS(rescueParams);
-                }
-
                 if (engineResult && engineResult.questionIds && engineResult.questionIds.length > 0) {
                     let fetchDocs;
                     if (engineResult.questions && engineResult.questions.length > 0) {
