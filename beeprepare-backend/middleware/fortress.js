@@ -90,12 +90,8 @@ const INJECTION_PATTERNS = {
     /\.\.\/.*\.\.\//,          // Path traversal
     /\x00/,                    // Null bytes
   ],
-  // LDAP injection
-  ldap: [
-    /[()\\*\x00]/,
-    /\|\|/,
-    /&&/,
-  ],
+  // LDAP injection (Disabled to prevent false positives with parentheses, asterisks, or logical operators in math/code inputs)
+  ldap: [],
   // XML / XXE
   xxe: [
     /<!ENTITY/i,
@@ -404,6 +400,15 @@ const suspiciousUADetector = (req, res, next) => {
  */
 const deepInjectionScanner = (req, res, next) => {
   if (req.method === 'OPTIONS') return next();
+
+  // Skip injection scanning for question creation/upload routes to allow arbitrary text (code, math, formulas, templates, etc.)
+  const SKIP_SCAN_ROUTES = [
+    '/questions/bulk-upload',
+    '/teacher/questions'
+  ];
+  if (SKIP_SCAN_ROUTES.some(route => req.originalUrl.includes(route))) {
+    return next();
+  }
 
   // Performance Optimization: "Fast-Track" for lightweight GET requests
   // Skip scanning for common safe endpoints that take no critical input

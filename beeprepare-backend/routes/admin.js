@@ -15,7 +15,8 @@ const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
   validate: { default: false },
-  message: { success: false, message: 'Too many admin requests.', error: { code: 'ADMIN_RATE_LIMITED' } }
+  message: { success: false, message: 'Too many admin requests.', error: { code: 'ADMIN_RATE_LIMITED' } },
+  skip: (req) => req.originalUrl.includes('/questions/bulk-upload')
 });
 router.use(adminLimiter);
 
