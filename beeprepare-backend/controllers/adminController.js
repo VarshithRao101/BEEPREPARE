@@ -1574,6 +1574,12 @@ const bulkUploadQuestions = async (req, res) => {
       return error(res, 'Bank not found', 'NOT_FOUND', 404);
     }
 
+    // Resolve chapter metadata safely
+    const targetChapter = bank.chapters.find(c => c.chapterId === chapterId || c._id?.toString() === chapterId);
+    const resolvedChapterId = targetChapter ? targetChapter.chapterId : (chapterId || 'general');
+    const resolvedChapterName = targetChapter ? targetChapter.chapterName : 'General';
+    const resolvedChapterIndex = targetChapter ? bank.chapters.findIndex(c => c.chapterId === targetChapter.chapterId) : 0;
+
     // Parse questions from text format (Enhanced for New Types & Matrix Engine)
     const parseQuestions = async (text) => {
       const blocks = text.split('---')
@@ -1594,18 +1600,18 @@ const bulkUploadQuestions = async (req, res) => {
 
         const q = {
           bankId: bankId.toString(),
-          chapterId: chapterId || 'general',
+          chapterId: resolvedChapterId,
+          chapterName: resolvedChapterName,
+          chapterIndex: resolvedChapterIndex,
           teacherId: bank.teacherId,
           class: bank.class,
           subject: bank.subject,
           createdBy: teacherUid || bank.teacherId,
           isImportant: false,
           numericId: nextId++,
-          chapterIndex: bank.chapters.findIndex(c => c.chapterId === chapterId),
           metaTags: [],
           tags: []
         };
-        if (q.chapterIndex < 0) q.chapterIndex = 0;
 
         const options = {};
         let correctOption = null;
@@ -1700,18 +1706,18 @@ const bulkUploadQuestions = async (req, res) => {
 
         const q = {
           bankId: bankId.toString(),
-          chapterId: chapterId || 'general',
+          chapterId: resolvedChapterId,
+          chapterName: resolvedChapterName,
+          chapterIndex: resolvedChapterIndex,
           teacherId: bank.teacherId,
           class: bank.class,
           subject: bank.subject,
           createdBy: teacherUid || bank.teacherId,
           isImportant: false,
           numericId: nextId++,
-          chapterIndex: bank.chapters.findIndex(c => c.chapterId === chapterId),
           metaTags: [],
           tags: []
         };
-        if (q.chapterIndex < 0) q.chapterIndex = 0;
 
         q.questionText = item.questionText;
         const rawType = (item.questionType || 'Short').toLowerCase();

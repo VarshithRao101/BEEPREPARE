@@ -175,6 +175,24 @@
                     </select>
                 </div>
                 <div class="filter-group">
+                    <label class="filter-label">Select Type</label>
+                    <select class="glass-select" id="type-dropdown" onchange="onSelectionChange()">
+                        <option value="">All Types</option>
+                        <option value="MCQ">MCQ</option>
+                        <option value="Very Short">Very Short</option>
+                        <option value="Short">Short</option>
+                        <option value="Long">Long</option>
+                        <option value="Essay">Essay</option>
+                        <option value="True or False">True or False</option>
+                        <option value="Fill in the Blanks">Fill in the Blanks</option>
+                        <option value="Simple Matching">Simple Matching</option>
+                        <option value="Matrix Matching">Matrix Matching</option>
+                        <option value="Reading Passage">Reading Passage</option>
+                        <option value="Case Study">Case Study</option>
+                        <option value="Data Interpretation">Data Interpretation</option>
+                    </select>
+                </div>
+                <div class="filter-group">
                     <label class="filter-label">Sync Code</label>
                     <button class="glass-select" style="min-width: 140px; color: var(--primary);" onclick="copyBankCode()">
                         COPY CODE
@@ -327,6 +345,7 @@
             const cls = document.getElementById('class-dropdown').value;
             const sub = document.getElementById('subject-dropdown').value;
             const chapId = document.getElementById('chapter-dropdown').value;
+            const type = document.getElementById('type-dropdown').value;
             
             if (!cls || !sub) {
                 document.getElementById('sync-banner').classList.remove('active');
@@ -341,10 +360,10 @@
             document.getElementById('active-bank-code').textContent = bank.bankCode;
             document.getElementById('sync-banner').classList.add('active');
 
-            loadQuestions(bank.bankId, chapId);
+            loadQuestions(bank.bankId, chapId, type);
         };
 
-        async function loadQuestions(bankId, chapterId = '') {
+        async function loadQuestions(bankId, chapterId = '', type = '') {
             const grid = document.getElementById('questions-grid');
             const loader = document.getElementById('questions-loader');
             
@@ -353,6 +372,7 @@
 
             let url = `/teacher/questions?bankId=${bankId}&limit=500`;
             if (chapterId) url += `&chapterId=${chapterId}`;
+            if (type) url += `&type=${type}`;
 
             const res = await apiCall(url);
             loader.style.display = 'none';

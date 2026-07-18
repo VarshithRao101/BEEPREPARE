@@ -1333,29 +1333,42 @@ const generatePaper = async (req, res) => {
 
     // Step 8: Construct REAL PROFESSIONAL paperHtml (Optimized for Scaling)
     let paperHtml = `
-<div class="paper-header" style="font-size: inherit;">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5em;">
-    <div style="text-align: left;">
-      <span style="font-weight: bold; border-bottom: 1px solid #000; padding: 2px 10px;">Roll No: _____________</span>
-    </div>
-    <div style="text-align: right; font-size: 0.8em; color: #666;">
-      Code No: BP-${paperId.substring(0, 6).toUpperCase()}
-    </div>
+<div class="paper-header" style="font-size: inherit; text-align: center; font-family: 'Times New Roman', serif;">
+  <!-- Institution Header -->
+  <div style="font-size: 1.5em; font-weight: bold; letter-spacing: 1px; margin-bottom: 0.2em; text-transform: uppercase;">
+    [CLICK TO ENTER INSTITUTION NAME]
+  </div>
+  <div style="font-size: 1.15em; font-weight: bold; letter-spacing: 0.5px; margin-bottom: 0.8em; text-transform: uppercase;">
+    [ANNUAL EXAMINATION 2025–26]
+  </div>
+  
+  <!-- Main Divider -->
+  <div style="border-top: 2px solid #000; margin-bottom: 0.8em;"></div>
+
+  <!-- Subject and Class Details -->
+  <div style="font-size: 1.25em; font-weight: bold; margin-bottom: 0.8em; text-transform: uppercase;">
+    SUBJECT: ${bank.subject.toUpperCase()} &nbsp;&nbsp;|&nbsp;&nbsp; CLASS: ${bank.class}
   </div>
 
-  <h2 style="margin: 0; font-size: 1.5em; text-align: center;">BOARD OF ACADEMIC EXCELLENCE (BEEPREPARE)</h2>
-  <h3 style="margin: 5px 0 1em 0; font-size: 1.2em; text-transform: uppercase; text-align: center;">ANNUAL EXAMINATION (2025–26)</h3>
-  <h4 style="margin: 0; font-size: 1.3em; border-bottom: 2px solid #000; padding-bottom: 0.8em; text-align: center;">
-    SUBJECT: ${bank.subject.toUpperCase()} (CLASS: ${bank.class})
-  </h4>
+  <!-- Student Meta Table / Block (Formal Board Style) -->
+  <table style="width: 100%; border-collapse: collapse; margin-bottom: 0.8em; font-size: 0.95em; text-align: left; font-weight: bold; border-top: 1px solid #000; border-bottom: 1px solid #000;">
+    <tr>
+      <td style="width: 35%; padding: 8px 0; border: none; background: transparent; color: #000;">Roll No: __________________</td>
+      <td style="width: 35%; padding: 8px 0; border: none; background: transparent; color: #000;">Student Name: ______________________</td>
+      <td style="width: 30%; text-align: right; padding: 8px 0; border: none; background: transparent; color: #555; font-size: 0.85em;">Code: BP-${paperId.substring(0, 6).toUpperCase()}</td>
+    </tr>
+    <tr>
+      <td style="padding: 8px 0; border: none; background: transparent; color: #000;">Time Allowed: 3 Hours</td>
+      <td style="padding: 8px 0; border: none; background: transparent; color: #000;">Maximum Marks: ${totalMarks}</td>
+      <td style="text-align: right; padding: 8px 0; border: none; background: transparent; color: #000;">Date: ______________</td>
+    </tr>
+  </table>
 
-  <div class="paper-meta-row" style="display: flex; justify-content: space-between; margin-top: 1em; font-weight: bold; font-size: 1em;">
-    <span>Maximum Time: 3 Hours</span>
-    <span>Maximum Marks: ${totalMarks}</span>
-  </div>
+  <!-- Inner Double Divider -->
+  <div style="border-bottom: 3px double #000; margin-bottom: 1.5em; width: 100%;"></div>
 </div>
 
-<div style="margin: 1.5em 0; border: 1px solid #000; padding: 1em; font-size: 0.9em; line-height: 1.6;">
+<div style="margin: 1.5em 0; border: 1px solid #000; padding: 1em; font-size: 0.9em; line-height: 1.6; text-align: left;">
   <strong>GENERAL INSTRUCTIONS:</strong>
   <ol style="margin: 0.5em 0 0 1.5em; padding: 0;">
     <li>This question paper contains ${selected.length} questions in ${sectionDefs.length} sections.</li>
