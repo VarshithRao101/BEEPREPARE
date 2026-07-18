@@ -169,10 +169,52 @@
             } else {
                 mcqBlock.style.display = 'none';
             }
+
+            // Propagate Type from Slot #1 (idx 0) to all other slots
+            if (idx === 0) {
+                for (let i = 1; i < 10; i++) {
+                    document.getElementById(`slot-type-${i}`).value = type;
+                    window.toggleMCQBlock(i);
+                }
+            }
         };
 
-        window.toggleSlotTag = (chip) => {
+        window.handleSlotMarksChange = (idx) => {
+            if (idx === 0) {
+                const val = document.getElementById('slot-marks-0').value;
+                for (let i = 1; i < 10; i++) {
+                    document.getElementById(`slot-marks-${i}`).value = val;
+                }
+            }
+        };
+
+        window.handleSlotDiffChange = (idx) => {
+            if (idx === 0) {
+                const val = document.getElementById('slot-diff-0').value;
+                for (let i = 1; i < 10; i++) {
+                    document.getElementById(`slot-diff-${i}`).value = val;
+                }
+            }
+        };
+
+        window.toggleSlotTag = (chip, idx) => {
             chip.classList.toggle('active');
+            
+            // Propagate Tag toggle from Slot #1 (idx 0) to all other slots
+            if (idx === 0) {
+                const tag = chip.dataset.tag;
+                const isActive = chip.classList.contains('active');
+                for (let i = 1; i < 10; i++) {
+                    const targetChip = document.querySelector(`#slot-tags-${i} .chip[data-tag="${tag}"]`);
+                    if (targetChip) {
+                        if (isActive) {
+                            targetChip.classList.add('active');
+                        } else {
+                            targetChip.classList.remove('active');
+                        }
+                    }
+                }
+            }
         };
 
         window.triggerSlotImage = (idx) => {
@@ -468,7 +510,7 @@
                                 </div>
                                 <div class="input-group">
                                     <label>Marks</label>
-                                    <select class="form-input slot-marks" id="slot-marks-${idx}">
+                                    <select class="form-input slot-marks" id="slot-marks-${idx}" onchange="handleSlotMarksChange(${idx})">
                                         <option value="1">1 Mark</option>
                                         <option value="2">2 Marks</option>
                                         <option value="3">3 Marks</option>
@@ -486,7 +528,7 @@
                             <div style="display:grid; grid-template-columns:1fr; gap:12px;">
                                 <div class="input-group">
                                     <label>Difficulty</label>
-                                    <select class="form-input slot-diff" id="slot-diff-${idx}">
+                                    <select class="form-input slot-diff" id="slot-diff-${idx}" onchange="handleSlotDiffChange(${idx})">
                                         <option value="Easy">Easy</option>
                                         <option value="Medium" selected>Medium</option>
                                         <option value="Hard">Hard</option>
@@ -513,7 +555,7 @@
                         <label style="display:block; font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Tags Selection</label>
                         <div style="display:flex; flex-wrap:wrap; gap:8px;" id="slot-tags-${idx}">
                             ${AVAILABLE_TAGS.map(t => `
-                                <button type="button" class="chip" data-tag="${t}" onclick="toggleSlotTag(this)">${t}</button>
+                                <button type="button" class="chip" data-tag="${t}" onclick="toggleSlotTag(this, ${idx})">${t}</button>
                             `).join('')}
                         </div>
                     </div>
