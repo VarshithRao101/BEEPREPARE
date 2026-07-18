@@ -1164,14 +1164,13 @@ const deleteQuestionsBulk = async (req, res) => {
     // Hot-reload Matrix Engine pool
     bootMatrixEngine().catch(err => console.warn('[Matrix Engine] Hot-reload failed:', err.message));
 
-    const { logActivity } = require('../utils/logActivity');
     logActivity(
       teacherId,
       'questions_bulk_deleted',
       'Questions Bulk Deleted',
       `Bulk deleted ${questions.length} questions`,
       '#FF5722'
-    ).catch(() => {});
+    );
 
     return success(res, `${questions.length} questions deleted successfully`, null);
   } catch (err) {
