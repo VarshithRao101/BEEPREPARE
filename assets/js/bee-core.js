@@ -290,6 +290,19 @@ export async function apiCall(
     sessionStorage.removeItem(CACHE_PREFIX + endpoint);
   }
 
+  if (method !== 'GET') {
+    try {
+      const keysToRemove = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.startsWith(CACHE_PREFIX)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => sessionStorage.removeItem(k));
+    } catch (e) { console.warn('Cache clear error', e); }
+  }
+
   // Only show loader for actual network calls if it takes more than 500ms (Loader Debouncing)
   let loaderShown = false;
   let loaderTimeout = null;

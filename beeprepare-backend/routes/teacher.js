@@ -24,6 +24,7 @@ router.delete('/custom-question-types/:name', ...guard, teacherHandlers.deleteCu
 router.get('/questions',                   ...guard, teacherHandlers.getQuestions);
 router.post('/questions',                  ...guard, validateQuestion, teacherHandlers.addQuestion);
 router.delete('/questions/:id',            ...guard, teacherHandlers.deleteQuestion);
+router.post('/questions/delete-bulk',      ...guard, teacherHandlers.deleteQuestionsBulk);
 router.post('/generate-paper',             ...guard, teacherHandlers.generatePaper);
 router.get('/notes/:bankId',               ...guard, teacherHandlers.getNotes);
 router.post('/notes/upload',               uploadLimiter, ...guard, upload.single('file'), validateUpload, teacherHandlers.uploadNote);

@@ -1087,6 +1087,100 @@ const deleteQuestion = async (req, res) => {
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
+// 10b. POST /api/teacher/questions/delete-bulk
+// ══════════════════════════════════════════════════════════════════════════════
+const deleteQuestionsBulk = async (req, res) => {
+  try {
+    await connectDB();
+    const { ids } = req.body;
+    const teacherId = req.user.googleUid;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return error(res, 'ids array is required', 'MISSING_IDS', 400);
+    }
+
+    const Question = require('../models/Question').getQuestion();
+    const User = require('../models/User').getUser();
+
+    // Fetch questions to get bankId and chapters
+    const questions = await Question.find({ _id: { $in: ids }, teacherId }).lean();
+    if (questions.length === 0) {
+      return error(res, 'No matching questions found', 'NOT_FOUND', 404);
+    }
+
+    const bankId = questions[0].bankId;
+    const bank = await Bank.findById(bankId);
+    if (!bank || bank.teacherId !== teacherId) {
+      return error(res, 'Access denied', 'FORBIDDEN', 403);
+    }
+
+    // Group decrements by chapterId
+    const chapterDecrements = {};
+    let imagePublicIds = [];
+
+    for (const q of questions) {
+      if (q.imagePublicId) imagePublicIds.push(q.imagePublicId);
+      chapterDecrements[q.chapterId] = (chapterDecrements[q.chapterId] || 0) + 1;
+    }
+
+    // Delete from Cloudinary storage if applicable
+    if (imagePublicIds.length > 0) {
+      for (const publicId of imagePublicIds) {
+        try {
+          await deleteFromStorage(publicId, 'image');
+        } catch (e) {
+          console.error('Failed to delete question diagram', e);
+        }
+      }
+    }
+
+    // Delete the questions from database
+    await Question.deleteMany({ _id: { $in: ids }, teacherId });
+
+    // Update Bank total count and chapter counts
+    const updates = [];
+    for (const [chapId, count] of Object.entries(chapterDecrements)) {
+      updates.push(
+        Bank.updateOne(
+          { _id: bankId },
+          {
+            $inc: {
+              totalQuestions: -count,
+              'chapters.$[ch].questionCount': -count
+            }
+          },
+          { arrayFilters: [{ 'ch.chapterId': chapId }] }
+        )
+      );
+    }
+    
+    // Decrement user's total questions count
+    updates.push(
+      User.updateOne({ googleUid: teacherId }, { $inc: { totalQuestions: -questions.length } })
+    );
+
+    await Promise.all(updates);
+
+    // Hot-reload Matrix Engine pool
+    bootMatrixEngine().catch(err => console.warn('[Matrix Engine] Hot-reload failed:', err.message));
+
+    const { logActivity } = require('../utils/logActivity');
+    logActivity(
+      teacherId,
+      'questions_bulk_deleted',
+      'Questions Bulk Deleted',
+      `Bulk deleted ${questions.length} questions`,
+      '#FF5722'
+    ).catch(() => {});
+
+    return success(res, `${questions.length} questions deleted successfully`, null);
+  } catch (err) {
+    console.error('deleteQuestionsBulk error:', err);
+    return error(res, 'Failed to bulk delete questions', 'SERVER_ERROR', 500);
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
 // 11. POST /api/teacher/generate-paper  (70/30 Algorithm)
 // ══════════════════════════════════════════════════════════════════════════════
 const generatePaper = async (req, res) => {
@@ -2056,6 +2150,7 @@ module.exports = {
   getQuestions,
   addQuestion,
   deleteQuestion,
+  deleteQuestionsBulk,
   generatePaper,
   getNotes,
   uploadNote,
